@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -18,10 +18,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useSearch } from '@/lib/useApi';
+import { useAppContext } from '@/context/AppContext';
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('General');
+  const { dispatch } = useAppContext();
+  const { data, error, isLoading, refetch } = useSearch(query, category === 'General' ? null : category);
 
   const categories = [
     { value: 'General', label: 'General' },
@@ -37,26 +41,37 @@ export default function SearchBar() {
       alert('Please enter a word to search for.');
       return;
     }
-    alert(`Query: "${query}"\nCategory: "${category}"`);
+    refetch();
   };
 
+  useEffect(() => {
+    if (data) {
+      const videoIds = data.map((hit) => hit.video_id);
+      dispatch({ type: 'LOAD_PLAYLIST', payload: videoIds });
+    }
+  }, [data, dispatch]);
+
   return (
-    <div className="flex w-full max-w-lg items-center space-x-2">
-      <div className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm">
-        <CategoryPicker
-          categories={categories}
-          value={category}
-          onChange={setCategory}
-        />
-        <Input
-          type="text"
-          placeholder="Search for a word..."
-          className="w-full border-none bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+    <div className="w-full max-w-lg">
+      <div className="flex items-center space-x-2">
+        <div className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <CategoryPicker
+            categories={categories}
+            value={category}
+            onChange={setCategory}
+          />
+          <Input
+            type="text"
+            placeholder="Search for a word..."
+            className="w-full border-none bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+        <Button onClick={handleSearch}>Search</Button>
       </div>
-      <Button onClick={handleSearch}>Search</Button>
+      {isLoading && <p className="mt-2 text-center">Loading...</p>}
+      {error && <p className="mt-2 text-center text-red-500">{error.message}</p>}
     </div>
   );
 }
