@@ -1,17 +1,16 @@
 'use client';
 
 import YouTube from 'react-youtube';
-import { useAppContext } from '@/context/AppContext';
+import { usePlayerContext } from '@/context/PlayerContext';
+import { Button } from '@/components/ui/button';
 
 export default function VideoPlayer() {
-  const { state, dispatch } = useAppContext();
+  const { state, dispatch } = usePlayerContext();
   const { playlist, currentVideoIndex, isMuted } = state;
 
-  const currentVideoId = playlist[currentVideoIndex];
-
-  const handleNextVideo = () => {
-    dispatch({ type: 'NEXT_VIDEO' });
-  };
+  const currentClip = playlist[currentVideoIndex];
+  const currentVideoId = currentClip?.video_id;
+  const startTime = currentClip?.start_time;
 
   const handleMute = () => {
     dispatch({ type: 'SET_MUTED', payload: true });
@@ -21,12 +20,21 @@ export default function VideoPlayer() {
     dispatch({ type: 'SET_MUTED', payload: false });
   };
 
+  const handleNextVideo = () => {
+    dispatch({ type: 'NEXT_VIDEO' });
+  };
+
+  const handlePrevVideo = () => {
+    dispatch({ type: 'PREV_VIDEO' });
+  };
+
   const opts = {
     height: '390',
     width: '640',
     playerVars: {
       autoplay: 1,
       mute: isMuted ? 1 : 0,
+      start: startTime,
     },
   };
 
@@ -44,6 +52,17 @@ export default function VideoPlayer() {
           />
         </div>
       )}
+      <div className="mt-4 flex justify-center space-x-4">
+        <Button onClick={handlePrevVideo} disabled={currentVideoIndex === 0}>
+          Previous
+        </Button>
+        <Button
+          onClick={handleNextVideo}
+          disabled={currentVideoIndex === playlist.length - 1}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-export interface SearchHit {
+export interface Clips {
   video_id: string;
   sentence_text: string;
   start_time: number;
@@ -12,23 +12,16 @@ export interface TranscriptLine {
   end: number;
 }
 
-export interface AppState {
-  playlist: string[];
+export interface PlayerState {
+  playlist: Clips[];
   currentVideoIndex: number;
   isMuted: boolean;
-  currentTranscript: {
-    status: 'idle' | 'loading' | 'success' | 'error';
-    data: TranscriptLine[] | null;
-    error: string | null;
-  };
   activeTranscriptLine: number | null;
 }
 
-export type Action =
-  | { type: 'LOAD_PLAYLIST'; payload: string[] }
+export type PlayerAction =
+  | { type: 'LOAD_PLAYLIST'; payload: Clips[] }
   | { type: 'NEXT_VIDEO' }
+  | { type: 'PREV_VIDEO'}
   | { type: 'SET_MUTED'; payload: boolean }
-  | { type: 'FETCH_TRANSCRIPT_START' }
-  | { type: 'FETCH_TRANSCRIPT_SUCCESS'; payload: TranscriptLine[] }
-  | { type: 'FETCH_TRANSCRIPT_ERROR'; payload: string }
   | { type: 'SET_ACTIVE_LINE'; payload: number | null };
