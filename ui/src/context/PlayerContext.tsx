@@ -15,6 +15,13 @@ const PlayerContext = createContext<{
   dispatch: Dispatch<PlayerAction>;
 }>({ state: initialState, dispatch: () => null });
 
+type PlayerAction =
+  | { type: 'NEXT_VIDEO' }
+  | { type: 'PREV_VIDEO' }
+  | { type: 'SET_MUTED'; payload: boolean }
+  | { type: 'LOAD_PLAYLIST'; payload: any[] }
+  | { type: 'SET_INDEX'; payload: number }; 
+
 const appReducer = (state: PlayerState, action: PlayerAction): PlayerState => {
   switch (action.type) {
     case 'LOAD_PLAYLIST':
@@ -25,8 +32,10 @@ const appReducer = (state: PlayerState, action: PlayerAction): PlayerState => {
       return { ...state, currentVideoIndex: Math.max(0, state.currentVideoIndex - 1) };
     case 'SET_MUTED':
       return { ...state, isMuted: action.payload };
-   case 'SET_ACTIVE_LINE':
-      return { ...state, activeTranscriptLine: action.payload };
+    case 'SET_INDEX': {
+      const i = Math.min(Math.max(0, action.payload), Math.max(0, state.playlist.length - 1));
+      return { ...state, currentVideoIndex: i };
+    }
     default:
       return state;
   }
