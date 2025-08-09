@@ -5,8 +5,8 @@ const YouTube = dynamic(() => import('react-youtube'), { ssr: false });
 import { useEffect, useMemo, useState } from 'react';
 import { usePlayerContext } from '@/context/PlayerContext';
 import { Button } from '@/components/ui/button';
+import ClipSlider from '@/components/comm/ClipSlider';
 
-// Read start from either `start` or `start_time`
 function getClipStart(clip: any): number {
   if (!clip) return 0;
   if (typeof clip.start === 'number') return clip.start;
@@ -65,10 +65,13 @@ export default function VideoPlayer() {
     loading: 'eager',
   } as const;
 
+  const heroClass =
+    'relative w-full h-[58vh] md:h-[66vh] lg:h-[74vh] overflow-hidden rounded-2xl';
+
   return (
     <div className="mt-8 w-full max-w-7xl mx-auto">
       {currentVideoId ? (
-        <div className="relative w-full h-[58vh] md:h-[66vh] lg:h-[74vh] overflow-hidden rounded-2xl">
+        <div className={heroClass}>
           <div
             className={`absolute inset-0 transition-opacity duration-300 ${
               ready ? 'opacity-0 pointer-events-none' : 'opacity-100'
@@ -112,8 +115,8 @@ export default function VideoPlayer() {
           `}</style>
         </div>
       ) : (
-        <div className="w-full h-[50vh] rounded-2xl bg-black/20 flex items-center justify-center text-white/70">
-          Type a word to start
+        <div className={`${heroClass} flex items-center justify-center bg-black/20`}>
+          <span className="text-white/80">Type a word to start</span>
         </div>
       )}
 
@@ -139,6 +142,12 @@ export default function VideoPlayer() {
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
         </Button>
       </div>
+
+      <ClipSlider
+        clips={playlist as any[]}
+        currentIndex={currentVideoIndex}
+        onSelect={(i) => dispatch({ type: 'SET_INDEX', payload: i })}
+      />
     </div>
   );
 }
