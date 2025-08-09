@@ -19,12 +19,12 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { useSearch } from '@/lib/useApi';
-import { useAppContext } from '@/context/AppContext';
+import { usePlayerContext } from '@/context/PlayerContext';
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('General');
-  const { dispatch } = useAppContext();
+  const { dispatch } = usePlayerContext();
   const { data, error, isLoading, refetch } = useSearch(query, category === 'General' ? null : category);
 
   const categories = [
@@ -46,8 +46,7 @@ export default function SearchBar() {
 
   useEffect(() => {
     if (data) {
-      const videoIds = data.map((hit) => hit.video_id);
-      dispatch({ type: 'LOAD_PLAYLIST', payload: videoIds });
+      dispatch({ type: 'LOAD_PLAYLIST', payload: data.hits });
     }
   }, [data, dispatch]);
 
@@ -72,6 +71,7 @@ export default function SearchBar() {
       </div>
       {isLoading && <p className="mt-2 text-center">Loading...</p>}
       {error && <p className="mt-2 text-center text-red-500">{error.message}</p>}
+      {data && <p className="mt-2 text-center">Total hits: {data.total}</p>}
     </div>
   );
 }

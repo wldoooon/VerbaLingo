@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from "@tanstack/react-query";
-import { SearchHit, TranscriptLine } from "@/lib/types";
+import { Clips, TranscriptLine } from "@/lib/types";
 
 const fetchSearchResults = async (query: string, category: string | null) => {
   const params = new URLSearchParams();
@@ -17,11 +17,11 @@ const fetchSearchResults = async (query: string, category: string | null) => {
   }
 
   const data = await response.json();
-  return data.hits; 
+  return data;
 };
 
 export const useSearch = (query: string, category: string | null) => {
-  return useQuery<SearchHit[], Error>({
+  return useQuery<{ total: number; hits: Clips[] }, Error>({
     queryKey: ["search", query, category],
     queryFn: () => fetchSearchResults(query, category),
     enabled: false, 

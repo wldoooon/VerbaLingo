@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AppProvider } from "@/context/AppContext";
+import { PlayerProvider } from "@/context/PlayerContext";
 import QueryProvider from "@/components/QueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -20,7 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <QueryProvider>
-          <AppProvider>{children}</AppProvider>
+          <PlayerProvider>{children}</PlayerProvider>
         </QueryProvider>
       </body>
     </html>
