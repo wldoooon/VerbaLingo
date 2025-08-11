@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { Button } from "@/components/ui/button"
 import ClipSlider from "@/components/comm/ClipSlider"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Search } from "lucide-react"
 
 function getClipStart(clip: any): number {
   if (!clip) return 0
@@ -126,21 +126,23 @@ export default function VideoPlayer() {
           className={`${heroClass} flex items-center justify-center bg-muted/50 border border-dashed border-muted-foreground/25`}
         >
           <div className="text-center">
-            <p className="text-muted-foreground text-lg mb-2">No clips loaded</p>
-            <p className="text-muted-foreground/60 text-sm">Search for a word to start watching clips</p>
+            <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">No clips loaded</h3>
+            <p className="text-muted-foreground">Search for a word to start watching clips</p>
           </div>
         </div>
       )}
 
       {playlist.length > 0 && (
         <>
-          <div className="mt-4 flex justify-center gap-4">
+          <div className="mt-6 flex justify-center gap-4">
             <Button
               variant="outline"
               size="icon"
               onClick={handlePrevVideo}
               disabled={currentVideoIndex === 0}
               aria-label="Previous clip"
+              className="rounded-full bg-transparent"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -150,6 +152,7 @@ export default function VideoPlayer() {
               onClick={handleNextVideo}
               disabled={currentVideoIndex === playlist.length - 1}
               aria-label="Next clip"
+              className="rounded-full bg-transparent"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
