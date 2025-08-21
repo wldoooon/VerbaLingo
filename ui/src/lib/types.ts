@@ -30,6 +30,7 @@ export interface PlayerState {
   currentVideoIndex: number;
   isMuted: boolean;
   activeTranscriptLine: number | null;
+  currentTime: number;
 }
 
 export type PlayerAction =
@@ -37,4 +38,5 @@ export type PlayerAction =
   | { type: 'NEXT_VIDEO' }
   | { type: 'PREV_VIDEO'}
   | { type: 'SET_MUTED'; payload: boolean }
+  | { type: 'SET_CURRENT_TIME'; payload: number }
   | { type: 'SET_ACTIVE_LINE'; payload: number | null };

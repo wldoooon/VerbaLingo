@@ -16,8 +16,7 @@ function formatTime(seconds: number): string {
 
 export default function TranscriptViewer() {
   const { state } = usePlayerContext()
-  const { playlist, currentVideoIndex } = state
-  const [currentTime, setCurrentTime] = useState(0)
+  const { playlist, currentVideoIndex, currentTime } = state
   const [activeSegmentId, setActiveSegmentId] = useState<number | null>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const activeSegmentRef = useRef<HTMLDivElement>(null)
@@ -28,23 +27,20 @@ export default function TranscriptViewer() {
   const { data, isLoading, isError } = useTranscript(videoId);
 
   useEffect(() => {
-    if (playlist.length === 0) return
-
-    const interval = setInterval(() => {
-      setCurrentTime((prev) => prev + 1)
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [playlist.length])
-
-  useEffect(() => {
-    setCurrentTime(0)
     setActiveSegmentId(null)
   }, [currentVideoIndex])
 
   useEffect(() => {
     if (data) {
-      const activeSegmentIndex = data.sentences.findIndex((segment) => currentTime >= segment.start_time && currentTime < segment.end_time)
+      const adjustedTime = currentTime + 3; 
+      console.log("Current time:", currentTime, "Adjusted time:", adjustedTime);
+      const activeSegmentIndex = data.sentences.findIndex((segment) => {
+        if (adjustedTime >= segment.start_time && adjustedTime < segment.end_time) {
+          console.log("Active segment:", segment);
+          return true;
+        }
+        return false;
+      })
       if (activeSegmentIndex !== -1 && activeSegmentIndex !== activeSegmentId) {
         setActiveSegmentId(activeSegmentIndex)
       }
@@ -61,7 +57,6 @@ export default function TranscriptViewer() {
   }, [activeSegmentId])
 
   const handleSegmentClick = (segment: TranscriptSentence, index: number) => {
-    setCurrentTime(segment.start_time)
     setActiveSegmentId(index)
   }
 
