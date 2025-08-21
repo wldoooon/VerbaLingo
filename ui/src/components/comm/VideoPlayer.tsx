@@ -1,12 +1,13 @@
-"use client"
+'use client'
 
 import dynamic from "next/dynamic"
 const YouTube = dynamic(() => import("react-youtube"), { ssr: false })
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { Button } from "@/components/ui/button"
 import ClipSlider from "@/components/comm/ClipSlider"
 import { ChevronLeft, ChevronRight, Search } from "lucide-react"
+import { YouTubePlayer } from "react-youtube"
 
 function getClipStart(clip: any): number {
   if (!clip) return 0
@@ -22,6 +23,8 @@ function thumb(videoId?: string) {
 export default function VideoPlayer() {
   const { state, dispatch } = usePlayerContext()
   const { playlist, currentVideoIndex, isMuted } = state
+  const playerRef = useRef<YouTubePlayer | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const currentClip = playlist[currentVideoIndex]
   const currentVideoId = currentClip?.video_id
@@ -34,6 +37,10 @@ export default function VideoPlayer() {
 
   useEffect(() => {
     setReady(false)
+    // Clean up interval on video change
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
   }, [uniqueKey])
 
   useEffect(() => {
@@ -50,6 +57,31 @@ export default function VideoPlayer() {
   const handleUnMute = () => dispatch({ type: "SET_MUTED", payload: false })
   const handleNextVideo = () => dispatch({ type: "NEXT_VIDEO" })
   const handlePrevVideo = () => dispatch({ type: "PREV_VIDEO" })
+
+  const startPolling = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      const currentTime = playerRef.current?.getCurrentTime();
+      if (typeof currentTime === 'number') {
+        dispatch({ type: 'SET_CURRENT_TIME', payload: currentTime });
+      }
+    }, 250);
+  };
+
+  const stopPolling = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  };
+
+  const onPlayerStateChange = (event: { data: number }) => {
+    // Playing
+    if (event.data === 1) {
+      startPolling();
+    } else { // Paused, ended, buffering
+      stopPolling();
+    }
+  };
 
   const opts = {
     height: "100%",
@@ -98,11 +130,13 @@ export default function VideoPlayer() {
               videoId={currentVideoId}
               opts={opts}
               onReady={(e) => {
+                playerRef.current = e.target;
                 try {
                   e.target.seekTo(rawStart, true)
                 } catch {}
                 setReady(true)
               }}
+              onStateChange={onPlayerStateChange}
               onEnd={handleNextVideo}
               onMute={handleMute}
               onUnMute={handleUnMute}

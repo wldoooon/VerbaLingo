@@ -12,11 +12,25 @@ export interface TranscriptLine {
   end: number;
 }
 
+export interface TranscriptSentence {
+    sentence_text: string;
+    start_time: number;
+    end_time: number;
+}
+
+export interface TranscriptResponse {
+    video_id: string;
+    start_time: number;
+    end_time: number;
+    sentences: TranscriptSentence[];
+}
+
 export interface PlayerState {
   playlist: Clips[];
   currentVideoIndex: number;
   isMuted: boolean;
   activeTranscriptLine: number | null;
+  currentTime: number;
 }
 
 export type PlayerAction =
@@ -24,4 +38,5 @@ export type PlayerAction =
   | { type: 'NEXT_VIDEO' }
   | { type: 'PREV_VIDEO'}
   | { type: 'SET_MUTED'; payload: boolean }
+  | { type: 'SET_CURRENT_TIME'; payload: number }
   | { type: 'SET_ACTIVE_LINE'; payload: number | null };

@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import { createContext, useReducer, Dispatch, ReactNode, useContext } from 'react';
 import { PlayerState, PlayerAction, TranscriptLine } from '@/lib/types';
@@ -8,6 +8,7 @@ const initialState: PlayerState = {
   currentVideoIndex: 0,
   isMuted: false,
   activeTranscriptLine: null,
+  currentTime: 0,
 };
 
 const PlayerContext = createContext<{
@@ -20,6 +21,7 @@ type PlayerAction =
   | { type: 'PREV_VIDEO' }
   | { type: 'SET_MUTED'; payload: boolean }
   | { type: 'LOAD_PLAYLIST'; payload: any[] }
+  | { type: 'SET_CURRENT_TIME'; payload: number }
   | { type: 'SET_INDEX'; payload: number }; 
 
 const appReducer = (state: PlayerState, action: PlayerAction): PlayerState => {
@@ -32,6 +34,8 @@ const appReducer = (state: PlayerState, action: PlayerAction): PlayerState => {
       return { ...state, currentVideoIndex: Math.max(0, state.currentVideoIndex - 1) };
     case 'SET_MUTED':
       return { ...state, isMuted: action.payload };
+    case 'SET_CURRENT_TIME':
+      return { ...state, currentTime: action.payload };
     case 'SET_INDEX': {
       const i = Math.min(Math.max(0, action.payload), Math.max(0, state.playlist.length - 1));
       return { ...state, currentVideoIndex: i };

@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
 import { useQuery } from "@tanstack/react-query";
-import { Clips, TranscriptLine } from "@/lib/types";
+import { Clips, TranscriptResponse } from "@/lib/types";
 
 const fetchSearchResults = async (query: string, category: string | null) => {
   const params = new URLSearchParams();
@@ -29,7 +29,8 @@ export const useSearch = (query: string, category: string | null) => {
 };
 
 const fetchTranscript = async (videoId: string) => {
-  const response = await fetch(`/api/v1/transcript/${videoId}`);
+  const url = `/api/v1/videos/${videoId}/transcript`;
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
@@ -37,7 +38,7 @@ const fetchTranscript = async (videoId: string) => {
 };
 
 export const useTranscript = (videoId: string) => {
-  return useQuery<TranscriptLine[], Error>({
+  return useQuery<TranscriptResponse, Error>({
     queryKey: ["transcript", videoId],
     queryFn: () => fetchTranscript(videoId),
     enabled: !!videoId, 
