@@ -41,14 +41,10 @@ async def search(
 @router.get("/videos/{video_id}/transcript", response_model=TranscriptResponse)
 async def get_transcript(
     video_id: str,
-    from_position: int = Query(0, ge=0, description="The starting position of the sentences to fetch."),
-    size: int = Query(50, ge=1, le=100, description="The number of sentences to fetch."),
     service: SearchService = Depends(get_search_service)
 ):
-    raw_results = await service.get_transcript_batch(
+    raw_results = await service.get_full_transcript(
         video_id=video_id,
-        from_position=from_position,
-        size=size
     )
 
     sentences: List[TranscriptSentence] = []
@@ -56,12 +52,21 @@ async def get_transcript(
     for hit in raw_hits:
         source = hit.get("_source", {})
         sentence = TranscriptSentence(
-            video_id=source.get("video_id"),
             sentence_text=source.get("sentence_text"),
             start_time=source.get("start"),
             end_time=source.get("end"),
-            position=source.get("position")
         )
         sentences.append(sentence)
 
-    return TranscriptResponse(sentences=sentences)
+    if not sentences:
+        raise HTTPException(status_code=404, detail="Transcript not found")
+
+    video_start_time = sentences[0].start_time
+    video_end_time = sentences[-1].end_time
+
+    return TranscriptResponse(
+        video_id=video_id,
+        start_time=video_start_time,
+        end_time=video_end_time,
+        sentences=sentences
+    )
