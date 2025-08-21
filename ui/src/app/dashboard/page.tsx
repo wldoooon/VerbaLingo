@@ -4,6 +4,7 @@ import { PlayerProvider } from "@/context/PlayerContext"
 import { AppSidebar } from "@/components/app-sidebar"
 import SearchBar from "@/components/comm/SearchBar"
 import VideoPlayer from "@/components/comm/VideoPlayer"
+import TranscriptViewer from "@/components/comm/TranscriptViewer"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 
 export default function Page() {
@@ -17,9 +18,9 @@ export default function Page() {
               <SidebarTrigger className="-ml-1" />
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <div className="flex flex-1 flex-col gap-6 p-6 pt-0">
             {/* Search Section */}
-            <div className="rounded-xl border bg-card text-card-foreground shadow p-6">
+            <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl">
               <div className="text-center mb-6">
                 <h1 className="text-3xl font-bold mb-2">Video Clip Search</h1>
                 <p className="text-muted-foreground">Search for any word and discover video clips that contain it</p>
@@ -29,9 +30,14 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Video Player Section */}
-            <div className="rounded-xl border bg-card text-card-foreground shadow p-6">
-              <VideoPlayer />
+            {/* Video Player and Transcript Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 bg-card text-card-foreground shadow-sm p-6 rounded-xl">
+                <VideoPlayer />
+              </div>
+              <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl">
+                <TranscriptViewer />
+              </div>
             </div>
           </div>
         </SidebarInset>
