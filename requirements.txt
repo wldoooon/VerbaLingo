@@ -1,0 +1,5 @@
+fastapi
+uvicorn[standard]
+ollama
+pydantic-settings
+python-dotenv
