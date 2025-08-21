@@ -12,6 +12,19 @@ export interface TranscriptLine {
   end: number;
 }
 
+export interface TranscriptSentence {
+    sentence_text: string;
+    start_time: number;
+    end_time: number;
+}
+
+export interface TranscriptResponse {
+    video_id: string;
+    start_time: number;
+    end_time: number;
+    sentences: TranscriptSentence[];
+}
+
 export interface PlayerState {
   playlist: Clips[];
   currentVideoIndex: number;
