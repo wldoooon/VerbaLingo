@@ -37,14 +37,19 @@ class SearchService:
         response = await self.client.search(index=settings.ALIAS_NAME, body=query)
         return response
 
-    async def get_full_transcript(self, video_id: str) -> dict:
+    async def get_transcript_batch(self, video_id: str, from_position: int, size: int) -> dict:
         query = {
-            "size": 10000,
+            "size": size,
             "sort": [
                 {"position": "asc"}
             ],
             "query": {
-                "term": {"video_id": video_id}
+                "bool": {
+                    "filter": [
+{"term": {"video_id": video_id}},
+                        {"range": {"position": {"gte": from_position}}}
+                    ]
+                }
             }
         }
         
