@@ -13,7 +13,7 @@ class GenerationRequest(BaseModel):
         description="The text prompt to send to the language model."
     )
     model: str = Field(
-        default="gemma:4b",
+        default="gemma3:4b",
         description="The name of the model to use for generation (e.g., 'gemma:2b', 'llama3')."
     )
     stream: bool = Field(
