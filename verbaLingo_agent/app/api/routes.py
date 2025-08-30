@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from verbaLingo_agent.app.schemas.generation import GenerationRequest, GenerationResponse
-from verbaLingo_agent.app.services.ollama_service import GenerationService, generation_service
+from verbaLingo_agent.app.services.ollama_service import GenerationService
+from verbaLingo_agent.app.dependencies import get_generation_service
 from typing import AsyncGenerator
 
 router = APIRouter()
 
-def get_generation_service() -> GenerationService:
-    return generation_service
 
 @router.post("/generate", response_model=GenerationResponse,
              summary="Generate Text",
