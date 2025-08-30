@@ -12,8 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useSearch } from "@/lib/useApi"
 import { usePlayerContext } from "@/context/PlayerContext"
 
-export default function SearchBar() {
-  const [query, setQuery] = useState("")
+export default function SearchBar({ query, onQueryChange }: { query: string; onQueryChange: (q: string) => void }) {
   const [category, setCategory] = useState("General")
   const { dispatch } = usePlayerContext()
   const { data, error, isLoading, refetch } = useSearch(query, category === "General" ? null : category)
@@ -57,7 +56,7 @@ export default function SearchBar() {
             placeholder="Search for a word..."
             className="w-full border-none bg-transparent p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => onQueryChange(e.target.value)}
             onKeyPress={handleKeyPress}
           />
         </div>
