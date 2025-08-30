@@ -8,6 +8,7 @@ from verbaLingo_agent.app.clients.agent_client import ollama_client
 async def lifespan(app: FastAPI):
     print("Starting up...")
     await ollama_client.health_check()
+    app.state.ollama_client = ollama_client
     print("Successfully connected to Ollama.")
     yield
     print("Shutting down...")
