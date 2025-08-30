@@ -19,7 +19,7 @@ async def generate_text(
     if request.stream:
         try:
             stream = service.process_generation_stream(request)
-            return StreamingResponse(stream, media_type="text/plain")
+            return StreamingResponse(stream, media_type="text/event-stream")
         except Exception as e:
             print(f"ERROR: Generation stream failed. Error: {e}")
             raise HTTPException(status_code=500, detail="Failed to generate text from the model.")

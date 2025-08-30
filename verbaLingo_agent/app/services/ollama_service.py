@@ -16,32 +16,39 @@ class GenerationService:
         self, request: GenerationRequest
     ) -> AsyncGenerator[str, None]:
         """
-        Processes a generation request and streams the response as Server-Sent Events.
-        This is the "adapter" that converts the raw Ollama stream into our standard format.
+        Processes a generation request and streams the response as Server-Sent Events
+        in the Vercel AI SDK Data Protocol format.
         """
         raw_stream_iterator = self.ollama_client.generate_stream(
             model=request.model, prompt=request.prompt
         )
 
+        # Unique ID for this text stream
+        id = f"chatcmpl-{(request.prompt[:10] + str(request.model)).encode('utf-8').hex()}"
+
         try:
+            # Yield the initial 'text-start' event
+            start_event = {"type": "text-start", "id": id}
+            yield f"data: {json.dumps(start_event)}\n\n"
+
             async for chunk in raw_stream_iterator:
-                # 1. Create the structured data object
-                data_event = StreamingData(type="chunk", content=chunk)
-                
-                # 2. Convert to JSON and format as SSE
-                sse_formatted_event = f"data: {data_event.model_dump_json()}\n\n"
-                
-                # 3. Yield the event
-                yield sse_formatted_event
+                # --- DEBUG LINE ---
+                print(f"RAW CHUNK FROM OLLAMA: {chunk}")
+                # ------------------
+
+                if chunk:
+                    # Format the chunk into a 'text-delta' event
+                    delta_event = {"type": "text-delta", "id": id, "delta": chunk}
+                    yield f"data: {json.dumps(delta_event)}\n\n"
 
         except Exception as e:
-            # Handle potential errors during streaming
-            error_event = StreamingData(type="error", content=str(e))
-            sse_formatted_error = f"data: {error_event.model_dump_json()}\n\n"
-            yield sse_formatted_error
+            print(f"[STREAM_ERROR] {e}")
+            error_event = {"type": "error", "error": str(e)}
+            yield f"data: {json.dumps(error_event)}\n\n"
         
         finally:
-            # Signal the end of the stream
-            end_event = StreamingData(type="end", content="Stream ended.")
-            sse_formatted_end = f"data: {end_event.model_dump_json()}\n\n"
-            yield sse_formatted_end
+            # Yield the final 'text-end' event
+            end_event = {"type": "text-end", "id": id}
+            yield f"data: {json.dumps(end_event)}\n\n"
+            # Signal the end of the entire stream to the SDK
+            yield "data: [DONE]\n\n"
