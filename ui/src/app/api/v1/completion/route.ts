@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         prompt,
-        model: 'gemma3:4b', // This can be configured as needed
+        model: 'gemma3:1b', // This can be configured as needed
         stream: true,
       }),
     });
