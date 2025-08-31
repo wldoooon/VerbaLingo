@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AiCompletion } from '@/components/ai-completion';
 import SearchBar from '@/components/comm/SearchBar';
 import VideoPlayer from '@/components/comm/VideoPlayer';
+import { FloatingAiAssistant } from '@/components/glowing-ai-chat-assistant';
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,6 +34,7 @@ export default function HomePage() {
         {/* New AI Completion Component */}
         <AiCompletion query={searchQuery} />
       </div>
+      <FloatingAiAssistant />
     </main>
   );
 }

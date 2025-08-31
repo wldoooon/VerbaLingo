@@ -1,13 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import { PlayerProvider } from "@/context/PlayerContext"
 import { AppSidebar } from "@/components/app-sidebar"
 import SearchBar from "@/components/comm/SearchBar"
 import VideoPlayer from "@/components/comm/VideoPlayer"
 import TranscriptViewer from "@/components/comm/TranscriptViewer"
+import { AiCompletion } from "@/components/ai-completion"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 
 export default function Page() {
+  const [searchQuery, setSearchQuery] = useState('');
+
   return (
     <PlayerProvider>
       <SidebarProvider>
@@ -26,7 +30,7 @@ export default function Page() {
                 <p className="text-muted-foreground">Search for any word and discover video clips that contain it</p>
               </div>
               <div className="flex justify-center">
-                <SearchBar />
+                <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
               </div>
             </div>
 
@@ -37,6 +41,17 @@ export default function Page() {
               </div>
               <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl">
                 <TranscriptViewer />
+              </div>
+            </div>
+
+            {/* AI Completion Section */}
+            <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl mt-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold">AI Assistant</h2>
+                <p className="text-muted-foreground">Ask anything about the video or get creative!</p>
+              </div>
+              <div className="flex justify-center">
+                <AiCompletion query={searchQuery} />
               </div>
             </div>
           </div>

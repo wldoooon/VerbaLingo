@@ -1,6 +1,8 @@
 'use client';
 
 import { useCompletion } from '@ai-sdk/react';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export function AiCompletion({ query }: { query: string }) {
   const { completion, complete, isLoading, error } = useCompletion({
@@ -25,7 +27,9 @@ export function AiCompletion({ query }: { query: string }) {
 
       {error && <div className="text-red-600 text-sm">{error.message}</div>}
 
-      <div className="whitespace-pre-wrap text-sm">{completion}</div>
+      <div className="text-sm">
+        <Markdown remarkPlugins={[remarkGfm]}>{completion}</Markdown>
+      </div>
     </div>
   );
 }
