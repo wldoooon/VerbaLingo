@@ -5,11 +5,14 @@ export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt } = await request.json();
+    const { prompt: originalPrompt } = await request.json();
 
-    if (!prompt) {
+
+    if (!originalPrompt) {
       return new Response('Prompt is required.', { status: 400 });
     }
+
+    const prompt = `Give me the meaning of the following word and some examples of how to use it in a sentence be brief: "${originalPrompt}"`;
 
     const backendUrl = 'http://127.0.0.1:8001/api/v1/generate';
 
