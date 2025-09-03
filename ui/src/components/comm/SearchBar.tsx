@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Check, ChevronsUpDown, Search, Languages } from "lucide-react"
+import { AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -88,47 +89,51 @@ export default function SearchBar() {
           </div>
         </Button>
       </DialogTrigger>
-      <DialogContent className="p-0 gap-0 max-w-2xl rounded-lg overflow-hidden shadow-2xl">
-        <div className="flex items-center gap-2 p-3">
-          <Search className="h-5 w-5 text-muted-foreground ml-1" />
-          <Input
-            type="text"
-            placeholder="Search for a word..."
-            className="w-full h-10 border-none bg-transparent p-0 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
-            autoFocus
-          />
-          <Button onClick={handleSearch} disabled={isLoading} className="mr-1">
-            {isLoading ? "Searching..." : "Search"}
-          </Button>
-        </div>
-        <div className="p-4 border-t bg-muted/50 min-h-[100px] flex items-center justify-center">
-          {isLoading && <p className="text-center text-sm text-muted-foreground">Searching for clips...</p>}
-          {error && <p className="text-center text-sm text-destructive">{error.message}</p>}
-          {data && !isLoading && (
-            <div className="w-full flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Found <span className="font-bold text-foreground">{data.total}</span> clips.
-              </p>
-              <div className="flex items-center gap-4">
-                <CategoryPicker categories={categories} value={category} onChange={setCategory} />
-                <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
-              </div>
+      <AnimatePresence>
+        {open && (
+          <DialogContent className="p-0 gap-0 max-w-2xl rounded-lg overflow-hidden shadow-2xl">
+            <div className="flex items-center gap-2 p-3">
+              <Search className="h-5 w-5 text-muted-foreground ml-1" />
+              <Input
+                type="text"
+                placeholder="Search for a word..."
+                className="w-full h-10 border-none bg-transparent p-0 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+                autoFocus
+              />
+              <Button onClick={handleSearch} disabled={isLoading} className="mr-1">
+                {isLoading ? "Searching..." : "Search"}
+              </Button>
             </div>
-          )}
-          {!isLoading && !error && !data && (
-            <div className="text-center text-sm text-muted-foreground">
-              <p className="mb-2">Enter a word to find video clips.</p>
-              <div className="flex items-center justify-center gap-4">
-                <CategoryPicker categories={categories} value={category} onChange={setCategory} />
-                <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
-              </div>
+            <div className="p-4 border-t bg-muted/50 min-h-[100px] flex items-center justify-center">
+              {isLoading && <p className="text-center text-sm text-muted-foreground">Searching for clips...</p>}
+              {error && <p className="text-center text-sm text-destructive">{error.message}</p>}
+              {data && !isLoading && (
+                <div className="w-full flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    Found <span className="font-bold text-foreground">{data.total}</span> clips.
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <CategoryPicker categories={categories} value={category} onChange={setCategory} />
+                    <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
+                  </div>
+                </div>
+              )}
+              {!isLoading && !error && !data && (
+                <div className="text-center text-sm text-muted-foreground">
+                  <p className="mb-2">Enter a word to find video clips.</p>
+                  <div className="flex items-center justify-center gap-4">
+                    <CategoryPicker categories={categories} value={category} onChange={setCategory} />
+                    <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </DialogContent>
+          </DialogContent>
+        )}
+      </AnimatePresence>
     </Dialog>
   )
 }
