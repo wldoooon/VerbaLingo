@@ -129,7 +129,7 @@
     @apply border-border outline-ring/50;
   }
     body {
-    @apply bg-background text-foreground bg-gradient-to-bl from-[#092635] via-[#1b4242] to-[#5c8374];
+    @apply bg-background text-foreground bg-gradient-to-bl from-[#000000] via-[#292929dc] to-[rgb(0,0,0)];
   }
 }
 
