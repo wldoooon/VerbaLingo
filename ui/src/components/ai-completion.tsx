@@ -3,6 +3,7 @@
 import { useCompletion } from '@ai-sdk/react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function AiCompletion({ query }: { query: string }) {
   const { completion, complete, isLoading, error } = useCompletion({
@@ -27,9 +28,20 @@ export function AiCompletion({ query }: { query: string }) {
 
       {error && <div className="text-red-600 text-sm">{error.message}</div>}
 
-      <div className="text-sm">
-        <Markdown remarkPlugins={[remarkGfm]}>{completion}</Markdown>
-      </div>
+      <AnimatePresence>
+        {completion && (
+          <motion.div
+            key="completion"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 3 }}
+            className="text-sm"
+          >
+            <Markdown remarkPlugins={[remarkGfm]}>{completion}</Markdown>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
