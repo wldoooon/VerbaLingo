@@ -44,7 +44,7 @@
 }
 
 :root {
-  --background: oklch(0% 0 0);
+  --background: radial-gradient(circle,rgba(5, 3, 23, 1) 0%, rgba(72, 60, 143, 1) 47%, rgba(0, 136, 163, 1) 100%);
   --foreground: oklch(0.9219 0 0);
   --card: oklch(0.2686 0 0);
   --card-foreground: oklch(0.9219 0 0);
@@ -129,7 +129,7 @@
     @apply border-border outline-ring/50;
   }
     body {
-    @apply bg-background text-foreground bg-radial-[at_50%_75%] from-sky-200 via-blue-400 to-indigo-900 to-90%;
+    @apply bg-background text-foreground bg-gradient-to-bl from-[#092635] via-[#1b4242] to-[#5c8374];
   }
 }
 
@@ -140,3 +140,10 @@
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.125);
 }
+
+.gradient {
+  background: #232526;
+  background: linear-gradient(
+    to right,
+    #232526,#414345
+  ) }

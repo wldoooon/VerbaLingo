@@ -19,14 +19,14 @@ export default function Page() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 glassmorphism">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-6 p-6 pt-0">
-          {/* Search Section */}
           <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl glassmorphism">
+            {/* Search Section */}
             <div className="text-center mb-6">
               <h1 className="text-3xl font-bold mb-2">Video Clip Search</h1>
               <p className="text-muted-foreground">Search for any word and discover video clips that contain it</p>
@@ -34,33 +34,28 @@ export default function Page() {
             <div className="flex justify-center">
               <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
             </div>
-          </div>
 
-          {/* Video Player and Transcript Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div
-              className={cn(
-                "bg-card text-card-foreground shadow-sm p-6 rounded-xl glassmorphism",
-                playlist.length > 0 ? "lg:col-span-2" : "lg:col-span-3",
-              )}
-            >
-              <VideoPlayer />
-            </div>
-            {playlist.length > 0 && (
-              <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl glassmorphism">
-                <TranscriptViewer />
+            {/* Video Player and Transcript Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+              <div className={cn("lg:col-span-2", playlist.length === 0 && "lg:col-span-3")}>
+                <VideoPlayer />
               </div>
-            )}
-          </div>
-
-          {/* AI Completion Section */}
-          <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl mt-6 glassmorphism">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold">AI Assistant</h2>
-              <p className="text-muted-foreground">Ask anything about the video or get creative!</p>
+              {playlist.length > 0 && (
+                <div>
+                  <TranscriptViewer />
+                </div>
+              )}
             </div>
-            <div className="flex justify-center">
-              <AiCompletion query={searchQuery} />
+
+            {/* AI Completion Section */}
+            <div className="mt-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold">AI Assistant</h2>
+                <p className="text-muted-foreground">Ask anything about the video or get creative!</p>
+              </div>
+              <div className="flex justify-center">
+                <AiCompletion query={searchQuery} />
+              </div>
             </div>
           </div>
         </div>
