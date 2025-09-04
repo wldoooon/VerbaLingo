@@ -26,7 +26,7 @@ export default function Page() {
         </header>
         <div className="flex flex-1 flex-col gap-6 p-6 pt-0">
           {/* Search Section */}
-          <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl">
+          <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl glassmorphism">
             <div className="text-center mb-6">
               <h1 className="text-3xl font-bold mb-2">Video Clip Search</h1>
               <p className="text-muted-foreground">Search for any word and discover video clips that contain it</p>
@@ -40,21 +40,21 @@ export default function Page() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div
               className={cn(
-                "bg-card text-card-foreground shadow-sm p-6 rounded-xl",
+                "bg-card text-card-foreground shadow-sm p-6 rounded-xl glassmorphism",
                 playlist.length > 0 ? "lg:col-span-2" : "lg:col-span-3",
               )}
             >
               <VideoPlayer />
             </div>
             {playlist.length > 0 && (
-              <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl">
+              <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl glassmorphism">
                 <TranscriptViewer />
               </div>
             )}
           </div>
 
           {/* AI Completion Section */}
-          <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl mt-6">
+          <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl mt-6 glassmorphism">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold">AI Assistant</h2>
               <p className="text-muted-foreground">Ask anything about the video or get creative!</p>
