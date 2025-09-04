@@ -19,13 +19,13 @@ export default function Page() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 glassmorphism">
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-6 p-6 pt-0">
-          <div className="bg-card text-card-foreground shadow-sm p-6 rounded-xl glassmorphism">
+        <div className="flex flex-1 flex-col">
+          <div className="bg-card text-card-foreground shadow-sm rounded-xl glassmorphism flex-1 p-6">
             {/* Search Section */}
             <div className="text-center mb-6">
               <h1 className="text-3xl font-bold mb-2">Video Clip Search</h1>
