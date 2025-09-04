@@ -25,7 +25,7 @@ export default function Page() {
           </div>
         </header>
         <div className="flex flex-1 flex-col">
-          <div className="bg-card text-card-foreground shadow-sm rounded-xl glassmorphism flex-1 p-6">
+          <div className="bg-card text-card-foreground shadow-sm glassmorphism flex-1 p-6">
             {/* Search Section */}
             <div className="text-center mb-6">
               <h1 className="text-3xl font-bold mb-2">Video Clip Search</h1>
