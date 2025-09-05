@@ -17,9 +17,9 @@ export function AiCompletion() {
   };
 
   return (
-    <div className="w-full max-w-sm">
+    <div className="w-full max-w-md">
       <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden">
-        <div style={{ width: 'calc(100% + 3rem)', height: '150px', position: 'relative', left: '-1.5rem' }}>
+        <div style={{ width: 'calc(100% + 3rem)', height: '150px', position: 'relative', left: '-1.5rem', top: '-1.5rem', right: '1rem' }}>
           <Threads
             amplitude={1}
             distance={0}
