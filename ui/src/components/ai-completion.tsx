@@ -19,21 +19,21 @@ export function AiCompletion() {
   return (
     <div className="w-full max-w-md">
       <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden">
-        <div style={{ width: '100%', height: '200px', position: 'relative' }}>
+        <div style={{ width: 'calc(100% + 3rem)', height: '200px', position: 'relative', left: '-1.5rem' }}>
           <Threads
             amplitude={1}
             distance={0}
             enableMouseInteraction={true}
           />
         </div>
-        <div className="p-8">
-          <div className="flex flex-col items-center space-y-4">
-            <h1 className="text-2xl font-bold text-white">AI Assistant</h1>
-            <p className="text-center text-gray-300">Click the button to get a fun fact!</p>
+        <div className="pt-0 px-8 pb-8">
+          <div className="flex flex-col items-center">
+            <h1 className="text-2xl font-bold text-white mt-0">AI Assistant</h1>
+            <p className="text-center text-gray-300 mt-2">Click the button to get a fun fact!</p>
             <button
               onClick={handleGenerate}
               disabled={isLoading}
-              className="rounded-full bg-blue-500/50 px-6 py-3 text-white font-semibold hover:bg-blue-500/80 transition-colors disabled:opacity-50"
+              className="rounded-full bg-blue-500/50 px-6 py-3 text-white font-semibold hover:bg-blue-500/80 transition-colors disabled:opacity-50 mt-4"
             >
               {isLoading ? 'Generating…' : 'Ask AI'}
             </button>
