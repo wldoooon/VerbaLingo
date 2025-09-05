@@ -5,6 +5,7 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from 'framer-motion';
 import Threads from './Threads'; // Assuming Threads.tsx is in the same directory
+import AnimatedContent from './AnimatedContent';
 
 export function AiCompletion() {
   const { completion, complete, isLoading, error } = useCompletion({
@@ -18,14 +19,31 @@ export function AiCompletion() {
 
   return (
     <div className="w-full max-w-md">
+        <AnimatedContent
+            distance={150}
+            direction="vertical"
+            reverse={false}
+            duration={2.5}
+            ease="power3.out"
+            initialOpacity={0}
+            animateOpacity
+            scale={1}
+            threshold={0}
+            delay={0.3}
+        >
       <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden">
-        <div style={{ width: 'calc(100% + 3rem)', height: '150px', position: 'relative', left: '-1.5rem', top: '-1.5rem', right: '1rem' }}>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          style={{ width: 'calc(100% + 3rem)', height: '150px', position: 'relative', left: '-1.5rem', top: '-1.5rem' }}
+        >
           <Threads
             amplitude={1}
             distance={0}
             enableMouseInteraction={true}
           />
-        </div>
+        </motion.div>
         <div className="pt-0 px-8 pb-8">
           <div className="flex flex-col items-center">
             <h1 className="text-2xl font-bold text-white mt-[-1rem]">AI Assistant</h1>
@@ -62,6 +80,7 @@ export function AiCompletion() {
           </AnimatePresence>
         </div>
       </div>
+        </AnimatedContent>
     </div>
   );
 }
