@@ -19,6 +19,7 @@ import {
     Suggestions,
     Suggestion,
 } from "@/components/ui/shadcn-io/ai/suggestion";
+import { Response } from "@/components/ui/shadcn-io/ai/response";
 import { ThumbsDown, ThumbsUp, Copy } from "lucide-react";
 
 const OPENAI_ICON = (
@@ -216,7 +217,7 @@ export function AiCompletion() {
                                         {error ? (
                                             <p className="text-red-500">{error.message}</p>
                                         ) : (
-                                            <Markdown remarkPlugins={[remarkGfm]}>{completion}</Markdown>
+                                            <Response>{completion}</Response>
                                         )}
                                         <div className="flex items-center justify-end gap-2 mt-4">
                                             <Button variant="ghost" size="icon" className="h-7 w-7"><Copy size={14} /></Button>
