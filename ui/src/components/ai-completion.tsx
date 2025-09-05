@@ -15,6 +15,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Bot, Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+    Suggestions,
+    Suggestion,
+} from "@/components/ui/shadcn-io/ai/suggestion";
 
 const OPENAI_ICON = (
     <>
@@ -125,6 +129,10 @@ export function AiCompletion() {
         complete(prompt);
     };
 
+    const handleSuggestionClick = (suggestion: string) => {
+        complete(suggestion);
+    };
+
     return (
         <div className="w-full max-w-md">
             <AnimatedContent
@@ -140,9 +148,9 @@ export function AiCompletion() {
                 delay={0.3}
             >
                 <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden">
-                    <div className="px-6 pt-4 pb-2 flex items-center justify-end">
+                    <div className="px-6 pt-4 pb-2 flex items-center justify-start">
                         <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
                             <span className="text-xs font-medium text-zinc-400">VerbaLingo AI Asistant</span>
                         </div>
                     </div>
@@ -169,6 +177,27 @@ export function AiCompletion() {
                             >
                                 {isLoading ? 'Generating…' : 'Ask AI'}
                             </button>
+                        </div>
+
+                        <div className="mt-4">
+                            <Suggestions>
+                                <Suggestion
+                                    suggestion="What is the weather today?"
+                                    onClick={handleSuggestionClick}
+                                />
+                                <Suggestion
+                                    suggestion="Give me a simple recipe for pasta."
+                                    onClick={handleSuggestionClick}
+                                />
+                                <Suggestion
+                                    suggestion="Explain the theory of relativity in simple terms."
+                                    onClick={handleSuggestionClick}
+                                />
+                                <Suggestion
+                                    suggestion="What are some good books to read?"
+                                    onClick={handleSuggestionClick}
+                                />
+                            </Suggestions>
                         </div>
 
                         <AnimatePresence>
