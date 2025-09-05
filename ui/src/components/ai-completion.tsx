@@ -32,6 +32,12 @@ export function AiCompletion() {
             delay={0.3}
         >
       <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden">
+        <div className="px-6 pt-4 pb-2">
+            <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span className="text-xs font-medium text-zinc-400">VerbaLingo AI Asistant</span>
+            </div>
+        </div>
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
