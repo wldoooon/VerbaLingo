@@ -140,7 +140,60 @@ export function AiCompletion() {
                 delay={0.3}
             >
                 <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden">
-                    <div className="px-6 pt-4 pb-2 flex items-center justify-between">
+                    <div className="px-6 pt-4 pb-2 flex items-center justify-end">
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                            <span className="text-xs font-medium text-zinc-400">VerbaLingo AI Asistant</span>
+                        </div>
+                    </div>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 1 }}
+                        style={{ width: 'calc(100% + 3rem)', height: '100px', position: 'relative', left: '-1.5rem', top: '-1.5rem' }}
+                    >
+                        <Threads
+                            amplitude={2}
+                            distance={0}
+                            enableMouseInteraction={true}
+                        />
+                    </motion.div>
+                    <div className="pt-0 px-8 pb-8">
+                        <div className="flex flex-col items-center">
+                            <h1 className="text-2xl font-bold text-white mt-[-1rem]">AI Assistant</h1>
+                            <p className="text-center text-gray-300 mt-2">Click the button to get a fun fact!</p>
+                            <button
+                                onClick={handleGenerate}
+                                disabled={isLoading}
+                                className="rounded-full bg-blue-500/50 px-6 py-3 text-white font-semibold hover:bg-blue-500/80 transition-colors disabled:opacity-50 mt-4"
+                            >
+                                {isLoading ? 'Generating…' : 'Ask AI'}
+                            </button>
+                        </div>
+
+                        <AnimatePresence>
+                            {(completion || error) && (
+                                <motion.div
+                                    key="completion"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="mt-6 pt-6 border-t border-white/20"
+                                >
+                                    <h2 className="text-xl font-bold mb-4 text-white">Response:</h2>
+                                    <div className="text-gray-200">
+                                        {error ? (
+                                            <p className="text-red-500">{error.message}</p>
+                                        ) : (
+                                            <Markdown remarkPlugins={[remarkGfm]}>{completion}</Markdown>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                    <div className="px-6 pt-2 pb-4 flex items-center justify-start">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -208,57 +261,6 @@ export function AiCompletion() {
                                 ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                            <span className="text-xs font-medium text-zinc-400">VerbaLingo AI Asistant</span>
-                        </div>
-                    </div>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1 }}
-                        style={{ width: 'calc(100% + 3rem)', height: '100px', position: 'relative', left: '-1.5rem', top: '-1.5rem' }}
-                    >
-                        <Threads
-                            amplitude={2}
-                            distance={0}
-                            enableMouseInteraction={true}
-                        />
-                    </motion.div>
-                    <div className="pt-0 px-8 pb-8">
-                        <div className="flex flex-col items-center">
-                            <h1 className="text-2xl font-bold text-white mt-[-1rem]">AI Assistant</h1>
-                            <p className="text-center text-gray-300 mt-2">Click the button to get a fun fact!</p>
-                            <button
-                                onClick={handleGenerate}
-                                disabled={isLoading}
-                                className="rounded-full bg-blue-500/50 px-6 py-3 text-white font-semibold hover:bg-blue-500/80 transition-colors disabled:opacity-50 mt-4"
-                            >
-                                {isLoading ? 'Generating…' : 'Ask AI'}
-                            </button>
-                        </div>
-
-                        <AnimatePresence>
-                            {(completion || error) && (
-                                <motion.div
-                                    key="completion"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    transition={{ duration: 0.5 }}
-                                    className="mt-6 pt-6 border-t border-white/20"
-                                >
-                                    <h2 className="text-xl font-bold mb-4 text-white">Response:</h2>
-                                    <div className="text-gray-200">
-                                        {error ? (
-                                            <p className="text-red-500">{error.message}</p>
-                                        ) : (
-                                            <Markdown remarkPlugins={[remarkGfm]}>{completion}</Markdown>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
                     </div>
                 </div>
             </AnimatedContent>
