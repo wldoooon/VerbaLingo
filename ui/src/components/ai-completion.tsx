@@ -17,9 +17,9 @@ export function AiCompletion() {
   };
 
   return (
-    <div className="w-full max-w-md">
+    <div className="w-full max-w-sm">
       <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden">
-        <div style={{ width: 'calc(100% + 3rem)', height: '200px', position: 'relative', left: '-1.5rem' }}>
+        <div style={{ width: 'calc(100% + 3rem)', height: '150px', position: 'relative', left: '-1.5rem' }}>
           <Threads
             amplitude={1}
             distance={0}
@@ -28,7 +28,7 @@ export function AiCompletion() {
         </div>
         <div className="pt-0 px-8 pb-8">
           <div className="flex flex-col items-center">
-            <h1 className="text-2xl font-bold text-white mt-0">AI Assistant</h1>
+            <h1 className="text-2xl font-bold text-white mt-[-1rem]">AI Assistant</h1>
             <p className="text-center text-gray-300 mt-2">Click the button to get a fun fact!</p>
             <button
               onClick={handleGenerate}
