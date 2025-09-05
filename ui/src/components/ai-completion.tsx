@@ -39,7 +39,7 @@ export function AiCompletion() {
           style={{ width: 'calc(100% + 3rem)', height: '150px', position: 'relative', left: '-1.5rem', top: '-1.5rem' }}
         >
           <Threads
-            amplitude={1}
+            amplitude={2}
             distance={0}
             enableMouseInteraction={true}
           />
