@@ -44,7 +44,7 @@ export function AiCompletion() {
                     <CardHeader>
                         <div className="flex items-center justify-start">
                             <div className="flex items-center gap-1.5">
-                                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                                <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
                                 <CardTitle className="text-xs font-medium text-zinc-400">VerbaLingo AI Asistant</CardTitle>
                             </div>
                         </div>
@@ -66,13 +66,13 @@ export function AiCompletion() {
                             <div className="flex flex-col items-center">
                                 <h1 className="text-2xl font-bold text-white mt-[-1rem]">AI Assistant</h1>
                                 <p className="text-center text-gray-300 mt-2">Click the button to get a fun fact!</p>
-                                <button
+                                <Button
                                     onClick={handleGenerate}
                                     disabled={isLoading}
-                                    className="rounded-full bg-blue-500/50 px-6 py-3 text-white font-semibold hover:bg-blue-500/80 transition-colors disabled:opacity-50 mt-4"
+                                    className="mt-4"
                                 >
                                     {isLoading ? 'Generating…' : 'Ask AI'}
-                                </button>
+                                </Button>
                             </div>
 
                             <div className="mt-4">
