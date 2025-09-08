@@ -27,7 +27,7 @@ export function AiCompletion() {
     };
 
     return (
-        <div className="w-full max-w-md">
+        <div className="w-full">
             <AnimatedContent
                 distance={150}
                 direction="vertical"
@@ -50,19 +50,7 @@ export function AiCompletion() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 1 }}
-                            style={{ width: 'calc(100% + 3rem)', height: '100px', position: 'relative', left: '-1.5rem', top: '-1.5rem' }}
-                        >
-                            <Threads
-                                amplitude={2}
-                                distance={0}
-                                enableMouseInteraction={true}
-                            />
-                        </motion.div>
-                        <div className="pt-0">
+                       <div className="pt-0">
                             <div className="flex flex-col items-center">
                                 <h1 className="text-2xl font-bold text-white mt-[-1rem]">AI Assistant</h1>
                                 <p className="text-center text-gray-300 mt-2">Click the button to get a fun fact!</p>
