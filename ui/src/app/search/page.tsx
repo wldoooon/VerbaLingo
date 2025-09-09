@@ -27,11 +27,7 @@ export default function SearchPage() {
         <div className="flex flex-1 flex-col">
           <div className="bg-card text-card-foreground shadow-sm flex-1 p-6 border-t">
             {/* Search Section */}
-            <div className="text-center mb-6">
-              <h1 className="text-3xl font-bold mb-2">Video Clip Search</h1>
-              <p className="text-muted-foreground">Search for any word and discover video clips that contain it</p>
-            </div>
-            <div className="flex justify-center">
+            <div className="flex justify-start">
               <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
             </div>
 
