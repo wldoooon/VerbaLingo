@@ -28,8 +28,9 @@ export function AiCompletion() {
     };
 
     return (
-        <div className="w-full">
+        <div className="w-full h-full">
             <AnimatedContent
+                className="h-full"
                 distance={150}
                 direction="vertical"
                 reverse={false}
@@ -41,7 +42,7 @@ export function AiCompletion() {
                 threshold={0}
                 delay={0.3}
             >
-                <Card>
+                <Card className="h-full flex flex-col border-t-0">
                     <CardHeader>
                         <div className="flex items-center justify-start">
                             <div className="flex items-center gap-1.5">
@@ -50,7 +51,7 @@ export function AiCompletion() {
                             </div>
                         </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex-1">
                        <div className="pt-0">
                             <div className="flex flex-col items-center">
                                 <SiriOrb size="96px" />

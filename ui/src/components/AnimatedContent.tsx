@@ -6,6 +6,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 interface AnimatedContentProps {
   children: ReactNode;
+  className?: string;
   distance?: number;
   direction?: 'vertical' | 'horizontal';
   reverse?: boolean;
@@ -21,6 +22,7 @@ interface AnimatedContentProps {
 
 const AnimatedContent: React.FC<AnimatedContentProps> = ({
   children,
+  className,
   distance = 100,
   direction = 'vertical',
   reverse = false,
@@ -84,7 +86,7 @@ const AnimatedContent: React.FC<AnimatedContentProps> = ({
     onComplete
   ]);
 
-  return <div ref={ref} style={{ visibility: 'hidden' }}>{children}</div>;
+  return <div ref={ref} style={{ visibility: 'hidden' }} className={className}>{children}</div>;
 };
 
 export default AnimatedContent;

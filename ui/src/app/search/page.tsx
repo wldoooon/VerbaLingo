@@ -42,7 +42,7 @@ export default function SearchPage() {
                 )}
               </div>
               {playlist.length > 0 && (
-                <div className="lg:col-span-5">
+                <div className="lg:col-span-5 -mt-21 -mr-6 -mb-6">
                   <AiCompletion query={searchQuery} />
                 </div>
               )}
