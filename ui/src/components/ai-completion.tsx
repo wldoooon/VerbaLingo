@@ -10,6 +10,7 @@ import { Response } from "@/components/ui/shadcn-io/ai/response";
 import { ThumbsDown, ThumbsUp, Copy } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import ModelSelector from "@/components/comm/ModelSelector";
+import SiriOrb from "@/components/comm/siri";
 
 export function AiCompletion() {
     const { completion, complete, isLoading, error } = useCompletion({
@@ -52,8 +53,8 @@ export function AiCompletion() {
                     <CardContent>
                        <div className="pt-0">
                             <div className="flex flex-col items-center">
-                                <h1 className="text-2xl font-bold text-white mt-[-1rem]">AI Assistant</h1>
-                                <p className="text-center text-gray-300 mt-2">Click the button to get a fun fact!</p>
+                                <SiriOrb size="96px" />
+                                <h1 className="text-2xl font-bold text-white mt-4">AI Assistant</h1>
                                 <Button
                                     onClick={handleGenerate}
                                     disabled={isLoading}
