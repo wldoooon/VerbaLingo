@@ -5,7 +5,7 @@ const YouTube = dynamic(() => import("react-youtube"), { ssr: false })
 import { useEffect, useState, useRef } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { Button } from "@/components/ui/button"
-import ClipSlider from "@/components/comm/ClipSlider"
+
 import { ChevronLeft, ChevronRight, Search } from "lucide-react"
 import { YouTubePlayer } from "react-youtube"
 
@@ -167,38 +167,7 @@ export default function VideoPlayer() {
         </div>
       )}
 
-      {playlist.length > 0 && (
-        <>
-          <div className="mt-6 flex justify-center gap-4">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handlePrevVideo}
-              disabled={currentVideoIndex === 0}
-              aria-label="Previous clip"
-              className="rounded-full bg-transparent"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleNextVideo}
-              disabled={currentVideoIndex === playlist.length - 1}
-              aria-label="Next clip"
-              className="rounded-full bg-transparent"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <ClipSlider
-            clips={playlist as any[]}
-            currentIndex={currentVideoIndex}
-            onSelect={(i) => dispatch({ type: "SET_INDEX", payload: i })}
-          />
-        </>
-      )}
+      
     </div>
   )
 }

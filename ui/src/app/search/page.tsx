@@ -10,7 +10,7 @@ import { AiCompletion } from "@/components/ai-completion"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
-export default function Page() {
+export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const { state } = usePlayerContext()
   const { playlist } = state
@@ -25,37 +25,27 @@ export default function Page() {
           </div>
         </header>
         <div className="flex flex-1 flex-col">
-          <div className="bg-card text-card-foreground shadow-sm glassmorphism flex-1 p-6">
+          <div className="bg-card text-card-foreground shadow-sm flex-1 p-6 border-t">
             {/* Search Section */}
-            <div className="text-center mb-6">
-              <h1 className="text-3xl font-bold mb-2">Video Clip Search</h1>
-              <p className="text-muted-foreground">Search for any word and discover video clips that contain it</p>
-            </div>
-            <div className="flex justify-center">
+            <div className="flex justify-start">
               <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
             </div>
 
-            {/* Video Player and Transcript Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-              <div className={cn("lg:col-span-2", playlist.length === 0 && "lg:col-span-3")}>
+            {/* Video Player, Transcript and AI Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6">
+              <div className={cn("lg:col-span-7", playlist.length === 0 && "lg:col-span-12")}>
                 <VideoPlayer />
+                {playlist.length > 0 && (
+                  <div className="mt-6">
+                    <TranscriptViewer />
+                  </div>
+                )}
               </div>
               {playlist.length > 0 && (
-                <div>
-                  <TranscriptViewer />
+                <div className="lg:col-span-5 -mt-21 -mr-6 -mb-6">
+                  <AiCompletion query={searchQuery} />
                 </div>
               )}
-            </div>
-
-            {/* AI Completion Section */}
-            <div className="mt-6">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold">AI Assistant</h2>
-                <p className="text-muted-foreground">Ask anything about the video or get creative!</p>
-              </div>
-              <div className="flex justify-center">
-                <AiCompletion query={searchQuery} />
-              </div>
             </div>
           </div>
         </div>
