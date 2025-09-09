@@ -42,7 +42,7 @@ export function AiCompletion() {
                 threshold={0}
                 delay={0.3}
             >
-                <Card className="h-full flex flex-col border-t-0">
+                <Card className="h-full flex flex-col border-t-0 rounded-none border-b-0">
                     <CardHeader>
                         <div className="flex items-center justify-start">
                             <div className="flex items-center gap-1.5">
