@@ -6,9 +6,9 @@ const FloatingAiAssistant = () => {
   const [message, setMessage] = useState('');
   const [charCount, setCharCount] = useState(0);
   const maxChars = 2000;
-  const chatRef = useRef(null);
+  const chatRef = useRef<HTMLDivElement>(null);
   
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setMessage(value);
     setCharCount(value.length);
@@ -22,7 +22,7 @@ const FloatingAiAssistant = () => {
     }
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -31,10 +31,10 @@ const FloatingAiAssistant = () => {
 
   // Close chat when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (chatRef.current && !chatRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (chatRef.current && !chatRef.current.contains(event.target as Node)) {
         // Check if the click is not on the floating button
-        if (!event.target.closest('.floating-ai-button')) {
+        if (!(event.target as Element).closest('.floating-ai-button')) {
           setIsChatOpen(false);
         }
       }

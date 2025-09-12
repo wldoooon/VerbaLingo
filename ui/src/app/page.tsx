@@ -18,7 +18,7 @@ export default function HomePage() {
         </div>
         
         {/* Existing Search Functionality */}
-        <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
+        <SearchBar />
         <VideoPlayer />
 
         {/* Divider */}
@@ -32,7 +32,7 @@ export default function HomePage() {
         </div>
 
         {/* New AI Completion Component */}
-        <AiCompletion query={searchQuery} />
+        <AiCompletion />
       </div>
       <FloatingAiAssistant />
     </main>
