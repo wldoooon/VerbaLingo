@@ -89,18 +89,24 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
                 
                 {/* Bottom Left Stats Card */}
                 <div className='absolute bottom-6 left-6'>
-                  <div className='bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-4 max-w-xs'>
-                    <div className='flex items-center justify-between text-white'>
-                      <div>
-                        <p className='text-lg font-bold'>347</p>
+                  <div className='bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-3 min-w-[310px]'>
+                    <div className='flex items-center text-white'>
+                      <div className='flex-1 text-center'>
+                        <p className='text-base font-bold'>184.322</p>
                         <p className='text-xs text-white/80'>Video Clips</p>
                       </div>
-                      <div className='text-right'>
-                        <p className='text-lg font-bold'>12</p>
+                      
+                      <div className='w-px h-6 bg-white/30 mx-3'></div>
+                      
+                      <div className='flex-1 text-center'>
+                        <p className='text-base font-bold'>85</p>
                         <p className='text-xs text-white/80'>Genres</p>
                       </div>
-                      <div className='text-right'>
-                        <p className='text-lg font-bold'>4.8★</p>
+                      
+                      <div className='w-px h-6 bg-white/30 mx-3'></div>
+                      
+                      <div className='flex-1 text-center'>
+                        <p className='text-base font-bold'>4.8★</p>
                         <p className='text-xs text-white/80'>Avg Rating</p>
                       </div>
                     </div>
