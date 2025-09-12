@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useSidebar } from "@/components/ui/sidebar";
 import { 
   Zap, 
   Globe, 
@@ -12,7 +13,6 @@ import {
   Database,
   Clock,
   Users,
-  ChevronUp,
   Settings,
   Info
 } from "lucide-react";
@@ -23,9 +23,8 @@ interface BottomStickyBarProps {
 }
 
 export function BottomStickyBar({ className }: BottomStickyBarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [liveUsers, setLiveUsers] = useState(1247);
-  const [isAggregating, setIsAggregating] = useState(true);
+  const { open, isMobile } = useSidebar();
 
   // Simulate live data updates
   useEffect(() => {
@@ -65,24 +64,13 @@ export function BottomStickyBar({ className }: BottomStickyBarProps) {
 
   return (
     <div className={cn(
-      "fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-t border-border transition-all duration-300",
-      isCollapsed ? "translate-y-10" : "translate-y-0",
+      "fixed bottom-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-t border-border transition-all duration-200",
+      // Adjust position based on sidebar state (desktop only)
+      !isMobile && open ? "left-[var(--sidebar-width)]" : "left-[var(--sidebar-width-icon)]",
+      "right-0",
       className
     )}>
-      {/* Collapse/Expand Toggle */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -top-6 left-1/2 transform -translate-x-1/2 h-6 w-12 rounded-t-md bg-background/95 backdrop-blur border border-b-0 hover:bg-muted"
-      >
-        <ChevronUp className={cn(
-          "h-3 w-3 transition-transform duration-200",
-          isCollapsed ? "rotate-180" : ""
-        )} />
-      </Button>
-
-      <div className="px-4 py-2">
+      <div className="px-6 py-2">
         <div className="flex items-center justify-between">
           {/* Left side - Status indicators */}
           <div className="flex items-center gap-3">
