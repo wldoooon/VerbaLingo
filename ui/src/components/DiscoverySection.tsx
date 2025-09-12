@@ -28,7 +28,7 @@ interface DiscoverySectionProps {
 
 export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionProps) {
   const OPTIONS: EmblaOptionsType = { 
-    loop: false,
+    loop: true,
     align: "start",
     slidesToScroll: 1,
     containScroll: "trimSnaps"
@@ -53,7 +53,7 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
 
       {/* Carousel */}
       <div className="relative">
-        <Carousel options={OPTIONS} className="w-full">
+        <Carousel options={OPTIONS} className="w-full" isAutoPlay={true}>
           <SliderContainer>
             <Slider className='w-full'>
               <div className='relative md:h-[500px] sm:h-full h-[300px] w-full rounded-lg overflow-hidden'>
@@ -71,9 +71,6 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
                 {/* Content Card */}
                 <div className='absolute top-6 left-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 max-w-sm'>
                   <div className='flex items-center gap-3 mb-3'>
-                    <div className='w-10 h-10 bg-red-500/80 rounded-lg flex items-center justify-center'>
-                      <span className='text-white font-bold text-lg'>🎬</span>
-                    </div>
                     <div>
                       <h3 className='text-white font-bold text-xl'>Movies & Cinema</h3>
                       <p className='text-white/80 text-sm'>Learn through entertainment</p>
@@ -125,7 +122,71 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
               </div>
             </Slider>
             <Slider className='w-full'>
-              <div className='bg-green-500 md:h-[500px] sm:h-full h-[300px] w-full rounded-lg'></div>
+              <div className='relative md:h-[500px] sm:h-full h-[300px] w-full rounded-lg overflow-hidden'>
+                {/* Background Image */}
+                <div 
+                  className='absolute inset-0 bg-cover bg-center bg-no-repeat'
+                  style={{
+                    backgroundImage: `url('/PodcastCollection.png')`
+                  }}
+                />
+                
+                {/* Gradient Overlay */}
+                <div className='absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent' />
+                
+                {/* Content Card */}
+                <div className='absolute top-6 left-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 max-w-sm'>
+                  <div className='flex items-center gap-3 mb-3'>
+                    
+                    <div>
+                      <h3 className='text-white font-bold text-xl'>Podcasts</h3>
+                      <p className='text-white/80 text-sm'>Learn through conversations</p>
+                    </div>
+                  </div>
+                  
+                  <p className='text-white/90 text-sm mb-4 leading-relaxed'>
+                    Improve listening skills with engaging podcasts, interviews, and educational talks. 
+                    Perfect for advanced learners.
+                  </p>
+                  
+                  <div className='flex items-center justify-between'>
+                    <div className='flex items-center gap-4 text-white/80 text-xs'>
+                      <span>180+ episodes</span>
+                      <span>•</span>
+                      <span>4.9★ rating</span>
+                    </div>
+                    <div className='bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full'>
+                      <span className='text-white text-xs font-medium'>Trending</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Bottom Left Stats Card */}
+                <div className='absolute bottom-6 left-6'>
+                  <div className='bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-3 min-w-[310px]'>
+                    <div className='flex items-center text-white'>
+                      <div className='flex-1 text-center'>
+                        <p className='text-base font-bold'>156.847</p>
+                        <p className='text-xs text-white/80'>Episodes</p>
+                      </div>
+                      
+                      <div className='w-px h-6 bg-white/30 mx-3'></div>
+                      
+                      <div className='flex-1 text-center'>
+                        <p className='text-base font-bold'>24</p>
+                        <p className='text-xs text-white/80'>Categories</p>
+                      </div>
+                      
+                      <div className='w-px h-6 bg-white/30 mx-3'></div>
+                      
+                      <div className='flex-1 text-center'>
+                        <p className='text-base font-bold'>4.9★</p>
+                        <p className='text-xs text-white/80'>Avg Rating</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </Slider>
             <Slider className='w-full'>
               <div className='bg-yellow-500 md:h-[500px] sm:h-full h-[300px] w-full rounded-lg'></div>
