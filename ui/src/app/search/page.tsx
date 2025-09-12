@@ -6,6 +6,7 @@ import SearchBar from "@/components/comm/SearchBar"
 import VideoPlayer from "@/components/comm/VideoPlayer"
 import TranscriptViewer from "@/components/comm/TranscriptViewer"
 import { AiCompletion } from "@/components/ai-completion"
+import { BottomStickyBar } from "@/components/BottomStickyBar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
@@ -18,7 +19,7 @@ export default function SearchPage() {
       <AppSidebar />
       <SidebarInset>
         <div className="flex flex-1 flex-col">
-          <div className="bg-card text-card-foreground shadow-sm flex-1 p-6">
+          <div className="bg-card text-card-foreground shadow-sm flex-1 p-6 pb-12">
             {/* Search Section */}
             <div className="flex justify-start">
               <SearchBar />
@@ -43,6 +44,9 @@ export default function SearchPage() {
           </div>
         </div>
       </SidebarInset>
+      
+      {/* Bottom Sticky Status Bar */}
+      <BottomStickyBar />
     </SidebarProvider>
   )
 }
