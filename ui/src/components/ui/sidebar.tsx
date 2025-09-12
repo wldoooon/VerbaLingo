@@ -219,14 +219,6 @@ function Sidebar({
       data-side={side}
       data-slot="sidebar"
     >
-      {/* Blur overlay when sidebar is hovered on desktop */}
-      {!isMobile && isHovered && (
-        <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[5] transition-all duration-200 ease-out"
-          style={{ marginLeft: 'var(--sidebar-width)' }}
-        />
-      )}
-      
       {/* This is what handles the sidebar gap on desktop */}
       <div
         data-slot="sidebar-gap"
