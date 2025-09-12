@@ -2,7 +2,6 @@
 import { useCompletion } from "@ai-sdk/react";
 import { motion, AnimatePresence } from "framer-motion";
 import Threads from "./Threads";
-import AnimatedContent from "./AnimatedContent";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Suggestions, Suggestion } from "@/components/ui/shadcn-io/ai/suggestion";
@@ -29,20 +28,7 @@ export function AiCompletion() {
 
     return (
         <div className="w-full h-full">
-            <AnimatedContent
-                className="h-full"
-                distance={150}
-                direction="vertical"
-                reverse={false}
-                duration={2.5}
-                ease="power3.out"
-                initialOpacity={0}
-                animateOpacity
-                scale={1}
-                threshold={0}
-                delay={0.3}
-            >
-                <Card className="h-full flex flex-col border-t-0 rounded-none border-b-0">
+            <Card className="h-full flex flex-col border-t-0 rounded-none border-b-0">
                     <CardHeader>
                         <div className="flex items-center justify-start">
                             <div className="flex items-center gap-1.5">
@@ -118,7 +104,6 @@ export function AiCompletion() {
                         <ModelSelector selectedModel={selectedModel} setSelectedModel={setSelectedModel} />
                     </CardFooter>
                 </Card>
-            </AnimatedContent>
         </div>
     );
 }

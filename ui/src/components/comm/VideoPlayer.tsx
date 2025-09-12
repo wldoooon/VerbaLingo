@@ -97,7 +97,7 @@ export default function VideoPlayer() {
     loading: "eager",
   } as const
 
-  const heroClass = "relative w-full h-[400px] md:h-[500px] overflow-hidden rounded-lg"
+  const heroClass = "relative w-full h-[600px] md:h-[550px] overflow-hidden rounded-lg"
 
   return (
     <div className="w-full">

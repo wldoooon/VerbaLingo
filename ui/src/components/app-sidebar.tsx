@@ -2,16 +2,20 @@
 
 import * as React from "react"
 import {
-  AudioWaveform,
   BookOpen,
   Bot,
   Command,
-  Frame,
   GalleryVerticalEnd,
-  Map,
-  PieChart,
+  Heart,
+  Play,
   Settings2,
-  SquareTerminal,
+  TrendingUp,
+  Users,
+  Video,
+  Trophy,
+  Search,
+  Star,
+  BarChart3,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -29,129 +33,155 @@ import {
 // This is sample data.
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "wldooon",
+    email: "user@verbalingo.com",
+    avatar: "/avatars/user.jpg",
   },
   teams: [
     {
-      name: "Acme Inc",
+      name: "VerbaLingo",
       logo: GalleryVerticalEnd,
-      plan: "Enterprise",
+      plan: "Premium",
     },
     {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
+      name: "English Learning",
       logo: Command,
-      plan: "Free",
+      plan: "Pro",
     },
   ],
   navMain: [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
+      title: "Learn",
+      url: "/learn",
+      icon: BookOpen,
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Lessons",
+          url: "/learn/lessons",
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "Grammar",
+          url: "/learn/grammar",
         },
         {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
+          title: "Vocabulary",
+          url: "/learn/vocabulary",
         },
         {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
+          title: "Pronunciation",
+          url: "/learn/pronunciation",
         },
       ],
     },
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
+      title: "Videos",
+      url: "/videos",
+      icon: Video,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "Discover",
+          url: "/videos/discover",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "Collections",
+          url: "/videos/collections",
         },
         {
-          title: "Tutorials",
-          url: "#",
+          title: "Channels",
+          url: "/videos/channels",
         },
         {
-          title: "Changelog",
-          url: "#",
+          title: "Trending",
+          url: "/videos/trending",
+        },
+      ],
+    },
+    {
+      title: "Progress",
+      url: "/progress",
+      icon: TrendingUp,
+      items: [
+        {
+          title: "Overview",
+          url: "/progress/overview",
+        },
+        {
+          title: "Statistics",
+          url: "/progress/stats",
+        },
+        {
+          title: "Achievements",
+          url: "/progress/achievements",
+        },
+        {
+          title: "Streaks",
+          url: "/progress/streaks",
+        },
+      ],
+    },
+    {
+      title: "Community",
+      url: "/community",
+      icon: Users,
+      items: [
+        {
+          title: "Forums",
+          url: "/community/forums",
+        },
+        {
+          title: "Study Groups",
+          url: "/community/groups",
+        },
+        {
+          title: "Leaderboard",
+          url: "/community/leaderboard",
+        },
+        {
+          title: "Events",
+          url: "/community/events",
         },
       ],
     },
     {
       title: "Settings",
-      url: "#",
+      url: "/settings",
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "Profile",
+          url: "/settings/profile",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "Preferences",
+          url: "/settings/preferences",
         },
         {
-          title: "Billing",
-          url: "#",
+          title: "Notifications",
+          url: "/settings/notifications",
         },
         {
-          title: "Limits",
-          url: "#",
+          title: "Privacy",
+          url: "/settings/privacy",
         },
       ],
     },
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
+      name: "Favorites",
+      url: "/favorites",
+      icon: Heart,
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
+      name: "Search",
+      url: "/search",
+      icon: Search,
     },
     {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      name: "AI Assistant",
+      url: "/ai",
+      icon: Bot,
     },
   ],
 }
