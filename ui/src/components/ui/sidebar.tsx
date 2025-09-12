@@ -40,6 +40,8 @@ type SidebarContextProps = {
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  isHovered: boolean
+  setIsHovered: (hovered: boolean) => void
 }
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
@@ -54,7 +56,7 @@ function useSidebar() {
 }
 
 function SidebarProvider({
-  defaultOpen = true,
+  defaultOpen = false, // Changed to false for hover behavior
   open: openProp,
   onOpenChange: setOpenProp,
   className,
@@ -68,11 +70,12 @@ function SidebarProvider({
 }) {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
+  const [isHovered, setIsHovered] = React.useState(false)
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(defaultOpen)
-  const open = openProp ?? _open
+  const open = openProp ?? (isMobile ? _open : isHovered) // Use hover state for desktop
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === "function" ? value(open) : value
@@ -122,8 +125,10 @@ function SidebarProvider({
       openMobile,
       setOpenMobile,
       toggleSidebar,
+      isHovered,
+      setIsHovered,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, isHovered, setIsHovered]
   )
 
   return (
@@ -139,7 +144,7 @@ function SidebarProvider({
             } as React.CSSProperties
           }
           className={cn(
-            "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
+            "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full relative",
             className
           )}
           {...props}
@@ -154,7 +159,7 @@ function SidebarProvider({
 function Sidebar({
   side = "left",
   variant = "sidebar",
-  collapsible = "offcanvas",
+  collapsible = "icon", // Changed default to icon for hover behavior
   className,
   children,
   ...props
@@ -163,7 +168,7 @@ function Sidebar({
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
 }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const { isMobile, state, openMobile, setOpenMobile, setIsHovered, isHovered } = useSidebar()
 
   if (collapsible === "none") {
     return (
@@ -214,6 +219,14 @@ function Sidebar({
       data-side={side}
       data-slot="sidebar"
     >
+      {/* Blur overlay when sidebar is hovered on desktop */}
+      {!isMobile && isHovered && (
+        <div 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[5] transition-all duration-200 ease-out"
+          style={{ marginLeft: 'var(--sidebar-width)' }}
+        />
+      )}
+      
       {/* This is what handles the sidebar gap on desktop */}
       <div
         data-slot="sidebar-gap"
@@ -226,6 +239,13 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
         )}
       />
+      {/* Hover trigger zone */}
+      {!isMobile && (
+        <div
+          className="fixed inset-y-0 left-0 w-4 z-20"
+          onMouseEnter={() => setIsHovered(true)}
+        />
+      )}
       <div
         data-slot="sidebar-container"
         className={cn(
@@ -239,6 +259,8 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
           className
         )}
+        onMouseEnter={() => !isMobile && setIsHovered(true)}
+        onMouseLeave={() => !isMobile && setIsHovered(false)}
         {...props}
       >
         <div
