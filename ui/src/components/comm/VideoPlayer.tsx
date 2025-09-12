@@ -138,8 +138,6 @@ export default function VideoPlayer() {
               }}
               onStateChange={onPlayerStateChange}
               onEnd={handleNextVideo}
-              onMute={handleMute}
-              onUnMute={handleUnMute}
               className="absolute inset-0 h-full w-full rounded-lg"
             />
           </div>

@@ -28,7 +28,7 @@ export default function SearchPage() {
           <div className="bg-card text-card-foreground shadow-sm flex-1 p-6 border-t">
             {/* Search Section */}
             <div className="flex justify-start">
-              <SearchBar query={searchQuery} onQueryChange={setSearchQuery} />
+              <SearchBar />
             </div>
 
             {/* Video Player, Transcript and AI Section */}
@@ -43,7 +43,7 @@ export default function SearchPage() {
               </div>
               {playlist.length > 0 && (
                 <div className="lg:col-span-5 -mt-21 -mr-6 -mb-6">
-                  <AiCompletion query={searchQuery} />
+                  <AiCompletion />
                 </div>
               )}
             </div>

@@ -22,7 +22,6 @@ export default function SearchBar() {
   const { data, error, isLoading, refetch } = useSearch(
     query,
     category === "General" ? null : category,
-    language === "English" ? null : language,
   )
 
   const categories = [

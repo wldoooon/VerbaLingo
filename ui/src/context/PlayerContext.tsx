@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useReducer, Dispatch, ReactNode, useContext } from 'react';
-import { PlayerState, PlayerAction, TranscriptLine } from '@/lib/types';
+import { PlayerState, TranscriptLine } from '@/lib/types';
 
 const initialState: PlayerState = {
   playlist: [],

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+// import { Inter } from "next/font/google";
 import "./globals.css";
 import { PlayerProvider } from "@/context/PlayerContext";
 import QueryProvider from "@/components/QueryProvider";
 
-const inter = Inter({ subsets: ["latin"] });
+// const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://i.ytimg.com" />
         <link rel="dns-prefetch" href="https://s.ytimg.com" />
       </head>
-      <body className={`${inter.className} min-h-screen bg-transparent`}>
+      <body className={`min-h-screen bg-transparent`}>
         <QueryProvider>
           <PlayerProvider>{children}</PlayerProvider>
         </QueryProvider>
