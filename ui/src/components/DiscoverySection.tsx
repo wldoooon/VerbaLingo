@@ -7,7 +7,10 @@ import {
   ChevronRight,
   TrendingUp,
   BookOpen,
-  Globe
+  Globe,
+  Play,
+  Film,
+  Tv
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Carousel, {
@@ -33,11 +36,18 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
 
   return (
     <div className={cn("w-full", className)}>
+      {/* Separator Line */}
+      <div className="w-full h-px bg-border mb-8"></div>
+      
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-3xl font-bold text-foreground">Discover Learning Content</h2>
-          <p className="text-muted-foreground mt-2 text-lg">Trending videos and courses curated for language learners</p>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Content Categories</h2>
+            <p className="text-muted-foreground mt-1 text-base">Explore learning materials by type and genre</p>
+          </div>
         </div>
       </div>
 
