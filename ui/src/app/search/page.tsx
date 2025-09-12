@@ -8,7 +8,7 @@ import TranscriptViewer from "@/components/comm/TranscriptViewer"
 import { AiCompletion } from "@/components/ai-completion"
 import { BottomStickyBar } from "@/components/BottomStickyBar"
 import { DiscoverySection } from "@/components/DiscoverySection"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
 export default function SearchPage() {
@@ -20,7 +20,18 @@ export default function SearchPage() {
       <AppSidebar />
       <SidebarInset>
         <div className="flex flex-1 flex-col">
-          <div className="bg-card text-card-foreground shadow-sm flex-1 p-6 pb-12">
+          {/* Mobile Header with Sidebar Toggle */}
+          <div className="flex items-center justify-between gap-2 p-4 lg:hidden border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger className="size-8 hover:bg-accent hover:text-accent-foreground" />
+              <h1 className="text-lg font-semibold text-foreground">VerbaLingo</h1>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Search & Learn
+            </div>
+          </div>
+          
+          <div className="bg-card text-card-foreground shadow-sm flex-1 p-4 sm:p-6 pb-12 lg:pb-6">
             {/* Search Section */}
             <div className="flex justify-start">
               <SearchBar />

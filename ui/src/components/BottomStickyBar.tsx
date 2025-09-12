@@ -24,7 +24,19 @@ interface BottomStickyBarProps {
 
 export function BottomStickyBar({ className }: BottomStickyBarProps) {
   const [liveUsers, setLiveUsers] = useState(1247);
+  const [isVerySmallScreen, setIsVerySmallScreen] = useState(false);
   const { open, isMobile } = useSidebar();
+
+  // Check for very small screens
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsVerySmallScreen(window.innerWidth < 480);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   // Simulate live data updates
   useEffect(() => {
@@ -65,22 +77,32 @@ export function BottomStickyBar({ className }: BottomStickyBarProps) {
   return (
     <div className={cn(
       "fixed bottom-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-t border-border transition-all duration-200",
-      // Adjust position based on sidebar state (desktop only)
-      !isMobile && open ? "left-[var(--sidebar-width)]" : "left-[var(--sidebar-width-icon)]",
-      "right-0",
+      // Adjust position based on sidebar state and device
+      isMobile 
+        ? "left-0 right-0" // Full width on mobile
+        : open 
+          ? "left-[var(--sidebar-width)]" // Sidebar open on desktop
+          : "left-[var(--sidebar-width-icon)]", // Sidebar collapsed on desktop
+      !isMobile && "right-0", // Only set right-0 on desktop
       className
     )}>
-      <div className="px-6 py-2">
+      <div className="px-3 sm:px-6 py-2">
         <div className="flex items-center justify-between">
           {/* Left side - Status indicators */}
-          <div className="flex items-center gap-3">
-            {statusItems.map((item) => {
+          <div className="flex items-center gap-1 sm:gap-3">
+            {statusItems.map((item, index) => {
               const IconComponent = item.icon;
+              
+              // Hide some items on very small screens (only show first 2)
+              const shouldHideOnSmall = index > 1 && isVerySmallScreen;
               
               return (
                 <div
                   key={item.id}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-muted/50 cursor-pointer transition-colors"
+                  className={cn(
+                    "flex items-center gap-1 sm:gap-1.5 px-1 sm:px-2 py-1 rounded-full hover:bg-muted/50 cursor-pointer transition-colors",
+                    shouldHideOnSmall && "hidden"
+                  )}
                   title={item.info}
                 >
                   <div className="relative">
@@ -89,12 +111,13 @@ export function BottomStickyBar({ className }: BottomStickyBarProps) {
                       <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                     )}
                   </div>
-                  <span className="text-xs font-medium text-muted-foreground">
+                  <span className="text-xs font-medium text-muted-foreground hidden sm:inline">
                     {item.label}
                   </span>
                   {item.id === "live" && (
-                    <Badge variant="secondary" className="ml-1 text-xs h-4">
-                      {liveUsers.toLocaleString()}
+                    <Badge variant="secondary" className="ml-0.5 sm:ml-1 text-xs h-4 px-1 sm:px-2">
+                      <span className="sm:hidden">{Math.floor(liveUsers/1000)}k</span>
+                      <span className="hidden sm:inline">{liveUsers.toLocaleString()}</span>
                     </Badge>
                   )}
                 </div>
@@ -103,8 +126,9 @@ export function BottomStickyBar({ className }: BottomStickyBarProps) {
           </div>
 
           {/* Right side - Simple status */}
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span>VerbaLingo • Online</span>
+          <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground">
+            <span className="hidden sm:inline">VerbaLingo • Online</span>
+            <span className="sm:hidden">Online</span>
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
           </div>
         </div>
