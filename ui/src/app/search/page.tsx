@@ -7,6 +7,7 @@ import VideoPlayer from "@/components/comm/VideoPlayer"
 import TranscriptViewer from "@/components/comm/TranscriptViewer"
 import { AiCompletion } from "@/components/ai-completion"
 import { BottomStickyBar } from "@/components/BottomStickyBar"
+import { DiscoverySection } from "@/components/DiscoverySection"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
@@ -25,22 +26,31 @@ export default function SearchPage() {
               <SearchBar />
             </div>
 
-            {/* Video Player, Transcript and AI Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6">
-              <div className={cn("lg:col-span-8", playlist.length === 0 && "lg:col-span-12")}>
-                <VideoPlayer />
-                {playlist.length > 0 && (
+            {/* Content Section - Discovery Carousel or Video Player */}
+            {playlist.length === 0 ? (
+              /* Discovery Carousel - shown when no search results */
+              <div className="mt-8">
+                <DiscoverySection 
+                  onVideoSelect={(video) => {
+                    console.log("Video selected:", video.title);
+                    // TODO: Implement video selection logic
+                  }}
+                />
+              </div>
+            ) : (
+              /* Video Player, Transcript and AI Section - shown when search results exist */
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6">
+                <div className="lg:col-span-8">
+                  <VideoPlayer />
                   <div className="mt-6">
                     <TranscriptViewer />
                   </div>
-                )}
-              </div>
-              {playlist.length > 0 && (
+                </div>
                 <div className="lg:col-span-4 -mt-21 -mr-6 -mb-6">
                   <AiCompletion />
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </SidebarInset>
