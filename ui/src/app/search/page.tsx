@@ -33,7 +33,7 @@ export default function SearchPage() {
 
             {/* Video Player, Transcript and AI Section */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6">
-              <div className={cn("lg:col-span-7", playlist.length === 0 && "lg:col-span-12")}>
+              <div className={cn("lg:col-span-8", playlist.length === 0 && "lg:col-span-12")}>
                 <VideoPlayer />
                 {playlist.length > 0 && (
                   <div className="mt-6">
@@ -42,7 +42,7 @@ export default function SearchPage() {
                 )}
               </div>
               {playlist.length > 0 && (
-                <div className="lg:col-span-5 -mt-21 -mr-6 -mb-6">
+                <div className="lg:col-span-4 -mt-21 -mr-6 -mb-6">
                   <AiCompletion query={searchQuery} />
                 </div>
               )}
