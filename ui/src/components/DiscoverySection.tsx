@@ -36,8 +36,6 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
 
   return (
     <div className={cn("w-full", className)}>
-      {/* Separator Line */}
-      <div className="w-full h-px bg-border mb-8"></div>
       
       {/* Header */}
       <div className="flex items-center justify-between mb-8">

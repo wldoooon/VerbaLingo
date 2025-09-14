@@ -21,7 +21,7 @@ export default function SearchPage() {
     name: "wldooon",
     email: "user@verbalingo.com",
     avatar: "/avatars/user.jpg",
-  }
+  };
 
   return (
     <SidebarProvider>
@@ -37,15 +37,17 @@ export default function SearchPage() {
             <HeaderUserProfile user={userData} />
           </div>
           
-          <div className="bg-card text-card-foreground shadow-sm flex-1 p-4 sm:p-6 pb-12 lg:pb-6">
-            {/* Search Section with User Profile */}
+          {/* Search Header */}
+          <div className="bg-card border-b p-4 sm:p-6">
             <div className="flex items-center justify-between gap-4">
               <SearchBar />
               <div className="hidden lg:block">
                 <HeaderUserProfile user={userData} />
               </div>
             </div>
-
+          </div>
+          
+          <div className="bg-card text-card-foreground shadow-sm flex-1 p-4 sm:p-6 pb-12 lg:pb-6">
             {/* Content Section - Discovery Carousel or Video Player */}
             {playlist.length === 0 ? (
               /* Discovery Carousel - shown when no search results */
@@ -66,8 +68,10 @@ export default function SearchPage() {
                     <TranscriptViewer />
                   </div>
                 </div>
-                <div className="lg:col-span-4 -mt-21 -mr-6 -mb-6">
-                  <AiCompletion />
+                <div className="lg:col-span-4">
+                  <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-hidden">
+                    <AiCompletion />
+                  </div>
                 </div>
               </div>
             )}
