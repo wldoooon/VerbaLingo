@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useTheme } from 'next-themes';
+import { ThemeToggleButton, useThemeTransition } from '@/components/ui/shadcn-io/theme-toggle-button';
 import { 
   Zap, 
   Globe, 
@@ -25,7 +27,15 @@ interface BottomStickyBarProps {
 export function BottomStickyBar({ className }: BottomStickyBarProps) {
   const [liveUsers, setLiveUsers] = useState(1247);
   const [isVerySmallScreen, setIsVerySmallScreen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { open, isMobile } = useSidebar();
+  const { theme, setTheme } = useTheme();
+  const { startTransition } = useThemeTransition();
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Check for very small screens
   useEffect(() => {
@@ -46,6 +56,15 @@ export function BottomStickyBar({ className }: BottomStickyBarProps) {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Handle theme toggle with animation
+  const handleThemeToggle = useCallback(() => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    
+    startTransition(() => {
+      setTheme(newTheme);
+    });
+  }, [theme, setTheme, startTransition]);
 
   const statusItems = [
     {
@@ -125,11 +144,25 @@ export function BottomStickyBar({ className }: BottomStickyBarProps) {
             })}
           </div>
 
-          {/* Right side - Simple status */}
-          <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground">
-            <span className="hidden sm:inline">VerbaLingo • Online</span>
-            <span className="sm:hidden">Online</span>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          {/* Right side - Theme toggle and status */}
+          <div className="flex items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
+            {/* Theme Toggle with Circle Animation */}
+            {mounted && (
+              <ThemeToggleButton 
+                theme={theme as 'light' | 'dark'}
+                onClick={handleThemeToggle}
+                variant="circle"
+                start="bottom-right"
+                className="hidden sm:flex h-8 w-8"
+              />
+            )}
+            
+            {/* Status text and indicator */}
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline">VerbaLingo • Online</span>
+              <span className="sm:hidden">Online</span>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            </div>
           </div>
         </div>
       </div>

@@ -79,7 +79,7 @@ export default function SearchBar() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full max-w-md h-10 justify-between text-muted-foreground">
+        <Button variant="outline" className="w-full max-w-md h-10 justify-between text-muted-foreground cursor-text hover:bg-transparent hover:text-muted-foreground">
           Search for a word...
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4" />
@@ -150,7 +150,7 @@ function CategoryPicker({ categories, value, onChange }: { categories: Item[]; v
           <button
             role="combobox"
             aria-expanded={open}
-            className="flex shrink-0 items-center rounded-md bg-background border px-2 py-1 text-xs font-semibold text-foreground hover:bg-muted"
+            className="flex shrink-0 items-center rounded-md bg-background border px-2 py-1 text-xs font-semibold text-foreground cursor-pointer"
           >
             {value}
             <ChevronsUpDown className="ml-1 h-3 w-3 opacity-50" />
@@ -194,7 +194,7 @@ function LanguagePicker({ languages, value, onChange }: { languages: Item[]; val
           <button
             role="combobox"
             aria-expanded={open}
-            className="flex shrink-0 items-center rounded-md bg-background border px-2 py-1 text-xs font-semibold text-foreground hover:bg-muted"
+            className="flex shrink-0 items-center rounded-md bg-background border px-2 py-1 text-xs font-semibold text-foreground cursor-pointer"
           >
             {value}
             <ChevronsUpDown className="ml-1 h-3 w-3 opacity-50" />
