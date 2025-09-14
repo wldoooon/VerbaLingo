@@ -38,7 +38,7 @@ export default function SearchPage() {
           </div>
           
           {/* Search Header */}
-          <div className="bg-card border-b p-4 sm:p-6">
+          <div className="bg-sidebar border-b p-2 sm:p-4">
             <div className="flex items-center justify-between gap-4">
               <SearchBar />
               <div className="hidden lg:block">
