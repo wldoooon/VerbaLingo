@@ -8,12 +8,20 @@ import TranscriptViewer from "@/components/comm/TranscriptViewer"
 import { AiCompletion } from "@/components/ai-completion"
 import { BottomStickyBar } from "@/components/BottomStickyBar"
 import { DiscoverySection } from "@/components/DiscoverySection"
+import { HeaderUserProfile } from "@/components/header-user-profile"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
 export default function SearchPage() {
   const { state } = usePlayerContext()
   const { playlist } = state
+
+  // User data (you can move this to a context or fetch from API)
+  const userData = {
+    name: "wldooon",
+    email: "user@verbalingo.com",
+    avatar: "/avatars/user.jpg",
+  }
 
   return (
     <SidebarProvider>
@@ -26,21 +34,22 @@ export default function SearchPage() {
               <SidebarTrigger className="size-8 hover:bg-accent hover:text-accent-foreground" />
               <h1 className="text-lg font-semibold text-foreground">VerbaLingo</h1>
             </div>
-            <div className="text-sm text-muted-foreground">
-              Search & Learn
-            </div>
+            <HeaderUserProfile user={userData} />
           </div>
           
           <div className="bg-card text-card-foreground shadow-sm flex-1 p-4 sm:p-6 pb-12 lg:pb-6">
-            {/* Search Section */}
-            <div className="flex justify-start">
+            {/* Search Section with User Profile */}
+            <div className="flex items-center justify-between gap-4">
               <SearchBar />
+              <div className="hidden lg:block">
+                <HeaderUserProfile user={userData} />
+              </div>
             </div>
 
             {/* Content Section - Discovery Carousel or Video Player */}
             {playlist.length === 0 ? (
               /* Discovery Carousel - shown when no search results */
-              <div className="mt-8">
+              <div className="mt-4">
                 <DiscoverySection 
                   onVideoSelect={(video) => {
                     console.log("Video selected:", video.title);

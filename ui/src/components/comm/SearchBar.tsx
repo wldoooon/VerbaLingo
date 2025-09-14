@@ -79,7 +79,7 @@ export default function SearchBar() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full max-w-lg justify-between text-muted-foreground">
+        <Button variant="outline" className="w-full max-w-md h-10 justify-between text-muted-foreground">
           Search for a word...
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4" />
