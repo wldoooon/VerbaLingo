@@ -9,6 +9,7 @@ import { AiCompletion } from "@/components/ai-completion"
 import { BottomStickyBar } from "@/components/BottomStickyBar"
 import { DiscoverySection } from "@/components/DiscoverySection"
 import { HeaderUserProfile } from "@/components/header-user-profile"
+import { HeaderToolbar } from "@/components/header-toolbar"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
@@ -34,15 +35,15 @@ export default function SearchPage() {
               <SidebarTrigger className="size-8 hover:bg-accent hover:text-accent-foreground" />
               <h1 className="text-lg font-semibold text-foreground">VerbaLingo</h1>
             </div>
-            <HeaderUserProfile user={userData} />
+            <HeaderToolbar user={userData} />
           </div>
           
           {/* Search Header */}
-          <div className="bg-sidebar border-b p-2 sm:p-4">
+          <div className="bg-card border-b p-2 sm:p-4">
             <div className="flex items-center justify-between gap-4">
               <SearchBar />
               <div className="hidden lg:block">
-                <HeaderUserProfile user={userData} />
+                <HeaderToolbar user={userData} />
               </div>
             </div>
           </div>
