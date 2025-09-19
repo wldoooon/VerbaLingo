@@ -40,7 +40,12 @@ export default function SearchPage() {
           {/* Search Header */}
           <div className="bg-card border-b p-2 sm:p-4">
             <div className="flex items-center justify-between gap-4">
-              <SearchBar />
+              <div className="flex items-center gap-3">
+                <div className="hidden lg:block">
+                  <SidebarTrigger className="size-8 hover:bg-accent hover:text-accent-foreground" />
+                </div>
+                <SearchBar />
+              </div>
               <div className="hidden lg:block">
                 <HeaderToolbar user={userData} />
               </div>
