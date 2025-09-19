@@ -5,7 +5,6 @@ import { AppSidebar } from "@/components/app-sidebar"
 import SearchBar from "@/components/comm/SearchBar"
 import VideoPlayer from "@/components/comm/VideoPlayer"
 import TranscriptViewer from "@/components/comm/TranscriptViewer"
-import { AiCompletion } from "@/components/ai-completion"
 import { BottomStickyBar } from "@/components/BottomStickyBar"
 import { DiscoverySection } from "@/components/DiscoverySection"
 import { HeaderUserProfile } from "@/components/header-user-profile"
@@ -61,18 +60,11 @@ export default function SearchPage() {
                 />
               </div>
             ) : (
-              /* Video Player, Transcript and AI Section - shown when search results exist */
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-6">
-                <div className="lg:col-span-8">
-                  <VideoPlayer />
-                  <div className="mt-6">
-                    <TranscriptViewer />
-                  </div>
-                </div>
-                <div className="lg:col-span-4">
-                  <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-hidden">
-                    <AiCompletion />
-                  </div>
+              /* Video Player and Transcript Section - shown when search results exist */
+              <div className="mt-6 max-w-full">
+                <VideoPlayer />
+                <div className="mt-6">
+                  <TranscriptViewer />
                 </div>
               </div>
             )}

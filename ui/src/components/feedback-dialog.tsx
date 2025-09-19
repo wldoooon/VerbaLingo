@@ -13,7 +13,7 @@ export function FeedbackDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">Feedback</Button>
+        <Button variant="outline" size="sm" className="rounded-full">Feedback</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
