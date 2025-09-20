@@ -6,7 +6,7 @@ import { useEffect, useState, useRef } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { Button } from "@/components/ui/button"
 
-import { ChevronLeft, ChevronRight, Search } from "lucide-react"
+import { ChevronLeft, ChevronRight, Search, Play, Pause } from "lucide-react"
 import { YouTubePlayer } from "react-youtube"
 
 function getClipStart(clip: any): number {
@@ -34,6 +34,7 @@ export default function VideoPlayer() {
   const uniqueKey = `${currentVideoId}-${currentVideoIndex}-${rawStart}`
 
   const [ready, setReady] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   useEffect(() => {
     setReady(false)
@@ -58,6 +59,16 @@ export default function VideoPlayer() {
   const handleNextVideo = () => dispatch({ type: "NEXT_VIDEO" })
   const handlePrevVideo = () => dispatch({ type: "PREV_VIDEO" })
 
+  const handleTogglePlay = () => {
+    if (playerRef.current) {
+      if (isPlaying) {
+        playerRef.current.pauseVideo()
+      } else {
+        playerRef.current.playVideo()
+      }
+    }
+  }
+
   const startPolling = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
@@ -77,8 +88,10 @@ export default function VideoPlayer() {
   const onPlayerStateChange = (event: { data: number }) => {
     // Playing
     if (event.data === 1) {
+      setIsPlaying(true)
       startPolling();
     } else { // Paused, ended, buffering
+      setIsPlaying(false)
       stopPolling();
     }
   };
@@ -97,7 +110,7 @@ export default function VideoPlayer() {
     loading: "eager",
   } as const
 
-  const heroClass = "relative w-full h-[600px] md:h-[550px] overflow-hidden rounded-lg"
+  const heroClass = "relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] overflow-hidden rounded-lg"
 
   return (
     <div className="w-full">
@@ -138,8 +151,6 @@ export default function VideoPlayer() {
               }}
               onStateChange={onPlayerStateChange}
               onEnd={handleNextVideo}
-              onMute={handleMute}
-              onUnMute={handleUnMute}
               className="absolute inset-0 h-full w-full rounded-lg"
             />
           </div>
@@ -167,7 +178,29 @@ export default function VideoPlayer() {
         </div>
       )}
 
-      
+      {/* Simple Play/Pause Control */}
+      {currentVideoId && ready && (
+        <div className="mt-4 flex justify-center">
+          <Button
+            onClick={handleTogglePlay}
+            variant="outline"
+            size="lg"
+            className="flex items-center gap-2 px-6 py-3"
+          >
+            {isPlaying ? (
+              <>
+                <Pause className="w-5 h-5" />
+                Pause
+              </>
+            ) : (
+              <>
+                <Play className="w-5 h-5" />
+                Play
+              </>
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

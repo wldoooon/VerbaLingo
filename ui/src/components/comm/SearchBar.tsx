@@ -79,7 +79,7 @@ export default function SearchBar() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full max-w-lg justify-between text-muted-foreground">
+        <Button variant="outline" className="w-full max-w-md h-10 justify-between text-muted-foreground cursor-text hover:bg-transparent hover:text-muted-foreground rounded-full">
           Search for a word...
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4" />
@@ -91,7 +91,7 @@ export default function SearchBar() {
       </DialogTrigger>
       <AnimatePresence>
         {open && (
-          <DialogContent className="p-0 gap-0 max-w-2xl rounded-lg overflow-hidden shadow-2xl">
+          <DialogContent className="p-0 gap-0 max-w-2xl rounded-2xl overflow-hidden shadow-2xl">
             <div className="flex items-center gap-2 p-3">
               <Search className="h-5 w-5 text-muted-foreground ml-1" />
               <Input
@@ -103,7 +103,7 @@ export default function SearchBar() {
                 onKeyPress={handleKeyPress}
                 autoFocus
               />
-              <Button onClick={handleSearch} disabled={isLoading} className="mr-1">
+              <Button onClick={handleSearch} disabled={isLoading} className="mr-1 rounded-full">
                 {isLoading ? "Searching..." : "Search"}
               </Button>
             </div>
@@ -150,7 +150,7 @@ function CategoryPicker({ categories, value, onChange }: { categories: Item[]; v
           <button
             role="combobox"
             aria-expanded={open}
-            className="flex shrink-0 items-center rounded-md bg-background border px-2 py-1 text-xs font-semibold text-foreground hover:bg-muted"
+            className="flex shrink-0 items-center rounded-full bg-background border px-2 py-1 text-xs font-semibold text-foreground cursor-pointer"
           >
             {value}
             <ChevronsUpDown className="ml-1 h-3 w-3 opacity-50" />
@@ -194,7 +194,7 @@ function LanguagePicker({ languages, value, onChange }: { languages: Item[]; val
           <button
             role="combobox"
             aria-expanded={open}
-            className="flex shrink-0 items-center rounded-md bg-background border px-2 py-1 text-xs font-semibold text-foreground hover:bg-muted"
+            className="flex shrink-0 items-center rounded-full bg-background border px-2 py-1 text-xs font-semibold text-foreground cursor-pointer"
           >
             {value}
             <ChevronsUpDown className="ml-1 h-3 w-3 opacity-50" />

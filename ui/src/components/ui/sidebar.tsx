@@ -56,7 +56,7 @@ function useSidebar() {
 }
 
 function SidebarProvider({
-  defaultOpen = false, // Changed to false for hover behavior
+  defaultOpen = true,
   open: openProp,
   onOpenChange: setOpenProp,
   className,
@@ -75,7 +75,7 @@ function SidebarProvider({
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(defaultOpen)
-  const open = openProp ?? (isMobile ? _open : isHovered) // Use hover state for desktop
+  const open = openProp ?? _open // Remove hover state dependency
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === "function" ? value(open) : value
@@ -159,7 +159,7 @@ function SidebarProvider({
 function Sidebar({
   side = "left",
   variant = "sidebar",
-  collapsible = "icon", // Changed default to icon for hover behavior
+  collapsible = "icon",
   className,
   children,
   ...props
@@ -231,13 +231,6 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
         )}
       />
-      {/* Hover trigger zone */}
-      {!isMobile && (
-        <div
-          className="fixed inset-y-0 left-0 w-4 z-20"
-          onMouseEnter={() => setIsHovered(true)}
-        />
-      )}
       <div
         data-slot="sidebar-container"
         className={cn(
@@ -251,8 +244,6 @@ function Sidebar({
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
           className
         )}
-        onMouseEnter={() => !isMobile && setIsHovered(true)}
-        onMouseLeave={() => !isMobile && setIsHovered(false)}
         {...props}
       >
         <div
