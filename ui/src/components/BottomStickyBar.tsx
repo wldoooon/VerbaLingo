@@ -105,7 +105,7 @@ export function BottomStickyBar({ className }: BottomStickyBarProps) {
       !isMobile && "right-0", // Only set right-0 on desktop
       className
     )}>
-      <div className="px-3 sm:px-6 py-2">
+      <div className="px-3 sm:px-6 py-1">
         <div className="flex items-center justify-between">
           {/* Left side - Status indicators */}
           <div className="flex items-center gap-1 sm:gap-3">
@@ -158,11 +158,7 @@ export function BottomStickyBar({ className }: BottomStickyBarProps) {
             )}
             
             {/* Status text and indicator */}
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:inline">VerbaLingo • Online</span>
-              <span className="sm:hidden">Online</span>
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            </div>
+
           </div>
         </div>
       </div>
