@@ -3,14 +3,25 @@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ArrowUpFromDot } from 'lucide-react';
+import { TextGif } from '@/components/comm/GifText';
 
 export default function ChatPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="bg-card border rounded-2xl shadow-sm h-150 w-110 p-6 flex flex-col justify-between">
-        {/* Empty card content */}
+        {/* Header with GifText */}
+        <div className="flex justify-center mb-6">
+          <TextGif
+            gifUrl="/assets/gif1.gif"
+            text="How Can i help you Today ?"
+            size="lg"
+            weight="bold"
+          />
+        </div>
+        
+        {/* Main content area */}
         <div className="flex-1">
-          {/* Main content area */}
+          {/* Content area */}
         </div>
         
         {/* Input at bottom */}
