@@ -32,7 +32,7 @@ export function AiCompletion() {
                     <CardHeader>
                         <div className="flex items-center justify-start">
                             <div className="flex items-center gap-1.5">
-                                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
                                 <CardTitle className="text-xs font-medium text-zinc-400">VerbaLingo AI Asistant</CardTitle>
                             </div>
                         </div>
