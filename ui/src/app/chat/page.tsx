@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ArrowUpFromDot } from 'lucide-react';
@@ -10,47 +11,79 @@ import {
   ConversationScrollButton 
 } from '@/components/ai-elements/conversation';
 
-// Mock conversation data
-const mockMessages = [
-  {
-    id: 1,
-    type: 'user',
-    content: 'Hello! Can you help me learn English?',
-    timestamp: '10:30 AM'
-  },
-  {
-    id: 2,
-    type: 'ai',
-    content: 'Hello! I\'d be happy to help you learn English. What specific area would you like to focus on? Grammar, vocabulary, pronunciation, or conversation practice?',
-    timestamp: '10:30 AM'
-  },
-  {
-    id: 3,
-    type: 'user',
-    content: 'I want to improve my pronunciation. Can you help with that?',
-    timestamp: '10:32 AM'
-  },
-  {
-    id: 4,
-    type: 'ai',
-    content: 'Absolutely! Pronunciation is crucial for effective communication. I can help you with phonetics, stress patterns, and intonation. Would you like to start with some specific words or sounds that you find challenging?',
-    timestamp: '10:32 AM'
-  },
-  {
-    id: 5,
-    type: 'user',
-    content: 'Yes, I have trouble with the "th" sound.',
-    timestamp: '10:34 AM'
-  },
-  {
-    id: 6,
-    type: 'ai',
-    content: 'The "th" sound is one of the most challenging for English learners! There are actually two types: voiced /ð/ (as in "this") and voiceless /θ/ (as in "think"). Try placing your tongue between your teeth and blow air gently. Practice with words like "think", "thank", "this", and "that".',
-    timestamp: '10:34 AM'
-  }
+// Mock AI responses
+const aiResponses = [
+  "That's a great question! I'd be happy to help you with that. Can you provide more details?",
+  "I understand what you're looking for. Let me break this down for you step by step.",
+  "Excellent! Here's what I recommend based on your question...",
+  "That's an interesting point. From my experience helping language learners, I suggest...",
+  "Perfect! Let me guide you through this. First, let's start with the basics...",
+  "I can definitely help you with that! Here are some practical tips you can try right away...",
+  "Good question! This is actually a common challenge for many English learners. Here's how to approach it...",
+  "I'm glad you asked! This is an important aspect of language learning. Let me explain..."
 ];
 
+interface Message {
+  id: number;
+  type: 'user' | 'ai';
+  content: string;
+  timestamp: string;
+}
+
 export default function ChatPage() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const getCurrentTime = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
+  const getRandomAIResponse = () => {
+    return aiResponses[Math.floor(Math.random() * aiResponses.length)];
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now(),
+      type: 'user',
+      content: inputValue.trim(),
+      timestamp: getCurrentTime()
+    };
+
+    // Add user message
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
+
+    // Simulate AI response delay
+    setTimeout(() => {
+      const aiMessage: Message = {
+        id: Date.now() + 1,
+        type: 'ai',
+        content: getRandomAIResponse(),
+        timestamp: getCurrentTime()
+      };
+      
+      setMessages(prev => [...prev, aiMessage]);
+      setIsLoading(false);
+    }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="bg-card border rounded-2xl shadow-sm h-150 w-110 p-6 flex flex-col justify-between">
@@ -67,29 +100,53 @@ export default function ChatPage() {
         {/* Main content area - Conversation */}
         <Conversation className="flex-1 mb-4">
           <ConversationContent>
-            <div className="space-y-4">
-              {mockMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.type === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
+            {messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-center">
+                <div className="space-y-2">
+                  <p className="text-muted-foreground text-sm">
+                    No messages yet
+                  </p>
+                  <p className="text-muted-foreground text-xs">
+                    Start a conversation by typing a message below
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {messages.map((message) => (
                   <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                      message.type === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted text-muted-foreground'
+                    key={message.id}
+                    className={`flex ${
+                      message.type === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >
-                    <p className="text-sm">{message.content}</p>
-                    <span className="text-xs opacity-70 mt-1 block">
-                      {message.timestamp}
-                    </span>
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                        message.type === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      <p className="text-sm">{message.content}</p>
+                      <span className="text-xs opacity-70 mt-1 block">
+                        {message.timestamp}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted text-muted-foreground rounded-2xl px-4 py-2">
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 bg-current rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
@@ -99,8 +156,17 @@ export default function ChatPage() {
           <Input 
             placeholder="Ask Anything here..." 
             className="w-full rounded-3xl h-12 pr-14"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={isLoading}
           />
-          <Button size="sm" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-8 w-8 p-0">
+          <Button 
+            size="sm" 
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full h-8 w-8 p-0"
+            onClick={handleSendMessage}
+            disabled={isLoading || !inputValue.trim()}
+          >
             <ArrowUpFromDot className="h-12 w-12" />
           </Button>
         </div>
