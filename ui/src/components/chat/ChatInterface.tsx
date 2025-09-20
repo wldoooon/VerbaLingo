@@ -7,7 +7,7 @@ import {
   ConversationScrollButton 
 } from '@/components/ai-elements/conversation';
 import { MessageBubble } from './MessageBubble';
-import { ChatInput } from './ChatInput';
+import { ChatInput } from '@/components/chat/ChatInput';
 
 // Mock AI responses
 const aiResponses = [
