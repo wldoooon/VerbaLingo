@@ -1,7 +1,6 @@
 "use client";
 import { useCompletion } from "@ai-sdk/react";
 import { motion, AnimatePresence } from "framer-motion";
-import Threads from "./Threads";
 import { useState } from "react";
 import { TextGif } from "@/components/comm/GifText";
 import { Button } from "@/components/ui/button";
@@ -29,14 +28,14 @@ export function AiCompletion() {
     };
 
     return (
-        <div className="w-full h-full">
+        <div className="w-3/4 h-full mx-auto">
             <Card className="h-full flex flex-col border-t-0 rounded-none border-b-0">
                     <CardHeader>
-                        <div className="flex items-center justify-center w-full">
+                        <div className="flex items-center justify-start w-full">
                             
                                 <TextGif
                                     gifUrl="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHF5Y3JnMTg0ZDB0NGM4MDI1c2djZGxtem45eHF3ZTdnZ3Z2bTJhMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/PnTG1y3MMveevPpe13/giphy.gif"
-                                    text="VerbaLingo AI Assistant"
+                                    text="What can i help you with today ?"
                                     size="sm"
                                     weight="medium"
                                 />
