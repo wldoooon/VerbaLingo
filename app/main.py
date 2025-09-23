@@ -1,7 +1,8 @@
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI
+import asyncio
 from .core.config import get_settings
 from contextlib import asynccontextmanager
-from elasticsearch import AsyncElasticsearch
+from meilisearch import Client
 from app.api.routes import router
 
 
@@ -9,27 +10,24 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.es_client = None
-    connection_args = {"hosts" : [settings.ELASTICSEARCH_URL]}
+    app.state.meili_client = None
     try: 
-        client = AsyncElasticsearch(**connection_args)
-        if not await client.ping():
-            raise ConnectionError("Elasticsearch connection failed.")
-        app.state.es_client = client
-        print("Connected to Elasticsearch successfully.")
+        client = Client(url=settings.MEILISEARCH_URL)
+        health = await asyncio.to_thread(client.health)
+        if health.get("status") != "available":
+            raise ConnectionError("MeiliSearch health check failed.")
+        app.state.meili_client = client
+        print("Connected to MeiliSearch successfully.")
     except Exception as e:
-        app.state.es_client = None
-        raise ConnectionError(f"An error occurred while connecting to Elasticsearch: {str(e)}")
+        app.state.meili_client = None
+        raise ConnectionError(f"An error occurred while connecting to MeiliSearch: {str(e)}")
 
     yield
 
     print("Shutting down the application...")
-    if app.state.es_client:
-        try:
-            await app.state.es_client.close()
-            print("Elasticsearch connection closed.")
-        except Exception as e:
-            print(f"Error closing Elasticsearch connection: {str(e)}")
+    if app.state.meili_client:
+        app.state.meili_client = None
+        print("MeiliSearch connection cleaned up.")
 
 
 app = FastAPI(lifespan=lifespan)

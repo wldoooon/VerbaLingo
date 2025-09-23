@@ -3,8 +3,8 @@ from functools import lru_cache
 from typing import Optional
 
 class EnvironmentSettings(BaseSettings):
-    ELASTICSEARCH_API_KEY: Optional[str] = None
-    ELASTICSEARCH_URL: str
+    MEILISEARCH_API_KEY: Optional[str] = None
+    MEILISEARCH_URL: str
     DATA_FILE_PATH: str 
 
 
@@ -19,8 +19,8 @@ class AppConstants:
 
 class Settings:
     def __init__(self, eviromentSettings: EnvironmentSettings):
-        self.ELASTICSEARCH_API_KEY = eviromentSettings.ELASTICSEARCH_API_KEY
-        self.ELASTICSEARCH_URL = eviromentSettings.ELASTICSEARCH_URL
+        self.MEILISEARCH_API_KEY = eviromentSettings.MEILISEARCH_API_KEY
+        self.MEILISEARCH_URL = eviromentSettings.MEILISEARCH_URL
         self.DATA_FILE_PATH = eviromentSettings.DATA_FILE_PATH
 
         self.ALIAS_NAME = AppConstants.ALIAS_NAME

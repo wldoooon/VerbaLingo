@@ -1,5 +1,6 @@
 fastapi
 uvicorn[standard]
+meilisearch
 ollama
 pydantic-settings
 python-dotenv
