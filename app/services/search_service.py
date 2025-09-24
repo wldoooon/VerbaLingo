@@ -1,55 +1,52 @@
-from elasticsearch import AsyncElasticsearch
+from meilisearch_python_sdk import AsyncClient
 from typing import Optional
-from ..core.config import get_settings
+from app.core.config import get_settings
 
 settings = get_settings()
 
 class SearchService:
-    def __init__(self, client: AsyncElasticsearch):
+    def __init__(self, client: AsyncClient):
         self.client = client
+        self.index = client.index(settings.INDEX_NAME)
     
     async def search(self, q: str, category: Optional[str] = None) -> dict:
-        query = {
-            "query": {
-                "bool": {
-                    "must":[
-                        {
-                            "match": {
-                                "sentence_text": {
-                                    "query": q,
-                                }
-                            }
-                        }
-                    ],
-                    "filter": []
-                }
-            }
-
-        }
-
-        if category:
-            query['query']['bool']['filter'].append({
-                "term": {
-                    "category": category
-                }
-            })
-
-        response = await self.client.search(index=settings.ALIAS_NAME, body=query)
-        return response
-
-    async def get_full_transcript(self, video_id: str) -> dict:
-        query = {
-            "size": 10000,
-            "sort": [
-                {"position": "asc"}
-            ],
-            "query": {
-                "term": {"video_id": video_id}
-            }
+        # MeiliSearch search parameters
+        search_params = {
+            "limit": 20,
+            "offset": 0
         }
         
-        response = await self.client.search(
-            index=settings.ALIAS_NAME,
-            body=query
+        # Add filter for category if provided
+        if category:
+            search_params["filter"] = f"category = '{category}'"
+        
+        # Perform search using MeiliSearch
+        result = await self.index.search(q, **search_params)
+        
+        # Convert MeiliSearch result to format expected by routes
+        return {
+            "hits": {
+                "hits": [
+                    {"_source": hit} for hit in result.hits
+                ],
+                "total": {"value": result.estimated_total_hits}
+            }
+        }
+
+    async def get_full_transcript(self, video_id: str) -> dict:
+        # Search for all sentences with specific video_id, sorted by position
+        result = await self.index.search(
+            "",  # Empty query to get all documents
+            filter=f"video_id = '{video_id}'",
+            sort=["position:asc"],
+            limit=10000
         )
-        return response
+        
+        # Convert to expected format
+        return {
+            "hits": {
+                "hits": [
+                    {"_source": hit} for hit in result.hits
+                ]
+            }
+        }

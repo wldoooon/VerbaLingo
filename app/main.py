@@ -2,25 +2,32 @@ from fastapi import FastAPI
 import asyncio
 from .core.config import get_settings
 from contextlib import asynccontextmanager
-from meilisearch import Client
-from app.api.routes import router
-
+from meilisearch_python_sdk import AsyncClient
+from .api.routes import router
 
 settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.meili_client = None
-    try: 
-        client = Client(url=settings.MEILISEARCH_URL)
-        health = await asyncio.to_thread(client.health)
-        if health.get("status") != "available":
+    try:
+        client_config = {"url": settings.MEILISEARCH_URL}
+        if settings.MEILISEARCH_API_KEY:
+            client_config["api_key"] = settings.MEILISEARCH_API_KEY
+        
+        client = AsyncClient(**client_config)
+        
+        health = await client.health()
+        if health == "status='available'":
             raise ConnectionError("MeiliSearch health check failed.")
+        
         app.state.meili_client = client
-        print("Connected to MeiliSearch successfully.")
+        print(f"Connected to MeiliSearch at {settings.MEILISEARCH_URL}")
+        
     except Exception as e:
         app.state.meili_client = None
-        raise ConnectionError(f"An error occurred while connecting to MeiliSearch: {str(e)}")
+        print(f"Failed to connect to MeiliSearch: {str(e)}")
+        raise
 
     yield
 
