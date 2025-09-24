@@ -23,7 +23,8 @@ def setup_index_settings(client, index_name):
     
     index.update_filterable_attributes([
         'category',
-        'lang'
+        'lang',
+        'video_id'
     ])
     
     index.update_sortable_attributes([
