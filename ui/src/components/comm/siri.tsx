@@ -98,102 +98,154 @@ const SiriOrb: React.FC<SiriOrbProps> = ({
           initial-value: 0deg;
         }
 
+        @property --wave1 {
+          syntax: "<percentage>";
+          inherits: false;
+          initial-value: 0%;
+        }
+
+        @property --wave2 {
+          syntax: "<percentage>";
+          inherits: false;
+          initial-value: 0%;
+        }
+
+        @property --wave3 {
+          syntax: "<percentage>";
+          inherits: false;
+          initial-value: 0%;
+        }
+
         .siri-orb {
           display: grid;
           grid-template-areas: "stack";
-          overflow: hidden;
-          border-radius: 50%;
+          overflow: visible;
           position: relative;
           transform: scale(1.1);
         }
 
-        .siri-orb::before,
-        .siri-orb::after {
+        .siri-orb::before {
           content: "";
           display: block;
           grid-area: stack;
           width: 100%;
           height: 100%;
-          border-radius: 50%;
           transform: translateZ(0);
-        }
-
-        .siri-orb::before {
           background:
-            conic-gradient(
-              from calc(var(--angle) * 2) at 25% 70%,
-              var(--c3),
-              transparent 20% 80%,
-              var(--c3)
+            radial-gradient(
+              ellipse at 50% 50%,
+              var(--c1) 0%,
+              transparent 70%
             ),
-            conic-gradient(
-              from calc(var(--angle) * 2) at 45% 75%,
-              var(--c2),
-              transparent 30% 60%,
-              var(--c2)
+            radial-gradient(
+              ellipse at 30% 40%,
+              var(--c2) 0%,
+              transparent 60%
             ),
-            conic-gradient(
-              from calc(var(--angle) * -3) at 80% 20%,
-              var(--c1),
-              transparent 40% 60%,
-              var(--c1)
-            ),
-            conic-gradient(
-              from calc(var(--angle) * 2) at 15% 5%,
-              var(--c2),
-              transparent 10% 90%,
-              var(--c2)
-            ),
-            conic-gradient(
-              from calc(var(--angle) * 1) at 20% 80%,
-              var(--c1),
-              transparent 10% 90%,
-              var(--c1)
-            ),
-            conic-gradient(
-              from calc(var(--angle) * -2) at 85% 10%,
-              var(--c3),
-              transparent 20% 80%,
-              var(--c3)
+            radial-gradient(
+              ellipse at 70% 60%,
+              var(--c3) 0%,
+              transparent 50%
             );
-          box-shadow: inset var(--bg) 0 0 var(--shadow-spread)
-            calc(var(--shadow-spread) * 0.2);
           filter: blur(var(--blur-amount)) contrast(var(--contrast-amount));
-          animation: rotate var(--animation-duration) linear infinite;
+          animation: 
+            rotate var(--animation-duration) linear infinite,
+            pulse calc(var(--animation-duration) * 0.3) ease-in-out infinite alternate;
+          clip-path: polygon(
+            50% 0%,
+            calc(50% + var(--wave1)) calc(10% + var(--wave2)),
+            calc(50% + var(--wave3)) calc(20% + var(--wave1)),
+            calc(50% + var(--wave2)) calc(30% + var(--wave3)),
+            calc(50% + var(--wave1)) calc(40% + var(--wave2)),
+            calc(50% + var(--wave3)) calc(50% + var(--wave1)),
+            calc(50% + var(--wave2)) calc(60% + var(--wave3)),
+            calc(50% + var(--wave1)) calc(70% + var(--wave2)),
+            calc(50% + var(--wave3)) calc(80% + var(--wave1)),
+            calc(50% + var(--wave2)) calc(90% + var(--wave3)),
+            50% 100%,
+            calc(50% - var(--wave2)) calc(90% + var(--wave3)),
+            calc(50% - var(--wave3)) calc(80% + var(--wave1)),
+            calc(50% - var(--wave1)) calc(70% + var(--wave2)),
+            calc(50% - var(--wave2)) calc(60% + var(--wave3)),
+            calc(50% - var(--wave3)) calc(50% + var(--wave1)),
+            calc(50% - var(--wave1)) calc(40% + var(--wave2)),
+            calc(50% - var(--wave2)) calc(30% + var(--wave3)),
+            calc(50% - var(--wave3)) calc(20% + var(--wave1)),
+            calc(50% - var(--wave1)) calc(10% + var(--wave2))
+          );
         }
 
         .siri-orb::after {
-          background-image: radial-gradient(
-            circle at center,
-            var(--bg) var(--dot-size),
-            transparent var(--dot-size)
-          );
-          background-size: calc(var(--dot-size) * 2) calc(var(--dot-size) * 2);
-          backdrop-filter: blur(calc(var(--blur-amount) * 2))
-            contrast(calc(var(--contrast-amount) * 2));
-          mix-blend-mode: overlay;
-        }
-
-        /* Apply mask only when radius is greater than 0 */
-        .siri-orb[style*="--mask-radius: 0%"]::after {
-          mask-image: none;
-        }
-
-        .siri-orb:not([style*="--mask-radius: 0%"])::after {
-          mask-image: radial-gradient(
-            black var(--mask-radius),
-            transparent 75%
-          );
+          content: "";
+          display: block;
+          grid-area: stack;
+          width: 120%;
+          height: 120%;
+          left: -10%;
+          top: -10%;
+          position: absolute;
+          background:
+            radial-gradient(
+              ellipse at calc(30% + var(--wave1)) calc(30% + var(--wave2)),
+              var(--c1) 0%,
+              transparent 40%
+            ),
+            radial-gradient(
+              ellipse at calc(70% + var(--wave2)) calc(70% + var(--wave3)),
+              var(--c2) 0%,
+              transparent 35%
+            ),
+            radial-gradient(
+              ellipse at calc(50% + var(--wave3)) calc(20% + var(--wave1)),
+              var(--c3) 0%,
+              transparent 30%
+            );
+          filter: blur(calc(var(--blur-amount) * 1.5)) contrast(calc(var(--contrast-amount) * 0.8));
+          animation: 
+            rotate calc(var(--animation-duration) * 1.3) linear infinite reverse,
+            wave1 calc(var(--animation-duration) * 0.4) ease-in-out infinite,
+            wave2 calc(var(--animation-duration) * 0.6) ease-in-out infinite,
+            wave3 calc(var(--animation-duration) * 0.8) ease-in-out infinite;
+          mix-blend-mode: screen;
+          opacity: 0.8;
         }
 
         @keyframes rotate {
           to {
             --angle: 360deg;
+            transform: rotate(360deg) translateZ(0);
           }
         }
 
+        @keyframes pulse {
+          0% { transform: scale(0.95) translateZ(0); }
+          100% { transform: scale(1.05) translateZ(0); }
+        }
+
+        @keyframes wave1 {
+          0%, 100% { --wave1: -8%; }
+          25% { --wave1: 12%; }
+          50% { --wave1: -5%; }
+          75% { --wave1: 8%; }
+        }
+
+        @keyframes wave2 {
+          0%, 100% { --wave2: 6%; }
+          33% { --wave2: -10%; }
+          66% { --wave2: 15%; }
+        }
+
+        @keyframes wave3 {
+          0%, 100% { --wave3: -12%; }
+          20% { --wave3: 8%; }
+          40% { --wave3: -6%; }
+          60% { --wave3: 14%; }
+          80% { --wave3: -9%; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
-          .siri-orb::before {
+          .siri-orb::before,
+          .siri-orb::after {
             animation: none;
           }
         }
