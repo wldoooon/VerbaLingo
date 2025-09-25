@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from app.dependencies import get_search_service
 from app.services.search_service import SearchService
-from app.schema import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse
+from app.schema import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word
 
 
 router = APIRouter(
@@ -52,10 +52,16 @@ async def get_transcript(
     raw_hits = raw_results.get("hits", {}).get("hits", [])
     for hit in raw_hits:
         source = hit.get("_source", {})
+        words_src = source.get("words") or []
+        words = [
+            Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
+            for w in words_src if isinstance(w, dict)
+        ]
         sentence = TranscriptSentence(
             sentence_text=source.get("sentence_text"),
             start_time=source.get("start"),
             end_time=source.get("end"),
+            words=words
         )
         sentences.append(sentence)
 
