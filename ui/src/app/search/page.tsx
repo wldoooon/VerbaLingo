@@ -5,6 +5,8 @@ import { AppSidebar } from "@/components/app-sidebar"
 import SearchBar from "@/components/comm/SearchBar"
 import VideoPlayer from "@/components/comm/VideoPlayer"
 import TranscriptViewer from "@/components/comm/TranscriptViewer"
+import AudioCard from "@/components/comm/AudioCard"
+import { AiCompletion } from "@/components/ai-completion"
 import { BottomStickyBar } from "@/components/BottomStickyBar"
 import { DiscoverySection } from "@/components/DiscoverySection"
 import { HeaderUserProfile } from "@/components/header-user-profile"
@@ -40,11 +42,13 @@ export default function SearchPage() {
           {/* Search Header */}
           <div className="bg-card border-b p-2 sm:p-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-1">
                 <div className="hidden lg:block">
                   <SidebarTrigger className="size-8 hover:bg-accent hover:text-accent-foreground" />
                 </div>
-                <SearchBar />
+                <div className="basis-1/2 max-w-[50%]">
+                  <SearchBar />
+                </div>
               </div>
               <div className="hidden lg:block">
                 <HeaderToolbar user={userData} />
@@ -66,10 +70,21 @@ export default function SearchPage() {
               </div>
             ) : (
               /* Video Player and Transcript Section - shown when search results exist */
-              <div className="mt-6 max-w-full">
-                <VideoPlayer />
-                <div className="mt-6">
-                  <TranscriptViewer />
+              <div className="mt-6 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-start lg:gap-2">
+                <div>
+                  <VideoPlayer />
+                  <div className="mt-4">
+                    <AudioCard
+                      src={"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}
+                      title={playlist[0]?.sentence_text ?? "Sample audio"}
+                    />
+                  </div>
+                  <div className="mt-6">
+                    <TranscriptViewer />
+                  </div>
+                </div>
+                <div className="hidden lg:block">
+                  <AiCompletion />
                 </div>
               </div>
             )}

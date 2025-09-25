@@ -16,9 +16,10 @@ router = APIRouter(
 async def search(
     q: str = Query(..., min_length=2, description="The search query text"),
     category: Optional[str] = Query(None, description="Filter result by a specific category."),
+    randomize: bool = Query(True, description="Randomize the order of search results"),
     service: SearchService = Depends(get_search_service)
 ):
-    raw_results = await service.search(q=q, category=category)
+    raw_results = await service.search(q=q, category=category, randomize=randomize)
 
     hits: List[SearchHit] = []
     raw_hits = raw_results.get("hits", {}).get("hits", [])
