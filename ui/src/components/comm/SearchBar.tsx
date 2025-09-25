@@ -45,6 +45,9 @@ export default function SearchBar() {
     if (!query.trim()) {
       return
     }
+    try {
+      localStorage.setItem('last_search_query', query.trim())
+    } catch {}
     refetch()
   }
 

@@ -70,20 +70,18 @@ export default function SearchPage() {
               </div>
             ) : (
               /* Video Player and Transcript Section - shown when search results exist */
-              <div className="mt-6 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-start lg:gap-2">
+              <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_480px] lg:items-start lg:gap-2">
                 <div>
                   <VideoPlayer />
-                  <div className="mt-4">
+                  <div className="mt-0">
                     <AudioCard
                       src={"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}
                       title={playlist[0]?.sentence_text ?? "Sample audio"}
                     />
                   </div>
-                  <div className="mt-6">
-                    <TranscriptViewer />
-                  </div>
+                  {/* TranscriptViewer removed; transcript is now overlayed on the video */}
                 </div>
-                <div className="hidden lg:block">
+                <div className="hidden lg:block lg:ml-0 lg:mr-0">
                   <AiCompletion />
                 </div>
               </div>
