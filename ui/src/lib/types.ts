@@ -16,6 +16,7 @@ export interface TranscriptSentence {
     sentence_text: string;
     start_time: number;
     end_time: number;
+    words?: { text: string; start: number; end: number }[];
 }
 
 export interface TranscriptResponse {

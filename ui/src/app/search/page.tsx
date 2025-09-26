@@ -13,10 +13,20 @@ import { HeaderUserProfile } from "@/components/header-user-profile"
 import { HeaderToolbar } from "@/components/header-toolbar"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { useState, useEffect } from "react"
 
 export default function SearchPage() {
   const { state } = usePlayerContext()
   const { playlist } = state
+  const [searchQuery, setSearchQuery] = useState("")
+
+  useEffect(() => {
+    // Get the last search query from localStorage
+    const lastQuery = localStorage.getItem('last_search_query')
+    if (lastQuery) {
+      setSearchQuery(lastQuery)
+    }
+  }, [])
 
   // User data (you can move this to a context or fetch from API)
   const userData = {
@@ -77,6 +87,7 @@ export default function SearchPage() {
                     <AudioCard
                       src={"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}
                       title={playlist[0]?.sentence_text ?? "Sample audio"}
+                      searchQuery={searchQuery}
                     />
                   </div>
                   {/* TranscriptViewer removed; transcript is now overlayed on the video */}
