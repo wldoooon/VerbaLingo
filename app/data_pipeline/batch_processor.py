@@ -43,7 +43,7 @@ def process_documents_in_batches():
     
     client = Client("http://localhost:7700")
     index_name = "yt_data"
-    batch_size = 100
+    batch_size = 500
     
     print("Configuring index settings...")
     setup_index_settings(client, index_name)
@@ -95,5 +95,5 @@ def configure_index_only():
 
 
 if __name__ == "__main__":
-    # process_documents_in_batches()  # Process documents and configure settings
-    configure_index_only()  # Only configure settings without processing
+    process_documents_in_batches()  # Process documents and configure settings
+    # configure_index_only()  # Only configure settings without processing

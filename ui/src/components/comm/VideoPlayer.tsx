@@ -106,11 +106,18 @@ export default function VideoPlayer() {
       start: startSec,
       modestbranding: 1,
       rel: 0,
+      controls: 0,
+      disablekb: 1,
+      fs: 0,
+      iv_load_policy: 3,
+      cc_load_policy: 0,
     },
     loading: "eager",
   } as const
 
   const heroClass = "relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] overflow-hidden rounded-lg"
+
+  // Transcript overlay removed; handled in AudioCard
 
   return (
     <div className="w-full">
@@ -138,12 +145,30 @@ export default function VideoPlayer() {
           </div>
 
           <div className={`absolute inset-0 transition-opacity duration-300 ${ready ? "opacity-100" : "opacity-0"}`}>
+          {/* Transparent overlay to block direct iframe interactions */}
+            <div className="absolute inset-0 z-10" />
             <YouTube
               key={uniqueKey}
               videoId={currentVideoId}
               opts={opts}
               onReady={(e) => {
                 playerRef.current = e.target;
+                try {
+                  // Expose simple global controls for other components (e.g., AudioCard)
+                  ;(window as any).playerPlayClip = () => playerRef.current?.playVideo()
+                  ;(window as any).playerPauseClip = () => playerRef.current?.pauseVideo()
+                  ;(window as any).playerToggleClip = () => {
+                    try {
+                      const state = playerRef.current?.getPlayerState?.()
+                      // 1 = playing per YT API
+                      if (state === 1) {
+                        playerRef.current?.pauseVideo()
+                      } else {
+                        playerRef.current?.playVideo()
+                      }
+                    } catch {}
+                  }
+                } catch {}
                 try {
                   e.target.seekTo(rawStart, true)
                 } catch {}
@@ -153,6 +178,7 @@ export default function VideoPlayer() {
               onEnd={handleNextVideo}
               className="absolute inset-0 h-full w-full rounded-lg"
             />
+            {/* Transcript overlay removed */}
           </div>
 
           <style jsx>{`
@@ -178,29 +204,7 @@ export default function VideoPlayer() {
         </div>
       )}
 
-      {/* Simple Play/Pause Control */}
-      {currentVideoId && ready && (
-        <div className="mt-4 flex justify-center">
-          <Button
-            onClick={handleTogglePlay}
-            variant="outline"
-            size="lg"
-            className="flex items-center gap-2 px-6 py-3"
-          >
-            {isPlaying ? (
-              <>
-                <Pause className="w-5 h-5" />
-                Pause
-              </>
-            ) : (
-              <>
-                <Play className="w-5 h-5" />
-                Play
-              </>
-            )}
-          </Button>
-        </div>
-      )}
+      {/* Removed inline Play/Pause control below the video */}
     </div>
   )
 }

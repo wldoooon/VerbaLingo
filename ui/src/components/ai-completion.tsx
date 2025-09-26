@@ -28,7 +28,7 @@ export function AiCompletion() {
     };
 
     return (
-        <div className="w-3/4 h-full mx-auto">
+        <div className="w-full h-full">
             <Card className="h-full flex flex-col border-t-0 rounded-none border-b-0">
                     <CardHeader>
                         <div className="flex items-center justify-start w-full">

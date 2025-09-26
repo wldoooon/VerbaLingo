@@ -20,6 +20,7 @@ export default function TranscriptViewer() {
   const [activeSegmentId, setActiveSegmentId] = useState<number | null>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const activeSegmentRef = useRef<HTMLDivElement>(null)
+  const [searchWord, setSearchWord] = useState<string>("")
 
   const currentVideo = playlist[currentVideoIndex];
   const videoId = currentVideo?.video_id;
@@ -29,6 +30,13 @@ export default function TranscriptViewer() {
   useEffect(() => {
     setActiveSegmentId(null)
   }, [currentVideoIndex])
+
+  useEffect(() => {
+    try {
+      const q = localStorage.getItem('last_search_query') || ""
+      setSearchWord(q.trim().toLowerCase())
+    } catch {}
+  }, [])
 
   useEffect(() => {
     if (data) {
@@ -58,6 +66,48 @@ export default function TranscriptViewer() {
 
   const handleSegmentClick = (segment: TranscriptSentence, index: number) => {
     setActiveSegmentId(index)
+  }
+
+  function renderSegmentText(segment: TranscriptSentence, isActive: boolean) {
+    const text = segment.sentence_text
+    if (!text) return null
+    const words = text.split(/(\s+)/) // keep spaces
+    // Compute current word index if active using even distribution across the segment
+    let activeWordIdx = -1
+    if (isActive) {
+      const adjustedTime = currentTime + 3
+      const duration = Math.max(0.001, segment.end_time - segment.start_time)
+      const elapsed = Math.min(Math.max(0, adjustedTime - segment.start_time), duration)
+      const onlyWords = text.split(/\s+/)
+      const idx = Math.min(onlyWords.length - 1, Math.floor((elapsed / duration) * onlyWords.length))
+      // Map back to index in words-with-spaces array
+      let count = 0
+      for (let i = 0; i < words.length; i++) {
+        if (!/\s+/.test(words[i])) {
+          if (count === idx) {
+            activeWordIdx = i
+            break
+          }
+          count++
+        }
+      }
+    }
+    return words.map((w, i) => {
+      const normalized = w.replace(/[^\p{L}\p{N}']/gu, '').toLowerCase()
+      const isSpace = /\s+/.test(w)
+      const isSearchHit = !isSpace && searchWord && normalized === searchWord
+      const isCurrent = i === activeWordIdx
+      const cls = isSpace
+        ? ""
+        : isCurrent
+          ? "bg-primary/80 text-primary-foreground rounded px-0.5"
+          : isSearchHit
+            ? "underline decoration-wavy decoration-primary/70"
+            : ""
+      return (
+        <span key={i} className={cls}>{w}</span>
+      )
+    })
   }
 
   if (playlist.length === 0) {
@@ -150,7 +200,7 @@ export default function TranscriptViewer() {
                           : "text-foreground"
                   }`}
                 >
-                  {segment.sentence_text}
+                  {renderSegmentText(segment, isActive)}
                 </p>
 
                 {/* Active Indicator */}

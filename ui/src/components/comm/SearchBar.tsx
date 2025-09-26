@@ -22,7 +22,6 @@ export default function SearchBar() {
   const { data, error, isLoading, refetch } = useSearch(
     query,
     category === "General" ? null : category,
-    language === "English" ? null : language,
   )
 
   const categories = [
@@ -46,6 +45,9 @@ export default function SearchBar() {
     if (!query.trim()) {
       return
     }
+    try {
+      localStorage.setItem('last_search_query', query.trim())
+    } catch {}
     refetch()
   }
 
@@ -79,7 +81,7 @@ export default function SearchBar() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full max-w-md h-10 justify-between text-muted-foreground cursor-text hover:bg-transparent hover:text-muted-foreground rounded-full">
+        <Button variant="outline" className="w-full h-10 justify-between text-muted-foreground cursor-text hover:bg-transparent hover:text-muted-foreground rounded-full">
           Search for a word...
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4" />
@@ -91,7 +93,7 @@ export default function SearchBar() {
       </DialogTrigger>
       <AnimatePresence>
         {open && (
-          <DialogContent className="p-0 gap-0 max-w-2xl rounded-2xl overflow-hidden shadow-2xl">
+          <DialogContent className="p-0 gap-0 max-w-6xl rounded-2xl overflow-hidden shadow-2xl">
             <div className="flex items-center gap-2 p-3">
               <Search className="h-5 w-5 text-muted-foreground ml-1" />
               <Input

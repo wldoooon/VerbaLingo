@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from app.dependencies import get_search_service
 from app.services.search_service import SearchService
-from app.schema import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse
+from app.schema import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word
 
 
 router = APIRouter(
@@ -16,9 +16,10 @@ router = APIRouter(
 async def search(
     q: str = Query(..., min_length=2, description="The search query text"),
     category: Optional[str] = Query(None, description="Filter result by a specific category."),
+    randomize: bool = Query(True, description="Randomize the order of search results"),
     service: SearchService = Depends(get_search_service)
 ):
-    raw_results = await service.search(q=q, category=category)
+    raw_results = await service.search(q=q, category=category, randomize=randomize)
 
     hits: List[SearchHit] = []
     raw_hits = raw_results.get("hits", {}).get("hits", [])
@@ -51,10 +52,16 @@ async def get_transcript(
     raw_hits = raw_results.get("hits", {}).get("hits", [])
     for hit in raw_hits:
         source = hit.get("_source", {})
+        words_src = source.get("words") or []
+        words = [
+            Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
+            for w in words_src if isinstance(w, dict)
+        ]
         sentence = TranscriptSentence(
             sentence_text=source.get("sentence_text"),
             start_time=source.get("start"),
             end_time=source.get("end"),
+            words=words
         )
         sentences.append(sentence)
 
