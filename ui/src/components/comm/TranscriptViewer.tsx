@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
-import { useTranscript } from "@/lib/useApi"
+import { useSearchParams } from "@/context/SearchParamsContext"
+import { useTranscript, useSearch } from "@/lib/useApi"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Clock, MessageSquare, Loader, AlertTriangle } from "lucide-react"
@@ -16,13 +17,21 @@ function formatTime(seconds: number): string {
 
 export default function TranscriptViewer() {
   const { state } = usePlayerContext()
-  const { playlist, currentVideoIndex, currentTime } = state
+  const { currentVideoIndex, currentTime } = state
+  
+  // Read playlist from React Query cache
+  const { query, category } = useSearchParams()
+  const { data: searchData } = useSearch(query, category)
+  const playlist = searchData?.hits || []
+  
   const [activeSegmentId, setActiveSegmentId] = useState<number | null>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const activeSegmentRef = useRef<HTMLDivElement>(null)
   const [searchWord, setSearchWord] = useState<string>("")
 
-  const currentVideo = playlist[currentVideoIndex];
+  // Defensive: clamp currentVideoIndex to valid range
+  const validIndex = Math.max(0, Math.min(currentVideoIndex, playlist.length - 1))
+  const currentVideo = playlist[validIndex];
   const videoId = currentVideo?.video_id;
 
   const { data, isLoading, isError } = useTranscript(videoId);

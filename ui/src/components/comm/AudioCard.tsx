@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils"
 import { Pause, Play, ChevronLeft, ChevronRight } from "lucide-react"
 import ElasticSlider from "@/components/ElasticSlider"
 import { usePlayerContext } from "@/context/PlayerContext"
-import { useTranscript } from "@/lib/useApi"
+import { useSearchParams } from "@/context/SearchParamsContext"
+import { useTranscript, useSearch } from "@/lib/useApi"
 
 type AudioCardProps = {
   src: string
@@ -40,11 +41,11 @@ function renderWordsWithHighlighting(
     
     return (
       <span
-        key={index}
+        key={`${word.start}-${word.text}`}
         className={cn(
-          "mr-2 transition-colors duration-200",
-          isCurrentWord && "bg-blue-500 text-white px-1 rounded font-semibold",
-          isSearchMatch && !isCurrentWord && "bg-yellow-300 text-black px-1 rounded"
+          "mr-2 transition-colors duration-20",
+          isCurrentWord && "bg-red-500 text-white px-1 rounded font-semibold",
+          isSearchMatch && !isCurrentWord && "bg-green-500 text-white px-1 rounded"
         )}
       >
         {word.text}
@@ -61,8 +62,16 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const [rate, setRate] = useState(defaultRate)
   const [volume] = useState(50)
   const { state, dispatch } = usePlayerContext()
-  const { playlist, currentVideoIndex, currentTime } = state
-  const currentClip = playlist[currentVideoIndex]
+  const { currentVideoIndex, currentTime } = state
+  
+  // Read playlist from React Query cache
+  const { query, category } = useSearchParams()
+  const { data } = useSearch(query, category)
+  const playlist = data?.hits || []
+  
+  // Defensive: clamp currentVideoIndex to valid range
+  const validIndex = Math.max(0, Math.min(currentVideoIndex, playlist.length - 1))
+  const currentClip = playlist[validIndex]
   
   // Get transcript data for the current video
   const { data: transcriptData } = useTranscript(currentClip?.video_id || "")

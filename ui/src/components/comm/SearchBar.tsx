@@ -9,19 +9,24 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
 import { useSearch } from "@/lib/useApi"
 import { usePlayerContext } from "@/context/PlayerContext"
+import { useSearchParams } from "@/context/SearchParamsContext"
+import { SearchLoadingSkeleton } from "@/components/skeletons/SearchResultsSkeleton"
 
 export default function SearchBar() {
   const [open, setOpen] = useState(false)
-  const [query, setQuery] = useState("")
-  const [category, setCategory] = useState("General")
+  const [localQuery, setLocalQuery] = useState("")
+  const [localCategory, setLocalCategory] = useState("General")
   const [language, setLanguage] = useState("English")
+  
+  const { query, category, setQuery, setCategory } = useSearchParams()
   const { dispatch } = usePlayerContext()
+  
   const { data, error, isLoading, refetch } = useSearch(
     query,
-    category === "General" ? null : category,
+    category,
   )
 
   const categories = [
@@ -42,12 +47,17 @@ export default function SearchBar() {
   ]
 
   const handleSearch = () => {
-    if (!query.trim()) {
+    if (!localQuery.trim()) {
       return
     }
     try {
-      localStorage.setItem('last_search_query', query.trim())
+      localStorage.setItem('last_search_query', localQuery.trim())
     } catch {}
+    
+    // Update global search params
+    setQuery(localQuery.trim())
+    setCategory(localCategory === "General" ? null : localCategory)
+    
     refetch()
   }
 
@@ -59,7 +69,8 @@ export default function SearchBar() {
 
   useEffect(() => {
     if (data) {
-      dispatch({ type: "LOAD_PLAYLIST", payload: data.hits })
+      // Reset video index when new search results arrive
+      dispatch({ type: "RESET_INDEX" })
       // Close dialog after a successful search
       if (data.hits.length > 0) {
         setOpen(false)
@@ -94,14 +105,15 @@ export default function SearchBar() {
       <AnimatePresence>
         {open && (
           <DialogContent className="p-0 gap-0 max-w-6xl rounded-2xl overflow-hidden shadow-2xl">
+            <DialogTitle className="sr-only">Search for video clips</DialogTitle>
             <div className="flex items-center gap-2 p-3">
               <Search className="h-5 w-5 text-muted-foreground ml-1" />
               <Input
                 type="text"
                 placeholder="Search for a word..."
                 className="w-full h-10 border-none bg-transparent p-0 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                value={localQuery}
+                onChange={(e) => setLocalQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 autoFocus
               />
@@ -110,7 +122,7 @@ export default function SearchBar() {
               </Button>
             </div>
             <div className="p-4 border-t bg-muted/50 min-h-[100px] flex items-center justify-center">
-              {isLoading && <p className="text-center text-sm text-muted-foreground">Searching for clips...</p>}
+              {isLoading && <SearchLoadingSkeleton />}
               {error && <p className="text-center text-sm text-destructive">{error.message}</p>}
               {data && !isLoading && (
                 <div className="w-full flex items-center justify-between">
@@ -118,7 +130,7 @@ export default function SearchBar() {
                     Found <span className="font-bold text-foreground">{data.total}</span> clips.
                   </p>
                   <div className="flex items-center gap-4">
-                    <CategoryPicker categories={categories} value={category} onChange={setCategory} />
+                    <CategoryPicker categories={categories} value={localCategory} onChange={setLocalCategory} />
                     <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
                   </div>
                 </div>
@@ -127,7 +139,7 @@ export default function SearchBar() {
                 <div className="text-center text-sm text-muted-foreground">
                   <p className="mb-2">Enter a word to find video clips.</p>
                   <div className="flex items-center justify-center gap-4">
-                    <CategoryPicker categories={categories} value={category} onChange={setCategory} />
+                    <CategoryPicker categories={categories} value={localCategory} onChange={setLocalCategory} />
                     <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
                   </div>
                 </div>

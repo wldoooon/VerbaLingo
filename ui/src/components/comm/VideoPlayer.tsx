@@ -4,6 +4,8 @@ import dynamic from "next/dynamic"
 const YouTube = dynamic(() => import("react-youtube"), { ssr: false })
 import { useEffect, useState, useRef } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
+import { useSearchParams } from "@/context/SearchParamsContext"
+import { useSearch } from "@/lib/useApi"
 import { Button } from "@/components/ui/button"
 
 import { ChevronLeft, ChevronRight, Search, Play, Pause } from "lucide-react"
@@ -22,11 +24,19 @@ function thumb(videoId?: string) {
 
 export default function VideoPlayer() {
   const { state, dispatch } = usePlayerContext()
-  const { playlist, currentVideoIndex, isMuted } = state
+  const { currentVideoIndex, isMuted } = state
+  
+  // Read playlist from React Query cache
+  const { query, category } = useSearchParams()
+  const { data } = useSearch(query, category)
+  const playlist = data?.hits || []
+  
   const playerRef = useRef<YouTubePlayer | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const currentClip = playlist[currentVideoIndex]
+  // Defensive: clamp currentVideoIndex to valid range
+  const validIndex = Math.max(0, Math.min(currentVideoIndex, playlist.length - 1))
+  const currentClip = playlist[validIndex]
   const currentVideoId = currentClip?.video_id
 
   const rawStart = getClipStart(currentClip)
@@ -54,8 +64,7 @@ export default function VideoPlayer() {
     })
   }, [playlist, currentVideoIndex])
 
-  const handleMute = () => dispatch({ type: "SET_MUTED", payload: true })
-  const handleUnMute = () => dispatch({ type: "SET_MUTED", payload: false })
+
   const handleNextVideo = () => dispatch({ type: "NEXT_VIDEO" })
   const handlePrevVideo = () => dispatch({ type: "PREV_VIDEO" })
 

@@ -27,7 +27,6 @@ export interface TranscriptResponse {
 }
 
 export interface PlayerState {
-  playlist: Clips[];
   currentVideoIndex: number;
   isMuted: boolean;
   activeTranscriptLine: number | null;
@@ -35,9 +34,10 @@ export interface PlayerState {
 }
 
 export type PlayerAction =
-  | { type: 'LOAD_PLAYLIST'; payload: Clips[] }
   | { type: 'NEXT_VIDEO' }
-  | { type: 'PREV_VIDEO'}
+  | { type: 'PREV_VIDEO' }
   | { type: 'SET_MUTED'; payload: boolean }
   | { type: 'SET_CURRENT_TIME'; payload: number }
-  | { type: 'SET_ACTIVE_LINE'; payload: number | null };
+  | { type: 'SET_INDEX'; payload: number }
+  | { type: 'RESET_INDEX' }; 
+

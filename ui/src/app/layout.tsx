@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { PlayerProvider } from "@/context/PlayerContext";
+import { SearchParamsProvider } from "@/context/SearchParamsContext";
 import QueryProvider from "@/components/QueryProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -31,7 +32,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           disableTransitionOnChange
         >
           <QueryProvider>
-            <PlayerProvider>{children}</PlayerProvider>
+            <SearchParamsProvider>
+              <PlayerProvider>{children}</PlayerProvider>
+            </SearchParamsProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

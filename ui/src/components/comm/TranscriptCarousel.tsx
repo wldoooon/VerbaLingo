@@ -2,16 +2,25 @@
 
 import { useEffect, useState, useRef } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
-import { useTranscript } from "@/lib/useApi"
+import { useSearchParams } from "@/context/SearchParamsContext"
+import { useTranscript, useSearch } from "@/lib/useApi"
 import useEmblaCarousel from 'embla-carousel-react'
 
 export default function TranscriptCarousel() {
   const { state } = usePlayerContext()
-  const { playlist, currentVideoIndex, currentTime } = state
+  const { currentVideoIndex, currentTime } = state
+  
+  // Read playlist from React Query cache
+  const { query, category } = useSearchParams()
+  const { data: searchData } = useSearch(query, category)
+  const playlist = searchData?.hits || []
+  
   const [activeSegmentId, setActiveSegmentId] = useState<number | null>(null)
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "center" });
 
-  const currentVideo = playlist[currentVideoIndex];
+  // Defensive: clamp currentVideoIndex to valid range
+  const validIndex = Math.max(0, Math.min(currentVideoIndex, playlist.length - 1))
+  const currentVideo = playlist[validIndex];
   const videoId = currentVideo?.video_id;
 
   const { data, isLoading, isError } = useTranscript(videoId);
