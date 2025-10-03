@@ -1,15 +1,15 @@
 "use client";
 import { useCompletion } from "@ai-sdk/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "@/context/SearchParamsContext";
 import { Button } from "@/components/ui/button";
 import { Response } from "@/components/ui/shadcn-io/ai/response";
-import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, Play } from "lucide-react";
-import ModelSelector from "@/components/comm/ModelSelector";
+import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
+import { useResponseHistory } from "@/hooks/useResponseHistory";
 
 interface SmartSuggestion {
     title: string;
@@ -72,8 +72,20 @@ export function AiCompletion() {
     const { completion, complete, isLoading, error } = useCompletion({
         api: "/api/v1/completion",
     });
-    const [selectedModel, setSelectedModel] = useState("GPT-4-1 Mini");
     const [inputValue, setInputValue] = useState("");
+    const currentPromptRef = useRef<string>("");
+    
+    // Use our custom history hook
+    const {
+        currentBranch,
+        totalBranches,
+        currentIndex,
+        canGoBack,
+        canGoForward,
+        addBranch,
+        goToPrevious,
+        goToNext,
+    } = useResponseHistory();
 
     const smartSuggestions = useMemo(() => generateSmartSuggestions(query), [query]);
 
@@ -83,12 +95,15 @@ export function AiCompletion() {
 
     const handleSuggestionClick = (suggestion: SmartSuggestion) => {
         setInputValue(suggestion.prompt);
+        currentPromptRef.current = suggestion.prompt;
         complete(suggestion.prompt);
     };
 
     const handleInputSubmit = () => {
         if (inputValue.trim()) {
-            complete(inputValue);
+            const prompt = inputValue.trim();
+            currentPromptRef.current = prompt;
+            complete(prompt);
         }
     };
 
@@ -98,6 +113,14 @@ export function AiCompletion() {
         }
     };
 
+    // Store completed response as a branch
+    useEffect(() => {
+        if (!isLoading && completion && completion.trim() && currentPromptRef.current) {
+            addBranch(currentPromptRef.current, completion);
+        }
+    }, [isLoading, completion, addBranch]);
+
+    // Clear input after submission
     useEffect(() => {
         if (!isLoading) {
             setInputValue("");
@@ -212,7 +235,7 @@ export function AiCompletion() {
                                             
                                             {/* Scrollable content */}
                                             <div 
-                                                className="max-h-96 overflow-y-auto text-card-foreground"
+                                                className="max-h-96 overflow-y-auto text-card-foreground pr-8"
                                                 onScroll={(e) => {
                                                     const element = e.currentTarget;
                                                     const topBlur = document.getElementById('top-blur');
@@ -240,7 +263,13 @@ export function AiCompletion() {
                                                 <p className="text-red-500">{error.message}</p>
                                             ) : (
                                                 <>
-                                                    <Response>{completion}</Response>
+                                                    {/* Show current branch if navigating, otherwise show live streaming completion */}
+                                                    <Response>
+                                                        {currentBranch && !isLoading 
+                                                            ? currentBranch.response 
+                                                            : completion
+                                                        }
+                                                    </Response>
                                                 </>
                                             )}
                                         </div>
@@ -250,16 +279,49 @@ export function AiCompletion() {
                                     </div>
                                     
                                     {!isLoading && !error && (
-                                        <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t">
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                <Copy size={16} />
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                <ThumbsUp size={16} />
-                                            </Button>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                <ThumbsDown size={16} />
-                                            </Button>
+                                        <div className="flex items-center justify-between gap-2 mt-4 pt-4 border-t">
+                                            {/* Branch Navigation - Only show if we have multiple branches */}
+                                            {totalBranches > 1 && (
+                                                <div className="flex items-center gap-2">
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-8 w-8"
+                                                        onClick={goToPrevious}
+                                                        disabled={!canGoBack}
+                                                    >
+                                                        <ChevronLeft size={16} />
+                                                    </Button>
+                                                    <span className="text-xs text-muted-foreground font-medium tabular-nums">
+                                                        {currentIndex + 1} of {totalBranches}
+                                                    </span>
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-8 w-8"
+                                                        onClick={goToNext}
+                                                        disabled={!canGoForward}
+                                                    >
+                                                        <ChevronRight size={16} />
+                                                    </Button>
+                                                </div>
+                                            )}
+                                            
+                                            {/* Spacer if no navigation */}
+                                            {totalBranches <= 1 && <div />}
+                                            
+                                            {/* Action Buttons */}
+                                            <div className="flex items-center gap-2">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <Copy size={16} />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <ThumbsUp size={16} />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <ThumbsDown size={16} />
+                                                </Button>
+                                            </div>
                                         </div>
                                     )}
                                     </div>
@@ -267,6 +329,9 @@ export function AiCompletion() {
                             )}
                         </AnimatePresence>
 
+                    </main>
+
+                    <footer className="w-full flex-shrink-0 mt-6 pt-4 border-t">
                         {/* Input Bar */}
                         <div className="relative w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
@@ -287,10 +352,6 @@ export function AiCompletion() {
                                 <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
                             </button>
                         </div>
-                    </main>
-
-                    <footer className="w-full flex-shrink-0 mt-6 pt-4 border-t">
-                        <ModelSelector selectedModel={selectedModel} setSelectedModel={setSelectedModel} />
                     </footer>
                 </div>
         </div>
