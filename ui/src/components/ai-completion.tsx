@@ -106,7 +106,7 @@ export function AiCompletion() {
 
     return (
         <div className="w-full h-full flex items-center justify-center p-4 overflow-y-auto">
-            <div className="relative w-full max-w-2xl mx-auto text-center flex flex-col items-center bg-card rounded-2xl p-8 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border dark:border-slate-800">
+            <div className="relative w-full max-w-2xl mx-auto text-center flex flex-col items-center bg-card rounded-2xl p-8 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border">
                 <header className="w-full">
                     <div className="relative h-28 w-full flex items-center justify-center mb-6">
                         {/* Central Orb */}
@@ -205,7 +205,7 @@ export function AiCompletion() {
                                     transition={{ duration: 0.5 }}
                                     className="w-full"
                                 >
-                                    <div className="bg-muted/50 rounded-xl p-6 text-left border">
+                                    <div className="bg-card rounded-xl p-6 text-left border">
                                         <div className="text-card-foreground">
                                             {error ? (
                                                 <p className="text-red-500">{error.message}</p>
