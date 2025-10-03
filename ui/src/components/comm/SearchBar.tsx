@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/animate-ui/components/radix/dialog"
 import { useSearch } from "@/lib/useApi"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
@@ -104,7 +104,10 @@ export default function SearchBar() {
       </DialogTrigger>
       <AnimatePresence>
         {open && (
-          <DialogContent className="p-0 gap-0 max-w-6xl rounded-2xl overflow-hidden shadow-2xl">
+          <DialogContent 
+            className="p-0 gap-0 max-w-6xl rounded-2xl overflow-hidden shadow-2xl"
+            overlayClassName="backdrop-blur-md bg-black/60"
+          >
             <DialogTitle className="sr-only">Search for video clips</DialogTitle>
             <div className="flex items-center gap-2 p-3">
               <Search className="h-5 w-5 text-muted-foreground ml-1" />
