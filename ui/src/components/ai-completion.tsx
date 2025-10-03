@@ -78,8 +78,8 @@ export function AiCompletion() {
     const smartSuggestions = useMemo(() => generateSmartSuggestions(query), [query]);
 
     const shouldHideSuggestions = useMemo(() => {
-        return isLoading || completion || error;
-    }, [isLoading, completion, error]);
+        return isLoading;
+    }, [isLoading]);
 
     const handleSuggestionClick = (suggestion: SmartSuggestion) => {
         setInputValue(suggestion.prompt);
@@ -106,53 +106,50 @@ export function AiCompletion() {
 
     return (
         <div className="w-full h-full flex items-center justify-center p-4 overflow-y-auto">
-            {isLoading && !completion && !error ? (
-                <AiAssistantSkeleton />
-            ) : (
-                <div className="relative w-full max-w-2xl mx-auto text-center flex flex-col items-center bg-card rounded-2xl p-8 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border dark:border-slate-800">
-                    <header className="w-full">
-                        <div className="relative h-28 w-full flex items-center justify-center mb-6">
-                            {/* Central Orb */}
-                            <div className="absolute w-20 h-20 bg-red-400/50 rounded-full blur-xl" />
-                            <div className="absolute w-14 h-14 bg-gradient-to-br from-red-400 to-red-600 rounded-full shadow-md animate-pulse" />
+            <div className="relative w-full max-w-2xl mx-auto text-center flex flex-col items-center bg-card rounded-2xl p-8 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border dark:border-slate-800">
+                <header className="w-full">
+                    <div className="relative h-28 w-full flex items-center justify-center mb-6">
+                        {/* Central Orb */}
+                        <div className="absolute w-20 h-20 bg-red-400/50 rounded-full blur-xl" />
+                        <div className="absolute w-14 h-14 bg-gradient-to-br from-red-400 to-red-600 rounded-full shadow-md animate-pulse" />
 
-                            {/* Floating Cards */}
-                            <div className="absolute top-2 left-0 sm:left-8">
-                                <div className="bg-card/80 rounded-lg shadow-md p-2 flex items-center space-x-2 w-40 border">
-                                    <div className="bg-red-100 dark:bg-red-950/50 p-1 rounded-md">
-                                        <Play className="h-4 w-4 text-red-600 dark:text-red-400" />
-                                    </div>
-                                    <div className="space-y-1.5 flex-1">
-                                        <div className="h-2 w-full bg-gray-200 dark:bg-slate-700 rounded-sm" />
-                                        <div className="h-2 w-4/5 bg-gray-200 dark:bg-slate-700 rounded-sm" />
-                                    </div>
+                        {/* Floating Cards */}
+                        <div className="absolute top-2 left-0 sm:left-8">
+                            <div className="bg-card/80 rounded-lg shadow-md p-2 flex items-center space-x-2 w-40 border">
+                                <div className="bg-red-100 dark:bg-red-950/50 p-1 rounded-md">
+                                    <Play className="h-4 w-4 text-red-600 dark:text-red-400" />
                                 </div>
-                            </div>
-                            <div className="absolute bottom-2 right-0 sm:right-8">
-                                <div className="bg-card/80 rounded-lg shadow-md p-2 flex items-center space-x-2 w-40 border">
-                                    <div className="bg-red-100 dark:bg-red-950/50 p-1 rounded-md">
-                                        <Play className="h-4 w-4 text-red-600 dark:text-red-400" />
-                                    </div>
-                                    <div className="space-y-1.5 flex-1">
-                                        <div className="h-2 w-full bg-gray-200 dark:bg-slate-700 rounded-sm" />
-                                        <div className="h-2 w-4/5 bg-gray-200 dark:bg-slate-700 rounded-sm" />
-                                    </div>
+                                <div className="space-y-1.5 flex-1">
+                                    <div className="h-2 w-full bg-gray-200 dark:bg-slate-700 rounded-sm" />
+                                    <div className="h-2 w-4/5 bg-gray-200 dark:bg-slate-700 rounded-sm" />
                                 </div>
                             </div>
                         </div>
+                        <div className="absolute bottom-2 right-0 sm:right-8">
+                            <div className="bg-card/80 rounded-lg shadow-md p-2 flex items-center space-x-2 w-40 border">
+                                <div className="bg-red-100 dark:bg-red-950/50 p-1 rounded-md">
+                                    <Play className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                </div>
+                                <div className="space-y-1.5 flex-1">
+                                    <div className="h-2 w-full bg-gray-200 dark:bg-slate-700 rounded-sm" />
+                                    <div className="h-2 w-4/5 bg-gray-200 dark:bg-slate-700 rounded-sm" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">
-                            {query ? `Learning about "${query}"` : "What do you want to learn?"}
-                        </h1>
-                        <p className="text-slate-500 dark:text-slate-400 mt-4 max-w-lg mx-auto">
-                            {query 
-                                ? `Get pronunciations, examples, and detailed explanations for "${query}"`
-                                : "Explore topics, get explanations, and improve your understanding—all in one place."
-                            }
-                        </p>
-                    </header>
+                    <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">
+                        {query ? `Learning about "${query}"` : "What do you want to learn?"}
+                    </h1>
+                    <p className="text-slate-500 dark:text-slate-400 mt-4 max-w-lg mx-auto">
+                        {query 
+                            ? `Get pronunciations, examples, and detailed explanations for "${query}"`
+                            : "Explore topics, get explanations, and improve your understanding—all in one place."
+                        }
+                    </p>
+                </header>
 
-                    <main className="w-full mt-6 space-y-6">
+                <main className="w-full mt-6 space-y-6">
                         {/* Suggestions */}
                         <AnimatePresence>
                             {!shouldHideSuggestions && (
@@ -164,12 +161,22 @@ export function AiCompletion() {
                                 >
                                     <div className="flex flex-wrap justify-center gap-3">
                                         {smartSuggestions.map((suggestion, i) => (
-                                            <SuggestionChip
+                                            <motion.div
                                                 key={i}
-                                                icon={suggestion.icon}
-                                                text={suggestion.title}
-                                                onClick={() => handleSuggestionClick(suggestion)}
-                                            />
+                                                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                transition={{
+                                                    duration: 0.4,
+                                                    delay: i * 0.1,
+                                                    ease: [0.4, 0, 0.2, 1]
+                                                }}
+                                            >
+                                                <SuggestionChip
+                                                    icon={suggestion.icon}
+                                                    text={suggestion.title}
+                                                    onClick={() => handleSuggestionClick(suggestion)}
+                                                />
+                                            </motion.div>
                                         ))}
                                     </div>
                                 </motion.div>
@@ -178,7 +185,18 @@ export function AiCompletion() {
 
                         {/* Response Section */}
                         <AnimatePresence>
-                            {(completion || error) && (
+                            {isLoading && !completion && !error ? (
+                                <motion.div
+                                    key="skeleton"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="w-full"
+                                >
+                                    <AiAssistantSkeleton />
+                                </motion.div>
+                            ) : (completion || error) && (
                                 <motion.div
                                     key="completion"
                                     initial={{ opacity: 0, y: 20 }}
@@ -241,7 +259,6 @@ export function AiCompletion() {
                         <ModelSelector selectedModel={selectedModel} setSelectedModel={setSelectedModel} />
                     </footer>
                 </div>
-            )}
         </div>
     );
 }
