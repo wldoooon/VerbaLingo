@@ -206,28 +206,28 @@ export function AiCompletion() {
                                     className="w-full"
                                 >
                                     <div className="bg-card rounded-xl p-6 text-left border">
-                                        <div className="text-card-foreground">
+                                        <div className="max-h-96 overflow-y-auto text-card-foreground">
                                             {error ? (
                                                 <p className="text-red-500">{error.message}</p>
                                             ) : (
                                                 <>
                                                     <Response>{completion}</Response>
-                                                    {!isLoading && (
-                                                        <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t">
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                <Copy size={16} />
-                                                            </Button>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                <ThumbsUp size={16} />
-                                                            </Button>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                <ThumbsDown size={16} />
-                                                            </Button>
-                                                        </div>
-                                                    )}
                                                 </>
                                             )}
                                         </div>
+                                        {!isLoading && !error && (
+                                            <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <Copy size={16} />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <ThumbsUp size={16} />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <ThumbsDown size={16} />
+                                                </Button>
+                                            </div>
+                                        )}
                                     </div>
                                 </motion.div>
                             )}
