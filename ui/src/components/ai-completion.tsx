@@ -105,9 +105,9 @@ export function AiCompletion() {
     }, [isLoading]);
 
     return (
-        <div className="w-full h-full flex items-center justify-center p-4 overflow-y-auto">
-            <div className="relative w-full max-w-2xl mx-auto text-center flex flex-col items-center bg-card rounded-2xl p-8 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border">
-                <header className="w-full">
+        <div className="w-full h-full flex flex-col">
+            <div className="relative w-full h-full flex flex-col bg-card rounded-2xl p-6 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border">
+                <header className="w-full flex-shrink-0">
                     <div className="relative h-28 w-full flex items-center justify-center mb-6">
                         {/* Central Orb */}
                         <div className="absolute w-20 h-20 bg-red-400/50 rounded-full blur-xl" />
@@ -138,10 +138,10 @@ export function AiCompletion() {
                         </div>
                     </div>
 
-                    <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">
+                    <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center">
                         {query ? `Learning about "${query}"` : "What do you want to learn?"}
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-4 max-w-lg mx-auto">
+                    <p className="text-slate-500 dark:text-slate-400 mt-4 max-w-lg mx-auto text-center">
                         {query 
                             ? `Get pronunciations, examples, and detailed explanations for "${query}"`
                             : "Explore topics, get explanations, and improve your understanding—all in one place."
@@ -149,7 +149,7 @@ export function AiCompletion() {
                     </p>
                 </header>
 
-                <main className="w-full mt-6 space-y-6">
+                <main className="w-full flex-1 flex flex-col mt-6 space-y-6 overflow-y-auto min-h-0">
                         {/* Suggestions */}
                         <AnimatePresence>
                             {!shouldHideSuggestions && (
@@ -255,7 +255,7 @@ export function AiCompletion() {
                         </div>
                     </main>
 
-                    <footer className="w-full mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <footer className="w-full flex-shrink-0 mt-6 pt-4 border-t">
                         <ModelSelector selectedModel={selectedModel} setSelectedModel={setSelectedModel} />
                     </footer>
                 </div>

@@ -86,7 +86,7 @@ export default function SearchPage() {
               </div>
             ) : (
               /* Video Player and Transcript Section - shown when search results exist */
-              <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_480px] lg:items-start lg:gap-2">
+              <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_480px] lg:items-stretch lg:gap-2">
                 <div>
                   <VideoPlayer />
                   <div className="mt-0">
@@ -98,7 +98,7 @@ export default function SearchPage() {
                   </div>
                   {/* TranscriptViewer removed; transcript is now overlayed on the video */}
                 </div>
-                <div className="hidden lg:block lg:ml-0 lg:mr-0">
+                <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0">
                   <AiCompletion />
                 </div>
               </div>
