@@ -181,7 +181,7 @@
       opacity: 0.8;
     }
   }
-  
+
   .animate-pulse-orb {
     animation: pulse-orb 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }

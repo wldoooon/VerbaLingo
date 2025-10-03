@@ -205,8 +205,37 @@ export function AiCompletion() {
                                     transition={{ duration: 0.5 }}
                                     className="w-full"
                                 >
-                                    <div className="bg-card rounded-xl p-6 text-left border">
-                                        <div className="max-h-96 overflow-y-auto text-card-foreground">
+                                    <div className="bg-card rounded-xl p-6 text-left border-t border-b">
+                                        <div className="relative">
+                                            {/* Top blur gradient */}
+                                            <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300" id="top-blur" />
+                                            
+                                            {/* Scrollable content */}
+                                            <div 
+                                                className="max-h-96 overflow-y-auto text-card-foreground"
+                                                onScroll={(e) => {
+                                                    const element = e.currentTarget;
+                                                    const topBlur = document.getElementById('top-blur');
+                                                    const bottomBlur = document.getElementById('bottom-blur');
+                                                    
+                                                    if (topBlur && bottomBlur) {
+                                                        // Check if scrolled from top
+                                                        if (element.scrollTop > 10) {
+                                                            topBlur.style.opacity = '1';
+                                                        } else {
+                                                            topBlur.style.opacity = '0';
+                                                        }
+                                                        
+                                                        // Check if scrolled to bottom
+                                                        const isBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 10;
+                                                        if (isBottom) {
+                                                            bottomBlur.style.opacity = '0';
+                                                        } else {
+                                                            bottomBlur.style.opacity = '1';
+                                                        }
+                                                    }
+                                                }}
+                                            >
                                             {error ? (
                                                 <p className="text-red-500">{error.message}</p>
                                             ) : (
@@ -215,19 +244,24 @@ export function AiCompletion() {
                                                 </>
                                             )}
                                         </div>
-                                        {!isLoading && !error && (
-                                            <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                    <Copy size={16} />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                    <ThumbsUp size={16} />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                    <ThumbsDown size={16} />
-                                                </Button>
-                                            </div>
-                                        )}
+                                        
+                                        {/* Bottom blur gradient */}
+                                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300" id="bottom-blur" />
+                                    </div>
+                                    
+                                    {!isLoading && !error && (
+                                        <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <Copy size={16} />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <ThumbsUp size={16} />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <ThumbsDown size={16} />
+                                            </Button>
+                                        </div>
+                                    )}
                                     </div>
                                 </motion.div>
                             )}

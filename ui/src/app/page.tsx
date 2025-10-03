@@ -86,7 +86,7 @@ export default function SearchPage() {
               </div>
             ) : (
               /* Video Player and Transcript Section - shown when search results exist */
-              <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_480px] lg:items-stretch lg:gap-2">
+              <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-stretch lg:gap-2">
                 <div>
                   <VideoPlayer />
                   <div className="mt-0">
