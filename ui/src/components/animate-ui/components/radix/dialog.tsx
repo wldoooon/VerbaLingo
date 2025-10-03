@@ -48,6 +48,10 @@ function DialogOverlay({ className, ...props }: DialogOverlayProps) {
   return (
     <DialogOverlayPrimitive
       className={cn('fixed inset-0 z-50 bg-black/50', className)}
+      initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+      animate={{ opacity: 1, backdropFilter: 'blur(12px)' }}
+      exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       {...props}
     />
   );
@@ -73,6 +77,10 @@ function DialogContent({
           'bg-background fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg sm:max-w-lg',
           className,
         )}
+        initial={{ opacity: 0, scale: 0.95, y: '-48%' }}
+        animate={{ opacity: 1, scale: 1, y: '-50%' }}
+        exit={{ opacity: 0, scale: 0.95, y: '-48%' }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
         {...props}
       >
         {children}
