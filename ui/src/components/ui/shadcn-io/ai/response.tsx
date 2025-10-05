@@ -209,44 +209,59 @@ const components: Options['components'] = {
     </a>
   ),
   h1: ({ node, children, className, ...props }) => (
-    <h1
-      className={cn('mt-6 mb-2 font-semibold text-3xl', className)}
-      {...props}
-    >
-      {children}
-    </h1>
+      <h1
+        className={cn('mt-8 mb-4 font-semibold text-3xl', className)}
+        {...props}
+      >
+        {children}
+      </h1>
   ),
   h2: ({ node, children, className, ...props }) => (
-    <h2
-      className={cn('mt-6 mb-2 font-semibold text-2xl', className)}
-      {...props}
-    >
-      {children}
-    </h2>
+      <h2
+        className={cn('mt-8 mb-4 font-semibold text-2xl', className)}
+        {...props}
+      >
+        {children}
+      </h2>
   ),
   h3: ({ node, children, className, ...props }) => (
-    <h3 className={cn('mt-6 mb-2 font-semibold text-xl', className)} {...props}>
-      {children}
-    </h3>
+      <h3 className={cn('mt-8 mb-4 font-semibold text-xl', className)} {...props}>
+        {children}
+      </h3>
   ),
   h4: ({ node, children, className, ...props }) => (
-    <h4 className={cn('mt-6 mb-2 font-semibold text-lg', className)} {...props}>
-      {children}
-    </h4>
+      <h4 className={cn('mt-8 mb-4 font-semibold text-lg', className)} {...props}>
+        {children}
+      </h4>
   ),
   h5: ({ node, children, className, ...props }) => (
-    <h5
-      className={cn('mt-6 mb-2 font-semibold text-base', className)}
-      {...props}
-    >
-      {children}
-    </h5>
+      <h5
+        className={cn('mt-8 mb-4 font-semibold text-base', className)}
+        {...props}
+      >
+        {children}
+      </h5>
   ),
   h6: ({ node, children, className, ...props }) => (
-    <h6 className={cn('mt-6 mb-2 font-semibold text-sm', className)} {...props}>
-      {children}
-    </h6>
+      <h6 className={cn('mt-8 mb-4 font-semibold text-sm', className)} {...props}>
+        {children}
+      </h6>
   ),
+    p: ({ node, children, className, ...props }) => (
+      <p className={cn('mt-3', className)} {...props}>
+        {children}
+      </p>
+    ),
+    ul: ({ node, children, className, ...props }) => (
+      <ul className={cn('ml-4 list-outside list-disc mt-3', className)} {...props}>
+        {children}
+      </ul>
+    ),
+    ol: ({ node, children, className, ...props }) => (
+      <ol className={cn('ml-4 list-outside list-decimal mt-3', className)} {...props}>
+        {children}
+      </ol>
+    ),
   table: ({ node, children, className, ...props }) => (
     <div className="my-4 overflow-x-auto">
       <table

@@ -3,17 +3,15 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Check, ChevronsUpDown, Search, Languages } from "lucide-react"
-import { AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/animate-ui/components/radix/dialog"
 import { useSearch } from "@/lib/useApi"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
-import { SearchLoadingSkeleton } from "@/components/skeletons/SearchResultsSkeleton"
 
 export default function SearchBar() {
   const [open, setOpen] = useState(false)
@@ -54,11 +52,12 @@ export default function SearchBar() {
       localStorage.setItem('last_search_query', localQuery.trim())
     } catch {}
     
-    // Update global search params
-    setQuery(localQuery.trim())
-    setCategory(localCategory === "General" ? null : localCategory)
+    // Update global search params first
+    const trimmedQuery = localQuery.trim()
+    const selectedCategory = localCategory === "General" ? null : localCategory
     
-    refetch()
+    setQuery(trimmedQuery)
+    setCategory(selectedCategory)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -66,6 +65,13 @@ export default function SearchBar() {
       handleSearch()
     }
   }
+
+  useEffect(() => {
+    // Trigger search when query changes and it's not empty
+    if (query && query.trim()) {
+      refetch()
+    }
+  }, [query, category, refetch])
 
   useEffect(() => {
     if (data) {
@@ -102,10 +108,11 @@ export default function SearchBar() {
           </div>
         </Button>
       </DialogTrigger>
-      <AnimatePresence>
-        {open && (
-          <DialogContent className="p-0 gap-0 max-w-6xl rounded-2xl overflow-hidden shadow-2xl">
-            <DialogTitle className="sr-only">Search for video clips</DialogTitle>
+      <DialogContent 
+        className="p-0 gap-0 max-w-6xl rounded-2xl overflow-hidden shadow-2xl"
+        overlayClassName="backdrop-blur-md bg-black/60"
+      >
+        <DialogTitle className="sr-only">Search for video clips</DialogTitle>
             <div className="flex items-center gap-2 p-3">
               <Search className="h-5 w-5 text-muted-foreground ml-1" />
               <Input
@@ -122,7 +129,7 @@ export default function SearchBar() {
               </Button>
             </div>
             <div className="p-4 border-t bg-muted/50 min-h-[100px] flex items-center justify-center">
-              {isLoading && <SearchLoadingSkeleton />}
+              {isLoading && <p className="text-sm text-muted-foreground">Searching...</p>}
               {error && <p className="text-center text-sm text-destructive">{error.message}</p>}
               {data && !isLoading && (
                 <div className="w-full flex items-center justify-between">
@@ -146,8 +153,6 @@ export default function SearchBar() {
               )}
             </div>
           </DialogContent>
-        )}
-      </AnimatePresence>
     </Dialog>
   )
 }

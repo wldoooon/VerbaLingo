@@ -9,7 +9,6 @@ import VideoPlayer from "@/components/comm/VideoPlayer"
 import TranscriptViewer from "@/components/comm/TranscriptViewer"
 import AudioCard from "@/components/comm/AudioCard"
 import { AiCompletion } from "@/components/ai-completion"
-import { BottomStickyBar } from "@/components/BottomStickyBar"
 import { DiscoverySection } from "@/components/DiscoverySection"
 import { HeaderUserProfile } from "@/components/header-user-profile"
 import { HeaderToolbar } from "@/components/header-toolbar"
@@ -86,7 +85,7 @@ export default function SearchPage() {
               </div>
             ) : (
               /* Video Player and Transcript Section - shown when search results exist */
-              <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_480px] lg:items-start lg:gap-2">
+              <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-stretch lg:gap-2">
                 <div>
                   <VideoPlayer />
                   <div className="mt-0">
@@ -98,7 +97,7 @@ export default function SearchPage() {
                   </div>
                   {/* TranscriptViewer removed; transcript is now overlayed on the video */}
                 </div>
-                <div className="hidden lg:block lg:ml-0 lg:mr-0">
+                <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0">
                   <AiCompletion />
                 </div>
               </div>
@@ -107,8 +106,6 @@ export default function SearchPage() {
         </div>
       </SidebarInset>
       
-      {/* Bottom Sticky Status Bar */}
-      <BottomStickyBar />
     </SidebarProvider>
   )
 }
