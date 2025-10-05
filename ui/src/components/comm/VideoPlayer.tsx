@@ -124,20 +124,20 @@ export default function VideoPlayer() {
     loading: "eager",
   } as const
 
-  const heroClass = "relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] overflow-hidden rounded-lg"
+  const heroClass = "relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] overflow-hidden rounded-2xl"
 
   // Transcript overlay removed; handled in AudioCard
 
   return (
     <div className="w-full">
       {currentVideoId ? (
-        <div className={heroClass}>
+        <div className={`${heroClass} border shadow-lg`}>
           <div
             className={`absolute inset-0 transition-opacity duration-300 ${
               ready ? "opacity-0 pointer-events-none" : "opacity-100"
             }`}
           >
-            <div className="absolute inset-0 rounded-lg border bg-muted/50 overflow-hidden">
+            <div className="absolute inset-0 rounded-2xl border bg-muted/50 overflow-hidden">
               {currentVideoId && (
                 <img
                   src={thumb(currentVideoId) || "/placeholder.svg"}
@@ -185,7 +185,7 @@ export default function VideoPlayer() {
               }}
               onStateChange={onPlayerStateChange}
               onEnd={handleNextVideo}
-              className="absolute inset-0 h-full w-full rounded-lg"
+              className="absolute inset-0 h-full w-full rounded-2xl"
             />
             {/* Transcript overlay removed */}
           </div>
@@ -203,7 +203,7 @@ export default function VideoPlayer() {
         </div>
       ) : (
         <div
-          className={`${heroClass} flex items-center justify-center bg-muted/50 border border-dashed border-muted-foreground/25`}
+          className={`${heroClass} flex items-center justify-center bg-muted/50 border border-dashed border-muted-foreground/25 shadow-lg`}
         >
           <div className="text-center">
             <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
