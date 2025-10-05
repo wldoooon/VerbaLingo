@@ -117,7 +117,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const remaining = Math.max(0, duration - current)
 
   return (
-    <div className={cn("relative w-full rounded-[28px] bg-card text-foreground p-5 sm:p-6 shadow-lg", className)}>
+    <div className={cn("relative w-full rounded-[28px] bg-card text-foreground p-5 sm:p-6 shadow-lg border-2 border-border", className)}>
       <audio
         ref={audioRef}
         src={src}

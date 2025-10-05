@@ -37,18 +37,6 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
   return (
     <div className={cn("w-full", className)}>
       
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Content Categories</h2>
-            <p className="text-muted-foreground mt-1 text-base">Explore learning materials by type and genre</p>
-          </div>
-        </div>
-      </div>
-
       {/* Carousel */}
       <div className="relative">
         <Carousel options={OPTIONS} className="w-full" isAutoPlay={true}>
