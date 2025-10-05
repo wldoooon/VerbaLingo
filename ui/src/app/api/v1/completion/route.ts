@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       return new Response('Prompt is required.', { status: 400 });
     }
 
-    const prompt = `Give me the meaning of the following word and some examples of how to use it in a sentence be brief: "${originalPrompt}"`;
+    const prompt = originalPrompt
 
     const backendUrl = 'http://127.0.0.1:8001/api/v1/generate';
 

@@ -9,7 +9,6 @@ import VideoPlayer from "@/components/comm/VideoPlayer"
 import TranscriptViewer from "@/components/comm/TranscriptViewer"
 import AudioCard from "@/components/comm/AudioCard"
 import { AiCompletion } from "@/components/ai-completion"
-import { BottomStickyBar } from "@/components/BottomStickyBar"
 import { DiscoverySection } from "@/components/DiscoverySection"
 import { HeaderUserProfile } from "@/components/header-user-profile"
 import { HeaderToolbar } from "@/components/header-toolbar"
@@ -107,8 +106,6 @@ export default function SearchPage() {
         </div>
       </SidebarInset>
       
-      {/* Bottom Sticky Status Bar */}
-      <BottomStickyBar />
     </SidebarProvider>
   )
 }
