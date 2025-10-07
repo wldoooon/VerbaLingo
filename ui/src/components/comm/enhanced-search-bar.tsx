@@ -34,12 +34,20 @@ export default function EnhancedSearchBar() {
   // Debounce search query for real-time search (300ms)
   const [debouncedQuery] = useDebouncedValue(localQuery, 300)
   
+  // Keep track of last successful search to preserve results
+  const [lastSearchQuery, setLastSearchQuery] = useState("")
+  const [lastSearchCategory, setLastSearchCategory] = useState<string | null>(null)
+  
   const { query, category, setQuery, setCategory } = useSearchParams()
   const { dispatch } = usePlayerContext()
   
+  // Use last search query to preserve results, fallback to debounced query
+  const activeQuery = debouncedQuery.trim() || lastSearchQuery
+  const activeCategory = localCategory !== null ? localCategory : lastSearchCategory
+  
   const { data, error, isLoading, refetch } = useSearch(
-    debouncedQuery,
-    localCategory,
+    activeQuery,
+    activeCategory,
   )
 
   // Auto-search on debounced query change
@@ -48,6 +56,14 @@ export default function EnhancedSearchBar() {
       refetch()
     }
   }, [debouncedQuery, localCategory, refetch, open])
+  
+  // Update last search when we have successful results
+  useEffect(() => {
+    if (data?.hits && data.hits.length > 0 && debouncedQuery.trim()) {
+      setLastSearchQuery(debouncedQuery.trim())
+      setLastSearchCategory(localCategory)
+    }
+  }, [data, debouncedQuery, localCategory])
 
   // Handle Enter key for random clip selection
   const handleRandomSelection = useCallback(() => {
@@ -86,13 +102,13 @@ export default function EnhancedSearchBar() {
     return () => document.removeEventListener("keydown", down)
   }, [])
 
-  // Reset on dialog close
+  // Restore last search when dialog reopens
   useEffect(() => {
-    if (!open) {
-      setLocalQuery("")
-      setLocalCategory(null)
+    if (open && !localQuery && lastSearchQuery) {
+      setLocalQuery(lastSearchQuery)
+      setLocalCategory(lastSearchCategory)
     }
-  }, [open])
+  }, [open, lastSearchQuery, lastSearchCategory, localQuery])
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
