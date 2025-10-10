@@ -4,7 +4,7 @@ import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useSearch } from "@/lib/useApi"
 import { AppSidebar } from "@/components/app-sidebar"
-import EnhancedSearchBar from "@/components/comm/enhanced-search-bar"
+import SearchBar from "@/components/comm/SearchBar"
 import VideoPlayer from "@/components/comm/VideoPlayer"
 import TranscriptViewer from "@/components/comm/TranscriptViewer"
 import AudioCard from "@/components/comm/AudioCard"
@@ -62,7 +62,7 @@ export default function SearchPage() {
                   <SidebarTrigger className="size-8 hover:bg-accent hover:text-accent-foreground" />
                 </div>
                 <div className="basis-1/2 max-w-[50%]">
-                  <EnhancedSearchBar />
+                  <SearchBar />
                 </div>
               </div>
               <div className="hidden lg:block">

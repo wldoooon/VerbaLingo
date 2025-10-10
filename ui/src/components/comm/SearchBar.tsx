@@ -108,9 +108,10 @@ export default function SearchBar() {
           </div>
         </Button>
       </DialogTrigger>
-      <DialogContent 
-        className="p-0 gap-0 max-w-6xl rounded-2xl overflow-hidden shadow-2xl"
+      <DialogContent
+        className="p-0 gap-0 max-w-lg rounded-2xl overflow-hidden shadow-2xl"
         overlayClassName="backdrop-blur-md bg-black/60"
+        showCloseButton={false}
       >
         <DialogTitle className="sr-only">Search for video clips</DialogTitle>
             <div className="flex items-center gap-2 p-3">
