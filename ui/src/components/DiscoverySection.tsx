@@ -4,13 +4,7 @@ import React from "react";
 import { EmblaOptionsType } from 'embla-carousel';
 import { 
   ChevronLeft,
-  ChevronRight,
-  TrendingUp,
-  BookOpen,
-  Globe,
-  Play,
-  Film,
-  Tv
+  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Carousel, {
@@ -42,7 +36,7 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
         <Carousel options={OPTIONS} className="w-full" isAutoPlay={true}>
           <SliderContainer>
             <Slider className='w-full'>
-              <div className='relative md:h-[500px] sm:h-full h-[300px] w-full rounded-lg overflow-hidden'>
+              <div className='relative md:h-[600px] sm:h-full h-[400px] w-full rounded-lg overflow-hidden'>
                 {/* Background Image */}
                 <div 
                   className='absolute inset-0 bg-cover bg-center bg-no-repeat'
@@ -108,7 +102,7 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
               </div>
             </Slider>
             <Slider className='w-full'>
-              <div className='relative md:h-[500px] sm:h-full h-[300px] w-full rounded-lg overflow-hidden'>
+              <div className='relative md:h-[600px] sm:h-full h-[400px] w-full rounded-lg overflow-hidden'>
                 {/* Background Image */}
                 <div 
                   className='absolute inset-0 bg-cover bg-center bg-no-repeat'
@@ -175,16 +169,16 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
               </div>
             </Slider>
             <Slider className='w-full'>
-              <div className='bg-yellow-500 md:h-[500px] sm:h-full h-[300px] w-full rounded-lg'></div>
+              <div className='bg-yellow-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
             </Slider>
             <Slider className='w-full'>
-              <div className='bg-red-500 md:h-[500px] sm:h-full h-[300px] w-full rounded-lg'></div>
+              <div className='bg-red-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
             </Slider>
             <Slider className='w-full'>
-              <div className='bg-purple-500 md:h-[500px] sm:h-full h-[300px] w-full rounded-lg'></div>
+              <div className='bg-purple-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
             </Slider>
             <Slider className='w-full'>
-              <div className='bg-indigo-500 md:h-[500px] sm:h-full h-[300px] w-full rounded-lg'></div>
+              <div className='bg-indigo-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
             </Slider>
           </SliderContainer>
 
@@ -202,22 +196,6 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
             <SliderDotButton />
           </div>
         </Carousel>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="mt-8 flex items-center justify-center gap-12 text-base text-muted-foreground">
-        <div className="flex items-center gap-3">
-          <TrendingUp className="h-5 w-5" />
-          <span className="font-medium">50+ trending videos</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <BookOpen className="h-5 w-5" />
-          <span className="font-medium">12 languages available</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Globe className="h-5 w-5" />
-          <span className="font-medium">Updated daily</span>
-        </div>
       </div>
     </div>
   );

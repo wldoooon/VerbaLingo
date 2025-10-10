@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="white">
+    <html lang="en" className="white overflow-x-hidden">
       <head>
         <link rel="preconnect" href="https://www.youtube.com" />
         <link rel="preconnect" href="https://i.ytimg.com" />
@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://i.ytimg.com" />
         <link rel="dns-prefetch" href="https://s.ytimg.com" />
       </head>
-      <body className={`${inter.className} min-h-screen bg-transparent`}>
+      <body className={`${inter.className} min-h-screen bg-transparent overflow-x-hidden`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

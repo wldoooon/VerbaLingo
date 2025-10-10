@@ -10,6 +10,7 @@ import TranscriptViewer from "@/components/comm/TranscriptViewer"
 import AudioCard from "@/components/comm/AudioCard"
 import { AiCompletion } from "@/components/ai-completion"
 import { DiscoverySection } from "@/components/DiscoverySection"
+import { GameTicker } from "@/components/game-ticker"
 import { HeaderUserProfile } from "@/components/header-user-profile"
 import { HeaderToolbar } from "@/components/header-toolbar"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
@@ -75,14 +76,21 @@ export default function SearchPage() {
             {/* Content Section - Discovery Carousel or Video Player */}
             {playlist.length === 0 ? (
               /* Discovery Carousel - shown when no search results */
-              <div className="mt-4">
-                <DiscoverySection 
-                  onVideoSelect={(video) => {
-                    console.log("Video selected:", video.title);
-                    // TODO: Implement video selection logic
-                  }}
-                />
-              </div>
+              <>
+                <div className="mt-4">
+                  <DiscoverySection 
+                    onVideoSelect={(video) => {
+                      console.log("Video selected:", video.title);
+                      // TODO: Implement video selection logic
+                    }}
+                  />
+                </div>
+              
+                {/* Game Ticker */}
+                <div className="mt-12">
+                  <GameTicker />
+                </div>
+              </>
             ) : (
               /* Video Player and Transcript Section - shown when search results exist */
               <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-stretch lg:gap-2">
