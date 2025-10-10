@@ -109,51 +109,51 @@ export default function SearchBar() {
         </Button>
       </DialogTrigger>
       <DialogContent
-        className="p-0 gap-0 max-w-lg rounded-2xl overflow-hidden shadow-2xl"
+        className="p-6 gap-0 max-w-lg rounded-2xl overflow-hidden shadow-2xl"
         overlayClassName="backdrop-blur-md bg-black/60"
         showCloseButton={false}
       >
         <DialogTitle className="sr-only">Search for video clips</DialogTitle>
-            <div className="flex items-center gap-2 p-3">
-              <Search className="h-5 w-5 text-muted-foreground ml-1" />
-              <Input
-                type="text"
-                placeholder="Search for a word..."
-                className="w-full h-10 border-none bg-transparent p-0 text-base focus-visible:ring-0 focus-visible:ring-offset-0"
-                value={localQuery}
-                onChange={(e) => setLocalQuery(e.target.value)}
-                onKeyPress={handleKeyPress}
-                autoFocus
-              />
-              <Button onClick={handleSearch} disabled={isLoading} className="mr-1 rounded-full">
-                {isLoading ? "Searching..." : "Search"}
-              </Button>
+        <div className="flex flex-col gap-4">
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder="Search for a word..."
+              className="w-full h-12 pr-10 text-base rounded-full"
+              value={localQuery}
+              onChange={(e) => setLocalQuery(e.target.value)}
+              onKeyPress={handleKeyPress}
+              autoFocus
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <Search className="h-4 w-4 text-muted-foreground" />
             </div>
-            <div className="p-4 border-t bg-muted/50 min-h-[100px] flex items-center justify-center">
-              {isLoading && <p className="text-sm text-muted-foreground">Searching...</p>}
-              {error && <p className="text-center text-sm text-destructive">{error.message}</p>}
-              {data && !isLoading && (
-                <div className="w-full flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">
-                    Found <span className="font-bold text-foreground">{data.total}</span> clips.
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <CategoryPicker categories={categories} value={localCategory} onChange={setLocalCategory} />
-                    <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
-                  </div>
-                </div>
-              )}
-              {!isLoading && !error && !data && (
-                <div className="text-center text-sm text-muted-foreground">
-                  <p className="mb-2">Enter a word to find video clips.</p>
-                  <div className="flex items-center justify-center gap-4">
-                    <CategoryPicker categories={categories} value={localCategory} onChange={setLocalCategory} />
-                    <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
-                  </div>
-                </div>
-              )}
+          </div>
+          
+          {isLoading && <p className="text-sm text-muted-foreground text-center">Searching...</p>}
+          {error && <p className="text-center text-sm text-destructive">{error.message}</p>}
+          {data && !isLoading && (
+            <div className="w-full flex flex-col gap-4">
+              <p className="text-sm text-muted-foreground text-center">
+                Found <span className="font-bold text-foreground">{data.total}</span> clips.
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <CategoryPicker categories={categories} value={localCategory} onChange={setLocalCategory} />
+                <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
+              </div>
             </div>
-          </DialogContent>
+          )}
+          {!isLoading && !error && !data && (
+            <div className="text-center text-sm text-muted-foreground">
+              <p className="mb-2">Enter a word to find video clips.</p>
+              <div className="flex items-center justify-center gap-4">
+                <CategoryPicker categories={categories} value={localCategory} onChange={setLocalCategory} />
+                <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
+              </div>
+            </div>
+          )}
+        </div>
+      </DialogContent>
     </Dialog>
   )
 }
