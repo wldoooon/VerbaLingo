@@ -198,7 +198,7 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
         </Carousel>
         
         {/* Shadow Effect at Bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-94 bg-gradient-to-t from-card via-card/95 via-card/85 via-card/70 via-card/50 via-card/30 via-card/15 to-transparent pointer-events-none z-10"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-card via-card/95 via-card/85 via-card/70 via-card/50 via-card/30 via-card/15 to-transparent pointer-events-none z-10"></div>
       </div>
     </div>
   );

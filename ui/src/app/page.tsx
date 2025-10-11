@@ -6,15 +6,12 @@ import { useSearch } from "@/lib/useApi"
 import { AppSidebar } from "@/components/app-sidebar"
 import SearchBar from "@/components/comm/SearchBar"
 import VideoPlayer from "@/components/comm/VideoPlayer"
-import TranscriptViewer from "@/components/comm/TranscriptViewer"
 import AudioCard from "@/components/comm/AudioCard"
 import { AiCompletion } from "@/components/ai-completion"
 import { DiscoverySection } from "@/components/DiscoverySection"
 import { GameTicker } from "@/components/game-ticker"
-import { HeaderUserProfile } from "@/components/header-user-profile"
 import { HeaderToolbar } from "@/components/header-toolbar"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
 
 export default function SearchPage() {
@@ -56,7 +53,7 @@ export default function SearchPage() {
           </div>
           
           {/* Search Header */}
-          <div className="bg-card border-b p-2 sm:p-4">
+          <div className="relative bg-card p-2 sm:p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1">
                 <div className="hidden lg:block">
@@ -69,6 +66,11 @@ export default function SearchPage() {
               <div className="hidden lg:block">
                 <HeaderToolbar user={userData} />
               </div>
+            </div>
+            {/* Gradient border bottom */}
+            <div className="absolute bottom-0 left-0 right-0 flex h-px">
+              <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+              <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
             </div>
           </div>
           
@@ -87,7 +89,18 @@ export default function SearchPage() {
                 </div>
               
                 {/* Game Ticker */}
-                <div className="mt-12">
+                <div className="mt-1">
+                  <div className="mb-2">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                        Popular Games
+                      </h2>
+                      <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent"></div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Learn English through gaming vocabulary and in-game dialogues
+                    </p>
+                  </div>
                   <GameTicker />
                 </div>
               </>
