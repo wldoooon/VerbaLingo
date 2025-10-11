@@ -129,7 +129,13 @@ export function AiCompletion() {
 
     return (
         <div className="w-full h-full flex flex-col">
-            <div className="relative w-full h-full flex flex-col bg-card rounded-2xl p-6 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border">
+            <div className="relative w-full h-full flex flex-col bg-card rounded-2xl p-6 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border-x border-t">
+                {/* Top gradient border */}
+                <div className="absolute top-0 left-0 right-0 flex h-px">
+                    <div className="w-1/2 bg-gradient-to-r from-transparent via-primary/50 to-primary"></div>
+                    <div className="w-1/2 bg-gradient-to-l from-transparent via-primary/50 to-primary"></div>
+                </div>
+                
                 <header className="w-full flex-shrink-0">
                     <div className="relative h-28 w-full flex items-center justify-center mb-6">
                         {/* Central Orb */}
@@ -170,6 +176,14 @@ export function AiCompletion() {
                             : "Explore topics, get explanations, and improve your understanding—all in one place."
                         }
                     </p>
+                    
+                    {/* Header bottom gradient border */}
+                    <div className="relative mt-6">
+                        <div className="absolute bottom-0 left-0 right-0 flex h-px">
+                            <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                            <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                        </div>
+                    </div>
                 </header>
 
                 <main className="w-full flex-1 flex flex-col mt-6 space-y-6 overflow-y-auto min-h-0">
@@ -228,7 +242,13 @@ export function AiCompletion() {
                                     transition={{ duration: 0.5 }}
                                     className="w-full"
                                 >
-                                    <div className="bg-card rounded-xl p-6 text-left border-t border-b">
+                                    <div className="relative bg-card rounded-xl p-6 text-left border-x">
+                                        {/* Top gradient border */}
+                                        <div className="absolute top-0 left-0 right-0 flex h-px">
+                                            <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                                            <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                                        </div>
+                                        
                                         <div className="relative">
                                             {/* Top blur gradient */}
                                             <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300" id="top-blur" />
@@ -276,6 +296,12 @@ export function AiCompletion() {
                                         
                                         {/* Bottom blur gradient */}
                                         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300" id="bottom-blur" />
+                                    </div>
+                                    
+                                    {/* Bottom gradient border */}
+                                    <div className="absolute -bottom-px left-0 right-0 flex h-px">
+                                        <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                                        <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
                                     </div>
                                     
                                     {!isLoading && !error && (
@@ -331,7 +357,13 @@ export function AiCompletion() {
 
                     </main>
 
-                    <footer className="w-full flex-shrink-0 mt-6 pt-4 border-t">
+                    <footer className="relative w-full flex-shrink-0 mt-6 pt-4">
+                        {/* Footer top gradient border */}
+                        <div className="absolute top-0 left-0 right-0 flex h-px">
+                            <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                            <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                        </div>
+                        
                         {/* Input Bar */}
                         <div className="relative w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
