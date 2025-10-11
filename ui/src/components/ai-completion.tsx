@@ -129,36 +129,143 @@ export function AiCompletion() {
 
     return (
         <div className="w-full h-full flex flex-col">
-            <div className="relative w-full h-full flex flex-col bg-card rounded-2xl p-6 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border">
+            <div className="relative w-full h-full flex flex-col bg-card rounded-2xl p-6 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border-t">
+                {/* Top gradient border */}
+                <div className="absolute top-0 left-0 right-0 flex h-px">
+                    <div className="w-1/2 bg-gradient-to-r from-transparent via-primary/50 to-primary"></div>
+                    <div className="w-1/2 bg-gradient-to-l from-transparent via-primary/50 to-primary"></div>
+                </div>
+                
+                {/* Left vertical gradient border - fade from center to edges */}
+                <div className="absolute top-0 bottom-0 left-0 flex flex-col w-px">
+                    <div className="h-1/2 bg-gradient-to-t from-border to-transparent"></div>
+                    <div className="h-1/2 bg-gradient-to-b from-border to-transparent"></div>
+                </div>
+                
+                {/* Right vertical gradient border - fade from center to edges */}
+                <div className="absolute top-0 bottom-0 right-0 flex flex-col w-px">
+                    <div className="h-1/2 bg-gradient-to-t from-border to-transparent"></div>
+                    <div className="h-1/2 bg-gradient-to-b from-border to-transparent"></div>
+                </div>
+                
                 <header className="w-full flex-shrink-0">
                     <div className="relative h-28 w-full flex items-center justify-center mb-6">
-                        {/* Central Orb */}
-                        <div className="absolute w-20 h-20 bg-red-400/50 rounded-full blur-xl" />
-                        <div className="absolute w-14 h-14 bg-gradient-to-br from-red-400 to-red-600 rounded-full shadow-md animate-pulse" />
+                        {/* Animated rings around the orb */}
+                        <div className="absolute w-32 h-32 rounded-full border-2 border-red-400/20 animate-ping" style={{ animationDuration: '3s' }} />
+                        <div className="absolute w-24 h-24 rounded-full border-2 border-red-400/30 animate-ping" style={{ animationDuration: '2s' }} />
+                        
+                        {/* Central Orb with enhanced glow */}
+                        <div className="absolute w-20 h-20 bg-red-400/50 rounded-full blur-xl animate-pulse" />
+                        <div className="absolute w-16 h-16 bg-red-400/30 rounded-full blur-lg animate-pulse" style={{ animationDuration: '2s' }} />
+                        <div className="absolute w-14 h-14 bg-gradient-to-br from-red-400 via-red-500 to-red-600 rounded-full shadow-lg animate-pulse shadow-red-500/50">
+                            {/* Sparkle effect inside orb */}
+                            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/40 to-transparent" />
+                        </div>
 
-                        {/* Floating Cards */}
-                        <div className="absolute top-2 left-0 sm:left-8">
-                            <div className="bg-card/80 rounded-lg shadow-md p-2 flex items-center space-x-2 w-40 border">
-                                <div className="bg-red-100 dark:bg-red-950/50 p-1 rounded-md">
+                        {/* Floating Cards with enhanced animations - overlapping closely with orb */}
+                        <motion.div 
+                            className="absolute top-1/2 -translate-y-1/2 left-8 sm:left-25 z-10"
+                            animate={{ 
+                                y: [-4, 4, -4],
+                                rotate: [-2, 2, -2]
+                            }}
+                            transition={{ 
+                                duration: 4,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                        >
+                            <div className="bg-card/90 backdrop-blur-sm rounded-lg shadow-lg p-2 flex items-center space-x-2 w-40 border border-red-200/50 dark:border-red-900/50 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                                <motion.div 
+                                    className="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-950/50 dark:to-red-900/50 p-1 rounded-md"
+                                    animate={{ 
+                                        scale: [1, 1.1, 1],
+                                        rotate: [0, 5, 0]
+                                    }}
+                                    transition={{ 
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        ease: "easeInOut"
+                                    }}
+                                >
                                     <Play className="h-4 w-4 text-red-600 dark:text-red-400" />
-                                </div>
+                                </motion.div>
                                 <div className="space-y-1.5 flex-1">
-                                    <div className="h-2 w-full bg-gray-200 dark:bg-slate-700 rounded-sm" />
-                                    <div className="h-2 w-4/5 bg-gray-200 dark:bg-slate-700 rounded-sm" />
+                                    <motion.div 
+                                        className="h-2 w-full bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
+                                        animate={{ opacity: [0.5, 1, 0.5] }}
+                                        transition={{ duration: 2, repeat: Infinity }}
+                                    />
+                                    <motion.div 
+                                        className="h-2 w-4/5 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
+                                        animate={{ opacity: [0.5, 1, 0.5] }}
+                                        transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
+                                    />
                                 </div>
                             </div>
-                        </div>
-                        <div className="absolute bottom-2 right-0 sm:right-8">
-                            <div className="bg-card/80 rounded-lg shadow-md p-2 flex items-center space-x-2 w-40 border">
-                                <div className="bg-red-100 dark:bg-red-950/50 p-1 rounded-md">
+                        </motion.div>
+                        
+                        <motion.div 
+                            className="absolute top-1/2 -translate-y-1/2 right-8 sm:right-20 z-10"
+                            animate={{ 
+                                y: [4, -4, 4],
+                                rotate: [2, -2, 2]
+                            }}
+                            transition={{ 
+                                duration: 5,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                        >
+                            <div className="bg-card/90 backdrop-blur-sm rounded-lg shadow-lg p-2 flex items-center space-x-2 w-40 border border-red-200/50 dark:border-red-900/50 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                                <motion.div 
+                                    className="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-950/50 dark:to-red-900/50 p-1 rounded-md"
+                                    animate={{ 
+                                        scale: [1, 1.1, 1],
+                                        rotate: [0, -5, 0]
+                                    }}
+                                    transition={{ 
+                                        duration: 2.5,
+                                        repeat: Infinity,
+                                        ease: "easeInOut"
+                                    }}
+                                >
                                     <Play className="h-4 w-4 text-red-600 dark:text-red-400" />
-                                </div>
+                                </motion.div>
                                 <div className="space-y-1.5 flex-1">
-                                    <div className="h-2 w-full bg-gray-200 dark:bg-slate-700 rounded-sm" />
-                                    <div className="h-2 w-4/5 bg-gray-200 dark:bg-slate-700 rounded-sm" />
+                                    <motion.div 
+                                        className="h-2 w-full bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
+                                        animate={{ opacity: [0.5, 1, 0.5] }}
+                                        transition={{ duration: 2.2, repeat: Infinity }}
+                                    />
+                                    <motion.div 
+                                        className="h-2 w-4/5 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
+                                        animate={{ opacity: [0.5, 1, 0.5] }}
+                                        transition={{ duration: 2.2, repeat: Infinity, delay: 0.4 }}
+                                    />
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
+                        
+                        {/* Floating particles around orb */}
+                        {[...Array(6)].map((_, i) => (
+                            <motion.div
+                                key={i}
+                                className="absolute w-1.5 h-1.5 bg-red-400 rounded-full"
+                                animate={{
+                                    x: [0, Math.cos(i * 60 * Math.PI / 180) * 40, 0],
+                                    y: [0, Math.sin(i * 60 * Math.PI / 180) * 40, 0],
+                                    opacity: [0, 1, 0],
+                                    scale: [0, 1, 0]
+                                }}
+                                transition={{
+                                    duration: 3,
+                                    repeat: Infinity,
+                                    delay: i * 0.5,
+                                    ease: "easeInOut"
+                                }}
+                            />
+                        ))}
                     </div>
 
                     <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center">
@@ -170,6 +277,14 @@ export function AiCompletion() {
                             : "Explore topics, get explanations, and improve your understanding—all in one place."
                         }
                     </p>
+                    
+                    {/* Header bottom gradient border */}
+                    <div className="relative mt-6">
+                        <div className="absolute bottom-0 left-0 right-0 flex h-px">
+                            <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                            <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                        </div>
+                    </div>
                 </header>
 
                 <main className="w-full flex-1 flex flex-col mt-6 space-y-6 overflow-y-auto min-h-0">
@@ -228,7 +343,13 @@ export function AiCompletion() {
                                     transition={{ duration: 0.5 }}
                                     className="w-full"
                                 >
-                                    <div className="bg-card rounded-xl p-6 text-left border-t border-b">
+                                    <div className="relative bg-card rounded-xl p-6 text-left border-x">
+                                        {/* Top gradient border */}
+                                        <div className="absolute top-0 left-0 right-0 flex h-px">
+                                            <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                                            <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                                        </div>
+                                        
                                         <div className="relative">
                                             {/* Top blur gradient */}
                                             <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300" id="top-blur" />
@@ -276,6 +397,12 @@ export function AiCompletion() {
                                         
                                         {/* Bottom blur gradient */}
                                         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300" id="bottom-blur" />
+                                    </div>
+                                    
+                                    {/* Bottom gradient border */}
+                                    <div className="absolute -bottom-px left-0 right-0 flex h-px">
+                                        <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                                        <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
                                     </div>
                                     
                                     {!isLoading && !error && (
@@ -331,7 +458,13 @@ export function AiCompletion() {
 
                     </main>
 
-                    <footer className="w-full flex-shrink-0 mt-6 pt-4 border-t">
+                    <footer className="relative w-full flex-shrink-0 mt-6 pt-4">
+                        {/* Footer top gradient border */}
+                        <div className="absolute top-0 left-0 right-0 flex h-px">
+                            <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                            <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                        </div>
+                        
                         {/* Input Bar */}
                         <div className="relative w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />

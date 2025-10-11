@@ -74,12 +74,12 @@ function DialogContent({
       <DialogOverlay className={overlayClassName} />
       <DialogContentPrimitive
         className={cn(
-          'bg-background fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg sm:max-w-lg',
+          'bg-background fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg',
           className,
         )}
-        initial={{ opacity: 0, scale: 0.95, y: '-48%' }}
-        animate={{ opacity: 1, scale: 1, y: '-50%' }}
-        exit={{ opacity: 0, scale: 0.95, y: '-48%' }}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
         {...props}
       >

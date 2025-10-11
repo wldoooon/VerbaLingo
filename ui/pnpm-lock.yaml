@@ -20,6 +20,9 @@ importers:
       '@icons-pack/react-simple-icons':
         specifier: ^13.7.0
         version: 13.7.0(react@19.1.0)
+      '@mantine/hooks':
+        specifier: ^8.3.3
+        version: 8.3.3(react@19.1.0)
       '@radix-ui/react-avatar':
         specifier: ^1.1.10
         version: 1.1.10(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -89,6 +92,9 @@ importers:
       katex:
         specifier: ^0.16.22
         version: 0.16.22
+      lodash.debounce:
+        specifier: ^4.0.8
+        version: 4.0.8
       lucide-react:
         specifier: ^0.525.0
         version: 0.525.0(react@19.1.0)
@@ -119,6 +125,9 @@ importers:
       react-dom:
         specifier: 19.1.0
         version: 19.1.0(react@19.1.0)
+      react-intersection-observer:
+        specifier: ^9.16.0
+        version: 9.16.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react-markdown:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@19.1.8)(react@19.1.0)
@@ -174,6 +183,9 @@ importers:
       '@tanstack/eslint-plugin-query':
         specifier: ^5.81.2
         version: 5.81.2(eslint@9.31.0(jiti@2.5.0))(typescript@5.8.3)
+      '@types/lodash.debounce':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/node':
         specifier: ^20
         version: 20.19.9
@@ -574,6 +586,11 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.29':
     resolution: {integrity: sha512-uw6guiW/gcAGPDhLmd77/6lW8QLeiV5RUTsAX46Db6oLhGaVj4lhnPwb184s1bkc8kdVg/+h988dro8GRDpmYQ==}
+
+  '@mantine/hooks@8.3.3':
+    resolution: {integrity: sha512-nmspxbFSjFkimRXYhgAujnyBwGeAWDSP1WKHFR+Yl5x3Q0IkmsiOTE9yJPjMjmjffZfunFXQFwQDl1OF3m42Pw==}
+    peerDependencies:
+      react: ^18.x || ^19.x
 
   '@mermaid-js/parser@0.6.2':
     resolution: {integrity: sha512-+PO02uGF6L6Cs0Bw8RpGhikVvMWEysfAyl27qTlroUB8jSWr1lL0Sf6zi78ZxlSnmgSY2AMMKVgghnN9jTtwkQ==}
@@ -1849,6 +1866,12 @@ packages:
 
   '@types/katex@0.16.7':
     resolution: {integrity: sha512-HMwFiRujE5PjrgwHQ25+bsLJgowjGjm5Z8FVSf0N6PwgJrwxH0QxzHYDcKsTfV3wva0vzrpqMTJS2jXPr5BMEQ==}
+
+  '@types/lodash.debounce@4.0.9':
+    resolution: {integrity: sha512-Ma5JcgTREwpLRwMM+XwBR7DaWe96nC38uCBDFKZWbNKD+osjVzdpnUSwBcqCptrp16sSOLBAUb50Car5I0TCsQ==}
+
+  '@types/lodash@4.17.20':
+    resolution: {integrity: sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==}
 
   '@types/mdast@4.0.4':
     resolution: {integrity: sha512-kGaNbPh1k7AFzgpud/gMdvIm5xuECykRR+JnWKQno9TAXVa6WIVCGTPvYGekIDL4uwCZQSYbUxNBSb1aUo79oA==}
@@ -3265,6 +3288,9 @@ packages:
   lodash-es@4.17.21:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
 
+  lodash.debounce@4.0.8:
+    resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
+
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
@@ -3725,6 +3751,15 @@ packages:
     resolution: {integrity: sha512-Xs1hdnE+DyKgeHJeJznQmYMIBG3TKIHJJT95Q58nHLSrElKlGQqDTR2HQ9fx5CN/Gk6Vh/kupBTDLU11/nDk/g==}
     peerDependencies:
       react: ^19.1.0
+
+  react-intersection-observer@9.16.0:
+    resolution: {integrity: sha512-w9nJSEp+DrW9KmQmeWHQyfaP6b03v+TdXynaoA964Wxt7mdR3An11z4NNCQgL4gKSK7y1ver2Fq+JKH6CWEzUA==}
+    peerDependencies:
+      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -4659,6 +4694,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.4
+
+  '@mantine/hooks@8.3.3(react@19.1.0)':
+    dependencies:
+      react: 19.1.0
 
   '@mermaid-js/parser@0.6.2':
     dependencies:
@@ -5686,7 +5725,7 @@ snapshots:
       '@internationalized/number': 3.6.5
       '@internationalized/string': 3.2.7
       '@react-aria/ssr': 3.9.10(react@19.1.0)
-      '@react-aria/utils': 3.30.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/utils': 3.31.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-types/shared': 3.32.1(react@19.1.0)
       '@swc/helpers': 0.5.15
       react: 19.1.0
@@ -5708,7 +5747,7 @@ snapshots:
       '@react-aria/i18n': 3.12.12(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-aria/interactions': 3.25.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-aria/ssr': 3.9.10(react@19.1.0)
-      '@react-aria/utils': 3.30.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@react-aria/utils': 3.31.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-aria/visually-hidden': 3.8.28(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@react-stately/overlays': 3.6.20(react@19.1.0)
       '@react-types/button': 3.14.1(react@19.1.0)
@@ -6080,6 +6119,12 @@ snapshots:
   '@types/json5@0.0.29': {}
 
   '@types/katex@0.16.7': {}
+
+  '@types/lodash.debounce@4.0.9':
+    dependencies:
+      '@types/lodash': 4.17.20
+
+  '@types/lodash@4.17.20': {}
 
   '@types/mdast@4.0.4':
     dependencies:
@@ -7731,6 +7776,8 @@ snapshots:
 
   lodash-es@4.17.21: {}
 
+  lodash.debounce@4.0.8: {}
+
   lodash.merge@4.6.2: {}
 
   longest-streak@3.1.0: {}
@@ -8491,6 +8538,12 @@ snapshots:
     dependencies:
       react: 19.1.0
       scheduler: 0.26.0
+
+  react-intersection-observer@9.16.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+    optionalDependencies:
+      react-dom: 19.1.0(react@19.1.0)
 
   react-is@16.13.1: {}
 

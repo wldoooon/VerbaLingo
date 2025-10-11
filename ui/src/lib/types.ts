@@ -4,6 +4,8 @@ export interface Clips {
   start_time: number;
   end_time: number;
   position: number;
+  category?: string;
+  video_title?: string;
 }
 
 export interface TranscriptLine {

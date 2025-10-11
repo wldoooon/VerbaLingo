@@ -40,8 +40,8 @@ export function HeaderToolbar({
         <ThemeToggleButton
           theme={theme as 'light' | 'dark'}
           onClick={handleThemeToggle}
-          variant="circle"
-          start="bottom-right"
+          variant="circle-blur"
+          start="top-right"
           className="h-8 w-8"
         />
       )}

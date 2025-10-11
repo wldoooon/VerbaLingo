@@ -4,13 +4,7 @@ import React from "react";
 import { EmblaOptionsType } from 'embla-carousel';
 import { 
   ChevronLeft,
-  ChevronRight,
-  TrendingUp,
-  BookOpen,
-  Globe,
-  Play,
-  Film,
-  Tv
+  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Carousel, {
@@ -37,24 +31,12 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
   return (
     <div className={cn("w-full", className)}>
       
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Content Categories</h2>
-            <p className="text-muted-foreground mt-1 text-base">Explore learning materials by type and genre</p>
-          </div>
-        </div>
-      </div>
-
       {/* Carousel */}
       <div className="relative">
         <Carousel options={OPTIONS} className="w-full" isAutoPlay={true}>
           <SliderContainer>
             <Slider className='w-full'>
-              <div className='relative md:h-[500px] sm:h-full h-[300px] w-full rounded-lg overflow-hidden'>
+              <div className='relative md:h-[600px] sm:h-full h-[400px] w-full rounded-lg overflow-hidden'>
                 {/* Background Image */}
                 <div 
                   className='absolute inset-0 bg-cover bg-center bg-no-repeat'
@@ -120,7 +102,7 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
               </div>
             </Slider>
             <Slider className='w-full'>
-              <div className='relative md:h-[500px] sm:h-full h-[300px] w-full rounded-lg overflow-hidden'>
+              <div className='relative md:h-[600px] sm:h-full h-[400px] w-full rounded-lg overflow-hidden'>
                 {/* Background Image */}
                 <div 
                   className='absolute inset-0 bg-cover bg-center bg-no-repeat'
@@ -187,16 +169,16 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
               </div>
             </Slider>
             <Slider className='w-full'>
-              <div className='bg-yellow-500 md:h-[500px] sm:h-full h-[300px] w-full rounded-lg'></div>
+              <div className='bg-yellow-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
             </Slider>
             <Slider className='w-full'>
-              <div className='bg-red-500 md:h-[500px] sm:h-full h-[300px] w-full rounded-lg'></div>
+              <div className='bg-red-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
             </Slider>
             <Slider className='w-full'>
-              <div className='bg-purple-500 md:h-[500px] sm:h-full h-[300px] w-full rounded-lg'></div>
+              <div className='bg-purple-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
             </Slider>
             <Slider className='w-full'>
-              <div className='bg-indigo-500 md:h-[500px] sm:h-full h-[300px] w-full rounded-lg'></div>
+              <div className='bg-indigo-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
             </Slider>
           </SliderContainer>
 
@@ -214,22 +196,9 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
             <SliderDotButton />
           </div>
         </Carousel>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="mt-8 flex items-center justify-center gap-12 text-base text-muted-foreground">
-        <div className="flex items-center gap-3">
-          <TrendingUp className="h-5 w-5" />
-          <span className="font-medium">50+ trending videos</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <BookOpen className="h-5 w-5" />
-          <span className="font-medium">12 languages available</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Globe className="h-5 w-5" />
-          <span className="font-medium">Updated daily</span>
-        </div>
+        
+        {/* Shadow Effect at Bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-card via-card/95 via-card/85 via-card/70 via-card/50 via-card/30 via-card/15 to-transparent pointer-events-none z-10"></div>
       </div>
     </div>
   );
