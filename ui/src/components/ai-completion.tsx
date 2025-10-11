@@ -129,11 +129,23 @@ export function AiCompletion() {
 
     return (
         <div className="w-full h-full flex flex-col">
-            <div className="relative w-full h-full flex flex-col bg-card rounded-2xl p-6 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border-x border-t">
+            <div className="relative w-full h-full flex flex-col bg-gradient-to-b from-red-500/10 via-red-500/5 to-card rounded-2xl p-6 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border-t">
                 {/* Top gradient border */}
                 <div className="absolute top-0 left-0 right-0 flex h-px">
                     <div className="w-1/2 bg-gradient-to-r from-transparent via-primary/50 to-primary"></div>
                     <div className="w-1/2 bg-gradient-to-l from-transparent via-primary/50 to-primary"></div>
+                </div>
+                
+                {/* Left vertical gradient border - fade from center to edges */}
+                <div className="absolute top-0 bottom-0 left-0 flex flex-col w-px">
+                    <div className="h-1/2 bg-gradient-to-t from-border to-transparent"></div>
+                    <div className="h-1/2 bg-gradient-to-b from-border to-transparent"></div>
+                </div>
+                
+                {/* Right vertical gradient border - fade from center to edges */}
+                <div className="absolute top-0 bottom-0 right-0 flex flex-col w-px">
+                    <div className="h-1/2 bg-gradient-to-t from-border to-transparent"></div>
+                    <div className="h-1/2 bg-gradient-to-b from-border to-transparent"></div>
                 </div>
                 
                 <header className="w-full flex-shrink-0">
