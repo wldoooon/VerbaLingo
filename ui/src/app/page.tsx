@@ -6,6 +6,7 @@ import { useSearch } from "@/lib/useApi"
 import { AppSidebar } from "@/components/app-sidebar"
 import SearchBar from "@/components/comm/SearchBar"
 import VideoPlayerCard from "@/components/comm/VideoPlayerCard"
+import AudioCard from "@/components/comm/AudioCard"
 import { AiCompletion } from "@/components/ai-completion"
 import { DiscoverySection } from "@/components/DiscoverySection"
 import { GameTicker } from "@/components/game-ticker"
@@ -106,8 +107,15 @@ export default function SearchPage() {
             ) : (
               /* Video Player and Transcript Section - shown when search results exist */
               <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-stretch lg:gap-2">
-                <div className="space-y-0">
-                  <VideoPlayerCard searchQuery={searchQuery} />
+                <div className="space-y-2">
+                  <VideoPlayerCard />
+                  <AudioCard 
+                    src={playlist[state.currentVideoIndex]?.video_id 
+                      ? `https://www.youtube.com/watch?v=${playlist[state.currentVideoIndex].video_id}` 
+                      : ""}
+                    title={playlist[state.currentVideoIndex]?.sentence_text ?? ""}
+                    searchQuery={searchQuery}
+                  />
                 </div>
                 <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0">
                   <AiCompletion />
