@@ -4,17 +4,13 @@ import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
-import { 
-  Pause, 
-  Play, 
-  SkipBack, 
-  SkipForward, 
+import {
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
   RotateCcw,
-  Volume2,
-  Share2,
-  Bookmark,
-  Settings,
-  Maximize2
+  Volume2
 } from "lucide-react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
@@ -194,7 +190,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           onClick={() => dispatch({ type: "PREV_VIDEO" })}
           aria-label="Previous clip"
         >
-          <SkipBack className="h-5 w-5" />
+          <SkipBack size={20} />
         </Button>
         
         <Button
@@ -204,7 +200,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           onClick={skipBackward}
           aria-label="Rewind 10 seconds"
         >
-          <RotateCcw className="h-5 w-5" />
+          <RotateCcw size={20} />
         </Button>
 
         <Button
@@ -219,7 +215,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           }}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? <Pause className="h-7 w-7" /> : <Play className="h-7 w-7 ml-1" />}
+          {isPlaying ? <Pause size={28} /> : <Play size={28} />}
         </Button>
 
         <Button
@@ -229,7 +225,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           onClick={skipForward}
           aria-label="Forward 10 seconds"
         >
-          <RotateCcw className="h-5 w-5 scale-x-[-1]" />
+          <RotateCcw size={20} className="scale-x-[-1]" />
         </Button>
 
         <Button
@@ -239,7 +235,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           onClick={() => dispatch({ type: "NEXT_VIDEO" })}
           aria-label="Next clip"
         >
-          <SkipForward className="h-5 w-5" />
+          <SkipForward size={20} />
         </Button>
       </div>
 
@@ -247,7 +243,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
       <div className="flex items-center justify-between gap-6">
         {/* Volume control */}
         <div className="flex items-center gap-3 flex-1 max-w-[200px]">
-          <Volume2 className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+          <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
           <Slider
             value={[volume]}
             max={100}
@@ -273,21 +269,6 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           ))}
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-2 flex-1 justify-end max-w-[200px]">
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-muted">
-            <Share2 className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-muted">
-            <Bookmark className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-muted">
-            <Settings className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-muted">
-            <Maximize2 className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
     </div>
   )
