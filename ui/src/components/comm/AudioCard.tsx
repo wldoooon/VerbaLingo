@@ -2,9 +2,16 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
-import { Pause, Play, ChevronLeft, ChevronRight } from "lucide-react"
-import ElasticSlider from "@/components/ElasticSlider"
+import {
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
+  RotateCcw,
+  Volume2
+} from "lucide-react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useTranscript, useSearch } from "@/lib/useApi"
@@ -55,12 +62,8 @@ function renderWordsWithHighlighting(
 }
 
 export default function AudioCard({ src, title, className, defaultRate = 1, searchQuery = "" }: AudioCardProps) {
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [duration, setDuration] = useState(0)
-  const [current, setCurrent] = useState(0)
   const [rate, setRate] = useState(defaultRate)
-  const [volume] = useState(50)
+  const [volume, setVolume] = useState(100)
   const { state, dispatch } = usePlayerContext()
   const { currentVideoIndex, currentTime } = state
   
@@ -78,101 +81,87 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
 
   const speeds = [1, 1.25, 1.5, 2]
 
+  // Get duration and playing state from window.playerToggleClip reference
+  // The YouTube player in VideoPlayerCard exposes these
+  const [duration, setDuration] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+
   useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-    audio.playbackRate = rate
+    // Poll for YouTube player state
+    const interval = setInterval(() => {
+      const player = (window as any).youtubePlayer
+      if (player && player.getDuration) {
+        const dur = player.getDuration()
+        if (dur > 0) setDuration(dur)
+        
+        const state = player.getPlayerState()
+        setIsPlaying(state === 1) // 1 = playing
+      }
+    }, 500)
+    
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    const player = (window as any).youtubePlayer
+    if (player && player.setPlaybackRate) {
+      player.setPlaybackRate(rate)
+    }
   }, [rate])
 
-  function togglePlay() {
-    const audio = audioRef.current
-    if (!audio) return
-    if (isPlaying) {
-      audio.pause()
-    } else {
-      audio.play().catch(() => {})
+  useEffect(() => {
+    const player = (window as any).youtubePlayer
+    if (player && player.setVolume) {
+      player.setVolume(volume)
     }
-    setIsPlaying(!isPlaying)
+  }, [volume])
+
+  function onSeek(value: number[]) {
+    const player = (window as any).youtubePlayer
+    if (player && player.seekTo) {
+      player.seekTo(value[0], true)
+    }
   }
 
-  function onLoaded() {
-    const audio = audioRef.current
-    if (!audio) return
-    setDuration(audio.duration || 0)
+  function skipBackward() {
+    const player = (window as any).youtubePlayer
+    if (player && player.seekTo) {
+      const newTime = Math.max(0, currentTime - 10)
+      player.seekTo(newTime, true)
+    }
   }
 
-  function onTimeUpdate() {
-    const audio = audioRef.current
-    if (!audio) return
-    setCurrent(audio.currentTime)
+  function skipForward() {
+    const player = (window as any).youtubePlayer
+    if (player && player.seekTo) {
+      const newTime = Math.min(duration, currentTime + 10)
+      player.seekTo(newTime, true)
+    }
   }
 
-  function onSeek(value: number) {
-    const audio = audioRef.current
-    if (!audio) return
-    audio.currentTime = value
-    setCurrent(value)
-  }
-
-  const remaining = Math.max(0, duration - current)
+  const remaining = Math.max(0, duration - currentTime)
 
   return (
-    <div className={cn("relative w-full rounded-[28px] bg-card text-foreground p-5 sm:p-6 shadow-lg border-2 border-border", className)}>
-      <audio
-        ref={audioRef}
-        src={src}
-        onLoadedMetadata={onLoaded}
-        onTimeUpdate={onTimeUpdate}
-        onEnded={() => setIsPlaying(false)}
-      />
-
-      {/* Top controls */}
-      <div className="flex items-center gap-3">
-        <div className="text-sm tabular-nums text-muted-foreground w-16">-{formatTime(remaining)}</div>
+    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-6 sm:p-8 pt-4 shadow-2xl", className)}>
+      {/* Progress slider at top with time markers */}
+      <div className="mb-2">
+        <div className="flex items-center justify-between text-sm font-medium text-muted-foreground mb-2">
+          <span className="tabular-nums">{formatTime(currentTime)}</span>
+          <span className="tabular-nums">-{formatTime(remaining)}</span>
+        </div>
+        <Slider
+          value={[currentTime]}
+          max={duration}
+          step={0.1}
+          onValueChange={onSeek}
+          className="cursor-pointer [&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+        />
       </div>
 
-      {/* Volume control docked on the right side */}
-      <div className="hidden sm:block absolute right-4 top-4 w-44">
-        <ElasticSlider defaultValue={volume} startingValue={0} maxValue={100} />
-      </div>
-
-      {/* Centered transport controls at top overlay */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-2 flex items-center gap-3 z-10">
-        <button
-          className="h-9 w-9 rounded-full bg-muted hover:bg-muted/80 grid place-items-center shadow"
-          onClick={() => dispatch({ type: "PREV_VIDEO" })}
-          aria-label="Previous clip"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-        <button
-          className="h-9 w-9 rounded-full bg-primary text-primary-foreground hover:opacity-90 grid place-items-center shadow"
-          onClick={() => {
-            try {
-              (window as any).playerToggleClip?.()
-              setIsPlaying((p) => !p)
-            } catch {
-              togglePlay()
-            }
-          }}
-          aria-label={isPlaying ? "Pause" : "Play"}
-        >
-          {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-        </button>
-        <button
-          className="h-9 w-9 rounded-full bg-muted hover:bg-muted/80 grid place-items-center shadow"
-          onClick={() => dispatch({ type: "NEXT_VIDEO" })}
-          aria-label="Next clip"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
-      </div>
-
-      {/* Title */}
-      <div className="mt-6">
-        <div className="text-center text-xl sm:text-2xl font-semibold leading-tight px-4">
+      {/* Transcript sentence with word highlighting */}
+      <div className="min-h-[80px] flex items-center justify-center">
+        <div className="text-center text-2xl sm:text-3xl md:text-4xl font-bold leading-relaxed px-6">
           {transcriptData && transcriptData.sentences.length > 0 ? (
-            // Find the sentence that matches the current clip
             (() => {
               const matchingSentence = transcriptData.sentences.find(
                 sentence => sentence.sentence_text === currentClip?.sentence_text
@@ -184,7 +173,6 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
                   searchQuery
                 )
               }
-              // Fallback to sentence text if no words available
               return currentClip?.sentence_text ?? title
             })()
           ) : (
@@ -193,20 +181,94 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
         </div>
       </div>
 
-      {/* Speeds */}
-      <div className="mt-4 flex items-center justify-center gap-8">
-        {speeds.map((s) => (
-          <button
-            key={s}
-            onClick={() => setRate(s)}
-            className={cn(
-              "text-base sm:text-lg font-semibold transition-colors",
-              rate === s ? "text-white" : "text-white/50 hover:text-white/80"
-            )}
-          >
-            {s}x
-          </button>
-        ))}
+      {/* Centered transport controls */}
+      <div className="flex items-center justify-center gap-4 mb-8">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-11 w-11 rounded-full hover:bg-muted"
+          onClick={() => dispatch({ type: "PREV_VIDEO" })}
+          aria-label="Previous clip"
+        >
+          <SkipBack size={20} />
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-11 w-11 rounded-full hover:bg-muted"
+          onClick={skipBackward}
+          aria-label="Rewind 10 seconds"
+        >
+          <RotateCcw size={20} />
+        </Button>
+
+        <Button
+          size="icon"
+          className="h-16 w-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-xl"
+          onClick={() => {
+            try {
+              (window as any).playerToggleClip?.()
+            } catch (e) {
+              console.error("Failed to toggle playback", e)
+            }
+          }}
+          aria-label={isPlaying ? "Pause" : "Play"}
+        >
+          {isPlaying ? <Pause size={28} /> : <Play size={28} />}
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-11 w-11 rounded-full hover:bg-muted"
+          onClick={skipForward}
+          aria-label="Forward 10 seconds"
+        >
+          <RotateCcw size={20} className="scale-x-[-1]" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-11 w-11 rounded-full hover:bg-muted"
+          onClick={() => dispatch({ type: "NEXT_VIDEO" })}
+          aria-label="Next clip"
+        >
+          <SkipForward size={20} />
+        </Button>
+      </div>
+
+      {/* Bottom row: Volume, Speed controls, and Action buttons */}
+      <div className="flex items-center justify-between gap-6">
+        {/* Volume control */}
+        <div className="flex items-center gap-3 flex-1 max-w-[200px]">
+          <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
+          <Slider
+            value={[volume]}
+            max={100}
+            step={1}
+            onValueChange={(val) => setVolume(val[0])}
+            className="cursor-pointer"
+          />
+        </div>
+
+        {/* Speed controls */}
+        <div className="flex items-center gap-5">
+          {speeds.map((s) => (
+            <button
+              key={s}
+              onClick={() => setRate(s)}
+              className={cn(
+                "text-base font-semibold transition-colors min-w-[40px]",
+                rate === s ? "text-red-500" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {s}x
+            </button>
+          ))}
+        </div>
+
       </div>
     </div>
   )

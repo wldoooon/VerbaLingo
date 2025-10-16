@@ -74,6 +74,8 @@ export function AiCompletion() {
     });
     const [inputValue, setInputValue] = useState("");
     const currentPromptRef = useRef<string>("");
+    const responseContainerRef = useRef<HTMLDivElement>(null);
+    const [maxResponseHeight, setMaxResponseHeight] = useState<number>(400);
     
     // Use our custom history hook
     const {
@@ -92,6 +94,31 @@ export function AiCompletion() {
     const shouldHideSuggestions = useMemo(() => {
         return isLoading;
     }, [isLoading]);
+
+    // Calculate available space dynamically
+    useEffect(() => {
+        const calculateMaxHeight = () => {
+            const container = responseContainerRef.current?.closest('.flex.flex-col') as HTMLElement;
+            if (!container) return;
+            
+            const containerHeight = container.clientHeight;
+            const header = container.querySelector('header');
+            const footer = container.querySelector('footer');
+            const suggestions = container.querySelector('[class*="suggestions"]');
+            
+            const headerHeight = header?.clientHeight || 0;
+            const footerHeight = footer?.clientHeight || 0;
+            const suggestionsHeight = !shouldHideSuggestions && suggestions?.clientHeight || 0;
+            
+            // Calculate available space (leaving some padding)
+            const availableSpace = containerHeight - headerHeight - footerHeight - suggestionsHeight - 100;
+            setMaxResponseHeight(Math.max(200, Math.min(availableSpace, 600)));
+        };
+
+        calculateMaxHeight();
+        window.addEventListener('resize', calculateMaxHeight);
+        return () => window.removeEventListener('resize', calculateMaxHeight);
+    }, [shouldHideSuggestions]);
 
     const handleSuggestionClick = (suggestion: SmartSuggestion) => {
         setInputValue(suggestion.prompt);
@@ -287,7 +314,7 @@ export function AiCompletion() {
                     </div>
                 </header>
 
-                <main className="w-full flex-1 flex flex-col mt-6 space-y-6 overflow-y-auto min-h-0">
+                <main className="w-full flex-1 flex flex-col mt-6 space-y-6 min-h-0">
                         {/* Suggestions */}
                         <AnimatePresence>
                             {!shouldHideSuggestions && (
@@ -295,7 +322,7 @@ export function AiCompletion() {
                                     initial={{ opacity: 1, height: "auto" }}
                                     exit={{ opacity: 0, height: 0 }}
                                     transition={{ duration: 0.3 }}
-                                    className="overflow-hidden"
+                                    className="overflow-hidden suggestions-container"
                                 >
                                     <div className="flex flex-wrap justify-center gap-3">
                                         {smartSuggestions.map((suggestion, i) => (
@@ -343,7 +370,7 @@ export function AiCompletion() {
                                     transition={{ duration: 0.5 }}
                                     className="w-full"
                                 >
-                                    <div className="relative bg-card rounded-xl p-6 text-left border-x">
+                                    <div ref={responseContainerRef} className="relative bg-card rounded-xl p-6 text-left border-x">
                                         {/* Top gradient border */}
                                         <div className="absolute top-0 left-0 right-0 flex h-px">
                                             <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
@@ -356,7 +383,8 @@ export function AiCompletion() {
                                             
                                             {/* Scrollable content */}
                                             <div 
-                                                className="max-h-96 overflow-y-auto text-card-foreground pr-8"
+                                                style={{ maxHeight: `${maxResponseHeight}px` }}
+                                                className="overflow-y-auto text-card-foreground pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
                                                 onScroll={(e) => {
                                                     const element = e.currentTarget;
                                                     const topBlur = document.getElementById('top-blur');
