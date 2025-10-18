@@ -20,7 +20,7 @@ type VideoPlayerCardProps = {
 }
 
 export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
-  const { state, dispatch } = usePlayerContext()
+  const { state, dispatch, playerRef, setPlayerState } = usePlayerContext()
   const { currentVideoIndex, isMuted } = state
   
   // Read playlist from React Query cache
@@ -28,7 +28,6 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
   const { data } = useSearch(query, category)
   const playlist = data?.hits || []
   
-  const playerRef = useRef<YouTubePlayer | null>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Defensive: clamp currentVideoIndex to valid range
@@ -41,7 +40,6 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
   const uniqueKey = `${currentVideoId}-${currentVideoIndex}-${rawStart}`
 
   const [ready, setReady] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
 
   useEffect(() => {
     setReady(false)
@@ -66,24 +64,33 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
     }
   }
 
-  const handleTogglePlay = () => {
-    if (playerRef.current) {
-      if (isPlaying) {
-        playerRef.current.pauseVideo()
-      } else {
-        playerRef.current.playVideo()
-      }
+  // Event handler: YouTube player state changed (playing/paused/etc)
+  const onPlayerStateChange = (event: { data: number }) => {
+    // YouTube player states:
+    // -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (cued)
+    const isNowPlaying = event.data === 1
+    
+    // Update context state (triggers re-renders in AudioCard and other consumers)
+    setPlayerState(prev => ({ ...prev, isPlaying: isNowPlaying }))
+    
+    // Start/stop polling for currentTime
+    if (isNowPlaying) {
+      startPolling()
+    } else {
+      stopPolling()
     }
   }
 
-  const onPlayerStateChange = (event: { data: number }) => {
-    if (event.data === 1) {
-      setIsPlaying(true)
-      startPolling()
-    } else {
-      setIsPlaying(false)
-      stopPolling()
-    }
+  // Event handler: YouTube player is ready
+  const onPlayerReady = (event: { target: YouTubePlayer }) => {
+    // Store player instance in context ref (no re-render)
+    playerRef.current = event.target
+    
+    // Get duration and update context state
+    const duration = event.target.getDuration()
+    setPlayerState(prev => ({ ...prev, duration }))
+    
+    setReady(true)
   }
 
   const opts = {
@@ -122,12 +129,7 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
             key={uniqueKey}
             videoId={currentVideoId}
             opts={opts}
-            onReady={(e) => {
-              playerRef.current = e.target
-              setReady(true)
-              ;(window as any).playerToggleClip = handleTogglePlay
-              ;(window as any).youtubePlayer = e.target
-            }}
+            onReady={onPlayerReady}
             onStateChange={onPlayerStateChange}
             className="absolute inset-0 w-full h-full"
             iframeClassName="w-full h-full"
