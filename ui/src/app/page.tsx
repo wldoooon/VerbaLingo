@@ -3,13 +3,13 @@
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useSearch } from "@/lib/useApi"
-import SearchBar from "@/components/comm/SearchBar"
 import VideoPlayerCard from "@/components/comm/VideoPlayerCard"
 import AudioCard from "@/components/comm/AudioCard"
 import { AiCompletion } from "@/components/ai-completion"
 import { DiscoverySection } from "@/components/DiscoverySection"
 import { GameTicker } from "@/components/game-ticker"
-import { HeaderToolbar } from "@/components/header-toolbar"
+import { Navigation } from "@/components/Navigation"
+import { SidebarCard } from "@/components/SidebarCard"
 import { useState, useEffect } from "react"
 
 export default function SearchPage() {
@@ -38,29 +38,16 @@ export default function SearchPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Full Width Header - Sticky at Top */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex h-16 items-center px-4 sm:px-6">
-          {/* Logo/Brand */}
-          <div className="flex items-center gap-3 mr-6">
-            <h1 className="text-xl font-bold text-foreground">VerbaLingo</h1>
-          </div>
+      {/* Navigation Header */}
+      <Navigation user={userData} />
 
-          {/* Search Bar - Centered, Wide */}
-          <div className="flex-1 max-w-3xl mx-auto">
-            <SearchBar />
-          </div>
+      {/* Main Content Area - Sidebar + Content */}
+      <main className="flex flex-1">
+        {/* Left Sidebar */}
+        <SidebarCard />
 
-          {/* Right Side - User Tools */}
-          <div className="ml-6">
-            <HeaderToolbar user={userData} />
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Area - Full Width */}
-      <main className="flex-1">
-        <div className="bg-card text-card-foreground shadow-sm flex-1 p-4 sm:p-6 pb-12 lg:pb-6">
+        {/* Main Content */}
+        <div className="flex-1 bg-card text-card-foreground shadow-sm p-4 sm:p-6 pb-12 lg:pb-6">
             {/* Content Section - Discovery Carousel or Video Player */}
             {playlist.length === 0 ? (
               /* Discovery Carousel - shown when no search results */
