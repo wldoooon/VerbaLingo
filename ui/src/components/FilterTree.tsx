@@ -101,7 +101,7 @@ export function FilterTree() {
       {/* Search Input */}
       <div className="relative">
         <Input
-          className="peer ps-9 h-9"
+          className="peer ps-9 h-9 rounded-xl"
           {...{
             ...tree.getSearchInputElementProps(),
             onChange: (e) => {
