@@ -165,7 +165,9 @@ export function FilterTree() {
                           ) : (
                             <FolderIcon className="pointer-events-none size-4 shrink-0 text-muted-foreground" />
                           ))}
-                        <span className="truncate">{item.getItemName()}</span>
+                        <span className={`truncate ${item.isFolder() ? 'font-semibold' : ''}`}>
+                          {item.getItemName()}
+                        </span>
                       </span>
                       {itemData.count !== undefined && (
                         <span className="text-xs text-muted-foreground shrink-0">
