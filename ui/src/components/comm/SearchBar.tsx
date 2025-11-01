@@ -4,9 +4,8 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Search, Clock, X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useSearch } from "@/lib/useApi"
-import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
+import { useRouter } from "next/navigation"
 
 // Categories for filtering
 const CATEGORIES = [
@@ -23,15 +22,11 @@ export default function SearchBar() {
   const [localCategory, setLocalCategory] = useState("General")
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const [isRouting, setIsRouting] = useState(false)
   const searchBarRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
   
-  const { query, category, setQuery, setCategory } = useSearchParams()
-  const { dispatch } = usePlayerContext()
-  
-  const { data, error, isLoading, refetch } = useSearch(
-    query,
-    category,
-  )
+  const { setQuery, setCategory } = useSearchParams()
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -94,6 +89,11 @@ export default function SearchBar() {
     setQuery(trimmedQuery)
     setCategory(selectedCategory)
     setShowSuggestions(false)
+
+    // Navigate to routed search page
+    const languageSegment = selectedCategory ?? "General"
+    setIsRouting(true)
+    router.push(`/search/${encodeURIComponent(trimmedQuery)}/${encodeURIComponent(languageSegment)}`)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -102,19 +102,7 @@ export default function SearchBar() {
     }
   }
 
-  useEffect(() => {
-    // Trigger search when query changes and it's not empty
-    if (query && query.trim()) {
-      refetch()
-    }
-  }, [query, category, refetch])
-
-  useEffect(() => {
-    if (data) {
-      // Reset video index when new search results arrive
-      dispatch({ type: "RESET_INDEX" })
-    }
-  }, [data, dispatch])
+  // With routed search, fetch happens on the search results page. No local fetching here.
 
   return (
     <div ref={searchBarRef} className="relative w-full">
@@ -148,11 +136,11 @@ export default function SearchBar() {
           }}
           onKeyPress={handleKeyPress}
           onFocus={() => setShowSuggestions(true)}
-          disabled={isLoading}
+          disabled={isRouting}
         />
         
         {/* Loading indicator inside the input */}
-        {isLoading && (
+        {isRouting && (
           <div className="absolute right-5 top-1/2 -translate-y-1/2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground"></div>
