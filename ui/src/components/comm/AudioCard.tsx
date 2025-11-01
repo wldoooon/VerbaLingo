@@ -230,7 +230,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
       {/* Transcript List - Scrollable Section */}
       <div 
         ref={scrollContainerRef}
-        className="max-h-[400px] overflow-y-auto rounded-2xl bg-muted/30 p-4 space-y-3 scroll-smooth"
+        className="max-h-[280px] overflow-y-auto rounded-2xl bg-muted/30 p-4 space-y-3 scroll-smooth scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/50"
       >
         {sentencesInClip.length > 0 ? (
           sentencesInClip.map((sentence: any, idx: number) => {
