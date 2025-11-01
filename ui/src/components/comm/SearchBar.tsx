@@ -168,6 +168,7 @@ export default function SearchBar() {
                 {recentSearches.map((search, idx) => (
                   <button
                     key={idx}
+                    type="button"
                     onClick={() => {
                       setLocalQuery(search)
                       handleSearch(search)
@@ -181,15 +182,25 @@ export default function SearchBar() {
                     )}
                   >
                     <span className="flex-1 truncate">{search}</span>
-                    <button
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Remove ${search} from recent searches`}
                       onClick={(e) => {
                         e.stopPropagation()
                         removeRecentSearch(search)
                       }}
-                      className="opacity-0 group-hover/item:opacity-100 p-1 hover:bg-destructive/10 rounded-md transition-opacity"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          removeRecentSearch(search)
+                        }
+                      }}
+                      className="opacity-0 group-hover/item:opacity-100 p-1 hover:bg-destructive/10 rounded-md transition-opacity cursor-pointer"
                     >
                       <X className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
-                    </button>
+                    </span>
                   </button>
                 ))}
               </div>

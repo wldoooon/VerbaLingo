@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="white overflow-x-hidden" style={{ fontSize: '85%' }}>
+    <html lang="en" suppressHydrationWarning  style={{fontSize: '90%'}}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=0.80, maximum-scale=1.0, user-scalable=yes" />
         <link rel="preconnect" href="https://www.youtube.com" />
@@ -25,7 +25,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://i.ytimg.com" />
         <link rel="dns-prefetch" href="https://s.ytimg.com" />
       </head>
-      <body className={`${inter.className} min-h-screen bg-transparent overflow-x-hidden`}>
+      <body
+        className={`${inter.className} white overflow-x-hidden min-h-screen bg-transparent`}
+        style={{ fontSize: '85%' }}
+        suppressHydrationWarning
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
