@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
@@ -24,13 +24,6 @@ type AudioCardProps = {
   searchQuery?: string
 }
 
-function formatTime(seconds: number) {
-  const s = Math.max(0, Math.floor(seconds))
-  const m = Math.floor(s / 60)
-  const rem = s % 60
-  return `${m}:${rem.toString().padStart(2, "0")}`
-}
-
 function renderWordsWithHighlighting(
   words: { text: string; start: number; end: number }[],
   currentTime: number,
@@ -41,9 +34,12 @@ function renderWordsWithHighlighting(
   }
 
   const query = searchQuery.toLowerCase().trim()
+  // Small lead to compensate for player time polling latency
+  const TIMING_LEAD_SECONDS = 0.08
+  const adjustedTime = currentTime + TIMING_LEAD_SECONDS
   
   return words.map((word, index) => {
-    const isCurrentWord = currentTime >= word.start && currentTime < word.end
+    const isCurrentWord = adjustedTime >= word.start && adjustedTime < word.end
     const isSearchMatch = query && word.text.toLowerCase().includes(query)
     
     return (
@@ -51,8 +47,8 @@ function renderWordsWithHighlighting(
         key={`${word.start}-${word.text}`}
         className={cn(
           "mr-2 transition-colors duration-20",
-          isCurrentWord && "bg-red-500 text-white px-1 rounded font-semibold",
-          isSearchMatch && !isCurrentWord && "bg-green-500 text-white px-1 rounded"
+          isCurrentWord && "border-5 border-red-500 px-1 rounded font-semibold",
+          isSearchMatch && !isCurrentWord && "bg-red-500 text-white px-1 rounded"
         )}
       >
         {word.text}
@@ -94,11 +90,6 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
     controls.setVolume(volume)
   }, [volume, controls])
 
-  // Seek handler using context controls
-  function onSeek(value: number[]) {
-    controls.seekTo(value[0])
-  }
-
   // Skip backward 10 seconds using context controls
   function skipBackward() {
     const newTime = Math.max(0, currentTime - 10)
@@ -120,24 +111,9 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
     }
   }
 
-  const remaining = Math.max(0, duration - currentTime)
-
   return (
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-6 sm:p-8 pt-4 shadow-2xl", className)}>
-      {/* Progress slider at top with time markers */}
-      <div className="mb-2">
-        <div className="flex items-center justify-between text-sm font-medium text-muted-foreground mb-2">
-          <span className="tabular-nums">{formatTime(currentTime)}</span>
-          <span className="tabular-nums">-{formatTime(remaining)}</span>
-        </div>
-        <Slider
-          value={[currentTime]}
-          max={duration}
-          step={0.1}
-          onValueChange={onSeek}
-          className="cursor-pointer [&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
-        />
-      </div>
+      {/* Top time markers removed as requested */}
 
       {/* Transcript sentence with word highlighting */}
       <div className="min-h-[80px] flex items-center justify-center">
