@@ -64,8 +64,11 @@ function renderWordsWithHighlighting(
 export default function AudioCard({ src, title, className, defaultRate = 1, searchQuery = "" }: AudioCardProps) {
   const [rate, setRate] = useState(defaultRate)
   const [volume, setVolume] = useState(100)
-  const { state, dispatch } = usePlayerContext()
+  
+  // Get player state and controls from context
+  const { state, dispatch, playerState, controls } = usePlayerContext()
   const { currentVideoIndex, currentTime } = state
+  const { isPlaying, duration } = playerState
   
   // Read playlist from React Query cache
   const { query, category } = useSearchParams()
@@ -81,61 +84,39 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
 
   const speeds = [1, 1.25, 1.5, 2]
 
-  // Get duration and playing state from window.playerToggleClip reference
-  // The YouTube player in VideoPlayerCard exposes these
-  const [duration, setDuration] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
-
+  // Sync playback rate with context controls
   useEffect(() => {
-    // Poll for YouTube player state
-    const interval = setInterval(() => {
-      const player = (window as any).youtubePlayer
-      if (player && player.getDuration) {
-        const dur = player.getDuration()
-        if (dur > 0) setDuration(dur)
-        
-        const state = player.getPlayerState()
-        setIsPlaying(state === 1) // 1 = playing
-      }
-    }, 500)
-    
-    return () => clearInterval(interval)
-  }, [])
+    controls.setPlaybackRate(rate)
+  }, [rate, controls])
 
+  // Sync volume with context controls
   useEffect(() => {
-    const player = (window as any).youtubePlayer
-    if (player && player.setPlaybackRate) {
-      player.setPlaybackRate(rate)
-    }
-  }, [rate])
+    controls.setVolume(volume)
+  }, [volume, controls])
 
-  useEffect(() => {
-    const player = (window as any).youtubePlayer
-    if (player && player.setVolume) {
-      player.setVolume(volume)
-    }
-  }, [volume])
-
+  // Seek handler using context controls
   function onSeek(value: number[]) {
-    const player = (window as any).youtubePlayer
-    if (player && player.seekTo) {
-      player.seekTo(value[0], true)
-    }
+    controls.seekTo(value[0])
   }
 
+  // Skip backward 10 seconds using context controls
   function skipBackward() {
-    const player = (window as any).youtubePlayer
-    if (player && player.seekTo) {
-      const newTime = Math.max(0, currentTime - 10)
-      player.seekTo(newTime, true)
-    }
+    const newTime = Math.max(0, currentTime - 10)
+    controls.seekTo(newTime)
   }
 
+  // Skip forward 10 seconds using context controls
   function skipForward() {
-    const player = (window as any).youtubePlayer
-    if (player && player.seekTo) {
-      const newTime = Math.min(duration, currentTime + 10)
-      player.seekTo(newTime, true)
+    const newTime = Math.min(duration, currentTime + 10)
+    controls.seekTo(newTime)
+  }
+
+  // Toggle play/pause using context controls
+  function togglePlayPause() {
+    if (isPlaying) {
+      controls.pause()
+    } else {
+      controls.play()
     }
   }
 
@@ -206,13 +187,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
         <Button
           size="icon"
           className="h-16 w-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-xl"
-          onClick={() => {
-            try {
-              (window as any).playerToggleClip?.()
-            } catch (e) {
-              console.error("Failed to toggle playback", e)
-            }
-          }}
+          onClick={togglePlayPause}
           aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? <Pause size={28} /> : <Play size={28} />}

@@ -3,15 +3,13 @@
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useSearch } from "@/lib/useApi"
-import { AppSidebar } from "@/components/app-sidebar"
-import SearchBar from "@/components/comm/SearchBar"
 import VideoPlayerCard from "@/components/comm/VideoPlayerCard"
 import AudioCard from "@/components/comm/AudioCard"
 import { AiCompletion } from "@/components/ai-completion"
 import { DiscoverySection } from "@/components/DiscoverySection"
 import { GameTicker } from "@/components/game-ticker"
-import { HeaderToolbar } from "@/components/header-toolbar"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { Navigation } from "@/components/Navigation"
+import { SidebarCard } from "@/components/SidebarCard"
 import { useState, useEffect } from "react"
 
 export default function SearchPage() {
@@ -39,42 +37,17 @@ export default function SearchPage() {
   };
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <div className="flex flex-1 flex-col">
-          {/* Mobile Header with Sidebar Toggle */}
-          <div className="flex items-center justify-between gap-2 p-4 lg:hidden border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
-            <div className="flex items-center gap-3">
-              <SidebarTrigger className="size-8 hover:bg-accent hover:text-accent-foreground" />
-              <h1 className="text-lg font-semibold text-foreground">VerbaLingo</h1>
-            </div>
-            <HeaderToolbar user={userData} />
-          </div>
-          
-          {/* Search Header */}
-          <div className="relative bg-card p-2 sm:p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 flex-1">
-                <div className="hidden lg:block">
-                  <SidebarTrigger className="size-8 hover:bg-accent hover:text-accent-foreground" />
-                </div>
-                <div className="basis-1/2 max-w-[50%]">
-                  <SearchBar />
-                </div>
-              </div>
-              <div className="hidden lg:block">
-                <HeaderToolbar user={userData} />
-              </div>
-            </div>
-            {/* Gradient border bottom */}
-            <div className="absolute bottom-0 left-0 right-0 flex h-px">
-              <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-              <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-            </div>
-          </div>
-          
-          <div className="bg-card text-card-foreground shadow-sm flex-1 p-4 sm:p-6 pb-12 lg:pb-6">
+    <div className="flex flex-col min-h-screen">
+      {/* Navigation Header */}
+      <Navigation user={userData} />
+
+      {/* Main Content Area - Sidebar + Content */}
+      <main className="flex flex-1">
+        {/* Left Sidebar */}
+        <SidebarCard />
+
+        {/* Main Content */}
+        <div className="flex-1 bg-card text-card-foreground shadow-sm p-4 sm:p-6 pb-12 lg:pb-6">
             {/* Content Section - Discovery Carousel or Video Player */}
             {playlist.length === 0 ? (
               /* Discovery Carousel - shown when no search results */
@@ -123,9 +96,7 @@ export default function SearchPage() {
               </div>
             )}
           </div>
-        </div>
-      </SidebarInset>
-      
-    </SidebarProvider>
+      </main>
+    </div>
   )
 }
