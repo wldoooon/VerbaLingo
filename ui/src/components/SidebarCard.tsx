@@ -6,10 +6,10 @@ import { Separator } from "@/components/ui/separator"
 import { useState } from "react"
 
 export function SidebarCard() {
-  const [isStudyHubOpen, setIsStudyHubOpen] = useState(false)
+  const [isStudyHubOpen, setIsStudyHubOpen] = useState(true)
 
   return (
-    <aside className="hidden lg:block w-[290px] bg-card sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+    <aside className="hidden lg:block w-[290px] bg-card sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto">
       <div className="relative h-full">
         <div className="p-4 h-full flex flex-col gap-4">
           <div className="flex items-center gap-2 text-base font-medium px-3 py-2 rounded-xl hover:bg-accent transition-colors cursor-pointer">

@@ -16,10 +16,10 @@ export function Navigation({ user }: NavigationProps) {
   return (
     <header className="sticky top-0 z-50 w-full bg-card">
       <div className="relative">
-        <div className="flex h-16 items-center px-4 sm:px-6 gap-4">
+        <div className="flex h-20 items-center px-4 sm:px-6 gap-4">
           {/* Logo/Brand */}
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-foreground">VerbaLingo</h1>
+            <h1 className="text-2xl font-bold text-foreground">VerbaLingo</h1>
           </div>
 
           {/* Navigation Menu */}
