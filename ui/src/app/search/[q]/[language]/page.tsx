@@ -25,10 +25,12 @@ export default function RoutedSearchPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   // Use a dedicated query instance here and manually fetch on mount
-  const { data, refetch } = useSearch(q, categoryForContext)
+  const { data, refetch, isFetching } = useSearch(q, categoryForContext)
   const playlist = useMemo(() => data?.hits || [], [data])
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     // Sync URL params into global search context
     setQuery(q)
     setCategory(categoryForContext)
@@ -74,20 +76,34 @@ export default function RoutedSearchPage() {
         <div className="flex-1 bg-card text-card-foreground shadow-sm p-4 sm:p-6 pb-12 lg:pb-6">
           {/* Always render the player+AI layout for routed search */}
           <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-stretch lg:gap-2">
+            {/* Left: Player + Audio */}
             <div className="space-y-2">
-              <VideoPlayerCard />
-              <AudioCard
-                src={
-                  playlist[state.currentVideoIndex]?.video_id
-                    ? `https://www.youtube.com/watch?v=${playlist[state.currentVideoIndex].video_id}`
-                    : ""
-                }
-                title={playlist[state.currentVideoIndex]?.sentence_text ?? ""}
-                searchQuery={searchQuery}
-              />
+              {mounted ? (
+                <>
+                  <VideoPlayerCard />
+                  <AudioCard
+                    src={
+                      playlist[state.currentVideoIndex]?.video_id
+                        ? `https://www.youtube.com/watch?v=${playlist[state.currentVideoIndex].video_id}`
+                        : ""
+                    }
+                    title={playlist[state.currentVideoIndex]?.sentence_text ?? ""}
+                    searchQuery={searchQuery}
+                  />
+                </>
+              ) : (
+                // Skeleton to keep SSR/CSR identical on first paint
+                <div className="w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] rounded-2xl bg-muted/30 animate-pulse" />
+              )}
             </div>
+
+            {/* Right: AI */}
             <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0">
-              <AiCompletion />
+              {mounted ? (
+                <AiCompletion />
+              ) : (
+                <div className="w-full h-[400px] rounded-2xl bg-muted/30 animate-pulse" />
+              )}
             </div>
           </div>
         </div>

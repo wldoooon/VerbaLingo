@@ -82,12 +82,9 @@ export default function SearchBar() {
     // Save to recent searches
     saveToRecentSearches(queryToSearch)
     
-    // Update global search params first
+    // Compute language segment for the routed page
     const trimmedQuery = queryToSearch.trim()
     const selectedCategory = localCategory === "General" ? null : localCategory
-    
-    setQuery(trimmedQuery)
-    setCategory(selectedCategory)
     setShowSuggestions(false)
 
     // Navigate to routed search page
