@@ -123,13 +123,11 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
     }
   }
 
-  // Get all sentences in the clip window
-  const clipStart = typeof currentClip?.start_time === 'number' ? currentClip.start_time : 0
-  const clipEnd = typeof currentClip?.end_time === 'number' ? currentClip.end_time : clipStart + 12
+  // Get ALL sentences from the transcript (not just the clip window)
+  const allSentences = transcriptData?.sentences || []
   
-  const sentencesInClip = transcriptData?.sentences
-    ?.filter((s: any) => s.end_time > clipStart && s.start_time < clipEnd)
-    .sort((a: any, b: any) => a.start_time - b.start_time) || []
+  // Sort by start time
+  const sentencesInClip = [...allSentences].sort((a: any, b: any) => a.start_time - b.start_time)
 
   // Auto-scroll to active sentence
   useEffect(() => {
