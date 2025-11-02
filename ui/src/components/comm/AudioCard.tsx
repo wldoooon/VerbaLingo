@@ -14,7 +14,7 @@ import {
 } from "lucide-react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
-import { useTranscript, useSearch } from "@/lib/useApi"
+import { useTranscript, useSearch, useTranslate } from "@/lib/useApi"
 
 type AudioCardProps = {
   src: string
@@ -262,14 +262,16 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
         
         <div 
           ref={scrollContainerRef}
-          className="max-h-[200px] overflow-y-auto rounded-2xl bg-muted/30 p-4 space-y-3 scroll-smooth scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/50"
+          className="max-h-[200px] overflow-y-auto rounded-2xl bg-muted/30 px-4 space-y-3 scroll-smooth scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/50 flex flex-col justify-center items-center"
         >
+          {/* Spacer to push content to center */}
+          <div className="flex-1 min-h-[60px]"></div>
+          
           {sentencesInClip.length > 0 ? (
             sentencesInClip.map((sentence: any, idx: number) => {
               const TIMING_LEAD = 0.08
-              const SENTENCE_END_OFFSET = 0.5 // End sentence 200ms earlier for smoother transitions
               const adjustedTime = currentTime + TIMING_LEAD
-              const isActive = adjustedTime >= sentence.start_time + 0.9 && adjustedTime < (sentence.end_time - SENTENCE_END_OFFSET)
+              const isActive = adjustedTime >= sentence.start_time - 0.7 && adjustedTime < (sentence.end_time - 0.9)
               const isTargetSentence = targetSentence && sentence.start_time === targetSentence.start_time
               
               return (
@@ -310,6 +312,8 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
                       })
                     })()}
                   </div>
+                  {/* Translated version (Arabic) under the sentence */}
+                  <SentenceTranslation text={sentence.sentence_text} source="en" target="ar" />
                 </div>
               )
             })
@@ -318,11 +322,36 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
               <p>{currentClip?.sentence_text ?? title}</p>
             </div>
           )}
+          
+          {/* Spacer to push content to center */}
+          <div className="flex-1 min-h-[60px]"></div>
         </div>
         
         {/* Bottom fade overlay */}
         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 rounded-b-2xl" />
       </div>
+    </div>
+  )
+}
+
+// Child component to fetch and render translation under a sentence
+const SentenceTranslation = ({
+  text,
+  source = "en",
+  target = "ar",
+}: { text: string; source?: string; target?: string }) => {
+  const { data, isLoading, isError } = useTranslate(text, source, target)
+
+  if (!text) return null
+  if (isLoading) {
+    return <div className="text-sm text-muted-foreground mt-2">Translating…</div>
+  }
+  if (isError || !data?.translated) {
+    return <div className="text-sm text-muted-foreground mt-2">Translation unavailable</div>
+  }
+  return (
+    <div className="text-sm text-muted-foreground mt-2" dir="auto" aria-label="Translated sentence">
+      {data.translated}
     </div>
   )
 }
