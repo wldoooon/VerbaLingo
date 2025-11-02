@@ -140,20 +140,31 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
     return query && text.toLowerCase().includes(query)
   })
 
-  // Auto-scroll to target sentence on mount, then scroll to active sentence during playback
+  // Auto-scroll to target sentence on mount - CONSTRAINED to transcript box only
   useEffect(() => {
     if (targetSentenceRef.current && scrollContainerRef.current && !hasScrolledToTarget.current) {
-      // Scroll to target sentence first
-      targetSentenceRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
+      // Calculate scroll position manually to avoid affecting global scroll
+      const container = scrollContainerRef.current
+      const target = targetSentenceRef.current
+      
+      const containerRect = container.getBoundingClientRect()
+      const targetRect = target.getBoundingClientRect()
+      
+      // Calculate the offset within the container
+      const relativeTop = targetRect.top - containerRect.top + container.scrollTop
+      const scrollTo = relativeTop - (container.clientHeight / 2) + (targetRect.height / 2)
+      
+      // Scroll ONLY the container, not the page
+      container.scrollTo({
+        top: scrollTo,
+        behavior: 'smooth'
       })
+      
       hasScrolledToTarget.current = true
       
       // Start playback after scroll completes (500ms delay)
       setTimeout(() => {
         if (!isPlaying && targetSentence) {
-          // Seek to the target sentence start time
           controls.seekTo(targetSentence.start_time)
           controls.play()
         }
@@ -161,12 +172,23 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
     }
   }, [targetSentence, scrollContainerRef, controls, isPlaying])
 
-  // Auto-scroll to active sentence during playback
+  // Auto-scroll to active sentence during playback - CONSTRAINED to transcript box only
   useEffect(() => {
     if (activeSentenceRef.current && scrollContainerRef.current && isPlaying) {
-      activeSentenceRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
+      const container = scrollContainerRef.current
+      const active = activeSentenceRef.current
+      
+      const containerRect = container.getBoundingClientRect()
+      const activeRect = active.getBoundingClientRect()
+      
+      // Calculate the offset within the container
+      const relativeTop = activeRect.top - containerRect.top + container.scrollTop
+      const scrollTo = relativeTop - (container.clientHeight / 2) + (activeRect.height / 2)
+      
+      // Scroll ONLY the container, not the page
+      container.scrollTo({
+        top: scrollTo,
+        behavior: 'smooth'
       })
     }
   }, [currentTime, isPlaying])
@@ -296,15 +318,15 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
                         const wordNodes = words.map((w, wi) => {
                           const wordText = (w.text || '').trim()
                           // Simple, robust window: active while time is within the word bounds
-                          const isCurrentWord = adjustedTime >= w.start - 0.4 && adjustedTime < w.end - 0.9
+                          const isCurrentWord = adjustedTime >= w.start - 0.7 && adjustedTime < w.end - 0.9
                           const isSearchMatch = !!query && wordText.toLowerCase().includes(query)
                           return (
                             <span
                               key={`${w.start}-${wi}`}
                               className={cn(
-                                "mr-2 transition-colors duration-150",
+                                "mr-2 transition-all duration-300 ease-in-out",
                                 isSearchMatch && !isCurrentWord && "bg-red-500 text-white px-1 rounded",
-                                isCurrentWord && "ring-2 ring-red-500 ring-offset-2 ring-offset-muted px-1 rounded"
+                                isCurrentWord && "ring-2 ring-red-500 ring-offset-2 ring-offset-muted px-1 rounded font-medium"
                               )}
                             >
                               {wordText || '\u00A0'}
