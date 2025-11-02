@@ -55,7 +55,7 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
       if (typeof currentTime === 'number') {
         dispatch({ type: 'SET_CURRENT_TIME', payload: currentTime })
       }
-    }, 250)
+    }, 100)
   }
 
   const stopPolling = () => {

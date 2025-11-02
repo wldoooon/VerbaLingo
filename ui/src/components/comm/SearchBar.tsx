@@ -1,63 +1,96 @@
-"use client"
+﻿"use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
-import { Check, ChevronsUpDown, Search, Languages } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { Search, Clock, X } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/animate-ui/components/radix/dialog"
-import { useSearch } from "@/lib/useApi"
-import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
+import { useRouter } from "next/navigation"
+
+// Categories for filtering
+const CATEGORIES = [
+  { value: "General", label: "General" },
+  { value: "Movies", label: "Movies" },
+  { value: "TV", label: "TV Shows" },
+  { value: "Games", label: "Games" },
+  { value: "Books", label: "Books" },
+  { value: "Music", label: "Music" },
+] // Force rebuild 🚀
 
 export default function SearchBar() {
-  const [open, setOpen] = useState(false)
   const [localQuery, setLocalQuery] = useState("")
   const [localCategory, setLocalCategory] = useState("General")
-  const [language, setLanguage] = useState("English")
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const [isRouting, setIsRouting] = useState(false)
+  const searchBarRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
   
-  const { query, category, setQuery, setCategory } = useSearchParams()
-  const { dispatch } = usePlayerContext()
-  
-  const { data, error, isLoading, refetch } = useSearch(
-    query,
-    category,
-  )
+  const { setQuery, setCategory } = useSearchParams()
 
-  const categories = [
-    { value: "General", label: "General" },
-    { value: "movies", label: "Movies" },
-    { value: "tv", label: "TV Shows" },
-    { value: "games", label: "Games" },
-    { value: "books", label: "Books" },
-    { value: "music", label: "Music" },
-  ]
+  // Load recent searches from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('recent_searches')
+      if (stored) {
+        setRecentSearches(JSON.parse(stored))
+      }
+    } catch {}
+  }, [])
 
-  const languages = [
-    { value: "English", label: "English" },
-    { value: "Spanish", label: "Spanish" },
-    { value: "French", label: "French" },
-    { value: "German", label: "German" },
-    { value: "Japanese", label: "Japanese" },
-  ]
+  // Click outside handler to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchBarRef.current && !searchBarRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
 
-  const handleSearch = () => {
-    if (!localQuery.trim()) {
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const saveToRecentSearches = (searchQuery: string) => {
+    try {
+      const trimmed = searchQuery.trim()
+      if (!trimmed) return
+      
+      const updated = [trimmed, ...recentSearches.filter(s => s !== trimmed)].slice(0, 5)
+      setRecentSearches(updated)
+      localStorage.setItem('recent_searches', JSON.stringify(updated))
+    } catch {}
+  }
+
+  const removeRecentSearch = (searchQuery: string) => {
+    try {
+      const updated = recentSearches.filter(s => s !== searchQuery)
+      setRecentSearches(updated)
+      localStorage.setItem('recent_searches', JSON.stringify(updated))
+    } catch {}
+  }
+
+  const handleSearch = (searchQuery?: string) => {
+    const queryToSearch = searchQuery || localQuery
+    if (!queryToSearch.trim()) {
       return
     }
+    
     try {
-      localStorage.setItem('last_search_query', localQuery.trim())
+      localStorage.setItem('last_search_query', queryToSearch.trim())
     } catch {}
     
-    // Update global search params first
-    const trimmedQuery = localQuery.trim()
-    const selectedCategory = localCategory === "General" ? null : localCategory
+    // Save to recent searches
+    saveToRecentSearches(queryToSearch)
     
-    setQuery(trimmedQuery)
-    setCategory(selectedCategory)
+    // Compute language segment for the routed page
+    const trimmedQuery = queryToSearch.trim()
+    const selectedCategory = localCategory === "General" ? null : localCategory
+    setShowSuggestions(false)
+
+    // Navigate to routed search page
+    const languageSegment = selectedCategory ?? "General"
+    setIsRouting(true)
+    router.push(`/search/${encodeURIComponent(trimmedQuery)}/${encodeURIComponent(languageSegment)}`)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -66,184 +99,144 @@ export default function SearchBar() {
     }
   }
 
-  useEffect(() => {
-    // Trigger search when query changes and it's not empty
-    if (query && query.trim()) {
-      refetch()
-    }
-  }, [query, category, refetch])
-
-  useEffect(() => {
-    if (data) {
-      // Reset video index when new search results arrive
-      dispatch({ type: "RESET_INDEX" })
-      // Close dialog after a successful search
-      if (data.hits.length > 0) {
-        setOpen(false)
-      }
-    }
-  }, [data, dispatch])
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setOpen((open) => !open)
-      }
-    }
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [])
+  // With routed search, fetch happens on the search results page. No local fetching here.
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-full h-10 justify-between text-muted-foreground cursor-text hover:bg-transparent hover:text-muted-foreground rounded-full">
-          Search for a word...
-          <div className="flex items-center gap-2">
-            <Search className="h-4 w-4" />
-            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-              <span className="text-xs">⌘</span>K
-            </kbd>
-          </div>
-        </Button>
-      </DialogTrigger>
-      <DialogContent
-        className="p-6 gap-0 max-w-lg rounded-2xl overflow-hidden shadow-2xl"
-        overlayClassName="backdrop-blur-md bg-black/60"
-        showCloseButton={false}
-      >
-        <DialogTitle className="sr-only">Search for video clips</DialogTitle>
-        <div className="flex flex-col gap-4">
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Search for a word..."
-              className="w-full h-12 pr-10 text-base rounded-full"
-              value={localQuery}
-              onChange={(e) => setLocalQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
-              autoFocus
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <Search className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </div>
-          
-          {isLoading && <p className="text-sm text-muted-foreground text-center">Searching...</p>}
-          {error && <p className="text-center text-sm text-destructive">{error.message}</p>}
-          {data && !isLoading && (
-            <div className="w-full flex flex-col gap-4">
-              <p className="text-sm text-muted-foreground text-center">
-                Found <span className="font-bold text-foreground">{data.total}</span> clips.
-              </p>
-              <div className="flex items-center justify-center gap-4">
-                <CategoryPicker categories={categories} value={localCategory} onChange={setLocalCategory} />
-                <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
-              </div>
-            </div>
-          )}
-          {!isLoading && !error && !data && (
-            <div className="text-center text-sm text-muted-foreground">
-              <p className="mb-2">Enter a word to find video clips.</p>
-              <div className="flex items-center justify-center gap-4">
-                <CategoryPicker categories={categories} value={localCategory} onChange={setLocalCategory} />
-                <LanguagePicker languages={languages} value={language} onChange={setLanguage} />
-              </div>
-            </div>
-          )}
+    <div ref={searchBarRef} className="relative w-full">
+      {/* Fab.com-style Search Bar - Larger & More Visible */}
+      <div className="relative group">
+        <div className="absolute left-5 top-1/2 -translate-y-1/2 z-10">
+          <Search className="h-5 w-5 text-muted-foreground/70" />
         </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
+        <input
+          type="text"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-haspopup="true"
+          aria-expanded={showSuggestions}
+          placeholder="Search for a word..."
+          className={cn(
+            "w-full h-12 pl-14 pr-5 text-base",
+            "rounded-full",
+            "bg-card/90 backdrop-blur-md",
+            "border border-border/60",
+            "text-foreground placeholder:text-muted-foreground/70",
+            "transition-all duration-200",
+            "focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50",
+            "hover:bg-background hover:border-border/80",
+            "shadow-sm hover:shadow-md focus:shadow-lg"
+          )}
+          value={localQuery}
+          onChange={(e) => {
+            setLocalQuery(e.target.value)
+            setShowSuggestions(true)
+          }}
+          onKeyPress={handleKeyPress}
+          onFocus={() => setShowSuggestions(true)}
+          disabled={isRouting}
+        />
+        
+        {/* Loading indicator inside the input */}
+        {isRouting && (
+          <div className="absolute right-5 top-1/2 -translate-y-1/2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground"></div>
+              <span>Searching...</span>
+            </div>
+          </div>
+        )}
+      </div>
 
-type Item = { value: string; label: string }
-
-function CategoryPicker({ categories, value, onChange }: { categories: Item[]; value: string; onChange: (value: string) => void }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="text-xs text-muted-foreground">Category</span>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            role="combobox"
-            aria-expanded={open}
-            className="flex shrink-0 items-center rounded-full bg-background border px-2 py-1 text-xs font-semibold text-foreground cursor-pointer"
-          >
-            {value}
-            <ChevronsUpDown className="ml-1 h-3 w-3 opacity-50" />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[180px] p-0">
-          <Command>
-            <CommandInput placeholder="Filter..." className="h-9" />
-            <CommandList>
-              <CommandEmpty>No category found.</CommandEmpty>
-              <CommandGroup>
-                {categories.map((cat) => (
-                  <CommandItem
-                    key={cat.value}
-                    value={cat.value}
-                    onSelect={() => {
-                      onChange(cat.label)
-                      setOpen(false)
+      {/* Fab-Style Suggestions Dropdown with Glassmorphism */}
+      {showSuggestions && (
+        <div className={cn(
+          "absolute top-full left-0 right-0 mt-2 z-50",
+          "bg-popover/80 backdrop-blur-xl",
+          "border border-border/50",
+          "rounded-2xl shadow-xl",
+          "overflow-hidden",
+          "animate-in fade-in-0 zoom-in-95 duration-200"
+        )}>
+          {/* Recent Searches Section */}
+          {recentSearches.length > 0 && (
+            <div className="p-3 border-b border-border/30">
+              <div className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <Clock className="h-3.5 w-3.5" />
+                Recent Searches
+              </div>
+              <div className="space-y-1">
+                {recentSearches.map((search, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setLocalQuery(search)
+                      handleSearch(search)
                     }}
+                    className={cn(
+                      "w-full flex items-center justify-between gap-3",
+                      "px-4 py-2.5 rounded-xl",
+                      "text-sm text-foreground text-left",
+                      "hover:bg-accent/50 transition-colors duration-150",
+                      "group/item"
+                    )}
                   >
-                    {cat.label}
-                    <Check className={cn("ml-auto h-4 w-4", value === cat.label ? "opacity-100" : "opacity-0")} />
-                  </CommandItem>
+                    <span className="flex-1 truncate">{search}</span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Remove ${search} from recent searches`}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        removeRecentSearch(search)
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          removeRecentSearch(search)
+                        }
+                      }}
+                      className="opacity-0 group-hover/item:opacity-100 p-1 hover:bg-destructive/10 rounded-md transition-opacity cursor-pointer"
+                    >
+                      <X className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                    </span>
+                  </button>
                 ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
-  )
-}
+              </div>
+            </div>
+          )}
 
-function LanguagePicker({ languages, value, onChange }: { languages: Item[]; value: string; onChange: (value: string) => void }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div className="flex items-center gap-1.5">
-      <Languages className="w-3.5 h-3.5 text-muted-foreground" />
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            role="combobox"
-            aria-expanded={open}
-            className="flex shrink-0 items-center rounded-full bg-background border px-2 py-1 text-xs font-semibold text-foreground cursor-pointer"
-          >
-            {value}
-            <ChevronsUpDown className="ml-1 h-3 w-3 opacity-50" />
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[180px] p-0">
-          <Command>
-            <CommandInput placeholder="Filter..." className="h-9" />
-            <CommandList>
-              <CommandEmpty>No language found.</CommandEmpty>
-              <CommandGroup>
-                {languages.map((lang) => (
-                  <CommandItem
-                    key={lang.value}
-                    value={lang.value}
-                    onSelect={() => {
-                      onChange(lang.label)
-                      setOpen(false)
-                    }}
-                  >
-                    {lang.label}
-                    <Check className={cn("ml-auto h-4 w-4", value === lang.label ? "opacity-100" : "opacity-0")} />
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+          {/* Category Filters Section */}
+          <div className="p-4">
+            <div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Filter by Category
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat.value}
+                  onClick={() => {
+                    setLocalCategory(cat.value)
+                    if (localQuery.trim()) {
+                      handleSearch()
+                    }
+                  }}
+                  className={cn(
+                    "px-4 py-2 rounded-full text-sm font-medium",
+                    "border transition-all duration-200",
+                    localCategory === cat.value
+                      ? "bg-primary text-primary-foreground border-primary shadow-md"
+                      : "bg-background/50 text-foreground border-border/40 hover:bg-accent/50 hover:border-border/60"
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
