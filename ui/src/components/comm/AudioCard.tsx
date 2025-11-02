@@ -325,10 +325,10 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
                 return adjustedTime >= s.start_time - 0.7 && adjustedTime < (s.end_time - 0.9)
               })
               
-              // Only render sentences within ±10 of active sentence
+              // Only render active sentence + 1 before + 1 after (3 total)
               if (activeSentenceIdx !== -1) {
                 const distance = Math.abs(idx - activeSentenceIdx)
-                if (distance > 10) return null
+                if (distance > 1) return null
               }
               
               return (
