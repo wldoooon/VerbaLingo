@@ -14,7 +14,8 @@ import {
 } from "lucide-react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
-import { useTranscript, useSearch, useTranslate } from "@/lib/useApi"
+import { useTranscript, useSearch } from "@/lib/useApi"
+import type { TranscriptSentence } from "@/lib/types"
 
 type AudioCardProps = {
   src: string
@@ -280,29 +281,51 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
                   ref={isActive ? activeSentenceRef : (isTargetSentence ? targetSentenceRef : null)}
                   className={cn(
                     "p-4 rounded-xl transition-all duration-500 ease-in-out",
-                    isActive ? "bg-card shadow-lg scale-[1.02] opacity-100" : "bg-transparent hover:bg-muted/50 opacity-70"
+                    isActive
+                      ? "bg-muted shadow-lg scale-[1.02] opacity-100"
+                      : "bg-transparent hover:bg-muted/50 opacity-70"
                   )}
                 >
-                  {/* Sentence text - only highlight search query word */}
-                  <div className="text-lg leading-relaxed">
+                  {/* Sentence text with per-word active highlighting */}
+                  <div className="relative text-lg leading-relaxed">
                     {(() => {
-                      const text = sentence.sentence_text || ""
                       const query = searchQuery.toLowerCase().trim()
-                      
-                      if (!query) {
-                        return <span>{text}</span>
+                      const words = (sentence.words as { text: string; start: number; end: number }[] | undefined) || []
+
+                      if (words.length > 0) {
+                        const wordNodes = words.map((w, wi) => {
+                          const wordText = (w.text || '').trim()
+                          // Simple, robust window: active while time is within the word bounds
+                          const isCurrentWord = adjustedTime >= w.start - 0.4 && adjustedTime < w.end - 0.9
+                          const isSearchMatch = !!query && wordText.toLowerCase().includes(query)
+                          return (
+                            <span
+                              key={`${w.start}-${wi}`}
+                              className={cn(
+                                "mr-2 transition-colors duration-150",
+                                isSearchMatch && !isCurrentWord && "bg-red-500 text-white px-1 rounded",
+                                isCurrentWord && "ring-2 ring-red-500 ring-offset-2 ring-offset-muted px-1 rounded"
+                              )}
+                            >
+                              {wordText || '\u00A0'}
+                            </span>
+                          )
+                        })
+                        return <>{wordNodes}</>
                       }
-                      
-                      // Split text and highlight only the target search query
+
+                      // Fallback: no word timings, keep original sentence-level rendering
+                      const text = sentence.sentence_text || ""
+                      if (!query) return <span className="relative z-10">{text}</span>
                       const regex = new RegExp(`(${query})`, 'gi')
                       const parts = text.split(regex)
-                      
                       return parts.map((part: string, partIdx: number) => {
                         const isMatch = part.toLowerCase() === query
                         return (
                           <span
                             key={partIdx}
                             className={cn(
+                              "relative z-10",
                               isMatch && "bg-red-500 text-white px-2 py-1 rounded font-bold"
                             )}
                           >
@@ -312,8 +335,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
                       })
                     })()}
                   </div>
-                  {/* Translated version (Arabic) under the sentence */}
-                  <SentenceTranslation text={sentence.sentence_text} source="en" target="ar" />
+                  {/* Translation removed as requested */}
                 </div>
               )
             })
@@ -334,24 +356,17 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   )
 }
 
-// Child component to fetch and render translation under a sentence
-const SentenceTranslation = ({
-  text,
-  source = "en",
-  target = "ar",
-}: { text: string; source?: string; target?: string }) => {
-  const { data, isLoading, isError } = useTranslate(text, source, target)
+// Translation UI removed from AudioCard as requested
 
-  if (!text) return null
-  if (isLoading) {
-    return <div className="text-sm text-muted-foreground mt-2">Translating…</div>
-  }
-  if (isError || !data?.translated) {
-    return <div className="text-sm text-muted-foreground mt-2">Translation unavailable</div>
-  }
-  return (
-    <div className="text-sm text-muted-foreground mt-2" dir="auto" aria-label="Translated sentence">
-      {data.translated}
-    </div>
-  )
+// Simple sentence progress (0..1) using only sentence start/end and desired offsets
+function computeSentenceProgress(sentence: TranscriptSentence, currentTime: number) {
+  const lead = 0.08
+  const preOffset = 0.7
+  const postOffset = 0.9
+  const t = currentTime + lead
+  const start = (sentence.start_time ?? 0) - preOffset
+  const end = (sentence.end_time ?? 0) - postOffset
+  const span = Math.max(0.001, end - start)
+  const p = (t - start) / span
+  return Math.min(Math.max(p, 0), 1)
 }
