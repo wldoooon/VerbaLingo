@@ -10,11 +10,19 @@ import {
   SkipBack,
   SkipForward,
   RotateCcw,
-  Volume2
+  Volume2,
+  Repeat,
+  Gauge
 } from "lucide-react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useTranscript, useSearch } from "@/lib/useApi"
+import type { TranscriptSentence } from "@/lib/types"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 type AudioCardProps = {
   src: string
@@ -70,6 +78,8 @@ function renderWordsWithHighlighting(
 export default function AudioCard({ src, title, className, defaultRate = 1, searchQuery = "" }: AudioCardProps) {
   const [rate, setRate] = useState(defaultRate)
   const [volume, setVolume] = useState(100)
+  const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
+  const [speedPopoverOpen, setSpeedPopoverOpen] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const activeSentenceRef = useRef<HTMLDivElement>(null)
   
@@ -89,8 +99,6 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   
   // Get transcript data for the current video
   const { data: transcriptData } = useTranscript(currentClip?.video_id || "")
-
-  const speeds = [1, 1.25, 1.5, 2]
 
   // Sync playback rate with context controls
   useEffect(() => {
@@ -123,168 +131,345 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
     }
   }
 
+  // Repeat the target sentence (sentence with search word)
+  const repeatTargetSentence = () => {
+    if (targetSentence) {
+      controls.seekTo(targetSentence.start_time)
+      if (!isPlaying) {
+        controls.play()
+      }
+    }
+  }
+
   // Get ALL sentences from the transcript (not just the clip window)
   const allSentences = transcriptData?.sentences || []
   
   // Sort by start time
   const sentencesInClip = [...allSentences].sort((a: any, b: any) => a.start_time - b.start_time)
 
-  // Auto-scroll to active sentence
+  // Find the sentence that contains the search query
+  const targetSentenceRef = useRef<HTMLDivElement>(null)
+  const hasScrolledToTarget = useRef(false)
+  const lastActiveSentenceIdx = useRef<number>(0)
+
+  const targetSentence = sentencesInClip.find((sentence: any) => {
+    const text = sentence.sentence_text || ""
+    const query = searchQuery.toLowerCase().trim()
+    return query && text.toLowerCase().includes(query)
+  })
+
+  // Auto-scroll to target sentence on mount - CONSTRAINED to transcript box only
+  useEffect(() => {
+    if (targetSentenceRef.current && scrollContainerRef.current && !hasScrolledToTarget.current) {
+      // Calculate scroll position manually to avoid affecting global scroll
+      const container = scrollContainerRef.current
+      const target = targetSentenceRef.current
+      
+      const containerRect = container.getBoundingClientRect()
+      const targetRect = target.getBoundingClientRect()
+      
+      // Calculate the offset within the container
+      const relativeTop = targetRect.top - containerRect.top + container.scrollTop
+      const scrollTo = relativeTop - (container.clientHeight / 2) + (targetRect.height / 2)
+      
+      // Scroll ONLY the container, not the page
+      container.scrollTo({
+        top: scrollTo,
+        behavior: 'smooth'
+      })
+      
+      hasScrolledToTarget.current = true
+      
+      // Start playback after scroll completes (500ms delay)
+      setTimeout(() => {
+        if (!isPlaying && targetSentence) {
+          controls.seekTo(targetSentence.start_time)
+          controls.play()
+        }
+      }, 500)
+    }
+  }, [targetSentence, scrollContainerRef, controls, isPlaying])
+
+  // Auto-scroll to active sentence during playback - CONSTRAINED to transcript box only
   useEffect(() => {
     if (activeSentenceRef.current && scrollContainerRef.current && isPlaying) {
-      activeSentenceRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
+      const container = scrollContainerRef.current
+      const active = activeSentenceRef.current
+      
+      const containerRect = container.getBoundingClientRect()
+      const activeRect = active.getBoundingClientRect()
+      
+      // Calculate the offset within the container
+      const relativeTop = activeRect.top - containerRect.top + container.scrollTop
+      const scrollTo = relativeTop - (container.clientHeight / 2) + (activeRect.height / 2)
+      
+      // Scroll ONLY the container, not the page
+      container.scrollTo({
+        top: scrollTo,
+        behavior: 'smooth'
       })
     }
   }, [currentTime, isPlaying])
 
   return (
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-6 sm:p-8 shadow-2xl", className)}>
-      {/* Audio Controls - Top Section */}
-      <div className="flex flex-col gap-6 mb-6">
-        {/* Transport controls */}
-        <div className="flex items-center justify-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-full hover:bg-muted"
-            onClick={() => dispatch({ type: "PREV_VIDEO" })}
-            aria-label="Previous clip"
-          >
-            <SkipBack size={20} />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-full hover:bg-muted"
-            onClick={skipBackward}
-            aria-label="Rewind 10 seconds"
-          >
-            <RotateCcw size={20} />
-          </Button>
-
-          <Button
-            size="icon"
-            className="h-16 w-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-xl"
-            onClick={togglePlayPause}
-            aria-label={isPlaying ? "Pause" : "Play"}
-          >
-            {isPlaying ? <Pause size={28} /> : <Play size={28} />}
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-full hover:bg-muted"
-            onClick={skipForward}
-            aria-label="Forward 10 seconds"
-          >
-            <RotateCcw size={20} className="scale-x-[-1]" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-full hover:bg-muted"
-            onClick={() => dispatch({ type: "NEXT_VIDEO" })}
-            aria-label="Next clip"
-          >
-            <SkipForward size={20} />
-          </Button>
+      {/* Audio Controls - All in one row */}
+      <div className="flex items-center justify-between gap-6 mb-6">
+        {/* Volume control - Left side */}
+        <div className="flex items-center gap-3 flex-1 max-w-[180px]">
+          <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
+          <Slider
+            value={[volume]}
+            max={100}
+            step={1}
+            onValueChange={(val) => setVolume(val[0])}
+            className="cursor-pointer"
+          />
         </div>
 
-        {/* Volume and Speed controls */}
-        <div className="flex items-center justify-between gap-6">
-          {/* Volume control */}
-          <div className="flex items-center gap-3 flex-1 max-w-[200px]">
-            <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
-            <Slider
-              value={[volume]}
-              max={100}
-              step={1}
-              onValueChange={(val) => setVolume(val[0])}
-              className="cursor-pointer"
-            />
+        {/* Transport controls - Center */}
+        <div className="flex items-center justify-center gap-4">
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full hover:bg-muted"
+              onClick={() => dispatch({ type: "PREV_VIDEO" })}
+              aria-label="Previous clip"
+            >
+              <SkipBack size={20} />
+            </Button>
+            <span className="text-xs text-muted-foreground">Previous</span>
+          </div>
+          
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full hover:bg-muted"
+              onClick={skipBackward}
+              aria-label="Rewind 10 seconds"
+            >
+              <RotateCcw size={20} />
+            </Button>
+            <span className="text-xs text-muted-foreground">-10s</span>
           </div>
 
-          {/* Speed controls */}
-          <div className="flex items-center gap-5">
-            {speeds.map((s) => (
-              <button
-                key={s}
-                onClick={() => setRate(s)}
-                className={cn(
-                  "text-base font-semibold transition-colors min-w-[40px]",
-                  rate === s ? "text-red-500" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {s}x
-              </button>
-            ))}
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              size="icon"
+              className="h-16 w-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-xl"
+              onClick={togglePlayPause}
+              aria-label={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? <Pause size={28} /> : <Play size={28} />}
+            </Button>
+            <span className="text-xs text-muted-foreground">{isPlaying ? "Pause" : "Play"}</span>
           </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full hover:bg-muted"
+              onClick={skipForward}
+              aria-label="Forward 10 seconds"
+            >
+              <RotateCcw size={20} className="scale-x-[-1]" />
+            </Button>
+            <span className="text-xs text-muted-foreground">+10s</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full hover:bg-muted disabled:opacity-50"
+              onClick={repeatTargetSentence}
+              disabled={!targetSentence}
+              aria-label="Repeat target sentence"
+              title="Repeat sentence with search word"
+            >
+              <Repeat size={20} />
+            </Button>
+            <span className="text-xs text-muted-foreground">Repeat</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full hover:bg-muted"
+              onClick={() => dispatch({ type: "NEXT_VIDEO" })}
+              aria-label="Next clip"
+            >
+              <SkipForward size={20} />
+            </Button>
+            <span className="text-xs text-muted-foreground">Next</span>
+          </div>
+        </div>
+
+        {/* Speed controls - Right side */}
+        <div className="flex items-center gap-4 flex-1 max-w-[180px] justify-end">
+          <Popover open={speedPopoverOpen} onOpenChange={setSpeedPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Gauge size={18} />
+                <span className="font-semibold">{rate}x</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-4" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Playback Speed</span>
+                  <span className="text-sm font-semibold text-red-500">{rate}x</span>
+                </div>
+                <Slider
+                  value={[speeds.indexOf(rate)]}
+                  max={speeds.length - 1}
+                  step={1}
+                  onValueChange={(val) => setRate(speeds[val[0]])}
+                  className="cursor-pointer"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  {speeds.map((s) => (
+                    <span key={s}>{s}x</span>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
-      {/* Transcript List - Scrollable Section */}
-      <div 
-        ref={scrollContainerRef}
-        className="max-h-[200px] overflow-y-auto rounded-2xl bg-muted/30 p-4 space-y-3 scroll-smooth scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/50"
-      >
-        {sentencesInClip.length > 0 ? (
-          sentencesInClip.map((sentence: any, idx: number) => {
-            const TIMING_LEAD = 0.08
-            const adjustedTime = currentTime + TIMING_LEAD
-            const isActive = adjustedTime >= sentence.start_time && adjustedTime < sentence.end_time
-            
-            return (
-              <div
-                key={`${sentence.start_time}-${idx}`}
-                ref={isActive ? activeSentenceRef : null}
-                className={cn(
-                  "p-4 rounded-xl transition-all duration-300",
-                  isActive ? "bg-card shadow-lg scale-[1.02]" : "bg-transparent hover:bg-muted/50"
-                )}
-              >
-                {/* Timestamp */}
-                <div className="text-xs text-muted-foreground font-medium mb-2">
-                  {formatTime(sentence.start_time)}
-                </div>
-                
-                {/* Sentence text with word highlighting */}
-                <div className="text-lg leading-relaxed">
-                  {sentence.words && sentence.words.length > 0 ? (
-                    sentence.words.map((word: any, wordIdx: number) => {
-                      const isCurrentWord = isActive && adjustedTime >= word.start && adjustedTime < word.end
-                      const isSearchMatch = searchQuery && word.text.toLowerCase().includes(searchQuery.toLowerCase().trim())
-                      
-                      return (
-                        <span
-                          key={`${word.start}-${word.text}-${wordIdx}`}
-                          className={cn(
-                            "mr-2 transition-all duration-150",
-                            isCurrentWord && "bg-red-500 text-white px-2 py-1 rounded font-bold scale-110 inline-block",
-                            isSearchMatch && !isCurrentWord && "bg-red-500/20 text-red-500 px-1 rounded font-semibold"
-                          )}
-                        >
-                          {word.text}
-                        </span>
-                      )
-                    })
-                  ) : (
-                    <span>{sentence.sentence_text}</span>
+      {/* Transcript List - Scrollable Section with fade effect */}
+      <div className="relative">
+        {/* Top fade overlay */}
+        <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 rounded-t-2xl" />
+        
+        <div 
+          ref={scrollContainerRef}
+          className="max-h-[200px] overflow-y-auto rounded-2xl bg-muted/30 px-4 space-y-3 scroll-smooth flex flex-col justify-center items-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        >
+          {/* Spacer to push content to center */}
+          <div className="flex-1 min-h-[60px]"></div>
+          
+          {sentencesInClip.length > 0 ? (
+            sentencesInClip.map((sentence: any, idx: number) => {
+              const TIMING_LEAD = 0.08
+              const adjustedTime = currentTime + TIMING_LEAD
+              const isActive = adjustedTime >= sentence.start_time - 0.7 && adjustedTime < (sentence.end_time - 0.9)
+              const isTargetSentence = targetSentence && sentence.start_time === targetSentence.start_time
+              
+              // Find active sentence index
+              const activeSentenceIdx = sentencesInClip.findIndex((s: any) => {
+                return adjustedTime >= s.start_time - 0.7 && adjustedTime < (s.end_time - 0.9)
+              })
+              
+              // Update last active index when we find an active sentence
+              if (activeSentenceIdx !== -1) {
+                lastActiveSentenceIdx.current = activeSentenceIdx
+              }
+              
+              // Use last active index (keeps showing last sentence until next one activates)
+              const centerIdx = lastActiveSentenceIdx.current
+              
+              // Only render sentence + 1 before + 1 after (3 total)
+              const distance = Math.abs(idx - centerIdx)
+              if (distance > 1) return null
+              
+              return (
+                <div
+                  key={`${sentence.start_time}-${idx}`}
+                  ref={isActive ? activeSentenceRef : (isTargetSentence ? targetSentenceRef : null)}
+                  className={cn(
+                    "p-4 rounded-xl transition-all duration-500 ease-in-out",
+                    isActive
+                      ? "bg-muted shadow-lg scale-[1.02] opacity-100"
+                      : "bg-transparent hover:bg-muted/50 opacity-70"
                   )}
+                >
+                  {/* Sentence text with per-word active highlighting */}
+                  <div className="relative text-lg leading-relaxed">
+                    {(() => {
+                      const query = searchQuery.toLowerCase().trim()
+                      const words = (sentence.words as { text: string; start: number; end: number }[] | undefined) || []
+
+                      if (words.length > 0) {
+                        const wordNodes = words.map((w, wi) => {
+                          const wordText = (w.text || '').trim()
+                          // Simple, robust window: active while time is within the word bounds
+                          const isCurrentWord = adjustedTime >= w.start - 0.7 && adjustedTime < w.end - 0.9
+                          const isSearchMatch = !!query && wordText.toLowerCase().includes(query)
+                          return (
+                            <span
+                              key={`${w.start}-${wi}`}
+                              className={cn(
+                                "mr-2 transition-all duration-300 ease-in-out",
+                                isSearchMatch && !isCurrentWord && "bg-red-500 text-white px-1 rounded",
+                                isCurrentWord && "ring-2 ring-red-500 ring-offset-2 ring-offset-muted px-1 rounded font-medium"
+                              )}
+                            >
+                              {wordText || '\u00A0'}
+                            </span>
+                          )
+                        })
+                        return <>{wordNodes}</>
+                      }
+
+                      // Fallback: no word timings, keep original sentence-level rendering
+                      const text = sentence.sentence_text || ""
+                      if (!query) return <span className="relative z-10">{text}</span>
+                      const regex = new RegExp(`(${query})`, 'gi')
+                      const parts = text.split(regex)
+                      return parts.map((part: string, partIdx: number) => {
+                        const isMatch = part.toLowerCase() === query
+                        return (
+                          <span
+                            key={partIdx}
+                            className={cn(
+                              "relative z-10",
+                              isMatch && "bg-red-500 text-white px-2 py-1 rounded font-bold"
+                            )}
+                          >
+                            {part}
+                          </span>
+                        )
+                      })
+                    })()}
+                  </div>
+                  {/* Translation removed as requested */}
                 </div>
-              </div>
-            )
-          })
-        ) : (
-          <div className="text-center text-muted-foreground py-8">
-            <p>{currentClip?.sentence_text ?? title}</p>
-          </div>
-        )}
+              )
+            })
+          ) : (
+            <div className="text-center text-muted-foreground py-8">
+              <p>{currentClip?.sentence_text ?? title}</p>
+            </div>
+          )}
+          
+          {/* Spacer to push content to center */}
+          <div className="flex-1 min-h-[60px]"></div>
+        </div>
+        
+        {/* Bottom fade overlay */}
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 rounded-b-2xl" />
       </div>
     </div>
   )
+}
+
+// Translation UI removed from AudioCard as requested
+
+// Simple sentence progress (0..1) using only sentence start/end and desired offsets
+function computeSentenceProgress(sentence: TranscriptSentence, currentTime: number) {
+  const lead = 0.08
+  const preOffset = 0.7
+  const postOffset = 0.9
+  const t = currentTime + lead
+  const start = (sentence.start_time ?? 0) - preOffset
+  const end = (sentence.end_time ?? 0) - postOffset
+  const span = Math.max(0.001, end - start)
+  const p = (t - start) / span
+  return Math.min(Math.max(p, 0), 1)
 }

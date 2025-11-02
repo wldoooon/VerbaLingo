@@ -21,6 +21,28 @@ services:
       - meili_data:/meili_data
     command: meilisearch --no-analytics
 
+  libretranslate:
+    image: libretranslate/libretranslate:v1.7.3
+    container_name: libretranslate01
+    ports:
+      - "5000:5000"
+    environment:
+      - LT_DISABLE_WEB_UI=false  # Set to true in production
+      - LT_UPDATE_MODELS=true  # Download models on first start
+      - LT_LOAD_ONLY=en,ar,fr,es,de,ja,zh,ru  # Only load languages you need (saves RAM)
+      - LT_THREADS=4  # Adjust based on your CPU
+      - LT_SUGGESTIONS=false  # Disable to save resources
+      - LT_DISABLE_FILES_TRANSLATION=true  # We only need text translation
+    volumes:
+      - lt_data:/home/libretranslate/.local  # Persist language models
+      - lt_db:/app/db  # Persist API keys and rate limits if needed
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:5000/languages || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   kibana:  # Keep Kibana if you still need it, or remove
     image: docker.elastic.co/kibana/kibana:8.11.1
     container_name: kibana01
@@ -35,4 +57,8 @@ volumes:
   esdata:
     driver: local
   meili_data:
+    driver: local
+  lt_data:
+    driver: local
+  lt_db:
     driver: local
