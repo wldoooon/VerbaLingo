@@ -297,6 +297,17 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
               const isActive = adjustedTime >= sentence.start_time - 0.7 && adjustedTime < (sentence.end_time - 0.9)
               const isTargetSentence = targetSentence && sentence.start_time === targetSentence.start_time
               
+              // Find active sentence index
+              const activeSentenceIdx = sentencesInClip.findIndex((s: any) => {
+                return adjustedTime >= s.start_time - 0.7 && adjustedTime < (s.end_time - 0.9)
+              })
+              
+              // Only render sentences within ±10 of active sentence
+              if (activeSentenceIdx !== -1) {
+                const distance = Math.abs(idx - activeSentenceIdx)
+                if (distance > 10) return null
+              }
+              
               return (
                 <div
                   key={`${sentence.start_time}-${idx}`}
