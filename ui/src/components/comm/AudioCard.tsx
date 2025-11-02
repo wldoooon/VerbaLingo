@@ -129,7 +129,38 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   // Sort by start time
   const sentencesInClip = [...allSentences].sort((a: any, b: any) => a.start_time - b.start_time)
 
-  // Auto-scroll to active sentence
+  // Find the sentence that contains the search query
+  const targetSentenceRef = useRef<HTMLDivElement>(null)
+  const hasScrolledToTarget = useRef(false)
+
+  const targetSentence = sentencesInClip.find((sentence: any) => {
+    const text = sentence.sentence_text || ""
+    const query = searchQuery.toLowerCase().trim()
+    return query && text.toLowerCase().includes(query)
+  })
+
+  // Auto-scroll to target sentence on mount, then scroll to active sentence during playback
+  useEffect(() => {
+    if (targetSentenceRef.current && scrollContainerRef.current && !hasScrolledToTarget.current) {
+      // Scroll to target sentence first
+      targetSentenceRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+      hasScrolledToTarget.current = true
+      
+      // Start playback after scroll completes (500ms delay)
+      setTimeout(() => {
+        if (!isPlaying && targetSentence) {
+          // Seek to the target sentence start time
+          controls.seekTo(targetSentence.start_time)
+          controls.play()
+        }
+      }, 500)
+    }
+  }, [targetSentence, scrollContainerRef, controls, isPlaying])
+
+  // Auto-scroll to active sentence during playback
   useEffect(() => {
     if (activeSentenceRef.current && scrollContainerRef.current && isPlaying) {
       activeSentenceRef.current.scrollIntoView({
@@ -141,9 +172,21 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
 
   return (
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-6 sm:p-8 shadow-2xl", className)}>
-      {/* Audio Controls - Top Section */}
-      <div className="flex flex-col gap-6 mb-6">
-        {/* Transport controls */}
+      {/* Audio Controls - All in one row */}
+      <div className="flex items-center justify-between gap-6 mb-6">
+        {/* Volume control - Left side */}
+        <div className="flex items-center gap-3 flex-1 max-w-[180px]">
+          <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
+          <Slider
+            value={[volume]}
+            max={100}
+            step={1}
+            onValueChange={(val) => setVolume(val[0])}
+            className="cursor-pointer"
+          />
+        </div>
+
+        {/* Transport controls - Center */}
         <div className="flex items-center justify-center gap-4">
           <Button
             variant="ghost"
@@ -195,95 +238,90 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           </Button>
         </div>
 
-        {/* Volume and Speed controls */}
-        <div className="flex items-center justify-between gap-6">
-          {/* Volume control */}
-          <div className="flex items-center gap-3 flex-1 max-w-[200px]">
-            <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
-            <Slider
-              value={[volume]}
-              max={100}
-              step={1}
-              onValueChange={(val) => setVolume(val[0])}
-              className="cursor-pointer"
-            />
-          </div>
-
-          {/* Speed controls */}
-          <div className="flex items-center gap-5">
-            {speeds.map((s) => (
-              <button
-                key={s}
-                onClick={() => setRate(s)}
-                className={cn(
-                  "text-base font-semibold transition-colors min-w-[40px]",
-                  rate === s ? "text-red-500" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {s}x
-              </button>
-            ))}
-          </div>
+        {/* Speed controls - Right side */}
+        <div className="flex items-center gap-4 flex-1 max-w-[180px] justify-end">
+          {speeds.map((s) => (
+            <button
+              key={s}
+              onClick={() => setRate(s)}
+              className={cn(
+                "text-base font-semibold transition-colors",
+                rate === s ? "text-red-500" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {s}x
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Transcript List - Scrollable Section */}
-      <div 
-        ref={scrollContainerRef}
-        className="max-h-[200px] overflow-y-auto rounded-2xl bg-muted/30 p-4 space-y-3 scroll-smooth scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/50"
-      >
-        {sentencesInClip.length > 0 ? (
-          sentencesInClip.map((sentence: any, idx: number) => {
-            const TIMING_LEAD = 0.08
-            const adjustedTime = currentTime + TIMING_LEAD
-            const isActive = adjustedTime >= sentence.start_time && adjustedTime < sentence.end_time
-            
-            return (
-              <div
-                key={`${sentence.start_time}-${idx}`}
-                ref={isActive ? activeSentenceRef : null}
-                className={cn(
-                  "p-4 rounded-xl transition-all duration-300",
-                  isActive ? "bg-card shadow-lg scale-[1.02]" : "bg-transparent hover:bg-muted/50"
-                )}
-              >
-                {/* Timestamp */}
-                <div className="text-xs text-muted-foreground font-medium mb-2">
-                  {formatTime(sentence.start_time)}
-                </div>
-                
-                {/* Sentence text with word highlighting */}
-                <div className="text-lg leading-relaxed">
-                  {sentence.words && sentence.words.length > 0 ? (
-                    sentence.words.map((word: any, wordIdx: number) => {
-                      const isCurrentWord = isActive && adjustedTime >= word.start && adjustedTime < word.end
-                      const isSearchMatch = searchQuery && word.text.toLowerCase().includes(searchQuery.toLowerCase().trim())
-                      
-                      return (
-                        <span
-                          key={`${word.start}-${word.text}-${wordIdx}`}
-                          className={cn(
-                            "mr-2 transition-all duration-150",
-                            isCurrentWord && "bg-red-500 text-white px-2 py-1 rounded font-bold scale-110 inline-block",
-                            isSearchMatch && !isCurrentWord && "bg-red-500/20 text-red-500 px-1 rounded font-semibold"
-                          )}
-                        >
-                          {word.text}
-                        </span>
-                      )
-                    })
-                  ) : (
-                    <span>{sentence.sentence_text}</span>
+      {/* Transcript List - Scrollable Section with fade effect */}
+      <div className="relative">
+        {/* Top fade overlay */}
+        <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 rounded-t-2xl" />
+        
+        <div 
+          ref={scrollContainerRef}
+          className="max-h-[200px] overflow-y-auto rounded-2xl bg-muted/30 p-4 space-y-3 scroll-smooth scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/50"
+        >
+          {sentencesInClip.length > 0 ? (
+            sentencesInClip.map((sentence: any, idx: number) => {
+              const TIMING_LEAD = 0.08
+              const SENTENCE_END_OFFSET = 0.5 // End sentence 200ms earlier for smoother transitions
+              const adjustedTime = currentTime + TIMING_LEAD
+              const isActive = adjustedTime >= sentence.start_time + 0.9 && adjustedTime < (sentence.end_time - SENTENCE_END_OFFSET)
+              const isTargetSentence = targetSentence && sentence.start_time === targetSentence.start_time
+              
+              return (
+                <div
+                  key={`${sentence.start_time}-${idx}`}
+                  ref={isActive ? activeSentenceRef : (isTargetSentence ? targetSentenceRef : null)}
+                  className={cn(
+                    "p-4 rounded-xl transition-all duration-500 ease-in-out",
+                    isActive ? "bg-card shadow-lg scale-[1.02] opacity-100" : "bg-transparent hover:bg-muted/50 opacity-70"
                   )}
+                >
+                  {/* Sentence text - only highlight search query word */}
+                  <div className="text-lg leading-relaxed">
+                    {(() => {
+                      const text = sentence.sentence_text || ""
+                      const query = searchQuery.toLowerCase().trim()
+                      
+                      if (!query) {
+                        return <span>{text}</span>
+                      }
+                      
+                      // Split text and highlight only the target search query
+                      const regex = new RegExp(`(${query})`, 'gi')
+                      const parts = text.split(regex)
+                      
+                      return parts.map((part: string, partIdx: number) => {
+                        const isMatch = part.toLowerCase() === query
+                        return (
+                          <span
+                            key={partIdx}
+                            className={cn(
+                              isMatch && "bg-red-500 text-white px-2 py-1 rounded font-bold"
+                            )}
+                          >
+                            {part}
+                          </span>
+                        )
+                      })
+                    })()}
+                  </div>
                 </div>
-              </div>
-            )
-          })
-        ) : (
-          <div className="text-center text-muted-foreground py-8">
-            <p>{currentClip?.sentence_text ?? title}</p>
-          </div>
-        )}
+              )
+            })
+          ) : (
+            <div className="text-center text-muted-foreground py-8">
+              <p>{currentClip?.sentence_text ?? title}</p>
+            </div>
+          )}
+        </div>
+        
+        {/* Bottom fade overlay */}
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 rounded-b-2xl" />
       </div>
     </div>
   )
