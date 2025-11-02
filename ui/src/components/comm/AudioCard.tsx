@@ -11,12 +11,18 @@ import {
   SkipForward,
   RotateCcw,
   Volume2,
-  Repeat
+  Repeat,
+  Gauge
 } from "lucide-react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useTranscript, useSearch } from "@/lib/useApi"
 import type { TranscriptSentence } from "@/lib/types"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 type AudioCardProps = {
   src: string
@@ -72,6 +78,8 @@ function renderWordsWithHighlighting(
 export default function AudioCard({ src, title, className, defaultRate = 1, searchQuery = "" }: AudioCardProps) {
   const [rate, setRate] = useState(defaultRate)
   const [volume, setVolume] = useState(100)
+  const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
+  const [speedPopoverOpen, setSpeedPopoverOpen] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const activeSentenceRef = useRef<HTMLDivElement>(null)
   
@@ -91,8 +99,6 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   
   // Get transcript data for the current video
   const { data: transcriptData } = useTranscript(currentClip?.video_id || "")
-
-  const speeds = [1, 1.25, 1.5, 2]
 
   // Sync playback rate with context controls
   useEffect(() => {
@@ -223,82 +229,117 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
 
         {/* Transport controls - Center */}
         <div className="flex items-center justify-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-full hover:bg-muted"
-            onClick={() => dispatch({ type: "PREV_VIDEO" })}
-            aria-label="Previous clip"
-          >
-            <SkipBack size={20} />
-          </Button>
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full hover:bg-muted"
+              onClick={() => dispatch({ type: "PREV_VIDEO" })}
+              aria-label="Previous clip"
+            >
+              <SkipBack size={20} />
+            </Button>
+            <span className="text-xs text-muted-foreground">Previous</span>
+          </div>
           
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-full hover:bg-muted"
-            onClick={skipBackward}
-            aria-label="Rewind 10 seconds"
-          >
-            <RotateCcw size={20} />
-          </Button>
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full hover:bg-muted"
+              onClick={skipBackward}
+              aria-label="Rewind 10 seconds"
+            >
+              <RotateCcw size={20} />
+            </Button>
+            <span className="text-xs text-muted-foreground">-10s</span>
+          </div>
 
-          <Button
-            size="icon"
-            className="h-16 w-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-xl"
-            onClick={togglePlayPause}
-            aria-label={isPlaying ? "Pause" : "Play"}
-          >
-            {isPlaying ? <Pause size={28} /> : <Play size={28} />}
-          </Button>
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              size="icon"
+              className="h-16 w-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-xl"
+              onClick={togglePlayPause}
+              aria-label={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? <Pause size={28} /> : <Play size={28} />}
+            </Button>
+            <span className="text-xs text-muted-foreground">{isPlaying ? "Pause" : "Play"}</span>
+          </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-full hover:bg-muted"
-            onClick={skipForward}
-            aria-label="Forward 10 seconds"
-          >
-            <RotateCcw size={20} className="scale-x-[-1]" />
-          </Button>
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full hover:bg-muted"
+              onClick={skipForward}
+              aria-label="Forward 10 seconds"
+            >
+              <RotateCcw size={20} className="scale-x-[-1]" />
+            </Button>
+            <span className="text-xs text-muted-foreground">+10s</span>
+          </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-full hover:bg-muted disabled:opacity-50"
-            onClick={repeatTargetSentence}
-            disabled={!targetSentence}
-            aria-label="Repeat target sentence"
-            title="Repeat sentence with search word"
-          >
-            <Repeat size={20} />
-          </Button>
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full hover:bg-muted disabled:opacity-50"
+              onClick={repeatTargetSentence}
+              disabled={!targetSentence}
+              aria-label="Repeat target sentence"
+              title="Repeat sentence with search word"
+            >
+              <Repeat size={20} />
+            </Button>
+            <span className="text-xs text-muted-foreground">Repeat</span>
+          </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-11 w-11 rounded-full hover:bg-muted"
-            onClick={() => dispatch({ type: "NEXT_VIDEO" })}
-            aria-label="Next clip"
-          >
-            <SkipForward size={20} />
-          </Button>
+          <div className="flex flex-col items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full hover:bg-muted"
+              onClick={() => dispatch({ type: "NEXT_VIDEO" })}
+              aria-label="Next clip"
+            >
+              <SkipForward size={20} />
+            </Button>
+            <span className="text-xs text-muted-foreground">Next</span>
+          </div>
         </div>
 
         {/* Speed controls - Right side */}
         <div className="flex items-center gap-4 flex-1 max-w-[180px] justify-end">
-          {speeds.map((s) => (
-            <button
-              key={s}
-              onClick={() => setRate(s)}
-              className={cn(
-                "text-base font-semibold transition-colors",
-                rate === s ? "text-red-500" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {s}x
-            </button>
-          ))}
+          <Popover open={speedPopoverOpen} onOpenChange={setSpeedPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Gauge size={18} />
+                <span className="font-semibold">{rate}x</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-4" align="end">
+              <div className="grid grid-cols-4 gap-2">
+                {speeds.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => {
+                      setRate(s)
+                      setSpeedPopoverOpen(false)
+                    }}
+                    className={cn(
+                      "px-3 py-2 rounded-md text-sm font-semibold transition-colors",
+                      rate === s 
+                        ? "bg-red-500 text-white" 
+                        : "bg-muted hover:bg-muted/80 text-foreground"
+                    )}
+                  >
+                    {s}x
+                  </button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
@@ -309,7 +350,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
         
         <div 
           ref={scrollContainerRef}
-          className="max-h-[200px] overflow-y-auto rounded-2xl bg-muted/30 px-4 space-y-3 scroll-smooth scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/50 flex flex-col justify-center items-center"
+          className="max-h-[200px] overflow-y-auto rounded-2xl bg-muted/30 px-4 space-y-3 scroll-smooth flex flex-col justify-center items-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {/* Spacer to push content to center */}
           <div className="flex-1 min-h-[60px]"></div>
