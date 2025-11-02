@@ -10,7 +10,8 @@ import {
   SkipBack,
   SkipForward,
   RotateCcw,
-  Volume2
+  Volume2,
+  Repeat
 } from "lucide-react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
@@ -121,6 +122,16 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
       controls.pause()
     } else {
       controls.play()
+    }
+  }
+
+  // Repeat the target sentence (sentence with search word)
+  const repeatTargetSentence = () => {
+    if (targetSentence) {
+      controls.seekTo(targetSentence.start_time)
+      if (!isPlaying) {
+        controls.play()
+      }
     }
   }
 
@@ -248,6 +259,18 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
             aria-label="Forward 10 seconds"
           >
             <RotateCcw size={20} className="scale-x-[-1]" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11 rounded-full hover:bg-muted disabled:opacity-50"
+            onClick={repeatTargetSentence}
+            disabled={!targetSentence}
+            aria-label="Repeat target sentence"
+            title="Repeat sentence with search word"
+          >
+            <Repeat size={20} />
           </Button>
 
           <Button
