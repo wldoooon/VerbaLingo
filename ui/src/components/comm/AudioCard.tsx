@@ -318,25 +318,24 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
                 <span className="font-semibold">{rate}x</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-56 p-4" align="end">
-              <div className="grid grid-cols-4 gap-2">
-                {speeds.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => {
-                      setRate(s)
-                      setSpeedPopoverOpen(false)
-                    }}
-                    className={cn(
-                      "px-3 py-2 rounded-md text-sm font-semibold transition-colors",
-                      rate === s 
-                        ? "bg-red-500 text-white" 
-                        : "bg-muted hover:bg-muted/80 text-foreground"
-                    )}
-                  >
-                    {s}x
-                  </button>
-                ))}
+            <PopoverContent className="w-64 p-4" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Playback Speed</span>
+                  <span className="text-sm font-semibold text-red-500">{rate}x</span>
+                </div>
+                <Slider
+                  value={[speeds.indexOf(rate)]}
+                  max={speeds.length - 1}
+                  step={1}
+                  onValueChange={(val) => setRate(speeds[val[0]])}
+                  className="cursor-pointer"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  {speeds.map((s) => (
+                    <span key={s}>{s}x</span>
+                  ))}
+                </div>
               </div>
             </PopoverContent>
           </Popover>
