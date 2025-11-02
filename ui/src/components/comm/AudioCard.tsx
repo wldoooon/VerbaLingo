@@ -144,6 +144,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   // Find the sentence that contains the search query
   const targetSentenceRef = useRef<HTMLDivElement>(null)
   const hasScrolledToTarget = useRef(false)
+  const lastActiveSentenceIdx = useRef<number>(0)
 
   const targetSentence = sentencesInClip.find((sentence: any) => {
     const text = sentence.sentence_text || ""
@@ -325,11 +326,17 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
                 return adjustedTime >= s.start_time - 0.7 && adjustedTime < (s.end_time - 0.9)
               })
               
-              // Only render active sentence + 1 before + 1 after (3 total)
+              // Update last active index when we find an active sentence
               if (activeSentenceIdx !== -1) {
-                const distance = Math.abs(idx - activeSentenceIdx)
-                if (distance > 1) return null
+                lastActiveSentenceIdx.current = activeSentenceIdx
               }
+              
+              // Use last active index (keeps showing last sentence until next one activates)
+              const centerIdx = lastActiveSentenceIdx.current
+              
+              // Only render sentence + 1 before + 1 after (3 total)
+              const distance = Math.abs(idx - centerIdx)
+              if (distance > 1) return null
               
               return (
                 <div
