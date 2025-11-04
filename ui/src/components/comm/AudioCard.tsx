@@ -383,10 +383,10 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
                   key={`${sentence.start_time}-${idx}`}
                   ref={isActive ? activeSentenceRef : (isTargetSentence ? targetSentenceRef : null)}
                   className={cn(
-                    "p-4 rounded-xl transition-all duration-500 ease-in-out",
+                    "p-4 rounded-xl transition-all duration-300 ease-in-out",
                     isActive
-                      ? "bg-muted shadow-lg scale-[1.02] opacity-100"
-                      : "bg-transparent hover:bg-muted/50 opacity-70"
+                      ? "border-b-2 border-red-500/60 pb-3 opacity-100"
+                      : "opacity-70 hover:opacity-90"
                   )}
                 >
                   {/* Sentence text with per-word active highlighting */}
