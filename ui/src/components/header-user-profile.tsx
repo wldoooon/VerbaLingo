@@ -8,6 +8,8 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react"
+import { useTheme } from "next-themes"
+import { ThemeSwitcher } from "@/components/ui/shadcn-io/theme-switcher"
 
 import {
   Avatar,
@@ -34,6 +36,7 @@ export function HeaderUserProfile({
     avatar: string
   }
 }) {
+  const { theme, setTheme } = useTheme()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -49,7 +52,7 @@ export function HeaderUserProfile({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-56"
+        className="w-56 rounded-xl border border-border/50 bg-popover/80 backdrop-blur-xl shadow-xl"
         align="end"
         forceMount
       >
@@ -61,14 +64,24 @@ export function HeaderUserProfile({
             </p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="my-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10" />
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <Sparkles className="mr-2 h-4 w-4" />
             <span>Upgrade to Pro</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="my-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10" />
+        <DropdownMenuGroup>
+          <div className="px-2 py-1.5">
+            <ThemeSwitcher
+              value={(theme as "light" | "dark" | "system") ?? "system"}
+              onChange={(t) => setTheme(t)}
+              className="bg-popover/60 ring-1 ring-border/50"
+            />
+          </div>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator className="my-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10" />
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <BadgeCheck className="mr-2 h-4 w-4" />
@@ -83,7 +96,7 @@ export function HeaderUserProfile({
             <span>Notifications</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="my-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10" />
         <DropdownMenuItem>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
