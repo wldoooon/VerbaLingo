@@ -1,8 +1,9 @@
 "use client"
 
-import { RefObject } from "react"
+import { RefObject, useState } from "react"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Search, Sparkles, Bookmark } from "lucide-react"
 
 type Word = { text: string; start: number; end: number }
 
@@ -23,6 +24,8 @@ type TranscriptBoxProps = {
   targetSentenceRef: RefObject<HTMLDivElement>
   targetSentence: Sentence | undefined
   lastActiveSentenceIdxRef: RefObject<number>
+  onSearchWord?: (word: string) => void
+  onExplainWordInContext?: (payload: { word: string; sentence: string }) => void
 }
 
 export const TranscriptBox = ({
@@ -35,7 +38,11 @@ export const TranscriptBox = ({
   targetSentenceRef,
   targetSentence,
   lastActiveSentenceIdxRef,
+  onSearchWord,
+  onExplainWordInContext,
 }: TranscriptBoxProps) => {
+  const [openWordKey, setOpenWordKey] = useState<string | null>(null)
+
   return (
     <div className="relative mt-1">
       <div
@@ -108,39 +115,77 @@ export const TranscriptBox = ({
                         const isSearchMatch =
                           !!query && wordText.toLowerCase().includes(query)
 
+                        const key = `${sentence.start_time}-${w.start}-${wi}`
+                        const isOpen = openWordKey === key
+
                         return (
-                          <Popover key={`${w.start}-${wi}`}>
-                            <PopoverTrigger asChild>
-                              <button
-                                type="button"
-                                className={cn(
-                                  "mr-2 pb-0.5 border-b-2 border-transparent transition-all duration-300 ease-in-out text-left inline-flex items-end",
-                                  isSearchMatch && !isCurrentWord &&
-                                    "border-b-red-400",
-                                  isCurrentWord &&
-                                    "border-b-red-500 font-semibold",
-                                  "hover:border-b-muted-foreground/70 hover:text-foreground",
-                                )}
+                          <Popover
+                            key={key}
+                            open={isOpen}
+                            onOpenChange={(next) => {
+                              setOpenWordKey(next ? key : null)
+                            }}
+                          >
+                            <div
+                              onMouseEnter={() => setOpenWordKey(key)}
+                              onMouseLeave={() => setOpenWordKey((current) => (current === key ? null : current))}
+                              className="inline-flex"
+                            >
+                              <PopoverTrigger asChild>
+                                <button
+                                  type="button"
+                                  className={cn(
+                                    "mr-2 pb-0.5 border-b-2 border-transparent transition-all duration-300 ease-in-out text-left inline-flex items-end",
+                                    isSearchMatch && !isCurrentWord &&
+                                      "border-b-red-400",
+                                    isCurrentWord &&
+                                      "border-b-red-500 font-semibold",
+                                    "hover:border-b-muted-foreground/70 hover:text-foreground",
+                                  )}
+                                >
+                                  {wordText || "\u00A0"}
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-56 p-3 rounded-[1.3rem] border border-border/50 bg-popover/80 backdrop-blur-xl shadow-xl"
+                                align="start"
                               >
-                                {wordText || "\u00A0"}
-                              </button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-56 p-3" align="start">
-                              <div className="space-y-2 text-sm">
-                                <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
-                                  {wordText}
+                                <div className="space-y-1 text-sm">
+                                  <div className="text-xs uppercase tracking-wide text-muted-foreground px-1">
+                                    {wordText}
+                                  </div>
+                                  <div className="h-px w-full bg-border/60 my-1" />
+                                  <button
+                                    className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80"
+                                    onClick={() => onSearchWord?.(wordText)}
+                                  >
+                                    <Search className="h-4 w-4 text-muted-foreground" />
+                                    <span>Search clips for "{wordText}"</span>
+                                  </button>
+                                  <div className="h-px w-full bg-border/60 my-1" />
+                                  <button
+                                    className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80"
+                                    onClick={() => {
+                                      const sentenceText =
+                                        sentence.sentence_text ||
+                                        words.map((ww: Word) => ww.text).join(" ")
+                                      onExplainWordInContext?.({
+                                        word: wordText,
+                                        sentence: sentenceText,
+                                      })
+                                    }}
+                                  >
+                                    <Sparkles className="h-4 w-4 text-muted-foreground" />
+                                    <span>Meaning in this context</span>
+                                  </button>
+                                  <div className="h-px w-full bg-border/60 my-1" />
+                                  <button className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80">
+                                    <Bookmark className="h-4 w-4 text-muted-foreground" />
+                                    <span>Save word</span>
+                                  </button>
                                 </div>
-                                <button className="w-full text-left px-2 py-1 rounded-md hover:bg-muted">
-                                  Search clips for "{wordText}"
-                                </button>
-                                <button className="w-full text-left px-2 py-1 rounded-md hover:bg-muted">
-                                  Meaning in this context
-                                </button>
-                                <button className="w-full text-left px-2 py-1 rounded-md hover:bg-muted">
-                                  Save word
-                                </button>
-                              </div>
-                            </PopoverContent>
+                              </PopoverContent>
+                            </div>
                           </Popover>
                         )
                       })

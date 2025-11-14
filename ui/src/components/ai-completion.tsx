@@ -1,5 +1,4 @@
 "use client";
-import { useCompletion } from "@ai-sdk/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "@/context/SearchParamsContext";
@@ -10,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
 import { useResponseHistory } from "@/hooks/useResponseHistory";
+import { useAiAssistant } from "@/context/AiAssistantContext";
 
 interface SmartSuggestion {
     title: string;
@@ -69,9 +69,7 @@ function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
 
 export function AiCompletion() {
     const { query } = useSearchParams();
-    const { completion, complete, isLoading, error } = useCompletion({
-        api: "/api/v1/completion",
-    });
+    const { completion, runPrompt, isLoading, error } = useAiAssistant();
     const [inputValue, setInputValue] = useState("");
     const currentPromptRef = useRef<string>("");
     const responseContainerRef = useRef<HTMLDivElement>(null);
@@ -123,14 +121,14 @@ export function AiCompletion() {
     const handleSuggestionClick = (suggestion: SmartSuggestion) => {
         setInputValue(suggestion.prompt);
         currentPromptRef.current = suggestion.prompt;
-        complete(suggestion.prompt);
+        runPrompt(suggestion.prompt);
     };
 
     const handleInputSubmit = () => {
         if (inputValue.trim()) {
             const prompt = inputValue.trim();
             currentPromptRef.current = prompt;
-            complete(prompt);
+            runPrompt(prompt);
         }
     };
 

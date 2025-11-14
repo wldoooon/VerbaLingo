@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { PlayerProvider } from "@/context/PlayerContext";
 import { SearchParamsProvider } from "@/context/SearchParamsContext";
+import { AiAssistantProvider } from "@/context/AiAssistantContext";
 import QueryProvider from "@/components/QueryProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -38,7 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           <QueryProvider>
             <SearchParamsProvider>
-              <PlayerProvider>{children}</PlayerProvider>
+              <PlayerProvider>
+                <AiAssistantProvider>{children}</AiAssistantProvider>
+              </PlayerProvider>
             </SearchParamsProvider>
           </QueryProvider>
         </ThemeProvider>

@@ -17,6 +17,7 @@ import {
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useTranscript, useSearch } from "@/lib/useApi"
+import { useRouter } from "next/navigation"
 import type { TranscriptSentence } from "@/lib/types"
 import {
   Popover,
@@ -24,6 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { TranscriptBox } from "./TranscriptBox"
+import { useAiAssistant } from "@/context/AiAssistantContext"
 
 type AudioCardProps = {
   src: string
@@ -79,6 +81,7 @@ function renderWordsWithHighlighting(
 export default function AudioCard({ src, title, className, defaultRate = 1, searchQuery = "" }: AudioCardProps) {
   const [rate, setRate] = useState(defaultRate)
   const [volume, setVolume] = useState(100)
+  const router = useRouter()
   const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
   const [speedPopoverOpen, setSpeedPopoverOpen] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -90,13 +93,14 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const { isPlaying, duration } = playerState
   
   // Read playlist from React Query cache
-  const { query, category } = useSearchParams()
+  const { query, category, setQuery, setCategory } = useSearchParams()
   const { data } = useSearch(query, category)
   const playlist = data?.hits || []
   
   // Defensive: clamp currentVideoIndex to valid range
   const validIndex = Math.max(0, Math.min(currentVideoIndex, playlist.length - 1))
   const currentClip = playlist[validIndex]
+  const { runPrompt } = useAiAssistant()
   
   // Get transcript data for the current video
   const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "")
@@ -353,6 +357,27 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
         targetSentenceRef={targetSentenceRef}
         targetSentence={targetSentence}
         lastActiveSentenceIdxRef={lastActiveSentenceIdx}
+        onSearchWord={(word) => {
+          const clean = word.trim()
+          if (!clean) return
+
+          // Update global search context
+          setQuery(clean)
+          setCategory(null)
+
+          // Navigate to routed search page so its useSearch hook fires
+          try {
+            const encoded = encodeURIComponent(clean)
+            const language = "General" // keep same default category mapping as routed page
+            router.push(`/search/${encoded}/${encodeURIComponent(language)}`)
+          } catch {
+            // ignore navigation errors for now
+          }
+        }}
+        onExplainWordInContext={({ word, sentence }) => {
+          const prompt = `Explain the meaning and nuance of the word "${word}" specifically in this sentence. Focus on how it is used here, any implied tone or register, and give 2-3 additional example sentences with similar usage.\n\nSentence: "${sentence}"`
+          runPrompt(prompt)
+        }}
       />
     </div>
   )
