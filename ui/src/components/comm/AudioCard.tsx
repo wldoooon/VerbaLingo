@@ -342,18 +342,12 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
         </div>
       </div>
 
-      {/* Transcript List - Scrollable Section with fade effect */}
-      <div className="relative">
-        {/* Top fade overlay */}
-        <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 rounded-t-2xl" />
-        
+      {/* Transcript List - Center focus carousel (prev/current/next) */}
+      <div className="relative mt-4">
         <div 
           ref={scrollContainerRef}
-          className="max-h-[200px] overflow-y-auto rounded-2xl bg-muted/30 px-4 space-y-3 scroll-smooth flex flex-col justify-center items-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="max-h-[220px] overflow-y-auto rounded-2xl bg-card px-4 py-4 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
-          {/* Spacer to push content to center */}
-          <div className="flex-1 min-h-[60px]"></div>
-          
           {isTranscriptLoading ? (
             <div className="w-full py-8 flex items-center justify-center">
               <div className="h-8 w-8 rounded-full border-2 border-muted-foreground/40 border-t-red-500 animate-spin" />
@@ -382,19 +376,21 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
               const distance = Math.abs(idx - centerIdx)
               if (distance > 1) return null
               
-              return (
-                <div
-                  key={`${sentence.start_time}-${idx}`}
-                  ref={isActive ? activeSentenceRef : (isTargetSentence ? targetSentenceRef : null)}
-                  className={cn(
-                    "p-4 rounded-xl transition-all duration-300 ease-in-out",
-                    isActive
-                      ? "border-b-2 border-red-500/60 pb-3 opacity-100"
-                      : "opacity-70 hover:opacity-90"
-                  )}
-                >
-                  {/* Sentence text with per-word active highlighting */}
-                  <div className="relative text-lg leading-relaxed">
+               return (
+                 <div
+                   key={`${sentence.start_time}-${idx}`}
+                   ref={isActive ? activeSentenceRef : (isTargetSentence ? targetSentenceRef : null)}
+                   className={cn(
+                    "mb-3 rounded-2xl border transition-all duration-300 ease-in-out bg-card/80 flex items-center justify-center text-center",
+                    idx === centerIdx
+                      ? "p-4 shadow-lg shadow-red-500/20 border-red-500/80 scale-[1.01]"
+                      : "p-3 opacity-70 hover:opacity-100",
+                    idx === centerIdx - 1 && "origin-bottom scale-[0.97] translate-y-1",
+                    idx === centerIdx + 1 && "origin-top scale-[0.97] -translate-y-1"
+                   )}
+                 >
+                   {/* Sentence text with per-word active highlighting */}
+                   <div className="relative text-base leading-relaxed inline-block">
                     {(() => {
                       const query = searchQuery.toLowerCase().trim()
                       const words = (sentence.words as { text: string; start: number; end: number }[] | undefined) || []
@@ -451,13 +447,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
               <p>{currentClip?.sentence_text ?? title}</p>
             </div>
           )}
-          
-          {/* Spacer to push content to center */}
-          <div className="flex-1 min-h-[60px]"></div>
         </div>
-        
-        {/* Bottom fade overlay */}
-        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 rounded-b-2xl" />
       </div>
     </div>
   )
