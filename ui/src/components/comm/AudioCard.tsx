@@ -212,9 +212,9 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   }, [currentTime, isPlaying])
 
   return (
-    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-6 sm:p-8 shadow-2xl", className)}>
+    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-5 shadow-2xl", className)}>
       {/* Audio Controls - All in one row */}
-      <div className="flex items-center justify-between gap-6 mb-6">
+      <div className="flex items-center justify-between gap-4 mb-2">
         {/* Volume control - Left side */}
         <div className="flex items-center gap-3 flex-1 max-w-[180px]">
           <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
@@ -343,10 +343,10 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
       </div>
 
       {/* Transcript List - Center focus carousel (prev/current/next) */}
-      <div className="relative mt-4">
+      <div className="relative mt-1">
         <div 
           ref={scrollContainerRef}
-          className="max-h-[220px] overflow-y-auto rounded-2xl bg-card px-4 py-4 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="max-h-[200px] overflow-y-auto rounded-2xl bg-card px-3 py-3 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {isTranscriptLoading ? (
             <div className="w-full py-8 flex items-center justify-center">
@@ -389,8 +389,8 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
                     idx === centerIdx + 1 && "origin-top scale-[0.97] -translate-y-1"
                    )}
                  >
-                   {/* Sentence text with per-word active highlighting */}
-                   <div className="relative text-base leading-relaxed inline-block">
+                  {/* Sentence text with per-word active highlighting */}
+                   <div className="relative text-lg leading-relaxed inline-block">
                     {(() => {
                       const query = searchQuery.toLowerCase().trim()
                       const words = (sentence.words as { text: string; start: number; end: number }[] | undefined) || []
