@@ -21,6 +21,8 @@ export default function RoutedSearchPage() {
   const { setQuery, setCategory } = useSearchParamsCtx()
   const { state, dispatch } = usePlayerContext()
 
+  const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
+
   // Local searchQuery for AudioCard subtitle
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -86,12 +88,13 @@ export default function RoutedSearchPage() {
                 }
                 title={playlist[state.currentVideoIndex]?.sentence_text ?? ""}
                 searchQuery={searchQuery}
+                onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
               />
             </div>
 
             {/* Right: AI */}
             <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0">
-              <AiCompletion />
+              <AiCompletion externalPrompt={externalPrompt} />
             </div>
           </div>
         </div>

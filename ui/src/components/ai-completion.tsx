@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
 import { useResponseHistory } from "@/hooks/useResponseHistory";
-import { useAiAssistant } from "@/context/AiAssistantContext";
+import { useCompletion } from "@ai-sdk/react";
 
 interface SmartSuggestion {
     title: string;
@@ -67,9 +67,11 @@ function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
     ];
 }
 
-export function AiCompletion() {
+export function AiCompletion({ externalPrompt }: { externalPrompt: string | null }) {
     const { query } = useSearchParams();
-    const { completion, runPrompt, isLoading, error } = useAiAssistant();
+    const { completion, complete, isLoading, error } = useCompletion({
+        api: "/api/v1/completion",
+    });
     const [inputValue, setInputValue] = useState("");
     const currentPromptRef = useRef<string>("");
     const responseContainerRef = useRef<HTMLDivElement>(null);
@@ -121,14 +123,14 @@ export function AiCompletion() {
     const handleSuggestionClick = (suggestion: SmartSuggestion) => {
         setInputValue(suggestion.prompt);
         currentPromptRef.current = suggestion.prompt;
-        runPrompt(suggestion.prompt);
+        complete(suggestion.prompt);
     };
 
     const handleInputSubmit = () => {
         if (inputValue.trim()) {
             const prompt = inputValue.trim();
             currentPromptRef.current = prompt;
-            runPrompt(prompt);
+            complete(prompt);
         }
     };
 
@@ -137,6 +139,18 @@ export function AiCompletion() {
             handleInputSubmit();
         }
     };
+
+    // Trigger completion when a new external prompt is passed in (e.g. from AudioCard)
+    const lastHandledPromptRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (!externalPrompt) return;
+        if (externalPrompt === lastHandledPromptRef.current) return;
+
+        lastHandledPromptRef.current = externalPrompt;
+        currentPromptRef.current = externalPrompt;
+        complete(externalPrompt);
+    }, [externalPrompt, complete]);
 
     // Store completed response as a branch
     useEffect(() => {

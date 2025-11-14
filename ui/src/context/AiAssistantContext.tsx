@@ -1,13 +1,10 @@
 "use client";
 
-import { createContext, useContext, useMemo, useRef } from "react";
-import { useCompletion } from "@ai-sdk/react";
+import { createContext, useContext, useRef } from "react";
 
 interface AiAssistantContextValue {
-  completion: string;
-  isLoading: boolean;
-  error: Error | null;
-  runPrompt: (prompt: string) => void;
+  lastPromptRequestRef: React.MutableRefObject<string | null>;
+  requestPrompt: (prompt: string) => void;
 }
 
 const AiAssistantContext = createContext<AiAssistantContextValue | undefined>(
@@ -17,28 +14,16 @@ const AiAssistantContext = createContext<AiAssistantContextValue | undefined>(
 export const AiAssistantProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { completion, complete, isLoading, error } = useCompletion({
-    api: "/api/v1/completion",
-  });
-  const lastPromptRef = useRef<string>("");
+  const lastPromptRequestRef = useRef<string | null>(null);
 
-  const value = useMemo<AiAssistantContextValue>(
-    () => ({
-      completion,
-      isLoading,
-      error: (error as Error) ?? null,
-      runPrompt: (prompt: string) => {
-        const clean = prompt.trim();
-        if (!clean) return;
-        lastPromptRef.current = clean;
-        complete(clean);
-      },
-    }),
-    [completion, isLoading, error, complete],
-  );
+  const requestPrompt = (prompt: string) => {
+    const clean = prompt.trim();
+    if (!clean) return;
+    lastPromptRequestRef.current = clean;
+  };
 
   return (
-    <AiAssistantContext.Provider value={value}>
+    <AiAssistantContext.Provider value={{ lastPromptRequestRef, requestPrompt }}>
       {children}
     </AiAssistantContext.Provider>
   );

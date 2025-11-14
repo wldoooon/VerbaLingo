@@ -25,7 +25,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { TranscriptBox } from "./TranscriptBox"
-import { useAiAssistant } from "@/context/AiAssistantContext"
 
 type AudioCardProps = {
   src: string
@@ -78,7 +77,7 @@ function renderWordsWithHighlighting(
   })
 }
 
-export default function AudioCard({ src, title, className, defaultRate = 1, searchQuery = "" }: AudioCardProps) {
+export default function AudioCard({ src, title, className, defaultRate = 1, searchQuery = "", onExplainWordPrompt }: AudioCardProps & { onExplainWordPrompt?: (prompt: string) => void }) {
   const [rate, setRate] = useState(defaultRate)
   const [volume, setVolume] = useState(100)
   const router = useRouter()
@@ -100,7 +99,6 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   // Defensive: clamp currentVideoIndex to valid range
   const validIndex = Math.max(0, Math.min(currentVideoIndex, playlist.length - 1))
   const currentClip = playlist[validIndex]
-  const { runPrompt } = useAiAssistant()
   
   // Get transcript data for the current video
   const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "")
@@ -376,7 +374,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
         }}
         onExplainWordInContext={({ word, sentence }) => {
           const prompt = `Explain the meaning and nuance of the word "${word}" specifically in this sentence. Focus on how it is used here, any implied tone or register, and give 2-3 additional example sentences with similar usage.\n\nSentence: "${sentence}"`
-          runPrompt(prompt)
+          onExplainWordPrompt?.(prompt)
         }}
       />
     </div>
