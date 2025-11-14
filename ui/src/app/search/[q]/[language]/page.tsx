@@ -29,21 +29,22 @@ export default function RoutedSearchPage() {
   const playlist = useMemo(() => data?.hits || [], [data])
 
   useEffect(() => {
+    if (!q || !q.trim()) return
+
+    // Start the backend fetch as early as possible
+    refetch()
+
     // Sync URL params into global search context
     setQuery(q)
     setCategory(categoryForContext)
 
     // Persist last query for components relying on it
     try {
-      if (q) localStorage.setItem("last_search_query", q)
+      localStorage.setItem("last_search_query", q)
     } catch {}
 
     setSearchQuery(q)
 
-    // Fetch results to populate React Query cache so VideoPlayerCard can read it
-    if (q && q.trim()) {
-      refetch()
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, languageParam])
 

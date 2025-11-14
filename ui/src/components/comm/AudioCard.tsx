@@ -98,7 +98,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const currentClip = playlist[validIndex]
   
   // Get transcript data for the current video
-  const { data: transcriptData } = useTranscript(currentClip?.video_id || "")
+  const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "")
 
   // Sync playback rate with context controls
   useEffect(() => {
@@ -354,7 +354,11 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           {/* Spacer to push content to center */}
           <div className="flex-1 min-h-[60px]"></div>
           
-          {sentencesInClip.length > 0 ? (
+          {isTranscriptLoading ? (
+            <div className="w-full py-8 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-full border-2 border-muted-foreground/40 border-t-red-500 animate-spin" />
+            </div>
+          ) : sentencesInClip.length > 0 ? (
             sentencesInClip.map((sentence: any, idx: number) => {
               const TIMING_LEAD = 0.08
               const adjustedTime = currentTime + TIMING_LEAD
