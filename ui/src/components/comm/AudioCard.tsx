@@ -23,6 +23,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { TranscriptBox } from "./TranscriptBox"
 
 type AudioCardProps = {
   src: string
@@ -342,113 +343,17 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
         </div>
       </div>
 
-      {/* Transcript List - Center focus carousel (prev/current/next) */}
-      <div className="relative mt-1">
-        <div 
-          ref={scrollContainerRef}
-          className="max-h-[200px] overflow-y-auto rounded-2xl bg-card px-3 py-3 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        >
-          {isTranscriptLoading ? (
-            <div className="w-full py-8 flex items-center justify-center">
-              <div className="h-8 w-8 rounded-full border-2 border-muted-foreground/40 border-t-red-500 animate-spin" />
-            </div>
-          ) : sentencesInClip.length > 0 ? (
-            sentencesInClip.map((sentence: any, idx: number) => {
-              const TIMING_LEAD = 0.08
-              const adjustedTime = currentTime + TIMING_LEAD
-              const isActive = adjustedTime >= sentence.start_time - 0.7 && adjustedTime < (sentence.end_time - 0.9)
-              const isTargetSentence = targetSentence && sentence.start_time === targetSentence.start_time
-              
-              // Find active sentence index
-              const activeSentenceIdx = sentencesInClip.findIndex((s: any) => {
-                return adjustedTime >= s.start_time - 0.7 && adjustedTime < (s.end_time - 0.9)
-              })
-              
-              // Update last active index when we find an active sentence
-              if (activeSentenceIdx !== -1) {
-                lastActiveSentenceIdx.current = activeSentenceIdx
-              }
-              
-              // Use last active index (keeps showing last sentence until next one activates)
-              const centerIdx = lastActiveSentenceIdx.current
-              
-              // Only render sentence + 1 before + 1 after (3 total)
-              const distance = Math.abs(idx - centerIdx)
-              if (distance > 1) return null
-              
-               return (
-                 <div
-                   key={`${sentence.start_time}-${idx}`}
-                   ref={isActive ? activeSentenceRef : (isTargetSentence ? targetSentenceRef : null)}
-                   className={cn(
-                    "mb-3 rounded-2xl border transition-all duration-300 ease-in-out bg-card/80 flex items-center justify-center text-center",
-                    idx === centerIdx
-                      ? "p-4 shadow-lg shadow-red-500/20 border-red-500/80 scale-[1.01]"
-                      : "p-3 opacity-70 hover:opacity-100",
-                    idx === centerIdx - 1 && "origin-bottom scale-[0.97] translate-y-1",
-                    idx === centerIdx + 1 && "origin-top scale-[0.97] -translate-y-1"
-                   )}
-                 >
-                  {/* Sentence text with per-word active highlighting */}
-                   <div className="relative text-lg leading-relaxed inline-block">
-                    {(() => {
-                      const query = searchQuery.toLowerCase().trim()
-                      const words = (sentence.words as { text: string; start: number; end: number }[] | undefined) || []
-
-                      if (words.length > 0) {
-                        const wordNodes = words.map((w, wi) => {
-                          const wordText = (w.text || '').trim()
-                          // Simple, robust window: active while time is within the word bounds
-                          const isCurrentWord = adjustedTime >= w.start - 0.7 && adjustedTime < w.end - 0.9
-                          const isSearchMatch = !!query && wordText.toLowerCase().includes(query)
-                          return (
-                            <span
-                              key={`${w.start}-${wi}`}
-                              className={cn(
-                                "mr-2 transition-all duration-300 ease-in-out",
-                                isSearchMatch && !isCurrentWord && "bg-red-500 text-white px-1 rounded",
-                                isCurrentWord && "ring-2 ring-red-500 ring-offset-2 ring-offset-muted px-1 rounded font-medium"
-                              )}
-                            >
-                              {wordText || '\u00A0'}
-                            </span>
-                          )
-                        })
-                        return <>{wordNodes}</>
-                      }
-
-                      // Fallback: no word timings, keep original sentence-level rendering
-                      const text = sentence.sentence_text || ""
-                      if (!query) return <span className="relative z-10">{text}</span>
-                      const regex = new RegExp(`(${query})`, 'gi')
-                      const parts = text.split(regex)
-                      return parts.map((part: string, partIdx: number) => {
-                        const isMatch = part.toLowerCase() === query
-                        return (
-                          <span
-                            key={partIdx}
-                            className={cn(
-                              "relative z-10",
-                              isMatch && "bg-red-500 text-white px-2 py-1 rounded font-bold"
-                            )}
-                          >
-                            {part}
-                          </span>
-                        )
-                      })
-                    })()}
-                  </div>
-                  {/* Translation removed as requested */}
-                </div>
-              )
-            })
-          ) : (
-            <div className="text-center text-muted-foreground py-8">
-              <p>{currentClip?.sentence_text ?? title}</p>
-            </div>
-          )}
-        </div>
-      </div>
+      <TranscriptBox
+        sentences={sentencesInClip}
+        searchQuery={searchQuery}
+        currentTime={currentTime}
+        isTranscriptLoading={isTranscriptLoading}
+        scrollContainerRef={scrollContainerRef}
+        activeSentenceRef={activeSentenceRef}
+        targetSentenceRef={targetSentenceRef}
+        targetSentence={targetSentence}
+        lastActiveSentenceIdxRef={lastActiveSentenceIdx}
+      />
     </div>
   )
 }
