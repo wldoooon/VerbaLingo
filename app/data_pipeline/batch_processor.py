@@ -47,19 +47,69 @@ def setup_index_settings(client, index_name):
 
 
 def quick_search(query: str, category: str | None = None, limit: int = 10):
+   """Run a quick search and print ONLY the sentence(s) that matched.
+
+   We use Meilisearch highlighting on nested attributes and then extract the
+   specific sentence_text values that contain the highlight tags.
+   """
    client = Client("http://localhost:7700")
    index_name = "yt_data"
    index = client.index(index_name)
 
-   params = {"limit": limit}
+   params = {
+       "limit": limit,
+       # Only retrieve minimal fields; rely on _formatted for highlighted text
+       "attributesToRetrieve": ["video_id", "position", "sentence_text", "sentences.sentence_text"],
+       "attributesToHighlight": ["sentence_text", "sentences.sentence_text"],
+       "highlightPreTag": "<em>",
+       "highlightPostTag": "</em>",
+       "showMatchesPosition": True,
+   }
    if category:
        params["filter"] = f"category = '{category}'"
 
    result = index.search(query, params)
    hits = result.get("hits", [])
-   for i, h in enumerate(hits, 1):
-       print(f"{i:02d}. vid={h.get('video_id')} pos={h.get('position')} text={h.get('sentences')}")
-   return hits
+
+   def extract_matched_sentences(hit: dict) -> list[str]:
+       matched: list[str] = []
+       formatted = hit.get("_formatted", {})
+
+       # 1) If top-level sentence_text exists and got highlighted
+       st = formatted.get("sentence_text")
+       if isinstance(st, str) and "<em>" in st:
+           matched.append(st)
+
+       # 2) If sentences is an array of objects with sentence_text
+       sentences_fmt = formatted.get("sentences")
+       if isinstance(sentences_fmt, list):
+           for item in sentences_fmt:
+               s = item.get("sentence_text") if isinstance(item, dict) else None
+               if isinstance(s, str) and "<em>" in s:
+                   matched.append(s)
+
+       return matched
+
+   line_no = 1
+   flattened_results: list[dict] = []
+   for hit in hits:
+       matched_sentences = extract_matched_sentences(hit)
+       if not matched_sentences:
+           # Fallback: just show raw sentence_text if present
+           fallback = hit.get("sentence_text")
+           if isinstance(fallback, str):
+               matched_sentences = [fallback]
+
+       for s in matched_sentences:
+           print(f"{line_no:02d}. vid={hit.get('video_id')} pos={hit.get('position')} sentence={s}")
+           flattened_results.append({
+               "video_id": hit.get("video_id"),
+               "position": hit.get("position"),
+               "sentence_formatted": s,  # may include <em> ... </em>
+           })
+           line_no += 1
+
+   return flattened_results
 
 
 def process_documents_in_batches():
