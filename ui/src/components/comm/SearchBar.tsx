@@ -165,7 +165,7 @@ export default function SearchBar() {
           className={cn(
             "w-full h-12 pl-14 pr-5 text-base",
             "rounded-full",
-            "bg-card/90 backdrop-blur-md",
+            "bg-card",
             "border border-border/60",
             "text-foreground placeholder:text-muted-foreground/70",
             "transition-all duration-200",
