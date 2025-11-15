@@ -12,23 +12,31 @@ def send_batch_to_meilisearch(batch, client, index_name):
     task = index.add_documents(batch, primary_key="id")
     return task
 
+def delete_index():
+    """Delete an index."""
+    client = Client("http://localhost:7700")
+    index_name = "yt_data"
+    client.index(index_name).delete()
+    print(f"Index {index_name} deleted.") 
+    
 
 def setup_index_settings(client, index_name):
     """Configure index settings for search optimization."""
     index = client.index(index_name)
     
     index.update_searchable_attributes([
-        'sentence_text'
+        'sentence_text',            # top-level sentence
+        'words.text',               # sub-attribute from words[] array
+        'sentences.sentence_text'   # sub-attribute from sentences[] array
     ])
     
     index.update_filterable_attributes([
         'category',
-        'lang',
+        'language',
         'video_id'
     ])
     
     index.update_sortable_attributes([
-        'position',
         'start_time'
     ])
     
@@ -36,6 +44,22 @@ def setup_index_settings(client, index_name):
     print("- Searchable attributes: sentence_text")
     print("- Filterable attributes: category, lang")
     print("- Sortable attributes: position, start_time")
+
+
+def quick_search(query: str, category: str | None = None, limit: int = 10):
+   client = Client("http://localhost:7700")
+   index_name = "yt_data"
+   index = client.index(index_name)
+
+   params = {"limit": limit}
+   if category:
+       params["filter"] = f"category = '{category}'"
+
+   result = index.search(query, params)
+   hits = result.get("hits", [])
+   for i, h in enumerate(hits, 1):
+       print(f"{i:02d}. vid={h.get('video_id')} pos={h.get('position')} text={h.get('sentences')}")
+   return hits
 
 
 def process_documents_in_batches():
@@ -95,5 +119,7 @@ def configure_index_only():
 
 
 if __name__ == "__main__":
-    process_documents_in_batches()  # Process documents and configure settings
+    quick_search("hello")
+    # process_documents_in_batches()  # Process documents and configure settings
     # configure_index_only()  # Only configure settings without processing
+    # delete_index()

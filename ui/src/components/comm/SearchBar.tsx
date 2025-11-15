@@ -136,14 +136,33 @@ export default function SearchBar() {
           disabled={isRouting}
         />
         
-        {/* Loading indicator inside the input */}
-        {isRouting && (
+        {/* Right-side action: show loader while routing, otherwise show Search button */}
+        {isRouting ? (
           <div className="absolute right-5 top-1/2 -translate-y-1/2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground"></div>
               <span>Searching...</span>
             </div>
           </div>
+        ) : (
+          <button
+            type="button"
+            aria-label="Search"
+            onClick={() => handleSearch()}
+            disabled={!localQuery.trim()}
+            className={cn(
+              "absolute right-2.5 top-1/2 -translate-y-1/2",
+              "inline-flex items-center gap-2 px-3 py-1.5",
+              "rounded-full border",
+              "bg-primary/90 text-primary-foreground border-primary/70",
+              "backdrop-blur-md shadow-sm",
+              "hover:bg-primary hover:shadow-md",
+              "disabled:opacity-50 disabled:cursor-not-allowed"
+            )}
+          >
+            <Search className="h-4 w-4" />
+            <span className="text-sm font-medium hidden sm:inline">Search</span>
+          </button>
         )}
       </div>
 
