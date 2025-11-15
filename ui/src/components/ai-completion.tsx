@@ -431,12 +431,14 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                             ) : (
                                                 <>
                                                     {/* Show current branch if navigating, otherwise show live streaming completion */}
-                                                    <Response>
-                                                        {currentBranch && !isLoading 
-                                                            ? currentBranch.response 
-                                                            : completion
-                                                        }
-                                                    </Response>
+                                                    <div className="text-base md:text-lg leading-relaxed">
+                                                        <Response>
+                                                            {currentBranch && !isLoading 
+                                                                ? currentBranch.response 
+                                                                : completion
+                                                            }
+                                                        </Response>
+                                                    </div>
                                                 </>
                                             )}
                                         </div>

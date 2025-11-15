@@ -10,6 +10,7 @@ import { AiCompletion } from "@/components/ai-completion"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams as useSearchParamsCtx } from "@/context/SearchParamsContext"
 import { useSearch } from "@/lib/useApi"
+import { Loader2 } from "lucide-react"
 
 export default function RoutedSearchPage() {
   const params = useParams<{ q: string; language: string }>()
@@ -22,18 +23,20 @@ export default function RoutedSearchPage() {
   const { state, dispatch } = usePlayerContext()
 
   const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
+  const [hasRequested, setHasRequested] = useState(false)
 
   // Local searchQuery for AudioCard subtitle
   const [searchQuery, setSearchQuery] = useState("")
 
   // Use a dedicated query instance here and manually fetch on mount
-  const { data, refetch } = useSearch(q, categoryForContext)
+  const { data, refetch, isLoading } = useSearch(q, categoryForContext)
   const playlist = useMemo(() => data?.hits || [], [data])
 
   useEffect(() => {
     if (!q || !q.trim()) return
 
     // Start the backend fetch as early as possible
+    setHasRequested(true)
     refetch()
 
     // Sync URL params into global search context
@@ -75,28 +78,33 @@ export default function RoutedSearchPage() {
 
         {/* Main Content */}
         <div className="flex-1 bg-card text-card-foreground shadow-sm p-4 sm:p-6 pb-12 lg:pb-6">
-          {/* Always render the player+AI layout for routed search */}
-          <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-stretch lg:gap-2">
-            {/* Left: Player + Audio */}
-            <div className="space-y-2">
-              <VideoPlayerCard />
-              <AudioCard
-                src={
-                  playlist[state.currentVideoIndex]?.video_id
-                    ? `https://www.youtube.com/watch?v=${playlist[state.currentVideoIndex].video_id}`
-                    : ""
-                }
-                title={playlist[state.currentVideoIndex]?.sentence_text ?? ""}
-                searchQuery={searchQuery}
-                onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
-              />
+          {(!hasRequested || isLoading) ? (
+            <div className="flex h-full items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
+          ) : (
+            <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-stretch lg:gap-2">
+              {/* Left: Player + Audio */}
+              <div className="space-y-2">
+                <VideoPlayerCard />
+                <AudioCard
+                  src={
+                    playlist[state.currentVideoIndex]?.video_id
+                      ? `https://www.youtube.com/watch?v=${playlist[state.currentVideoIndex].video_id}`
+                      : ""
+                  }
+                  title={playlist[state.currentVideoIndex]?.sentence_text ?? ""}
+                  searchQuery={searchQuery}
+                  onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
+                />
+              </div>
 
-            {/* Right: AI */}
-            <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0">
-              <AiCompletion externalPrompt={externalPrompt} />
+              {/* Right: AI */}
+              <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0">
+                <AiCompletion externalPrompt={externalPrompt} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
     </div>
