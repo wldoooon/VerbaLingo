@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { PlayerProvider } from "@/context/PlayerContext";
 import { SearchParamsProvider } from "@/context/SearchParamsContext";
+import { AiAssistantProvider } from "@/context/AiAssistantContext";
 import QueryProvider from "@/components/QueryProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning  style={{fontSize: '90%'}}>
+    <html lang="en" suppressHydrationWarning  style={{fontSize: '80%'}}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=0.80, maximum-scale=1.0, user-scalable=yes" />
         <link rel="preconnect" href="https://www.youtube.com" />
@@ -38,7 +39,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           <QueryProvider>
             <SearchParamsProvider>
-              <PlayerProvider>{children}</PlayerProvider>
+              <PlayerProvider>
+                <AiAssistantProvider>{children}</AiAssistantProvider>
+              </PlayerProvider>
             </SearchParamsProvider>
           </QueryProvider>
         </ThemeProvider>

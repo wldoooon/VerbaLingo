@@ -1,5 +1,4 @@
 "use client";
-import { useCompletion } from "@ai-sdk/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "@/context/SearchParamsContext";
@@ -10,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
 import { useResponseHistory } from "@/hooks/useResponseHistory";
+import { useCompletion } from "@ai-sdk/react";
 
 interface SmartSuggestion {
     title: string;
@@ -67,7 +67,7 @@ function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
     ];
 }
 
-export function AiCompletion() {
+export function AiCompletion({ externalPrompt }: { externalPrompt: string | null }) {
     const { query } = useSearchParams();
     const { completion, complete, isLoading, error } = useCompletion({
         api: "/api/v1/completion",
@@ -140,6 +140,18 @@ export function AiCompletion() {
         }
     };
 
+    // Trigger completion when a new external prompt is passed in (e.g. from AudioCard)
+    const lastHandledPromptRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        if (!externalPrompt) return;
+        if (externalPrompt === lastHandledPromptRef.current) return;
+
+        lastHandledPromptRef.current = externalPrompt;
+        currentPromptRef.current = externalPrompt;
+        complete(externalPrompt);
+    }, [externalPrompt, complete]);
+
     // Store completed response as a branch
     useEffect(() => {
         if (!isLoading && completion && completion.trim() && currentPromptRef.current) {
@@ -162,13 +174,19 @@ export function AiCompletion() {
                     <div className="w-1/2 bg-gradient-to-r from-transparent via-primary/50 to-primary"></div>
                     <div className="w-1/2 bg-gradient-to-l from-transparent via-primary/50 to-primary"></div>
                 </div>
-                
-                {/* Left vertical gradient border - fade from center to edges */}
-                <div className="absolute top-0 bottom-0 left-0 flex flex-col w-px">
-                    <div className="h-1/2 bg-gradient-to-t from-border to-transparent"></div>
-                    <div className="h-1/2 bg-gradient-to-b from-border to-transparent"></div>
+
+                {/* Left fading border for outer card - matches right side */}
+                <div className="pointer-events-none absolute top-0 bottom-0 left-0 flex flex-col w-px">
+                    <div className="h-1/2 bg-gradient-to-t from-border to-transparent" />
+                    <div className="h-1/2 bg-gradient-to-b from-border to-transparent" />
                 </div>
-                
+
+                {/* Bottom fading border for outer card */}
+                <div className="absolute bottom-0 left-0 right-0 flex h-px">
+                    <div className="w-1/2 bg-gradient-to-r from-transparent to-border" />
+                    <div className="w-1/2 bg-gradient-to-l from-transparent to-border" />
+                </div>
+
                 {/* Right vertical gradient border - fade from center to edges */}
                 <div className="absolute top-0 bottom-0 right-0 flex flex-col w-px">
                     <div className="h-1/2 bg-gradient-to-t from-border to-transparent"></div>

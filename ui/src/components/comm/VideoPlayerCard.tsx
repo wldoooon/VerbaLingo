@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic"
 const YouTube = dynamic(() => import("react-youtube"), { ssr: false })
 import { useEffect, useState, useRef } from "react"
+import { Play } from "lucide-react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useSearch } from "@/lib/useApi"
@@ -118,11 +119,21 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
       <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] overflow-hidden rounded-2xl">
         {!ready && currentVideoId && (
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center blur-sm scale-105"
             style={{
               backgroundImage: `url(https://i.ytimg.com/vi/${currentVideoId}/hqdefault.jpg)`,
             }}
-          />
+          >
+            <div className="absolute inset-0 bg-black/30" />
+            {/* Shine effect */}
+            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shine_1.8s_ease-in-out_infinite]" />
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-16 w-16 rounded-full bg-white/10 border border-white/30 flex items-center justify-center animate-pulse">
+                <Play className="h-7 w-7 text-white/80" />
+              </div>
+            </div>
+          </div>
         )}
         {currentVideoId && (
           <YouTube

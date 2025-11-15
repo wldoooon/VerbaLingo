@@ -21,6 +21,8 @@ export default function RoutedSearchPage() {
   const { setQuery, setCategory } = useSearchParamsCtx()
   const { state, dispatch } = usePlayerContext()
 
+  const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
+
   // Local searchQuery for AudioCard subtitle
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -29,21 +31,22 @@ export default function RoutedSearchPage() {
   const playlist = useMemo(() => data?.hits || [], [data])
 
   useEffect(() => {
+    if (!q || !q.trim()) return
+
+    // Start the backend fetch as early as possible
+    refetch()
+
     // Sync URL params into global search context
     setQuery(q)
     setCategory(categoryForContext)
 
     // Persist last query for components relying on it
     try {
-      if (q) localStorage.setItem("last_search_query", q)
+      localStorage.setItem("last_search_query", q)
     } catch {}
 
     setSearchQuery(q)
 
-    // Fetch results to populate React Query cache so VideoPlayerCard can read it
-    if (q && q.trim()) {
-      refetch()
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, languageParam])
 
@@ -85,12 +88,13 @@ export default function RoutedSearchPage() {
                 }
                 title={playlist[state.currentVideoIndex]?.sentence_text ?? ""}
                 searchQuery={searchQuery}
+                onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
               />
             </div>
 
             {/* Right: AI */}
             <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0">
-              <AiCompletion />
+              <AiCompletion externalPrompt={externalPrompt} />
             </div>
           </div>
         </div>

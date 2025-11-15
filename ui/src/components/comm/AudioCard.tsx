@@ -17,12 +17,14 @@ import {
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useTranscript, useSearch } from "@/lib/useApi"
+import { useRouter } from "next/navigation"
 import type { TranscriptSentence } from "@/lib/types"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { TranscriptBox } from "./TranscriptBox"
 
 type AudioCardProps = {
   src: string
@@ -75,9 +77,10 @@ function renderWordsWithHighlighting(
   })
 }
 
-export default function AudioCard({ src, title, className, defaultRate = 1, searchQuery = "" }: AudioCardProps) {
+export default function AudioCard({ src, title, className, defaultRate = 1, searchQuery = "", onExplainWordPrompt }: AudioCardProps & { onExplainWordPrompt?: (prompt: string) => void }) {
   const [rate, setRate] = useState(defaultRate)
   const [volume, setVolume] = useState(100)
+  const router = useRouter()
   const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
   const [speedPopoverOpen, setSpeedPopoverOpen] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -89,7 +92,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const { isPlaying, duration } = playerState
   
   // Read playlist from React Query cache
-  const { query, category } = useSearchParams()
+  const { query, category, setQuery, setCategory } = useSearchParams()
   const { data } = useSearch(query, category)
   const playlist = data?.hits || []
   
@@ -98,7 +101,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const currentClip = playlist[validIndex]
   
   // Get transcript data for the current video
-  const { data: transcriptData } = useTranscript(currentClip?.video_id || "")
+  const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "")
 
   // Sync playback rate with context controls
   useEffect(() => {
@@ -212,9 +215,9 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   }, [currentTime, isPlaying])
 
   return (
-    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-6 sm:p-8 shadow-2xl", className)}>
+    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-5 shadow-2xl", className)}>
       {/* Audio Controls - All in one row */}
-      <div className="flex items-center justify-between gap-6 mb-6">
+      <div className="flex items-center justify-between gap-4 mb-2">
         {/* Volume control - Left side */}
         <div className="flex items-center gap-3 flex-1 max-w-[180px]">
           <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
@@ -342,119 +345,38 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
         </div>
       </div>
 
-      {/* Transcript List - Scrollable Section with fade effect */}
-      <div className="relative">
-        {/* Top fade overlay */}
-        <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 rounded-t-2xl" />
-        
-        <div 
-          ref={scrollContainerRef}
-          className="max-h-[200px] overflow-y-auto rounded-2xl bg-muted/30 px-4 space-y-3 scroll-smooth flex flex-col justify-center items-center [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        >
-          {/* Spacer to push content to center */}
-          <div className="flex-1 min-h-[60px]"></div>
-          
-          {sentencesInClip.length > 0 ? (
-            sentencesInClip.map((sentence: any, idx: number) => {
-              const TIMING_LEAD = 0.08
-              const adjustedTime = currentTime + TIMING_LEAD
-              const isActive = adjustedTime >= sentence.start_time - 0.7 && adjustedTime < (sentence.end_time - 0.9)
-              const isTargetSentence = targetSentence && sentence.start_time === targetSentence.start_time
-              
-              // Find active sentence index
-              const activeSentenceIdx = sentencesInClip.findIndex((s: any) => {
-                return adjustedTime >= s.start_time - 0.7 && adjustedTime < (s.end_time - 0.9)
-              })
-              
-              // Update last active index when we find an active sentence
-              if (activeSentenceIdx !== -1) {
-                lastActiveSentenceIdx.current = activeSentenceIdx
-              }
-              
-              // Use last active index (keeps showing last sentence until next one activates)
-              const centerIdx = lastActiveSentenceIdx.current
-              
-              // Only render sentence + 1 before + 1 after (3 total)
-              const distance = Math.abs(idx - centerIdx)
-              if (distance > 1) return null
-              
-              return (
-                <div
-                  key={`${sentence.start_time}-${idx}`}
-                  ref={isActive ? activeSentenceRef : (isTargetSentence ? targetSentenceRef : null)}
-                  className={cn(
-                    "p-4 rounded-xl transition-all duration-300 ease-in-out",
-                    isActive
-                      ? "border-b-2 border-red-500/60 pb-3 opacity-100"
-                      : "opacity-70 hover:opacity-90"
-                  )}
-                >
-                  {/* Sentence text with per-word active highlighting */}
-                  <div className="relative text-lg leading-relaxed">
-                    {(() => {
-                      const query = searchQuery.toLowerCase().trim()
-                      const words = (sentence.words as { text: string; start: number; end: number }[] | undefined) || []
+      <TranscriptBox
+        sentences={sentencesInClip}
+        searchQuery={searchQuery}
+        currentTime={currentTime}
+        isTranscriptLoading={isTranscriptLoading}
+        scrollContainerRef={scrollContainerRef}
+        activeSentenceRef={activeSentenceRef}
+        targetSentenceRef={targetSentenceRef}
+        targetSentence={targetSentence}
+        lastActiveSentenceIdxRef={lastActiveSentenceIdx}
+        onSearchWord={(word) => {
+          const clean = word.trim()
+          if (!clean) return
 
-                      if (words.length > 0) {
-                        const wordNodes = words.map((w, wi) => {
-                          const wordText = (w.text || '').trim()
-                          // Simple, robust window: active while time is within the word bounds
-                          const isCurrentWord = adjustedTime >= w.start - 0.7 && adjustedTime < w.end - 0.9
-                          const isSearchMatch = !!query && wordText.toLowerCase().includes(query)
-                          return (
-                            <span
-                              key={`${w.start}-${wi}`}
-                              className={cn(
-                                "mr-2 transition-all duration-300 ease-in-out",
-                                isSearchMatch && !isCurrentWord && "bg-red-500 text-white px-1 rounded",
-                                isCurrentWord && "ring-2 ring-red-500 ring-offset-2 ring-offset-muted px-1 rounded font-medium"
-                              )}
-                            >
-                              {wordText || '\u00A0'}
-                            </span>
-                          )
-                        })
-                        return <>{wordNodes}</>
-                      }
+          // Update global search context
+          setQuery(clean)
+          setCategory(null)
 
-                      // Fallback: no word timings, keep original sentence-level rendering
-                      const text = sentence.sentence_text || ""
-                      if (!query) return <span className="relative z-10">{text}</span>
-                      const regex = new RegExp(`(${query})`, 'gi')
-                      const parts = text.split(regex)
-                      return parts.map((part: string, partIdx: number) => {
-                        const isMatch = part.toLowerCase() === query
-                        return (
-                          <span
-                            key={partIdx}
-                            className={cn(
-                              "relative z-10",
-                              isMatch && "bg-red-500 text-white px-2 py-1 rounded font-bold"
-                            )}
-                          >
-                            {part}
-                          </span>
-                        )
-                      })
-                    })()}
-                  </div>
-                  {/* Translation removed as requested */}
-                </div>
-              )
-            })
-          ) : (
-            <div className="text-center text-muted-foreground py-8">
-              <p>{currentClip?.sentence_text ?? title}</p>
-            </div>
-          )}
-          
-          {/* Spacer to push content to center */}
-          <div className="flex-1 min-h-[60px]"></div>
-        </div>
-        
-        {/* Bottom fade overlay */}
-        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 rounded-b-2xl" />
-      </div>
+          // Navigate to routed search page so its useSearch hook fires
+          try {
+            const encoded = encodeURIComponent(clean)
+            const language = "General" // keep same default category mapping as routed page
+            router.push(`/search/${encoded}/${encodeURIComponent(language)}`)
+          } catch {
+            // ignore navigation errors for now
+          }
+        }}
+        onExplainWordInContext={({ word, sentence }) => {
+          const prompt = `Explain the meaning and nuance of the word "${word}" specifically in this sentence. Focus on how it is used here, any implied tone or register, and give 2-3 additional example sentences with similar usage.\n\nSentence: "${sentence}"`
+          onExplainWordPrompt?.(prompt)
+        }}
+      />
     </div>
   )
 }
