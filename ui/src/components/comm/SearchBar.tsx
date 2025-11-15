@@ -19,7 +19,8 @@ const CATEGORIES = [
 
 export default function SearchBar() {
   const [localQuery, setLocalQuery] = useState("")
-  const [localCategory, setLocalCategory] = useState("General")
+  const { category: globalCategory, language, setLanguage } = useSearchParams()
+  const [localCategory, setLocalCategory] = useState(globalCategory ?? "General")
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [isRouting, setIsRouting] = useState(false)
