@@ -1,9 +1,30 @@
-"""
-Simple streaming batch processor for MeiliSearch
-"""
-
+import json
 from meilisearch import Client
 from jsonl_reader import read_jsonl_lines
+
+
+def calculate_json_size(data):
+    """Calculate the approximate size of a JSON-serialized object in bytes."""
+    return len(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+
+
+def transform_category(document):
+    """
+    Transform the category field from a string to an object with type and title.
+    
+    Args:
+        document: Document dictionary that may contain a 'category' field
+        
+    Returns:
+        Document with transformed category field
+    """
+    if 'category' in document and document['category'] is not None:
+        original_category = document['category']
+        document['category'] = {
+            "type": "Cartoon",
+            "title": original_category
+        }
+    return document
 
 
 def send_batch_to_meilisearch(batch, client, index_name):
@@ -32,6 +53,8 @@ def setup_index_settings(client, index_name):
     
     index.update_filterable_attributes([
         'category',
+        'category.type',
+        'category.title',
         'language',
         'video_id'
     ])
@@ -42,8 +65,8 @@ def setup_index_settings(client, index_name):
     
     print(f"Index settings configured for {index_name}")
     print("- Searchable attributes: sentence_text")
-    print("- Filterable attributes: category, lang")
-    print("- Sortable attributes: position, start_time")
+    print("- Filterable attributes: category, category.type, category.title, language, video_id")
+    print("- Sortable attributes: start_time")
 
 
 def quick_search(query: str, category: str | None = None, limit: int = 10):
@@ -66,7 +89,8 @@ def quick_search(query: str, category: str | None = None, limit: int = 10):
        "showMatchesPosition": True,
    }
    if category:
-       params["filter"] = f"category = '{category}'"
+       # Filter by category.title since category is now an object
+       params["filter"] = f"category.title = '{category}'"
 
    result = index.search(query, params)
    hits = result.get("hits", [])
@@ -112,50 +136,80 @@ def quick_search(query: str, category: str | None = None, limit: int = 10):
    return flattened_results
 
 
-def process_documents_in_batches():
-    """Process documents in batches of 100."""
+def process_documents_in_batches(max_batch_size_mb=90):
+    """
+    Process documents in batches based on payload size to avoid Meilisearch 100MB limit.
+    
+    Args:
+        max_batch_size_mb: Maximum batch size in MB (default 90MB for safety margin)
+    """
     
     client = Client("http://localhost:7700")
     index_name = "yt_data"
-    batch_size = 500
+    max_batch_size_bytes = max_batch_size_mb * 1024 * 1024  # Convert MB to bytes
     
     print("Configuring index settings...")
     setup_index_settings(client, index_name)
     print()
     
     batch = []
+    batch_size_bytes = 0
     total_processed = 0
     batch_count = 0
     doc_id_counter = 0  
     
-    print("Starting batch processing...")
+    print(f"Starting batch processing with max batch size: {max_batch_size_mb}MB ({max_batch_size_bytes:,} bytes)...")
+    print()
     
     for document in read_jsonl_lines():
         document['id'] = f"yt_{doc_id_counter}"
         doc_id_counter += 1
         
-        batch.append(document)
-        total_processed += 1
-
-        if len(batch) >= batch_size:
+        # Transform category field to object structure
+        document = transform_category(document)
+        
+        # Calculate the size of this document when serialized (after transformation)
+        doc_size = calculate_json_size(document)
+        
+        # Warn if a single document is very large (but still process it)
+        if doc_size > max_batch_size_bytes * 0.8:  # 80% of max batch size
+            print(f"⚠ Warning: Document {doc_id_counter} is very large ({doc_size / (1024*1024):.2f}MB)")
+        
+        # Check if adding this document would exceed the batch size limit
+        if batch and (batch_size_bytes + doc_size) > max_batch_size_bytes:
+            # Send current batch before adding this document
             batch_count += 1
+            batch_size_mb = batch_size_bytes / (1024 * 1024)
             try:
                 task = send_batch_to_meilisearch(batch, client, index_name)
-                print(f"Sent batch {batch_count} ({len(batch)} docs) - Total: {total_processed}")
-                batch = []  
+                print(f"✓ Sent batch {batch_count} ({len(batch)} docs, {batch_size_mb:.2f}MB) - Total processed: {total_processed}")
+                batch = []
+                batch_size_bytes = 0
             except Exception as e:
-                print(f"Failed to send batch {batch_count}: {e}")
-                batch = []  
+                print(f"✗ Failed to send batch {batch_count}: {e}")
+                batch = []
+                batch_size_bytes = 0
+        
+        # Add document to batch
+        batch.append(document)
+        batch_size_bytes += doc_size
+        total_processed += 1
 
+    # Send remaining documents in final batch
     if batch:
         batch_count += 1
+        batch_size_mb = batch_size_bytes / (1024 * 1024)
         try:
             task = send_batch_to_meilisearch(batch, client, index_name)
-            print(f"Sent final batch {batch_count} ({len(batch)} docs) - Total: {total_processed}")
+            print(f"✓ Sent final batch {batch_count} ({len(batch)} docs, {batch_size_mb:.2f}MB) - Total processed: {total_processed}")
         except Exception as e:
-            print(f"Failed to send final batch: {e}")
+            print(f"✗ Failed to send final batch: {e}")
 
-    print(f"\nProcessing complete! Sent {batch_count} batches, {total_processed} documents total.")
+    print(f"\n{'='*60}")
+    print(f"Processing complete!")
+    print(f"  - Total batches sent: {batch_count}")
+    print(f"  - Total documents processed: {total_processed}")
+    print(f"{'='*60}")
 
 
 def configure_index_only():
@@ -169,7 +223,7 @@ def configure_index_only():
 
 
 if __name__ == "__main__":
-    quick_search("hello")
-    # process_documents_in_batches()  # Process documents and configure settings
+    # quick_search("hello")
+    process_documents_in_batches()  # Process documents and configure settings
     # configure_index_only()  # Only configure settings without processing
     # delete_index()
