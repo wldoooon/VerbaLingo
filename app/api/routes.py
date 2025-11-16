@@ -27,11 +27,9 @@ async def search(
         source = hit.get("_source", {})
         formatted = hit.get("_formatted", {})
         
-        # Skip if no video_id (invalid document)
         if not source.get("video_id"):
             continue
         
-        # Handle category object structure
         category_obj = None
         if "category" in source and source["category"] is not None:
             if isinstance(source["category"], dict):
@@ -40,13 +38,11 @@ async def search(
                     title=source["category"].get("title", "")
                 )
         
-        # Extract sentence data - handle both flattened and nested structures
         sentence_text = source.get("sentence_text")
         start_time = source.get("start")
         end_time = source.get("end")
         words = None
         
-        # Check if top-level sentence_text exists and has highlighting (matched)
         formatted_sentence_text = formatted.get("sentence_text")
         if formatted_sentence_text and isinstance(formatted_sentence_text, str) and "<em>" in formatted_sentence_text:
             # Top-level sentence matched - use it
@@ -74,7 +70,6 @@ async def search(
                                 matched_sentence = source["sentences"][idx]
                                 break
             
-            # If we found a matched sentence, use it; otherwise fall back to first sentence
             if matched_sentence and isinstance(matched_sentence, dict):
                 sentence_text = matched_sentence.get("sentence_text")
                 start_time = matched_sentence.get("start")
@@ -102,11 +97,8 @@ async def search(
             sentence_text=sentence_text,
             start_time=start_time,
             end_time=end_time,
-            title=source.get("title"),
-            channel=source.get("channel"),
             category=category_obj,
             language=source.get("language"),
-            words=words
         )
         hits.append(search_hit)
 

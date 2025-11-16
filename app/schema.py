@@ -17,11 +17,8 @@ class SearchHit(BaseModel):
     sentence_text: Optional[str] = None
     start_time: Optional[float] = None
     end_time: Optional[float] = None
-    title: Optional[str] = None
-    channel: Optional[str] = None
     category: Optional[Category] = None
     language: Optional[str] = None
-    words: Optional[List[Word]] = None
 
 class SearchResponse(BaseModel):
     total: int
