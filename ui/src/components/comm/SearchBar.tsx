@@ -6,6 +6,7 @@ import { Search, Clock, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useRouter } from "next/navigation"
+import TextType from "@/components/TextType"
 
 // Categories for filtering
 const CATEGORIES = [
@@ -19,7 +20,8 @@ const CATEGORIES = [
 
 export default function SearchBar() {
   const [localQuery, setLocalQuery] = useState("")
-  const [localCategory, setLocalCategory] = useState("General")
+  const { category: globalCategory, language, setLanguage } = useSearchParams()
+  const [localCategory, setLocalCategory] = useState(globalCategory ?? "General")
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [isRouting, setIsRouting] = useState(false)
@@ -108,17 +110,62 @@ export default function SearchBar() {
         <div className="absolute left-5 top-1/2 -translate-y-1/2 z-10">
           <Search className="h-5 w-5 text-muted-foreground/70" />
         </div>
+        {/* Animated example text overlay using TextType when input is empty */}
+        {!localQuery && (
+          <div className="pointer-events-none absolute left-14 right-24 top-1/2 -translate-y-1/2 z-20 flex items-center">
+            <TextType 
+              text={[
+                "hello, how are you today?",
+                "مرحبا، أين يمكنني أن أجد محطة المترو؟",
+                "guten Tag, ich hätte gerne ein Stück Kuchen",
+                "bonjour, pouvez-vous m'aider à trouver cette adresse?",
+                "你好，我想学习如何做这道菜",
+                "thank you very much for your help",
+                "أشعر بالجوع وأريد أن آكل شيئاً لذيذاً",
+                "kannst du mir bitte den Weg zum Bahnhof erklären?",
+                "excusez-moi, où se trouve la bibliothèque?",
+                "今天天气真好，我们去公园散步吧",
+                "where is the nearest restaurant?",
+                "أحب القراءة في المساء مع فنجان من الشاي",
+                "ich lerne seit einem Jahr Deutsch und es macht mir Spaß",
+                "quelle est votre couleur préférée?",
+                "请问，这附近有好的咖啡店吗？",
+                "I would like to order coffee please",
+                "ما رأيك في هذا الفيلم الجديد؟",
+                "was machst du am Wochenende?",
+                "j'aime voyager et découvrir de nouvelles cultures",
+                "我喜欢听音乐和看电影",
+                "what time is it?",
+                "هل يمكنك أن تعطيني بعض النصائح؟",
+                "wie war dein Tag heute?",
+                "je dois aller à la banque cet après-midi",
+                "明天我要去北京旅行",
+                "привет, как дела?",
+                "извините, вы не подскажете, где здесь туалет?",
+                "я хочу выучить английский язык",
+                "какая сегодня погода?",
+                "спасибо большое за вашу помощь"
+              ]}
+              typingSpeed={75}
+              pauseDuration={1500}
+              showCursor={true}
+              cursorCharacter="|"
+              className="text-base text-muted-foreground/70"
+            />
+          </div>
+        )}
+
         <input
           type="text"
           role="combobox"
           aria-autocomplete="list"
           aria-haspopup="true"
           aria-expanded={showSuggestions}
-          placeholder="Search for a word..."
+          placeholder=""
           className={cn(
             "w-full h-12 pl-14 pr-5 text-base",
             "rounded-full",
-            "bg-card/90 backdrop-blur-md",
+            "bg-card",
             "border border-border/60",
             "text-foreground placeholder:text-muted-foreground/70",
             "transition-all duration-200",
@@ -136,14 +183,33 @@ export default function SearchBar() {
           disabled={isRouting}
         />
         
-        {/* Loading indicator inside the input */}
-        {isRouting && (
+        {/* Right-side action: show loader while routing, otherwise show Search button */}
+        {isRouting ? (
           <div className="absolute right-5 top-1/2 -translate-y-1/2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground"></div>
               <span>Searching...</span>
             </div>
           </div>
+        ) : (
+          <button
+            type="button"
+            aria-label="Search"
+            onClick={() => handleSearch()}
+            disabled={!localQuery.trim()}
+            className={cn(
+              "absolute right-2.5 top-1/2 -translate-y-1/2",
+              "inline-flex items-center gap-2 px-3 py-1.5",
+              "rounded-full border",
+              "bg-primary/90 text-primary-foreground border-primary/70",
+              "backdrop-blur-md shadow-sm",
+              "hover:bg-primary hover:shadow-md",
+              "disabled:opacity-50 disabled:cursor-not-allowed"
+            )}
+          >
+            <Search className="h-4 w-4" />
+            <span className="text-sm font-medium hidden sm:inline">Search</span>
+          </button>
         )}
       </div>
 

@@ -3,6 +3,7 @@
 import { FilterTree } from "@/components/FilterTree"
 import { Compass, ChevronDown, BookmarkIcon, CreditCard, GraduationCap } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
 
 export function SidebarCard() {
@@ -38,13 +39,15 @@ export function SidebarCard() {
             {/* Study Hub Items */}
             {isStudyHubOpen && (
               <div className="flex flex-col gap-0.5 ml-4 mt-1">
-                <div className="flex items-center gap-2 text-base px-2 py-1.5 rounded-xl hover:bg-accent transition-colors cursor-pointer">
+                <div className="group flex items-center gap-2 text-base px-2 py-1.5 rounded-xl transition-colors opacity-70 cursor-not-allowed">
                   <BookmarkIcon className="h-4 w-4 text-muted-foreground" />
                   <span>Saved Words</span>
+                  <Badge variant="secondary" className="ml-2">Soon</Badge>
                 </div>
-                <div className="flex items-center gap-2 text-base px-2 py-1.5 rounded-xl hover:bg-accent transition-colors cursor-pointer">
+                <div className="group flex items-center gap-2 text-base px-2 py-1.5 rounded-xl transition-colors opacity-70 cursor-not-allowed">
                   <CreditCard className="h-4 w-4 text-muted-foreground" />
                   <span>Flash Card</span>
+                  <Badge variant="secondary" className="ml-2">Soon</Badge>
                 </div>
               </div>
             )}
