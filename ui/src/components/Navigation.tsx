@@ -34,9 +34,6 @@ export function Navigation({ user, showNavMenu = true }: NavigationProps) {
             </a>
           </div>
 
-          {/* Navigation Menu */}
-          {showNavMenu && <NavMenu />}
-
           {/* Spacer - Left */}
           <div className="flex-1 min-w-0" />
 
