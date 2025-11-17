@@ -74,7 +74,6 @@ class SearchService:
         result = await self.index.search(
             "",  # Empty query to get all documents
             filter=f"video_id = '{video_id}'",
-            sort=["position:asc"],
             limit=10000
         )
         

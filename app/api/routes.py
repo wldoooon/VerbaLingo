@@ -118,20 +118,45 @@ async def get_transcript(
 
     sentences: List[TranscriptSentence] = []
     raw_hits = raw_results.get("hits", {}).get("hits", [])
+    
     for hit in raw_hits:
         source = hit.get("_source", {})
-        words_src = source.get("words") or []
-        words = [
-            Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
-            for w in words_src if isinstance(w, dict)
-        ]
-        sentence = TranscriptSentence(
-            sentence_text=source.get("sentence_text"),
-            start_time=source.get("start"),
-            end_time=source.get("end"),
-            words=words
-        )
-        sentences.append(sentence)
+        
+        # Check if data has new nested structure with sentences array
+        if "sentences" in source and isinstance(source["sentences"], list):
+            # New structure: sentences is an array of sentence objects
+            for sentence_obj in source["sentences"]:
+                if not isinstance(sentence_obj, dict):
+                    continue
+                    
+                words_src = sentence_obj.get("words") or []
+                words = [
+                    Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
+                    for w in words_src if isinstance(w, dict)
+                ]
+                
+                sentence = TranscriptSentence(
+                    sentence_text=sentence_obj.get("sentence_text"),
+                    start_time=sentence_obj.get("start"),
+                    end_time=sentence_obj.get("end"),
+                    words=words
+                )
+                sentences.append(sentence)
+        else:
+            # Old structure: flat structure with sentence_text, start, end at top level
+            words_src = source.get("words") or []
+            words = [
+                Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
+                for w in words_src if isinstance(w, dict)
+            ]
+            
+            sentence = TranscriptSentence(
+                sentence_text=source.get("sentence_text"),
+                start_time=source.get("start"),
+                end_time=source.get("end"),
+                words=words
+            )
+            sentences.append(sentence)
 
     if not sentences:
         raise HTTPException(status_code=404, detail="Transcript not found")
