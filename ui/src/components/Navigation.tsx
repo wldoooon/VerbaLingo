@@ -15,27 +15,34 @@ interface NavigationProps {
     email: string
     avatar: string
   }
+  showNavMenu?: boolean
 }
 
-export function Navigation({ user }: NavigationProps) {
+export function Navigation({ user, showNavMenu = true }: NavigationProps) {
   const { language, setLanguage, category, setCategory } = useSearchParams()
   return (
     <header className="sticky top-0 z-50 w-full bg-card">
       <div className="relative">
         <div className="flex h-20 items-center px-4 sm:px-6 gap-4">
           {/* Logo/Brand */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <a href="/" aria-label="VerbaLingo home" className="select-none">
-              <span className={`${logoFont.className} text-3xl sm:text-4xl leading-none text-foreground drop-shadow-sm`}>VerbaLingo</span>
+              <span className={`${logoFont.className} text-3xl sm:text-4xl leading-none drop-shadow-sm`}>
+                <span className="text-foreground">VerbaLin</span>
+                <span className="text-red-500">go</span>
+              </span>
             </a>
           </div>
 
           {/* Navigation Menu */}
-          <NavMenu />
+          {showNavMenu && <NavMenu />}
 
-          {/* Search Bar + Filters */}
-          <div className="flex-1 flex items-center gap-2 ml-4">
-            <div className="flex-1">
+          {/* Spacer - Left */}
+          <div className="flex-1 min-w-0" />
+
+          {/* Search Bar + Filters - Centered with right expansion */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-[400px] sm:w-[500px] md:w-[600px] lg:w-[700px]">
               <SearchBar />
             </div>
             {/* Language Selector */}
@@ -71,8 +78,11 @@ export function Navigation({ user }: NavigationProps) {
             </div>
           </div>
 
+          {/* Spacer - Right */}
+          <div className="flex-1 min-w-0" />
+
           {/* Right Side - User Tools */}
-          <div className="ml-auto">
+          <div className="flex-shrink-0">
             <HeaderToolbar user={user} />
           </div>
         </div>

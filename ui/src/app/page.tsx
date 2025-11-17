@@ -17,7 +17,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Navigation Header */}
-      <Navigation user={userData} />
+      <Navigation user={userData} showNavMenu={false} />
 
       {/* Main Content Area - Sidebar + Content */}
       <main className="flex flex-1">
