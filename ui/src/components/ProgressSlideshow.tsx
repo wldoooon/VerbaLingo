@@ -8,24 +8,24 @@ import { Button } from "@/components/ui/button";
 const slides = [
     {
         id: 1,
-        title: "Learn from Movies",
-        description: "Immerse yourself in cinema. Learn English naturally by watching your favorite blockbusters with dual subtitles.",
-        image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&q=80",
-        color: "from-blue-600 to-indigo-900"
+        title: "Learn from Cartoons",
+        description: "Rediscover your childhood favorites. Learn English with simple dialogues and fun stories from classic cartoons.",
+        image: "/Cartoon_Picture.jpg",
+        color: "from-orange-500 to-red-600"
     },
     {
         id: 2,
         title: "Master with Podcasts",
         description: "Tune in to native conversations. Improve your listening skills with thousands of hours of engaging podcasts.",
-        image: "https://images.unsplash.com/photo-1478737270239-2f02b77ac6d5?w=1200&q=80",
+        image: "/PodcastCollection.png",
         color: "from-purple-600 to-pink-900"
     },
     {
         id: 3,
-        title: "TV Series Collection",
-        description: "Binge-watch your way to fluency. Follow character arcs and learn slang, idioms, and cultural context.",
-        image: "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=1200&q=80",
-        color: "from-emerald-600 to-teal-900"
+        title: "Movies & TV Series",
+        description: "Immerse yourself in cinema. Learn English naturally by watching your favorite blockbusters and series.",
+        image: "/titanic-sinking-lifeboats-cinematic-desktop-wallpaper.jpg",
+        color: "from-blue-600 to-indigo-900"
     }
 ];
 
@@ -79,14 +79,6 @@ export function ProgressSlideshow() {
                         <p className="text-lg text-white/90 mb-8 leading-relaxed drop-shadow-md max-w-lg">
                             {slides[currentIndex].description}
                         </p>
-                        <div className="flex gap-4">
-                            <Button size="lg" className="bg-white text-black hover:bg-white/90 font-bold rounded-full px-8 transition-transform hover:scale-105">
-                                <Play className="w-4 h-4 mr-2 fill-current" /> Start Watching
-                            </Button>
-                            <Button size="lg" variant="outline" className="text-white border-white/30 hover:bg-white/10 rounded-full backdrop-blur-sm transition-transform hover:scale-105">
-                                Explore Library
-                            </Button>
-                        </div>
                     </motion.div>
                 </AnimatePresence>
             </div>
