@@ -27,7 +27,7 @@ export function CurvedCarousel() {
 
     // Carousel configuration
     const ITEM_WIDTH = 300; // Increased width
-    const RADIUS = 1500; // Large radius for "Curved Wall" effect
+    const RADIUS = 1000; // Adjusted radius
 
     // Auto-rotation animation
     useEffect(() => {
@@ -35,7 +35,7 @@ export function CurvedCarousel() {
             controls.start({
                 rotateY: 360,
                 transition: {
-                    duration: 120, // Slower rotation for larger radius
+                    duration: 120,
                     ease: "linear",
                     repeat: Infinity,
                 }
@@ -46,7 +46,7 @@ export function CurvedCarousel() {
     }, [isHovered, controls]);
 
     return (
-        <section className="w-full py-24 overflow-hidden bg-background/50 perspective-[2000px] relative z-20">
+        <section className="w-full py-24 overflow-hidden bg-background/50 perspective-[600px] relative z-20">
             {/* Gradient Masks for depth */}
             <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10 pointer-events-none" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,hsl(var(--background))_100%)] z-10 pointer-events-none" />
@@ -74,10 +74,10 @@ export function CurvedCarousel() {
                         return (
                             <div
                                 key={index}
-                                className="absolute flex items-center justify-center p-8 rounded-2xl border border-white/10 bg-card/80 backdrop-blur-md shadow-2xl cursor-pointer hover:bg-primary/20 transition-colors group"
+                                className="absolute flex items-center justify-center p-8 cursor-pointer group"
                                 style={{
                                     width: ITEM_WIDTH,
-                                    height: 220, // Increased height
+                                    height: 220,
                                     transform: `rotateY(${angle}deg) translateZ(${RADIUS}px)`,
                                     backfaceVisibility: "hidden",
                                 }}
@@ -90,9 +90,6 @@ export function CurvedCarousel() {
                                         Series
                                     </p>
                                 </div>
-
-                                {/* Reflection effect */}
-                                <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent rounded-2xl pointer-events-none" />
                             </div>
                         );
                     })}
