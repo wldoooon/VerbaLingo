@@ -1,7 +1,8 @@
 "use client";
 
 import { Navigation } from "@/components/Navigation";
-import { SidebarCard } from "@/components/SidebarCard";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { DiscoverySection } from "@/components/DiscoverySection";
 import { motion } from "framer-motion";
 import { ArrowRight, Play, Search, BookOpen, Globe, Zap, Headphones, MessageCircle } from "lucide-react";
@@ -39,16 +40,13 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground font-sans selection:bg-primary/20 selection:text-primary">
-      {/* Navigation */}
-      <Navigation user={userData} showNavMenu={false} />
+    <SidebarProvider>
+      <AppSidebar />
 
-      <main className="flex flex-1">
-        {/* Sidebar */}
-        <SidebarCard />
+      <SidebarInset>
+        <Navigation user={userData} showNavMenu={false} />
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <main className="flex-1 flex flex-col min-w-0">
           {/* Hero Section */}
           <section className="relative pt-6 pb-20 lg:pt-10 lg:pb-32 overflow-hidden">
             {/* Background Elements */}
@@ -270,9 +268,9 @@ export default function LandingPage() {
               </div>
             </div>
           </footer>
-        </div>
-      </main>
-    </div>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 

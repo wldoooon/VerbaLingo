@@ -10,7 +10,7 @@ export function SidebarCard() {
   const [isStudyHubOpen, setIsStudyHubOpen] = useState(true)
 
   return (
-    <aside className="hidden lg:block w-[290px] bg-card sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto">
+    <aside className="hidden lg:block w-[240px] bg-card sticky top-0 h-screen overflow-y-auto border-r border-border">
       <div className="relative h-full">
         <div className="p-4 h-full flex flex-col gap-4">
           <div className="flex items-center gap-2 text-base font-medium px-3 py-2 rounded-xl hover:bg-accent transition-colors cursor-pointer">
@@ -56,8 +56,8 @@ export function SidebarCard() {
 
           <FilterTree />
         </div>
-        {/* Faded border right */}
-        <div className="absolute top-0 right-0 bottom-0 w-px bg-gradient-to-b from-transparent via-border to-transparent"></div>
+        {/* Faded border right - Removed since we added border-r to aside */}
+        {/* <div className="absolute top-0 right-0 bottom-0 w-px bg-gradient-to-b from-transparent via-border to-transparent"></div> */}
       </div>
     </aside>
   )

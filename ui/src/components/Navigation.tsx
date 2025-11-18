@@ -6,6 +6,7 @@ import { NavMenu } from "@/components/nav-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { Bangers } from "next/font/google"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 const logoFont = Bangers({ subsets: ["latin"], weight: "400" })
 
@@ -24,14 +25,9 @@ export function Navigation({ user, showNavMenu = true }: NavigationProps) {
     <header className="sticky top-0 z-50 w-full bg-card">
       <div className="relative">
         <div className="flex h-20 items-center px-4 sm:px-6 gap-4">
-          {/* Logo/Brand */}
+          {/* Sidebar Trigger */}
           <div className="flex items-center gap-3 flex-shrink-0">
-            <a href="/" aria-label="VerbaLingo home" className="select-none">
-              <span className={`${logoFont.className} text-3xl sm:text-4xl leading-none drop-shadow-sm`}>
-                <span className="text-foreground">VerbaLin</span>
-                <span className="text-red-500">go</span>
-              </span>
-            </a>
+            <SidebarTrigger />
           </div>
 
           {/* Spacer - Left */}
