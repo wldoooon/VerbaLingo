@@ -4,6 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { DiscoverySection } from "@/components/DiscoverySection";
+import { CurvedCarousel } from "@/components/CurvedCarousel";
 import { motion } from "framer-motion";
 import { ArrowRight, Play, Search, BookOpen, Globe, Zap, Headphones, MessageCircle } from "lucide-react";
 import Link from "next/link";
@@ -103,6 +104,9 @@ export default function LandingPage() {
               </div>
             </div>
           </section>
+
+          {/* 3D Curved Carousel */}
+          <CurvedCarousel />
 
 
 
