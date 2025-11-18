@@ -26,8 +26,8 @@ export function CurvedCarousel() {
     const controls = useAnimation();
 
     // Carousel configuration
-    const ITEM_WIDTH = 300; // Increased width
-    const RADIUS = 1000; // Adjusted radius
+    const ITEM_WIDTH = 300;
+    const RADIUS = 1000; // Adjusted radius for 3D effect
 
     // Auto-rotation animation
     useEffect(() => {
@@ -46,16 +46,16 @@ export function CurvedCarousel() {
     }, [isHovered, controls]);
 
     return (
-        <section className="w-full py-24 overflow-hidden bg-background/50 perspective-[600px] relative z-20">
+        <section className="w-full py-4 border-t border-border/50 overflow-hidden bg-background/50 perspective-[600px] relative z-20">
             {/* Gradient Masks for depth */}
             <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10 pointer-events-none" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,hsl(var(--background))_100%)] z-10 pointer-events-none" />
 
-            {/* Side Fades - Stronger and Wider */}
+            {/* Side Fades */}
             <div className="absolute left-0 top-0 bottom-0 w-64 bg-gradient-to-r from-background via-background/80 to-transparent z-50 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-64 bg-gradient-to-l from-background via-background/80 to-transparent z-50 pointer-events-none" />
 
-            <div className="relative h-[400px] flex items-center justify-center preserve-3d">
+            <div className="relative h-[260px] flex items-center justify-center preserve-3d">
                 <motion.div
                     className="relative flex items-center justify-center preserve-3d"
                     animate={controls}
