@@ -57,14 +57,14 @@ export default function LandingPage() {
               <div className="absolute top-40 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl opacity-50 mix-blend-multiply animate-pulse-orb" style={{ animationDelay: "1s" }} />
             </div>
 
-            <div className="container mx-auto px-4 sm:px-6 relative z-10">
-              <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+            <div className="w-full relative z-10">
+              <div className="flex flex-col lg:flex-row items-center gap-4">
                 {/* Description on the Left */}
                 <motion.div
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="lg:w-1/2 space-y-8"
+                  className="lg:w-1/4 space-y-8 pl-6 pr-2"
                 >
                   <motion.div variants={itemVariants} className="inline-flex items-center rounded-full border border-border bg-background/50 backdrop-blur-sm px-3 py-1 text-sm text-muted-foreground shadow-sm">
                     <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
@@ -79,7 +79,7 @@ export default function LandingPage() {
                   </motion.h1>
 
                   <motion.p variants={itemVariants} className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
-                    Stop memorizing lists. Start understanding. MiniYouGlish immerses you in authentic videos, podcasts, and conversations to help you speak like a native.
+                    Stop memorizing lists. Start understanding. VerbaLingo immerses you in authentic videos, podcasts, and conversations to help you speak like a native.
                   </motion.p>
 
                   <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start gap-4 pt-4">
@@ -99,7 +99,7 @@ export default function LandingPage() {
                 </motion.div>
 
                 {/* Discover Carousel on the Right */}
-                <div className="lg:w-1/2 w-full">
+                <div className="lg:w-3/4 w-full pr-4">
                   <DiscoverySection />
                 </div>
               </div>
@@ -157,10 +157,10 @@ export default function LandingPage() {
 
           {/* Discover Section with Carousel */}
           <section id="how-it-works" className="py-24 overflow-hidden">
-            <div className="container mx-auto px-4 sm:px-6">
-              <div className="flex flex-col lg:flex-row items-center gap-16">
+            <div className="w-full">
+              <div className="flex flex-col lg:flex-row items-center gap-9">
                 {/* Description on the Left */}
-                <div className="lg:w-1/2 space-y-8">
+                <div className="lg:w-1/4 space-y-8 pl-6 pr-2">
                   <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
                     Discover Content <br />
                     <span className="text-primary">tailored for you</span>.
@@ -197,7 +197,7 @@ export default function LandingPage() {
                 </div>
 
                 {/* Discover Carousel on the Right */}
-                <div className="lg:w-1/2 w-full">
+                <div className="lg:w-3/4 w-full pr-4">
                   <DiscoverySection />
                 </div>
               </div>
@@ -235,7 +235,7 @@ export default function LandingPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
                 <div className="col-span-2 md:col-span-1">
                   <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-                    MiniYouGlish
+                    VerbaLingo
                   </span>
                   <p className="mt-4 text-sm text-muted-foreground">
                     The context-first English learning platform powered by real-world video content.
@@ -266,7 +266,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="pt-8 border-t border-border text-center text-sm text-muted-foreground">
-                © {new Date().getFullYear()} MiniYouGlish. All rights reserved.
+                © {new Date().getFullYear()} VerbaLingo. All rights reserved.
               </div>
             </div>
           </footer>
