@@ -17,9 +17,9 @@ export function SidebarCard() {
             <Compass className="h-5 w-5" />
             <span>Discover</span>
           </div>
-          
+
           <Separator />
-          
+
           {/* Study Hub Section */}
           <div className="flex flex-col gap-1">
             {/* Study Hub Header */}
@@ -30,12 +30,11 @@ export function SidebarCard() {
               <GraduationCap className="h-5 w-5" />
               <span className="flex-1 text-left">Study Hub</span>
               <ChevronDown
-                className={`h-4 w-4 text-muted-foreground transition-transform ${
-                  isStudyHubOpen ? "" : "-rotate-90"
-                }`}
+                className={`h-4 w-4 text-muted-foreground transition-transform ${isStudyHubOpen ? "" : "-rotate-90"
+                  }`}
               />
             </button>
-            
+
             {/* Study Hub Items */}
             {isStudyHubOpen && (
               <div className="flex flex-col gap-0.5 ml-4 mt-1">
@@ -52,9 +51,9 @@ export function SidebarCard() {
               </div>
             )}
           </div>
-          
+
           <Separator />
-          
+
           <FilterTree />
         </div>
         {/* Faded border right */}

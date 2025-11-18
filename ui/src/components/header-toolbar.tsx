@@ -5,6 +5,8 @@ import { FeedbackDialog } from "@/components/feedback-dialog"
 import { HeaderUserProfile } from "@/components/header-user-profile"
 import { useTheme } from 'next-themes'
 import { ThemeToggleButton, useThemeTransition } from '@/components/ui/shadcn-io/theme-toggle-button'
+import { Button } from '@/components/ui/button'
+import { Crown } from 'lucide-react'
 
 export function HeaderToolbar({
   user,
@@ -27,7 +29,7 @@ export function HeaderToolbar({
   // Handle theme toggle with animation
   const handleThemeToggle = useCallback(() => {
     const newTheme = theme === 'dark' ? 'light' : 'dark'
-    
+
     startTransition(() => {
       setTheme(newTheme)
     })
@@ -35,6 +37,14 @@ export function HeaderToolbar({
 
   return (
     <div className="flex items-center gap-3">
+      <Button
+        variant="outline"
+        size="sm"
+        className="rounded-full"
+      >
+        <Crown className="w-4 h-4 mr-1.5" />
+        Upgrade
+      </Button>
       <FeedbackDialog />
       {mounted && (
         <ThemeToggleButton

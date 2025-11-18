@@ -2,6 +2,7 @@
 
 import { Navigation } from "@/components/Navigation";
 import { SidebarCard } from "@/components/SidebarCard";
+import { DiscoverySection } from "@/components/DiscoverySection";
 import { motion } from "framer-motion";
 import { ArrowRight, Play, Search, BookOpen, Globe, Zap, Headphones, MessageCircle } from "lucide-react";
 import Link from "next/link";
@@ -57,43 +58,51 @@ export default function LandingPage() {
             </div>
 
             <div className="container mx-auto px-4 sm:px-6 relative z-10">
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="max-w-4xl mx-auto text-center space-y-8"
-              >
-                <motion.div variants={itemVariants} className="inline-flex items-center rounded-full border border-border bg-background/50 backdrop-blur-sm px-3 py-1 text-sm text-muted-foreground shadow-sm">
-                  <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
-                  New: AI-Powered Pronunciation Feedback
+              <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+                {/* Description on the Left */}
+                <motion.div
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="lg:w-1/2 space-y-8"
+                >
+                  <motion.div variants={itemVariants} className="inline-flex items-center rounded-full border border-border bg-background/50 backdrop-blur-sm px-3 py-1 text-sm text-muted-foreground shadow-sm">
+                    <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
+                    New: AI-Powered Pronunciation Feedback
+                  </motion.div>
+
+                  <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
+                    Master English with <br className="hidden sm:block" />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-gradient">
+                      Real-World Context
+                    </span>
+                  </motion.h1>
+
+                  <motion.p variants={itemVariants} className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
+                    Stop memorizing lists. Start understanding. MiniYouGlish immerses you in authentic videos, podcasts, and conversations to help you speak like a native.
+                  </motion.p>
+
+                  <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start gap-4 pt-4">
+                    <Link
+                      href="/search"
+                      className="h-12 px-8 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25 w-full sm:w-auto"
+                    >
+                      Start Learning Free <ArrowRight className="w-4 h-4" />
+                    </Link>
+                    <Link
+                      href="#how-it-works"
+                      className="h-12 px-8 rounded-full border border-border bg-background hover:bg-muted/50 transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
+                    >
+                      <Play className="w-4 h-4" /> Watch Demo
+                    </Link>
+                  </motion.div>
                 </motion.div>
 
-                <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-foreground">
-                  Master English with <br className="hidden sm:block" />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-gradient">
-                    Real-World Context
-                  </span>
-                </motion.h1>
-
-                <motion.p variants={itemVariants} className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                  Stop memorizing lists. Start understanding. MiniYouGlish immerses you in authentic videos, podcasts, and conversations to help you speak like a native.
-                </motion.p>
-
-                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                  <Link
-                    href="/search"
-                    className="h-12 px-8 rounded-full bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/25 w-full sm:w-auto"
-                  >
-                    Start Learning Free <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <Link
-                    href="#how-it-works"
-                    className="h-12 px-8 rounded-full border border-border bg-background hover:bg-muted/50 transition-all flex items-center justify-center gap-2 w-full sm:w-auto"
-                  >
-                    <Play className="w-4 h-4" /> Watch Demo
-                  </Link>
-                </motion.div>
-              </motion.div>
+                {/* Discover Carousel on the Right */}
+                <div className="lg:w-1/2 w-full">
+                  <DiscoverySection />
+                </div>
+              </div>
             </div>
           </section>
 
@@ -146,30 +155,31 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* Interactive Demo / How it works */}
+          {/* Discover Section with Carousel */}
           <section id="how-it-works" className="py-24 overflow-hidden">
             <div className="container mx-auto px-4 sm:px-6">
               <div className="flex flex-col lg:flex-row items-center gap-16">
+                {/* Description on the Left */}
                 <div className="lg:w-1/2 space-y-8">
                   <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                    Learning that feels like <br />
-                    <span className="text-primary">entertainment</span>.
+                    Discover Content <br />
+                    <span className="text-primary">tailored for you</span>.
                   </h2>
                   <div className="space-y-6">
                     {[
                       {
-                        title: "Search a phrase",
-                        desc: "Enter an idiom or word you want to master.",
+                        title: "Curated Collections",
+                        desc: "Explore handpicked movies, podcasts, and shows for every learning level.",
                         icon: <Search className="w-5 h-5" />,
                       },
                       {
-                        title: "Watch real clips",
-                        desc: "We find the exact moments it's used in thousands of videos.",
+                        title: "Real-world contexts",
+                        desc: "See how phrases are used in authentic situations across different media.",
                         icon: <Play className="w-5 h-5" />,
                       },
                       {
-                        title: "Speak with confidence",
-                        desc: "Shadow the speaker and perfect your intonation.",
+                        title: "Track your progress",
+                        desc: "Monitor your learning journey with detailed stats and achievements.",
                         icon: <MessageCircle className="w-5 h-5" />,
                       },
                     ].map((step, i) => (
@@ -186,30 +196,9 @@ export default function LandingPage() {
                   </div>
                 </div>
 
+                {/* Discover Carousel on the Right */}
                 <div className="lg:w-1/2 w-full">
-                  <div className="relative rounded-2xl border border-border bg-muted/50 aspect-video shadow-2xl overflow-hidden group">
-                    {/* Mock Video Interface */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/5 group-hover:bg-black/10 transition-colors">
-                      <div className="w-20 h-20 rounded-full bg-background/90 backdrop-blur flex items-center justify-center shadow-xl cursor-pointer hover:scale-110 transition-transform">
-                        <Play className="w-8 h-8 text-primary ml-1" />
-                      </div>
-                    </div>
-
-                    {/* Floating UI Elements */}
-                    <motion.div
-                      animate={{ y: [0, -10, 0] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute bottom-8 left-8 right-8 bg-background/90 backdrop-blur-md p-4 rounded-xl border border-border shadow-lg"
-                    >
-                      <div className="flex gap-2 mb-2">
-                        <span className="h-2 w-20 bg-primary/20 rounded-full"></span>
-                        <span className="h-2 w-12 bg-muted rounded-full"></span>
-                      </div>
-                      <p className="font-medium text-lg">
-                        "...and that's the <span className="text-primary font-bold bg-primary/10 px-1 rounded">bottom line</span>, because..."
-                      </p>
-                    </motion.div>
-                  </div>
+                  <DiscoverySection />
                 </div>
               </div>
             </div>
