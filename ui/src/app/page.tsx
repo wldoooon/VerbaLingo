@@ -62,7 +62,7 @@ export default function LandingPage() {
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className="lg:w-1/4 space-y-8 pl-6 pr-2"
+                  className="lg:w-1/4 space-y-8 pl-10 pr-2"
                 >
                   <motion.div variants={itemVariants} className="inline-flex items-center rounded-full border border-border bg-background/50 backdrop-blur-sm px-3 py-1 text-sm text-muted-foreground shadow-sm">
                     <span className="flex h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
@@ -158,7 +158,7 @@ export default function LandingPage() {
             <div className="w-full">
               <div className="flex flex-col lg:flex-row items-center gap-9">
                 {/* Description on the Left */}
-                <div className="lg:w-1/4 space-y-8 pl-6 pr-2">
+                <div className="lg:w-1/4 space-y-8 pl-10 pr-2">
                   <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
                     Discover Content <br />
                     <span className="text-primary">tailored for you</span>.
