@@ -30,8 +30,8 @@ export function Navigation({ user, showNavMenu = true }: NavigationProps) {
             <SidebarTrigger />
           </div>
 
-          {/* Spacer - Left */}
-          <div className="flex-1 min-w-0" />
+          {/* Spacer - Left - Removed to move search bar to left */}
+          {/* <div className="flex-1 min-w-0" /> */}
 
           {/* Search Bar + Filters - Centered with right expansion */}
           <div className="flex items-center gap-2 flex-shrink-0">
