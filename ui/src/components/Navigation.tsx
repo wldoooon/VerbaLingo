@@ -6,6 +6,7 @@ import { NavMenu } from "@/components/nav-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { Bangers } from "next/font/google"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 const logoFont = Bangers({ subsets: ["latin"], weight: "400" })
 
@@ -15,27 +16,26 @@ interface NavigationProps {
     email: string
     avatar: string
   }
+  showNavMenu?: boolean
 }
 
-export function Navigation({ user }: NavigationProps) {
+export function Navigation({ user, showNavMenu = true }: NavigationProps) {
   const { language, setLanguage, category, setCategory } = useSearchParams()
   return (
     <header className="sticky top-0 z-50 w-full bg-card">
       <div className="relative">
         <div className="flex h-20 items-center px-4 sm:px-6 gap-4">
-          {/* Logo/Brand */}
-          <div className="flex items-center gap-3">
-            <a href="/" aria-label="VerbaLingo home" className="select-none">
-              <span className={`${logoFont.className} text-3xl sm:text-4xl leading-none text-foreground drop-shadow-sm`}>VerbaLingo</span>
-            </a>
+          {/* Sidebar Trigger */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <SidebarTrigger />
           </div>
 
-          {/* Navigation Menu */}
-          <NavMenu />
+          {/* Spacer - Left - Removed to move search bar to left */}
+          {/* <div className="flex-1 min-w-0" /> */}
 
-          {/* Search Bar + Filters */}
-          <div className="flex-1 flex items-center gap-2 ml-4">
-            <div className="flex-1">
+          {/* Search Bar + Filters - Centered with right expansion */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-[400px] sm:w-[500px] md:w-[600px] lg:w-[700px]">
               <SearchBar />
             </div>
             {/* Language Selector */}
@@ -71,8 +71,11 @@ export function Navigation({ user }: NavigationProps) {
             </div>
           </div>
 
+          {/* Spacer - Right */}
+          <div className="flex-1 min-w-0" />
+
           {/* Right Side - User Tools */}
-          <div className="ml-auto">
+          <div className="flex-shrink-0">
             <HeaderToolbar user={user} />
           </div>
         </div>

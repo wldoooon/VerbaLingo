@@ -2,202 +2,110 @@
 
 import * as React from "react"
 import {
-  BookOpen,
-  Bot,
-  Command,
-  GalleryVerticalEnd,
-  Heart,
-  Play,
-  Settings2,
-  TrendingUp,
-  Users,
-  Video,
-  Trophy,
-  Search,
-  Star,
-  BarChart3,
+  Compass,
+  GraduationCap,
+  BookmarkIcon,
+  CreditCard,
+  ChevronRight,
 } from "lucide-react"
 
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-
-// This is sample data.
-const data = {
-  user: {
-    name: "wldooon",
-    email: "user@verbalingo.com",
-    avatar: "/avatars/user.jpg",
-  },
-  teams: [
-    {
-      name: "VerbaLingo",
-      logo: GalleryVerticalEnd,
-      plan: "Premium",
-    },
-    {
-      name: "English Learning",
-      logo: Command,
-      plan: "Pro",
-    },
-  ],
-  navMain: [
-    {
-      title: "Learn",
-      url: "/learn",
-      icon: BookOpen,
-      isActive: true,
-      items: [
-        {
-          title: "Lessons",
-          url: "/learn/lessons",
-        },
-        {
-          title: "Grammar",
-          url: "/learn/grammar",
-        },
-        {
-          title: "Vocabulary",
-          url: "/learn/vocabulary",
-        },
-        {
-          title: "Pronunciation",
-          url: "/learn/pronunciation",
-        },
-      ],
-    },
-    {
-      title: "Videos",
-      url: "/videos",
-      icon: Video,
-      items: [
-        {
-          title: "Discover",
-          url: "/videos/discover",
-        },
-        {
-          title: "Collections",
-          url: "/videos/collections",
-        },
-        {
-          title: "Channels",
-          url: "/videos/channels",
-        },
-        {
-          title: "Trending",
-          url: "/videos/trending",
-        },
-      ],
-    },
-    {
-      title: "Progress",
-      url: "/progress",
-      icon: TrendingUp,
-      items: [
-        {
-          title: "Overview",
-          url: "/progress/overview",
-        },
-        {
-          title: "Statistics",
-          url: "/progress/stats",
-        },
-        {
-          title: "Achievements",
-          url: "/progress/achievements",
-        },
-        {
-          title: "Streaks",
-          url: "/progress/streaks",
-        },
-      ],
-    },
-    {
-      title: "Community",
-      url: "/community",
-      icon: Users,
-      items: [
-        {
-          title: "Forums",
-          url: "/community/forums",
-        },
-        {
-          title: "Study Groups",
-          url: "/community/groups",
-        },
-        {
-          title: "Leaderboard",
-          url: "/community/leaderboard",
-        },
-        {
-          title: "Events",
-          url: "/community/events",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Settings2,
-      items: [
-        {
-          title: "Profile",
-          url: "/settings/profile",
-        },
-        {
-          title: "Preferences",
-          url: "/settings/preferences",
-        },
-        {
-          title: "Notifications",
-          url: "/settings/notifications",
-        },
-        {
-          title: "Privacy",
-          url: "/settings/privacy",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Favorites",
-      url: "/favorites",
-      icon: Heart,
-    },
-    {
-      name: "Search",
-      url: "/search",
-      icon: Search,
-    },
-    {
-      name: "AI Assistant",
-      url: "/ai",
-      icon: Bot,
-    },
-  ],
-}
+import { Badge } from "@/components/ui/badge"
+import { FilterTree } from "@/components/FilterTree"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <a href="#">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <Compass className="size-4" />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-semibold">VerbaLingo</span>
+                  <span className="">v1.0.0</span>
+                </div>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <SidebarGroup>
+          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton isActive={true} tooltip="Discover">
+                  <Compass />
+                  <span>Discover</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <Collapsible asChild defaultOpen={true} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="Study Hub">
+                      <GraduationCap />
+                      <span>Study Hub</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild className="opacity-70 cursor-not-allowed">
+                          <span className="flex items-center gap-2 w-full">
+                            <BookmarkIcon className="size-4" />
+                            <span>Saved Words</span>
+                            <Badge variant="secondary" className="ml-auto text-[10px] h-4 px-1">Soon</Badge>
+                          </span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild className="opacity-70 cursor-not-allowed">
+                          <span className="flex items-center gap-2 w-full">
+                            <CreditCard className="size-4" />
+                            <span>Flash Card</span>
+                            <Badge variant="secondary" className="ml-auto text-[10px] h-4 px-1">Soon</Badge>
+                          </span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="flex-1 overflow-hidden">
+          <SidebarGroupLabel>Filters</SidebarGroupLabel>
+          <SidebarGroupContent className="h-full">
+            <div className="px-2 h-full">
+              <FilterTree />
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )
