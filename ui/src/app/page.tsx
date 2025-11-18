@@ -3,7 +3,7 @@
 import { Navigation } from "@/components/Navigation";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { DiscoverySection } from "@/components/DiscoverySection";
+import { ProgressSlideshow } from "@/components/ProgressSlideshow";
 import { CurvedCarousel } from "@/components/CurvedCarousel";
 import { motion } from "framer-motion";
 import { ArrowRight, Play, Search, BookOpen, Globe, Zap, Headphones, MessageCircle } from "lucide-react";
@@ -99,7 +99,7 @@ export default function LandingPage() {
 
                 {/* Discover Carousel on the Right */}
                 <div className="lg:w-3/4 w-full pr-4">
-                  <DiscoverySection />
+                  <ProgressSlideshow />
                 </div>
               </div>
             </div>
