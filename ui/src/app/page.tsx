@@ -50,7 +50,7 @@ export default function LandingPage() {
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Hero Section */}
-          <section className="relative pt-12 pb-20 lg:pt-24 lg:pb-32 overflow-hidden">
+          <section className="relative pt-6 pb-20 lg:pt-10 lg:pb-32 overflow-hidden">
             {/* Background Elements */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
               <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl opacity-50 mix-blend-multiply animate-pulse-orb" />
