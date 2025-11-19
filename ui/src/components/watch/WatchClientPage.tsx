@@ -33,14 +33,22 @@ const AiCompletion = dynamic(
     }
 )
 
+import { useSearch } from "@/lib/useApi"
+
 function SearchParamSyncer({ word }: { word: string }) {
-    const { setQuery } = useSearchParams()
+    const { setQuery, setCategory } = useSearchParams()
+
+    const decoded = word ? decodeURIComponent(word) : ""
+    const { refetch } = useSearch(decoded, null)
+
     useEffect(() => {
-        if (word) {
-            const decoded = decodeURIComponent(word)
+        if (decoded) {
             setQuery(decoded)
+            setCategory(null)
+            refetch()
         }
-    }, [word, setQuery])
+    }, [decoded, setQuery, setCategory, refetch])
+
     return null
 }
 
