@@ -97,7 +97,7 @@ export default function WatchClientPage({ word }: { word: string }) {
 
                             {/* Right Column: AI Assistant */}
                             <div className="xl:col-span-1 h-full min-w-0">
-                                <div className="sticky top-6 h-[calc(100vh-8rem)]">
+                                <div className="sticky top-6 h-full">
                                     <Suspense fallback={<AiCompletionSkeleton />}>
                                         <AiCompletion externalPrompt={externalPrompt} />
                                     </Suspense>
