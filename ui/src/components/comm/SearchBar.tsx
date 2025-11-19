@@ -27,7 +27,7 @@ export default function SearchBar() {
   const [isRouting, setIsRouting] = useState(false)
   const searchBarRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
-  
+
   const { setQuery, setCategory } = useSearchParams()
 
   // Load recent searches from localStorage
@@ -37,7 +37,7 @@ export default function SearchBar() {
       if (stored) {
         setRecentSearches(JSON.parse(stored))
       }
-    } catch {}
+    } catch { }
   }, [])
 
   // Click outside handler to close suggestions
@@ -56,11 +56,11 @@ export default function SearchBar() {
     try {
       const trimmed = searchQuery.trim()
       if (!trimmed) return
-      
+
       const updated = [trimmed, ...recentSearches.filter(s => s !== trimmed)].slice(0, 5)
       setRecentSearches(updated)
       localStorage.setItem('recent_searches', JSON.stringify(updated))
-    } catch {}
+    } catch { }
   }
 
   const removeRecentSearch = (searchQuery: string) => {
@@ -68,7 +68,7 @@ export default function SearchBar() {
       const updated = recentSearches.filter(s => s !== searchQuery)
       setRecentSearches(updated)
       localStorage.setItem('recent_searches', JSON.stringify(updated))
-    } catch {}
+    } catch { }
   }
 
   const handleSearch = (searchQuery?: string) => {
@@ -76,23 +76,22 @@ export default function SearchBar() {
     if (!queryToSearch.trim()) {
       return
     }
-    
+
     try {
       localStorage.setItem('last_search_query', queryToSearch.trim())
-    } catch {}
-    
+    } catch { }
+
     // Save to recent searches
     saveToRecentSearches(queryToSearch)
-    
+
     // Compute language segment for the routed page
     const trimmedQuery = queryToSearch.trim()
     const selectedCategory = localCategory === "General" ? null : localCategory
     setShowSuggestions(false)
 
-    // Navigate to routed search page
-    const languageSegment = selectedCategory ?? "General"
+    // Navigate to routed watch page
     setIsRouting(true)
-    router.push(`/search/${encodeURIComponent(trimmedQuery)}/${encodeURIComponent(languageSegment)}`)
+    router.push(`/watch/${encodeURIComponent(trimmedQuery)}`)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -113,7 +112,7 @@ export default function SearchBar() {
         {/* Animated example text overlay using TextType when input is empty */}
         {!localQuery && (
           <div className="pointer-events-none absolute left-14 right-24 top-1/2 -translate-y-1/2 z-20 flex items-center">
-            <TextType 
+            <TextType
               text={[
                 "hello, how are you today?",
                 "مرحبا، أين يمكنني أن أجد محطة المترو؟",
@@ -182,7 +181,7 @@ export default function SearchBar() {
           onFocus={() => setShowSuggestions(true)}
           disabled={isRouting}
         />
-        
+
         {/* Right-side action: show loader while routing, otherwise show Search button */}
         {isRouting ? (
           <div className="absolute right-5 top-1/2 -translate-y-1/2">
