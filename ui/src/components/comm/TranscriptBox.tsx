@@ -7,6 +7,42 @@ import { Search, Sparkles, Bookmark } from "lucide-react"
 
 type Word = { text: string; start: number; end: number }
 
+// Helper to handle cases where backend returns full sentences as single "words"
+function normalizeTranscriptWords(words: Word[]): Word[] {
+  if (!words || words.length === 0) return []
+
+  const normalized: Word[] = []
+
+  for (const w of words) {
+    const text = (w.text || "").trim()
+    if (!text) continue
+
+    // If word has spaces, it's likely a sentence/phrase that needs splitting
+    if (text.includes(" ")) {
+      const parts = text.split(/\s+/)
+      const totalLength = parts.reduce((acc, p) => acc + p.length, 0)
+      const duration = w.end - w.start
+      let currentTime = w.start
+
+      parts.forEach((part) => {
+        // Distribute duration based on character length (linear interpolation)
+        const weight = totalLength > 0 ? part.length / totalLength : 1 / parts.length
+        const partDuration = duration * weight
+
+        normalized.push({
+          text: part,
+          start: currentTime,
+          end: currentTime + partDuration,
+        })
+        currentTime += partDuration
+      })
+    } else {
+      normalized.push(w)
+    }
+  }
+  return normalized
+}
+
 type Sentence = {
   start_time: number
   end_time: number
@@ -59,15 +95,15 @@ export const TranscriptBox = ({
             const adjustedTime = currentTime + TIMING_LEAD
 
             const isActive =
-              adjustedTime >= sentence.start_time - 0.7 &&
-              adjustedTime < sentence.end_time - 0.9
+              adjustedTime >= sentence.start_time &&
+              adjustedTime < sentence.end_time
             const isTargetSentence =
               targetSentence && sentence.start_time === targetSentence.start_time
 
             const activeSentenceIdx = sentences.findIndex((s: any) => {
               return (
-                adjustedTime >= s.start_time - 0.7 &&
-                adjustedTime < s.end_time - 0.9
+                adjustedTime >= s.start_time &&
+                adjustedTime < s.end_time
               )
             })
 
@@ -86,8 +122,8 @@ export const TranscriptBox = ({
                   isActive
                     ? activeSentenceRef
                     : isTargetSentence
-                    ? targetSentenceRef
-                    : null
+                      ? targetSentenceRef
+                      : null
                 }
                 className={cn(
                   "mb-3 rounded-2xl border transition-all duration-300 ease-in-out bg-card/80 flex items-center justify-center text-center",
@@ -95,23 +131,23 @@ export const TranscriptBox = ({
                     ? "p-4 shadow-lg shadow-red-500/20 border-red-500/80 scale-[1.01]"
                     : "p-3 opacity-70 hover:opacity-100",
                   idx === centerIdx - 1 &&
-                    "origin-bottom scale-[0.97] translate-y-1",
+                  "origin-bottom scale-[0.97] translate-y-1",
                   idx === centerIdx + 1 &&
-                    "origin-top scale-[0.97] -translate-y-1",
+                  "origin-top scale-[0.97] -translate-y-1",
                 )}
               >
                 <div className="relative text-lg leading-relaxed inline-block">
                   {(() => {
                     const query = searchQuery.toLowerCase().trim()
-                    const words =
-                      (sentence.words as Word[] | undefined) || []
+                    const rawWords = (sentence.words as Word[] | undefined) || []
+                    const words = normalizeTranscriptWords(rawWords)
 
                     if (words.length > 0) {
                       const wordNodes = words.map((w, wi) => {
                         const wordText = (w.text || "").trim()
                         const isCurrentWord =
-                          adjustedTime >= w.start - 0.7 &&
-                          adjustedTime < w.end - 0.9
+                          adjustedTime >= w.start &&
+                          adjustedTime < w.end
                         const isSearchMatch =
                           !!query && wordText.toLowerCase().includes(query)
 
@@ -137,9 +173,9 @@ export const TranscriptBox = ({
                                   className={cn(
                                     "mr-2 pb-0.5 border-b-2 border-transparent transition-all duration-300 ease-in-out text-left inline-flex items-end",
                                     isSearchMatch && !isCurrentWord &&
-                                      "border-b-red-400",
+                                    "border-b-red-400",
                                     isCurrentWord &&
-                                      "border-b-red-500 font-semibold",
+                                    "border-b-red-500 font-semibold",
                                     "hover:border-b-muted-foreground/70 hover:text-foreground",
                                   )}
                                 >
@@ -204,7 +240,7 @@ export const TranscriptBox = ({
                           className={cn(
                             "relative z-10",
                             isMatch &&
-                              "border-b-2 border-b-red-500 font-semibold pb-0.5",
+                            "border-b-2 border-b-red-500 font-semibold pb-0.5",
                           )}
                         >
                           {part}
