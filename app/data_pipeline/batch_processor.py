@@ -21,7 +21,7 @@ def transform_category(document):
     if 'category' in document and document['category'] is not None:
         original_category = document['category']
         document['category'] = {
-            "type": "Cartoon",
+            "type": "Cartoons",
             "title": original_category
         }
     return document
@@ -162,7 +162,7 @@ def process_documents_in_batches(max_batch_size_mb=90):
     print()
     
     for document in read_jsonl_lines():
-        document['id'] = f"yt_{doc_id_counter}"
+        document['id'] = f"yt_{document['video_id']}_{doc_id_counter}"
         doc_id_counter += 1
         
         # Transform category field to object structure

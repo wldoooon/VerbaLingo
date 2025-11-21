@@ -149,13 +149,18 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
 
   // Sort by start time
   const sentencesInClip = [...allSentences].sort((a: any, b: any) => a.start_time - b.start_time)
-
   // Find the sentence that contains the search query
   const targetSentenceRef = useRef<HTMLDivElement>(null)
   const hasScrolledToTarget = useRef(false)
   const lastActiveSentenceIdx = useRef<number>(0)
 
   const targetSentence = sentencesInClip.find((sentence: any) => {
+    // Match by start time with a small tolerance (0.1s) to handle float precision
+    if (currentClip?.start_time !== undefined) {
+      return Math.abs(sentence.start_time - currentClip.start_time) < 0.1
+    }
+
+    // Fallback to text matching
     const text = sentence.sentence_text || ""
     const query = searchQuery.toLowerCase().trim()
     return query && text.toLowerCase().includes(query)
