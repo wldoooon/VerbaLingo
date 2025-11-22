@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  typesense:
+    image: typesense/typesense:26.0  
+    container_name: miniyouglish_typesense
+    restart: unless-stopped
+    ports:
+      - "8108:8108"  
+    volumes:
+      - typesense-data:/data  
+    environment:
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:-xyz123}
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_ENABLE_CORS: "true"
+    command: >
+      --data-dir /data
+      --api-key ${TYPESENSE_API_KEY:-xyz123}
+      --enable-cors
+
+volumes:
+  typesense-data:
+    driver: local

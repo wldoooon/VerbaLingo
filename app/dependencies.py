@@ -1,9 +1,14 @@
 from fastapi import Request, Depends
 from app.services.search_service import SearchService
-from meilisearch_python_sdk import AsyncClient
+from app.core.typesense_client import get_typesense_client
+import typesense
 
-def get_meili_client(request: Request) -> AsyncClient:
-    return request.app.state.meili_client
+def get_typesense_client_from_app(request: Request) -> typesense.Client:
+    if not hasattr(request.app.state, "typesense_client") or request.app.state.typesense_client is None:
+        return get_typesense_client()
+    return request.app.state.typesense_client
 
-def get_search_service(client: AsyncClient = Depends(get_meili_client)) -> SearchService:
+def get_search_service(
+    client: typesense.Client = Depends(get_typesense_client_from_app)
+) -> SearchService:
     return SearchService(client=client)

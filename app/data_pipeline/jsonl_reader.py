@@ -15,7 +15,8 @@ def read_jsonl_lines() -> Iterator[Dict[str, Any]]:
         Dictionary for each JSON line
     """
     current_dir = Path(__file__).parent
-    filepath = current_dir / "Ben10_Dataset_Eng.jsonl" # here put the name of dataset file (eg. dataset.jsonl)
+    # Go up two levels to root, then into dataset folder
+    filepath = current_dir.parent.parent / "dataset" / "SpiderMan_Dataset_Eng.jsonl"
 
     with open(filepath, 'r', encoding='utf-8') as file:
         for line in file:
