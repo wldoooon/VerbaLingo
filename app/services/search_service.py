@@ -1,87 +1,90 @@
-from meilisearch_python_sdk import AsyncClient
+import typesense
 from typing import Optional
 from app.core.config import get_settings
+import json
 
 settings = get_settings()
 
 class SearchService:
-    def __init__(self, client: AsyncClient):
+    def __init__(self, client: typesense.Client):
         self.client = client
-        self.index = client.index(settings.INDEX_NAME)
+        self.collection_name = settings.COLLECTION_NAME
     
     async def search(self, q: str, category: Optional[str] = None) -> dict:
-        # Search parameters
         search_params = {
-            "limit": 20,
-            "offset": 0
+            'q': q,
+            'query_by': 'sentence_text',
+            'infix': 'always',
+            'per_page': 50,
+            'page': 1,
+            'highlight_fields': 'sentence_text',
+            'group_by': 'video_id',
+            'group_limit': 1
         }
         
-        # Add filter for category if provided (using category.title since category is now an object)
         if category:
-            search_params["filter"] = f"category.title = '{category}'"
+            search_params['filter_by'] = f'category_title:={category}'
         
-        # Specify which attributes to retrieve to ensure we get all needed fields
-        search_params["attributes_to_retrieve"] = [
-            "video_id",
-            "sentence_text",
-            "start",
-            "end",
-            "position",
-            "title",
-            "channel",
-            "category",
-            "language",
-            "words",
-            "sentences"  # Include sentences array in case structure is nested
-        ]
+        try:
+            result = self.client.collections[self.collection_name].documents.search(search_params)
+        except typesense.exceptions.ObjectNotFound:
+            return {"hits": {"hits": [], "total": {"value": 0}}}
         
-        # Enable highlighting to identify which sentence matched
-        search_params["attributes_to_highlight"] = ["sentence_text", "sentences.sentence_text"]
-        search_params["highlight_pre_tag"] = "<em>"
-        search_params["highlight_post_tag"] = "</em>"
-        search_params["show_matches_position"] = True
-        
-        # Perform search using MeiliSearch
-        result = await self.index.search(q, **search_params)
-        
-        # Get hits from result
-        hits = result.hits
-        
-        # Convert MeiliSearch result to format expected by routes
-        # Meilisearch returns hits as dictionaries with _formatted field when highlighting is enabled
         formatted_hits = []
-        for hit in hits:
-            # Meilisearch hits are typically dictionaries
-            hit_dict = hit if isinstance(hit, dict) else dict(hit)
-            # Extract _formatted if it exists (Meilisearch adds this when highlighting is enabled)
-            formatted_data = hit_dict.get("_formatted") if isinstance(hit_dict, dict) else None
-            # Create a copy without _formatted for _source
-            source_dict = {k: v for k, v in hit_dict.items() if k != "_formatted"} if isinstance(hit_dict, dict) else hit_dict
+        grouped_hits = result.get('grouped_hits', [])
+        
+        for group in grouped_hits:
+            hits = group.get('hits', [])
+            if not hits: continue
+            
+            hit = hits[0]
+            document = hit.get('document', {})
+            highlights = hit.get('highlights', [])
+            
+            if 'words' in document and isinstance(document['words'], str):
+                try:
+                    document['words'] = json.loads(document['words'])
+                except:
+                    document['words'] = []
+            
+            formatted_doc = document.copy()
+            for highlight in highlights:
+                field = highlight.get('field')
+                snippet = highlight.get('snippet')
+                if field and snippet:
+                    formatted_doc[field] = snippet
+            
             formatted_hits.append({
-                "_source": source_dict,  # Original document without _formatted
-                "_formatted": formatted_data  # Highlighted version
+                "_source": document,
+                "_formatted": formatted_doc
             })
         
         return {
             "hits": {
                 "hits": formatted_hits,
-                "total": {"value": result.estimated_total_hits}
+                "total": {"value": result.get('found', 0)}
             }
         }
 
     async def get_full_transcript(self, video_id: str) -> dict:
-        # Search for all sentences with specific video_id, sorted by position
-        result = await self.index.search(
-            "",  # Empty query to get all documents
-            filter=f"video_id = '{video_id}'",
-            limit=10000
-        )
+        search_params = {
+            'q': '*',
+            'query_by': 'sentence_text',
+            'filter_by': f'video_id:={video_id}',
+            'sort_by': 'position:asc',
+            'per_page': 250
+        }
         
-        # Convert to expected format
+        try:
+            result = self.client.collections[self.collection_name].documents.search(search_params)
+        except typesense.exceptions.ObjectNotFound:
+            return {"hits": {"hits": []}}
+        
         return {
             "hits": {
                 "hits": [
-                    {"_source": hit} for hit in result.hits
+                    {"_source": hit.get('document', {})} 
+                    for hit in result.get('hits', [])
                 ]
             }
         }

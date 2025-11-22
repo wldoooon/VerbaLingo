@@ -6,23 +6,22 @@ from app.services.search_service import SearchService
 from app.services.translation_service import get_translation_service, TranslationService
 from app.schema import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word, Category
 
-
 router = APIRouter(
     prefix="/api/v1",
     tags=["Search"]
 )
 
-
 @router.get("/search", response_model=SearchResponse)
 async def search(
-    q: str = Query(..., min_length=2, description="The search query text"),
-    category: Optional[str] = Query(None, description="Filter result by a specific category."),
+    q: str = Query(..., min_length=2),
+    category: Optional[str] = Query(None),
     service: SearchService = Depends(get_search_service)
 ):
     raw_results = await service.search(q=q, category=category)
 
     hits: List[SearchHit] = []
     raw_hits = raw_results.get("hits", {}).get("hits", [])
+    
     for hit in raw_hits:
         source = hit.get("_source", {})
         formatted = hit.get("_formatted", {})
@@ -30,75 +29,36 @@ async def search(
         if not source.get("video_id"):
             continue
         
-        category_obj = None
-        if "category" in source and source["category"] is not None:
-            if isinstance(source["category"], dict):
-                category_obj = Category(
-                    type=source["category"].get("type", ""),
-                    title=source["category"].get("title", "")
-                )
+        category_title = source.get("category_title", "Unknown")
+        category_type = source.get("category_type", "Cartoon")
+        category_obj = Category(type=category_type, title=category_title)
         
-        sentence_text = source.get("sentence_text")
-        start_time = source.get("start")
-        end_time = source.get("end")
-        words = None
+        sentence_text = formatted.get("sentence_text", source.get("sentence_text", ""))
+        start_time = source.get("start", 0.0)
+        end_time = source.get("end", 0.0)
         
-        formatted_sentence_text = formatted.get("sentence_text")
-        if formatted_sentence_text and isinstance(formatted_sentence_text, str) and "<em>" in formatted_sentence_text:
-            # Top-level sentence matched - use it
-            sentence_text = source.get("sentence_text")
-            start_time = source.get("start")
-            end_time = source.get("end")
-            if "words" in source and source["words"]:
-                words = [
-                    Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
-                    for w in source["words"] if isinstance(w, dict)
-                ]
-        elif "sentences" in source and isinstance(source["sentences"], list):
-            # Check nested sentences array for matches using highlighting
-            formatted_sentences = formatted.get("sentences", [])
-            matched_sentence = None
-            
-            # Find the sentence that has highlighting (contains <em> tags)
-            if isinstance(formatted_sentences, list):
-                for idx, formatted_sent in enumerate(formatted_sentences):
-                    if isinstance(formatted_sent, dict):
-                        sent_text = formatted_sent.get("sentence_text")
-                        if isinstance(sent_text, str) and "<em>" in sent_text:
-                            # Found the matched sentence - get its data from source
-                            if idx < len(source["sentences"]):
-                                matched_sentence = source["sentences"][idx]
-                                break
-            
-            if matched_sentence and isinstance(matched_sentence, dict):
-                sentence_text = matched_sentence.get("sentence_text")
-                start_time = matched_sentence.get("start")
-                end_time = matched_sentence.get("end")
-                if "words" in matched_sentence and matched_sentence["words"]:
-                    words = [
-                        Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
-                        for w in matched_sentence["words"] if isinstance(w, dict)
-                    ]
-            elif source["sentences"] and len(source["sentences"]) > 0:
-                # Fallback: use first sentence if no match found via highlighting
-                first_sentence = source["sentences"][0]
-                if isinstance(first_sentence, dict):
-                    sentence_text = first_sentence.get("sentence_text")
-                    start_time = first_sentence.get("start")
-                    end_time = first_sentence.get("end")
-                    if "words" in first_sentence and first_sentence["words"]:
-                        words = [
-                            Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
-                            for w in first_sentence["words"] if isinstance(w, dict)
-                        ]
-        
-        search_hit = SearchHit(
-            video_id=source.get("video_id"),
+        words_data = source.get("words", [])
+        words = [
+            Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
+            for w in words_data if isinstance(w, dict)
+        ] if words_data else []
+
+        transcript_sentence = TranscriptSentence(
             sentence_text=sentence_text,
             start_time=start_time,
             end_time=end_time,
+            words=words
+        )
+        
+        search_hit = SearchHit(
+            video_id=source.get("video_id"),
+            title=source.get("video_title", ""),
+            channel=source.get("channel", ""),
             category=category_obj,
-            language=source.get("language"),
+            sentence_text=sentence_text,
+            start_time=start_time,
+            end_time=end_time,
+            transcript=[transcript_sentence] 
         )
         hits.append(search_hit)
 
@@ -106,15 +66,12 @@ async def search(
 
     return SearchResponse(total=total, hits=hits)
 
-
 @router.get("/videos/{video_id}/transcript", response_model=TranscriptResponse)
 async def get_transcript(
     video_id: str,
     service: SearchService = Depends(get_search_service)
 ):
-    raw_results = await service.get_full_transcript(
-        video_id=video_id,
-    )
+    raw_results = await service.get_full_transcript(video_id=video_id)
 
     sentences: List[TranscriptSentence] = []
     raw_hits = raw_results.get("hits", {}).get("hits", [])
@@ -122,41 +79,26 @@ async def get_transcript(
     for hit in raw_hits:
         source = hit.get("_source", {})
         
-        # Check if data has new nested structure with sentences array
-        if "sentences" in source and isinstance(source["sentences"], list):
-            # New structure: sentences is an array of sentence objects
-            for sentence_obj in source["sentences"]:
-                if not isinstance(sentence_obj, dict):
-                    continue
-                    
-                words_src = sentence_obj.get("words") or []
-                words = [
-                    Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
-                    for w in words_src if isinstance(w, dict)
-                ]
+        words_src = source.get("words", [])
+        if isinstance(words_src, str):
+            import json
+            try:
+                words_src = json.loads(words_src)
+            except:
+                words_src = []
                 
-                sentence = TranscriptSentence(
-                    sentence_text=sentence_obj.get("sentence_text"),
-                    start_time=sentence_obj.get("start"),
-                    end_time=sentence_obj.get("end"),
-                    words=words
-                )
-                sentences.append(sentence)
-        else:
-            # Old structure: flat structure with sentence_text, start, end at top level
-            words_src = source.get("words") or []
-            words = [
-                Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
-                for w in words_src if isinstance(w, dict)
-            ]
-            
-            sentence = TranscriptSentence(
-                sentence_text=source.get("sentence_text"),
-                start_time=source.get("start"),
-                end_time=source.get("end"),
-                words=words
-            )
-            sentences.append(sentence)
+        words = [
+            Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
+            for w in words_src if isinstance(w, dict)
+        ]
+        
+        sentence = TranscriptSentence(
+            sentence_text=source.get("sentence_text", ""),
+            start_time=source.get("start", 0.0),
+            end_time=source.get("end", 0.0),
+            words=words
+        )
+        sentences.append(sentence)
 
     if not sentences:
         raise HTTPException(status_code=404, detail="Transcript not found")
@@ -171,19 +113,13 @@ async def get_transcript(
         sentences=sentences
     )
 
-
 @router.get("/translate")
 async def translate_text(
-    text: str = Query(..., min_length=1, description="Text to translate"),
-    source: str = Query("en", description="Source language code (e.g., 'en', 'fr')"),
-    target: str = Query("ar", description="Target language code (e.g., 'ar', 'es')"),
+    text: str = Query(..., min_length=1),
+    source: str = Query("en"),
+    target: str = Query("ar"),
     translator: TranslationService = Depends(get_translation_service)
 ):
-    """
-    Translate a single text using LibreTranslate
-    
-    Example: /api/v1/translate?text=Hello&source=en&target=ar
-    """
     translated = translator.translate_text(text, source, target)
     if translated is None:
         raise HTTPException(status_code=500, detail="Translation failed")
@@ -195,23 +131,19 @@ async def translate_text(
         "target": target
     }
 
-
 @router.get("/translate/languages")
 async def get_supported_languages(
     translator: TranslationService = Depends(get_translation_service)
 ):
-    """Get list of supported languages from LibreTranslate"""
     languages = translator.get_supported_languages()
     if not languages:
         raise HTTPException(status_code=503, detail="Translation service unavailable")
     return {"languages": languages}
 
-
 @router.get("/translate/health")
 async def translation_health(
     translator: TranslationService = Depends(get_translation_service)
 ):
-    """Check if translation service is healthy"""
     is_healthy = translator.health_check()
     if not is_healthy:
         raise HTTPException(status_code=503, detail="Translation service unavailable")

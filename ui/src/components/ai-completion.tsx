@@ -76,7 +76,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     const currentPromptRef = useRef<string>("");
     const responseContainerRef = useRef<HTMLDivElement>(null);
     const [maxResponseHeight, setMaxResponseHeight] = useState<number>(400);
-    
+
     // Use our custom history hook
     const {
         currentBranch,
@@ -100,16 +100,16 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         const calculateMaxHeight = () => {
             const container = responseContainerRef.current?.closest('.flex.flex-col') as HTMLElement;
             if (!container) return;
-            
+
             const containerHeight = container.clientHeight;
             const header = container.querySelector('header');
             const footer = container.querySelector('footer');
             const suggestions = container.querySelector('[class*="suggestions"]');
-            
+
             const headerHeight = header?.clientHeight || 0;
             const footerHeight = footer?.clientHeight || 0;
             const suggestionsHeight = !shouldHideSuggestions && suggestions?.clientHeight || 0;
-            
+
             // Calculate available space (leaving some padding)
             const availableSpace = containerHeight - headerHeight - footerHeight - suggestionsHeight - 100;
             setMaxResponseHeight(Math.max(200, Math.min(availableSpace, 600)));
@@ -192,13 +192,13 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                     <div className="h-1/2 bg-gradient-to-t from-border to-transparent"></div>
                     <div className="h-1/2 bg-gradient-to-b from-border to-transparent"></div>
                 </div>
-                
+
                 <header className="w-full flex-shrink-0">
                     <div className="relative h-28 w-full flex items-center justify-center mb-6">
                         {/* Animated rings around the orb */}
                         <div className="absolute w-32 h-32 rounded-full border-2 border-red-400/20 animate-ping" style={{ animationDuration: '3s' }} />
                         <div className="absolute w-24 h-24 rounded-full border-2 border-red-400/30 animate-ping" style={{ animationDuration: '2s' }} />
-                        
+
                         {/* Central Orb with enhanced glow */}
                         <div className="absolute w-20 h-20 bg-red-400/50 rounded-full blur-xl animate-pulse" />
                         <div className="absolute w-16 h-16 bg-red-400/30 rounded-full blur-lg animate-pulse" style={{ animationDuration: '2s' }} />
@@ -208,26 +208,26 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         </div>
 
                         {/* Floating Cards with enhanced animations - overlapping closely with orb */}
-                        <motion.div 
+                        <motion.div
                             className="absolute top-1/2 -translate-y-1/2 left-8 sm:left-25 z-10"
-                            animate={{ 
+                            animate={{
                                 y: [-4, 4, -4],
                                 rotate: [-2, 2, -2]
                             }}
-                            transition={{ 
+                            transition={{
                                 duration: 4,
                                 repeat: Infinity,
                                 ease: "easeInOut"
                             }}
                         >
                             <div className="bg-card/90 backdrop-blur-sm rounded-lg shadow-lg p-2 flex items-center space-x-2 w-40 border border-red-200/50 dark:border-red-900/50 hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                <motion.div 
+                                <motion.div
                                     className="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-950/50 dark:to-red-900/50 p-1 rounded-md"
-                                    animate={{ 
+                                    animate={{
                                         scale: [1, 1.1, 1],
                                         rotate: [0, 5, 0]
                                     }}
-                                    transition={{ 
+                                    transition={{
                                         duration: 2,
                                         repeat: Infinity,
                                         ease: "easeInOut"
@@ -236,12 +236,12 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                     <Play className="h-4 w-4 text-red-600 dark:text-red-400" />
                                 </motion.div>
                                 <div className="space-y-1.5 flex-1">
-                                    <motion.div 
+                                    <motion.div
                                         className="h-2 w-full bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
                                         animate={{ opacity: [0.5, 1, 0.5] }}
                                         transition={{ duration: 2, repeat: Infinity }}
                                     />
-                                    <motion.div 
+                                    <motion.div
                                         className="h-2 w-4/5 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
                                         animate={{ opacity: [0.5, 1, 0.5] }}
                                         transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
@@ -249,27 +249,27 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                 </div>
                             </div>
                         </motion.div>
-                        
-                        <motion.div 
+
+                        <motion.div
                             className="absolute top-1/2 -translate-y-1/2 right-8 sm:right-20 z-10"
-                            animate={{ 
+                            animate={{
                                 y: [4, -4, 4],
                                 rotate: [2, -2, 2]
                             }}
-                            transition={{ 
+                            transition={{
                                 duration: 5,
                                 repeat: Infinity,
                                 ease: "easeInOut"
                             }}
                         >
                             <div className="bg-card/90 backdrop-blur-sm rounded-lg shadow-lg p-2 flex items-center space-x-2 w-40 border border-red-200/50 dark:border-red-900/50 hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                <motion.div 
+                                <motion.div
                                     className="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-950/50 dark:to-red-900/50 p-1 rounded-md"
-                                    animate={{ 
+                                    animate={{
                                         scale: [1, 1.1, 1],
                                         rotate: [0, -5, 0]
                                     }}
-                                    transition={{ 
+                                    transition={{
                                         duration: 2.5,
                                         repeat: Infinity,
                                         ease: "easeInOut"
@@ -278,12 +278,12 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                     <Play className="h-4 w-4 text-red-600 dark:text-red-400" />
                                 </motion.div>
                                 <div className="space-y-1.5 flex-1">
-                                    <motion.div 
+                                    <motion.div
                                         className="h-2 w-full bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
                                         animate={{ opacity: [0.5, 1, 0.5] }}
                                         transition={{ duration: 2.2, repeat: Infinity }}
                                     />
-                                    <motion.div 
+                                    <motion.div
                                         className="h-2 w-4/5 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
                                         animate={{ opacity: [0.5, 1, 0.5] }}
                                         transition={{ duration: 2.2, repeat: Infinity, delay: 0.4 }}
@@ -291,7 +291,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                 </div>
                             </div>
                         </motion.div>
-                        
+
                         {/* Floating particles around orb */}
                         {[...Array(6)].map((_, i) => (
                             <motion.div
@@ -317,12 +317,12 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         {query ? `Learning about "${query}"` : "What do you want to learn?"}
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-4 max-w-lg mx-auto text-center">
-                        {query 
+                        {query
                             ? `Get pronunciations, examples, and detailed explanations for "${query}"`
                             : "Explore topics, get explanations, and improve your understanding—all in one place."
                         }
                     </p>
-                    
+
                     {/* Header bottom gradient border */}
                     <div className="relative mt-6">
                         <div className="absolute bottom-0 left-0 right-0 flex h-px">
@@ -333,99 +333,99 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                 </header>
 
                 <main className="w-full flex-1 flex flex-col mt-6 space-y-6 min-h-0">
-                        {/* Suggestions */}
-                        <AnimatePresence>
-                            {!shouldHideSuggestions && (
-                                <motion.div
-                                    initial={{ opacity: 1, height: "auto" }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="overflow-hidden suggestions-container"
-                                >
-                                    <div className="flex flex-wrap justify-center gap-3">
-                                        {smartSuggestions.map((suggestion, i) => (
-                                            <motion.div
-                                                key={i}
-                                                initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                transition={{
-                                                    duration: 0.4,
-                                                    delay: i * 0.1,
-                                                    ease: [0.4, 0, 0.2, 1]
-                                                }}
-                                            >
-                                                <SuggestionChip
-                                                    icon={suggestion.icon}
-                                                    text={suggestion.title}
-                                                    onClick={() => handleSuggestionClick(suggestion)}
-                                                />
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                    {/* Suggestions */}
+                    <AnimatePresence>
+                        {!shouldHideSuggestions && (
+                            <motion.div
+                                initial={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="overflow-hidden suggestions-container"
+                            >
+                                <div className="flex flex-wrap justify-center gap-3">
+                                    {smartSuggestions.map((suggestion, i) => (
+                                        <motion.div
+                                            key={i}
+                                            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                                            transition={{
+                                                duration: 0.4,
+                                                delay: i * 0.1,
+                                                ease: [0.4, 0, 0.2, 1]
+                                            }}
+                                        >
+                                            <SuggestionChip
+                                                icon={suggestion.icon}
+                                                text={suggestion.title}
+                                                onClick={() => handleSuggestionClick(suggestion)}
+                                            />
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                        {/* Response Section */}
-                        <AnimatePresence>
-                            {isLoading && !completion && !error ? (
-                                <motion.div
-                                    key="skeleton"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="w-full"
-                                >
-                                    <AiAssistantSkeleton />
-                                </motion.div>
-                            ) : (completion || error) && (
-                                <motion.div
-                                    key="completion"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    transition={{ duration: 0.5 }}
-                                    className="w-full"
-                                >
-                                    <div ref={responseContainerRef} className="relative bg-card rounded-xl p-6 text-left border-x">
-                                        {/* Top gradient border */}
-                                        <div className="absolute top-0 left-0 right-0 flex h-px">
-                                            <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                                            <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-                                        </div>
-                                        
-                                        <div className="relative">
-                                            {/* Top blur gradient */}
-                                            <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300" id="top-blur" />
-                                            
-                                            {/* Scrollable content */}
-                                            <div 
-                                                style={{ maxHeight: `${maxResponseHeight}px` }}
-                                                className="overflow-y-auto text-card-foreground pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
-                                                onScroll={(e) => {
-                                                    const element = e.currentTarget;
-                                                    const topBlur = document.getElementById('top-blur');
-                                                    const bottomBlur = document.getElementById('bottom-blur');
-                                                    
-                                                    if (topBlur && bottomBlur) {
-                                                        // Check if scrolled from top
-                                                        if (element.scrollTop > 10) {
-                                                            topBlur.style.opacity = '1';
-                                                        } else {
-                                                            topBlur.style.opacity = '0';
-                                                        }
-                                                        
-                                                        // Check if scrolled to bottom
-                                                        const isBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 10;
-                                                        if (isBottom) {
-                                                            bottomBlur.style.opacity = '0';
-                                                        } else {
-                                                            bottomBlur.style.opacity = '1';
-                                                        }
+                    {/* Response Section */}
+                    <AnimatePresence>
+                        {isLoading && !completion && !error ? (
+                            <motion.div
+                                key="skeleton"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.3 }}
+                                className="w-full"
+                            >
+                                <AiAssistantSkeleton />
+                            </motion.div>
+                        ) : (completion || error) && (
+                            <motion.div
+                                key="completion"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.5 }}
+                                className="w-full"
+                            >
+                                <div ref={responseContainerRef} className="relative bg-card rounded-xl p-6 text-left border-x">
+                                    {/* Top gradient border */}
+                                    <div className="absolute top-0 left-0 right-0 flex h-px">
+                                        <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                                        <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                                    </div>
+
+                                    <div className="relative">
+                                        {/* Top blur gradient */}
+                                        <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300" id="top-blur" />
+
+                                        {/* Scrollable content */}
+                                        <div
+                                            style={{ maxHeight: `${maxResponseHeight}px` }}
+                                            className="overflow-y-auto text-card-foreground pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
+                                            onScroll={(e) => {
+                                                const element = e.currentTarget;
+                                                const topBlur = document.getElementById('top-blur');
+                                                const bottomBlur = document.getElementById('bottom-blur');
+
+                                                if (topBlur && bottomBlur) {
+                                                    // Check if scrolled from top
+                                                    if (element.scrollTop > 10) {
+                                                        topBlur.style.opacity = '1';
+                                                    } else {
+                                                        topBlur.style.opacity = '0';
                                                     }
-                                                }}
-                                            >
+
+                                                    // Check if scrolled to bottom
+                                                    const isBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 10;
+                                                    if (isBottom) {
+                                                        bottomBlur.style.opacity = '0';
+                                                    } else {
+                                                        bottomBlur.style.opacity = '1';
+                                                    }
+                                                }
+                                            }}
+                                        >
                                             {error ? (
                                                 <p className="text-red-500">{error.message}</p>
                                             ) : (
@@ -433,8 +433,8 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                                     {/* Show current branch if navigating, otherwise show live streaming completion */}
                                                     <div className="text-base md:text-lg leading-relaxed">
                                                         <Response>
-                                                            {currentBranch && !isLoading 
-                                                                ? currentBranch.response 
+                                                            {currentBranch && !isLoading
+                                                                ? currentBranch.response
                                                                 : completion
                                                             }
                                                         </Response>
@@ -442,25 +442,25 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                                 </>
                                             )}
                                         </div>
-                                        
+
                                         {/* Bottom blur gradient */}
                                         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300" id="bottom-blur" />
                                     </div>
-                                    
+
                                     {/* Bottom gradient border */}
                                     <div className="absolute -bottom-px left-0 right-0 flex h-px">
                                         <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
                                         <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
                                     </div>
-                                    
+
                                     {!isLoading && !error && (
                                         <div className="flex items-center justify-between gap-2 mt-4 pt-4 border-t">
                                             {/* Branch Navigation - Only show if we have multiple branches */}
                                             {totalBranches > 1 && (
                                                 <div className="flex items-center gap-2">
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
                                                         className="h-8 w-8"
                                                         onClick={goToPrevious}
                                                         disabled={!canGoBack}
@@ -470,9 +470,9 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                                     <span className="text-xs text-muted-foreground font-medium tabular-nums">
                                                         {currentIndex + 1} of {totalBranches}
                                                     </span>
-                                                    <Button 
-                                                        variant="ghost" 
-                                                        size="icon" 
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
                                                         className="h-8 w-8"
                                                         onClick={goToNext}
                                                         disabled={!canGoForward}
@@ -481,10 +481,10 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                                     </Button>
                                                 </div>
                                             )}
-                                            
+
                                             {/* Spacer if no navigation */}
                                             {totalBranches <= 1 && <div />}
-                                            
+
                                             {/* Action Buttons */}
                                             <div className="flex items-center gap-2">
                                                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -499,42 +499,42 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                             </div>
                                         </div>
                                     )}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
-                    </main>
+                </main>
 
-                    <footer className="relative w-full flex-shrink-0 mt-6 pt-4">
-                        {/* Footer top gradient border */}
-                        <div className="absolute top-0 left-0 right-0 flex h-px">
-                            <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                            <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-                        </div>
-                        
-                        {/* Input Bar */}
-                        <div className="relative w-full">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
-                            <Input
-                                type="text"
-                                placeholder="Ask about pronunciation, definitions, examples..."
-                                className="w-full rounded-full pl-10 pr-10 py-6 bg-card shadow-sm"
-                                value={inputValue}
-                                onChange={(e) => setInputValue(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                disabled={isLoading}
-                            />
-                            <button
-                                onClick={handleInputSubmit}
-                                disabled={!inputValue.trim() || isLoading}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
-                            </button>
-                        </div>
-                    </footer>
-                </div>
+                <footer className="relative w-full flex-shrink-0 mt-6 pt-4">
+                    {/* Footer top gradient border */}
+                    <div className="absolute top-0 left-0 right-0 flex h-px">
+                        <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                        <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                    </div>
+
+                    {/* Input Bar */}
+                    <div className="relative w-full">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
+                        <Input
+                            type="text"
+                            placeholder="Ask about pronunciation, definitions, examples..."
+                            className="w-full rounded-full pl-10 pr-10 py-6 bg-card shadow-sm"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            disabled={isLoading}
+                        />
+                        <button
+                            onClick={handleInputSubmit}
+                            disabled={!inputValue.trim() || isLoading}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
+                        </button>
+                    </div>
+                </footer>
+            </div>
         </div>
     );
 }

@@ -57,11 +57,11 @@ function renderWordsWithHighlighting(
   // Small lead to compensate for player time polling latency
   const TIMING_LEAD_SECONDS = 0.08
   const adjustedTime = currentTime + TIMING_LEAD_SECONDS
-  
+
   return words.map((word, index) => {
     const isCurrentWord = adjustedTime >= word.start && adjustedTime < word.end
     const isSearchMatch = query && word.text.toLowerCase().includes(query)
-    
+
     return (
       <span
         key={`${word.start}-${word.text}`}
@@ -85,21 +85,21 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const [speedPopoverOpen, setSpeedPopoverOpen] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const activeSentenceRef = useRef<HTMLDivElement>(null)
-  
+
   // Get player state and controls from context
   const { state, dispatch, playerState, controls } = usePlayerContext()
   const { currentVideoIndex, currentTime } = state
   const { isPlaying, duration } = playerState
-  
+
   // Read playlist from React Query cache
   const { query, category, setQuery, setCategory } = useSearchParams()
   const { data } = useSearch(query, category)
   const playlist = data?.hits || []
-  
+
   // Defensive: clamp currentVideoIndex to valid range
   const validIndex = Math.max(0, Math.min(currentVideoIndex, playlist.length - 1))
   const currentClip = playlist[validIndex]
-  
+
   // Get transcript data for the current video
   const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "")
 
@@ -146,16 +146,21 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
 
   // Get ALL sentences from the transcript (not just the clip window)
   const allSentences = transcriptData?.sentences || []
-  
+
   // Sort by start time
   const sentencesInClip = [...allSentences].sort((a: any, b: any) => a.start_time - b.start_time)
-
   // Find the sentence that contains the search query
   const targetSentenceRef = useRef<HTMLDivElement>(null)
   const hasScrolledToTarget = useRef(false)
   const lastActiveSentenceIdx = useRef<number>(0)
 
   const targetSentence = sentencesInClip.find((sentence: any) => {
+    // Match by start time with a small tolerance (0.1s) to handle float precision
+    if (currentClip?.start_time !== undefined) {
+      return Math.abs(sentence.start_time - currentClip.start_time) < 0.1
+    }
+
+    // Fallback to text matching
     const text = sentence.sentence_text || ""
     const query = searchQuery.toLowerCase().trim()
     return query && text.toLowerCase().includes(query)
@@ -167,22 +172,22 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
       // Calculate scroll position manually to avoid affecting global scroll
       const container = scrollContainerRef.current
       const target = targetSentenceRef.current
-      
+
       const containerRect = container.getBoundingClientRect()
       const targetRect = target.getBoundingClientRect()
-      
+
       // Calculate the offset within the container
       const relativeTop = targetRect.top - containerRect.top + container.scrollTop
       const scrollTo = relativeTop - (container.clientHeight / 2) + (targetRect.height / 2)
-      
+
       // Scroll ONLY the container, not the page
       container.scrollTo({
         top: scrollTo,
         behavior: 'smooth'
       })
-      
+
       hasScrolledToTarget.current = true
-      
+
       // Start playback after scroll completes (500ms delay)
       setTimeout(() => {
         if (!isPlaying && targetSentence) {
@@ -198,14 +203,14 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
     if (activeSentenceRef.current && scrollContainerRef.current && isPlaying) {
       const container = scrollContainerRef.current
       const active = activeSentenceRef.current
-      
+
       const containerRect = container.getBoundingClientRect()
       const activeRect = active.getBoundingClientRect()
-      
+
       // Calculate the offset within the container
       const relativeTop = activeRect.top - containerRect.top + container.scrollTop
       const scrollTo = relativeTop - (container.clientHeight / 2) + (activeRect.height / 2)
-      
+
       // Scroll ONLY the container, not the page
       container.scrollTo({
         top: scrollTo,
@@ -244,7 +249,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
             </Button>
             <span className="text-xs text-muted-foreground">Previous</span>
           </div>
-          
+
           <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
@@ -363,11 +368,10 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           setQuery(clean)
           setCategory(null)
 
-          // Navigate to routed search page so its useSearch hook fires
+          // Navigate to routed watch page
           try {
             const encoded = encodeURIComponent(clean)
-            const language = "General" // keep same default category mapping as routed page
-            router.push(`/search/${encoded}/${encodeURIComponent(language)}`)
+            router.push(`/watch/${encoded}`)
           } catch {
             // ignore navigation errors for now
           }

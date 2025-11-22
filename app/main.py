@@ -1,47 +1,39 @@
 from fastapi import FastAPI
-import asyncio
-from .core.config import get_settings
 from contextlib import asynccontextmanager
-from meilisearch_python_sdk import AsyncClient
+from .core.config import get_settings
+from .core.typesense_client import get_typesense_client
 from .api.routes import router
 
 settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.meili_client = None
+    app.state.typesense_client = None
     try:
-        client_config = {"url": settings.MEILISEARCH_URL}
-        if settings.MEILISEARCH_API_KEY:
-            client_config["api_key"] = settings.MEILISEARCH_API_KEY
+        client = get_typesense_client()
+        health = client.operations.is_healthy()
         
-        client = AsyncClient(**client_config)
+        if not health:
+            raise ConnectionError("Typesense health check failed.")
         
-        health = await client.health()
-        if health == "status='available'":
-            raise ConnectionError("MeiliSearch health check failed.")
-        
-        app.state.meili_client = client
-        print(f"Connected to MeiliSearch at {settings.MEILISEARCH_URL}")
+        app.state.typesense_client = client
+        print(f"Connected to Typesense at {settings.TYPESENSE_HOST}:{settings.TYPESENSE_PORT}")
         
     except Exception as e:
-        app.state.meili_client = None
-        print(f"Failed to connect to MeiliSearch: {str(e)}")
+        app.state.typesense_client = None
+        print(f"Failed to connect to Typesense: {str(e)}")
         raise
 
     yield
 
-    print("Shutting down the application...")
-    if app.state.meili_client:
-        app.state.meili_client = None
-        print("MeiliSearch connection cleaned up.")
+    if app.state.typesense_client:
+        app.state.typesense_client = None
 
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="Verbalingo API",
+    description="Search API powered by Typesense",
+    version="2.0.0",
+    lifespan=lifespan
+)
 
 app.include_router(router)
-
-
-
-
-

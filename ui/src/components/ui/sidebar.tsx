@@ -4,6 +4,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, VariantProps } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
+import { motion } from "framer-motion"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -263,7 +264,7 @@ function SidebarTrigger({
   onClick,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, open } = useSidebar()
 
   return (
     <Button
@@ -278,7 +279,31 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      <motion.svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="lucide lucide-panel-left"
+      >
+        <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+        <motion.path
+          d="M9 3v18"
+          animate={{ x: open ? 0 : -6, opacity: open ? 1 : 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        />
+        <motion.path
+          d="M13 9l3 3l-3 3"
+          initial={{ opacity: 0, x: -2 }}
+          animate={{ opacity: open ? 0 : 1, x: open ? -2 : 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        />
+      </motion.svg>
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )

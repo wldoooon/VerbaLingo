@@ -1,229 +1,187 @@
 import json
-from meilisearch import Client
+import typesense
+import sys
 from jsonl_reader import read_jsonl_lines
 
+client = typesense.Client({
+    'nodes': [{
+        'host': 'localhost',
+        'port': '8108',
+        'protocol': 'http'
+    }],
+    'api_key': 'xyz123',
+    'connection_timeout_seconds': 10
+})
 
-def calculate_json_size(data):
-    """Calculate the approximate size of a JSON-serialized object in bytes."""
-    return len(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+COLLECTION_NAME = "yt_sentences"
 
+def create_collection_schema(reset=False):
+    if reset:
+        delete_collection()
 
-def transform_category(document):
-    """
-    Transform the category field from a string to an object with type and title.
+    schema = {
+        'name': COLLECTION_NAME,
+        'fields': [
+            {'name': 'sentence_text', 'type': 'string', 'infix': True},
+            {'name': 'video_id', 'type': 'string', 'facet': True},
+            {'name': 'channel', 'type': 'string', 'facet': True, 'optional': True},
+            {'name': 'category_title', 'type': 'string', 'facet': True, 'optional': True},
+            {'name': 'category_type', 'type': 'string', 'facet': True, 'optional': True},
+            {'name': 'language', 'type': 'string', 'facet': True, 'optional': True},
+            {'name': 'start', 'type': 'float'},
+            {'name': 'end', 'type': 'float'},
+            {'name': 'position', 'type': 'int32'},
+            {'name': 'video_title', 'type': 'string', 'optional': True, 'index': False},
+            {'name': 'words', 'type': 'string', 'optional': True, 'index': False},
+        ],
+        'default_sorting_field': 'position'
+    }
     
-    Args:
-        document: Document dictionary that may contain a 'category' field
+    try:
+        client.collections.create(schema)
+        print(f"Created collection: {COLLECTION_NAME}")
+    except typesense.exceptions.ObjectAlreadyExists:
+        print(f"Collection {COLLECTION_NAME} already exists.")
+
+def delete_collection():
+    try:
+        client.collections[COLLECTION_NAME].delete()
+        print(f"Deleted collection: {COLLECTION_NAME}")
+    except typesense.exceptions.ObjectNotFound:
+        print(f"Collection {COLLECTION_NAME} not found, nothing to delete.")
+
+def get_stats():
+    try:
+        stats = client.collections[COLLECTION_NAME].retrieve()
+        print(f"\nCollection Stats for '{COLLECTION_NAME}':")
+        print(f"   - Documents: {stats.get('num_documents', 0)}")
+        print(f"   - Created At: {stats.get('created_at', 'Unknown')}")
+        print(f"   - Memory Usage: {stats.get('memory_usage_bytes', 0) / 1024 / 1024:.2f} MB")
+    except typesense.exceptions.ObjectNotFound:
+        print(f"Collection {COLLECTION_NAME} does not exist.")
+
+def test_search(query="hello"):
+    print(f"\nTesting search for: '{query}'")
+    search_params = {
+        'q': query,
+        'query_by': 'sentence_text',
+        'per_page': 3
+    }
+    try:
+        results = client.collections[COLLECTION_NAME].documents.search(search_params)
+        hits = results.get('hits', [])
+        print(f"   - Found {results.get('found', 0)} results.")
+        for i, hit in enumerate(hits):
+            doc = hit['document']
+            print(f"   {i+1}. [{doc['start']:.2f}s] {doc['sentence_text']} (Video: {doc['video_id']})")
+    except Exception as e:
+        print(f"Search failed: {e}")
+
+def flatten_video_to_sentences(video_doc):
+    sentences = video_doc.get('sentences', [])
+    video_id = video_doc.get('video_id')
+    
+    cat_title = "Unknown"
+    cat_type = "Cartoon" 
+    
+    if isinstance(video_doc.get('category'), dict):
+        cat_title = video_doc['category'].get('title', 'Unknown')
+    elif isinstance(video_doc.get('category'), str):
+        cat_title = video_doc['category']
+
+    flat_docs = []
+    for i, sent in enumerate(sentences):
+        doc_id = f"{video_id}_{i}"
+        words_json = json.dumps(sent.get('words', []), ensure_ascii=False)
         
-    Returns:
-        Document with transformed category field
-    """
-    if 'category' in document and document['category'] is not None:
-        original_category = document['category']
-        document['category'] = {
-            "type": "Cartoon",
-            "title": original_category
+        flat_doc = {
+            'id': doc_id,
+            'video_id': video_id,
+            'video_title': video_doc.get('title', ''),
+            'channel': video_doc.get('channel', ''),
+            'category_title': cat_title,
+            'category_type': cat_type,
+            'language': video_doc.get('language', 'en'),
+            'sentence_text': sent.get('sentence_text', ''),
+            'start': sent.get('start', 0.0),
+            'end': sent.get('end', 0.0),
+            'position': i,
+            'words': words_json
         }
-    return document
+        flat_docs.append(flat_doc)
+        
+    return flat_docs
 
+def send_batch_to_typesense(batch):
+    jsonl_data = '\n'.join([json.dumps(doc) for doc in batch])
+    return client.collections[COLLECTION_NAME].documents.import_(
+        jsonl_data,
+        {'action': 'upsert'}
+    )
 
-def send_batch_to_meilisearch(batch, client, index_name):
-    """Send a batch of documents to MeiliSearch."""
-    index = client.index(index_name)
-    task = index.add_documents(batch, primary_key="id")
-    return task
-
-def delete_index():
-    """Delete an index."""
-    client = Client("http://localhost:7700")
-    index_name = "yt_data"
-    client.index(index_name).delete()
-    print(f"Index {index_name} deleted.") 
-    
-
-def setup_index_settings(client, index_name):
-    """Configure index settings for search optimization."""
-    index = client.index(index_name)
-    
-    index.update_searchable_attributes([
-        'sentence_text',            # top-level sentence
-        'words.text',               # sub-attribute from words[] array
-        'sentences.sentence_text'   # sub-attribute from sentences[] array
-    ])
-    
-    index.update_filterable_attributes([
-        'category',
-        'category.type',
-        'category.title',
-        'language',
-        'video_id'
-    ])
-    
-    index.update_sortable_attributes([
-        'start_time'
-    ])
-    
-    print(f"Index settings configured for {index_name}")
-    print("- Searchable attributes: sentence_text")
-    print("- Filterable attributes: category, category.type, category.title, language, video_id")
-    print("- Sortable attributes: start_time")
-
-
-def quick_search(query: str, category: str | None = None, limit: int = 10):
-   """Run a quick search and print ONLY the sentence(s) that matched.
-
-   We use Meilisearch highlighting on nested attributes and then extract the
-   specific sentence_text values that contain the highlight tags.
-   """
-   client = Client("http://localhost:7700")
-   index_name = "yt_data"
-   index = client.index(index_name)
-
-   params = {
-       "limit": limit,
-       # Only retrieve minimal fields; rely on _formatted for highlighted text
-       "attributesToRetrieve": ["video_id", "position", "sentence_text", "sentences.sentence_text"],
-       "attributesToHighlight": ["sentence_text", "sentences.sentence_text"],
-       "highlightPreTag": "<em>",
-       "highlightPostTag": "</em>",
-       "showMatchesPosition": True,
-   }
-   if category:
-       # Filter by category.title since category is now an object
-       params["filter"] = f"category.title = '{category}'"
-
-   result = index.search(query, params)
-   hits = result.get("hits", [])
-
-   def extract_matched_sentences(hit: dict) -> list[str]:
-       matched: list[str] = []
-       formatted = hit.get("_formatted", {})
-
-       # 1) If top-level sentence_text exists and got highlighted
-       st = formatted.get("sentence_text")
-       if isinstance(st, str) and "<em>" in st:
-           matched.append(st)
-
-       # 2) If sentences is an array of objects with sentence_text
-       sentences_fmt = formatted.get("sentences")
-       if isinstance(sentences_fmt, list):
-           for item in sentences_fmt:
-               s = item.get("sentence_text") if isinstance(item, dict) else None
-               if isinstance(s, str) and "<em>" in s:
-                   matched.append(s)
-
-       return matched
-
-   line_no = 1
-   flattened_results: list[dict] = []
-   for hit in hits:
-       matched_sentences = extract_matched_sentences(hit)
-       if not matched_sentences:
-           # Fallback: just show raw sentence_text if present
-           fallback = hit.get("sentence_text")
-           if isinstance(fallback, str):
-               matched_sentences = [fallback]
-
-       for s in matched_sentences:
-           print(f"{line_no:02d}. vid={hit.get('video_id')} pos={hit.get('position')} sentence={s}")
-           flattened_results.append({
-               "video_id": hit.get("video_id"),
-               "position": hit.get("position"),
-               "sentence_formatted": s,  # may include <em> ... </em>
-           })
-           line_no += 1
-
-   return flattened_results
-
-
-def process_documents_in_batches(max_batch_size_mb=90):
-    """
-    Process documents in batches based on payload size to avoid Meilisearch 100MB limit.
-    
-    Args:
-        max_batch_size_mb: Maximum batch size in MB (default 90MB for safety margin)
-    """
-    
-    client = Client("http://localhost:7700")
-    index_name = "yt_data"
-    max_batch_size_bytes = max_batch_size_mb * 1024 * 1024  # Convert MB to bytes
-    
-    print("Configuring index settings...")
-    setup_index_settings(client, index_name)
-    print()
+def process_documents_in_batches(reset=False):
+    create_collection_schema(reset=reset)
     
     batch = []
-    batch_size_bytes = 0
-    total_processed = 0
     batch_count = 0
-    doc_id_counter = 0  
+    total_sentences = 0
     
-    print(f"Starting batch processing with max batch size: {max_batch_size_mb}MB ({max_batch_size_bytes:,} bytes)...")
-    print()
+    print("\nStarting indexing process...")
     
-    for document in read_jsonl_lines():
-        document['id'] = f"yt_{doc_id_counter}"
-        doc_id_counter += 1
+    for video_doc in read_jsonl_lines():
+        sentence_docs = flatten_video_to_sentences(video_doc)
+        batch.extend(sentence_docs)
         
-        # Transform category field to object structure
-        document = transform_category(document)
-        
-        # Calculate the size of this document when serialized (after transformation)
-        doc_size = calculate_json_size(document)
-        
-        # Warn if a single document is very large (but still process it)
-        if doc_size > max_batch_size_bytes * 0.8:  # 80% of max batch size
-            print(f"⚠ Warning: Document {doc_id_counter} is very large ({doc_size / (1024*1024):.2f}MB)")
-        
-        # Check if adding this document would exceed the batch size limit
-        if batch and (batch_size_bytes + doc_size) > max_batch_size_bytes:
-            # Send current batch before adding this document
+        if len(batch) >= 5000:
             batch_count += 1
-            batch_size_mb = batch_size_bytes / (1024 * 1024)
             try:
-                task = send_batch_to_meilisearch(batch, client, index_name)
-                print(f"✓ Sent batch {batch_count} ({len(batch)} docs, {batch_size_mb:.2f}MB) - Total processed: {total_processed}")
-                batch = []
-                batch_size_bytes = 0
+                send_batch_to_typesense(batch)
+                total_sentences += len(batch)
+                print(f"   Batch {batch_count}: Indexed {len(batch)} sentences. Total: {total_sentences}")
             except Exception as e:
-                print(f"✗ Failed to send batch {batch_count}: {e}")
-                batch = []
-                batch_size_bytes = 0
-        
-        # Add document to batch
-        batch.append(document)
-        batch_size_bytes += doc_size
-        total_processed += 1
-
-    # Send remaining documents in final batch
+                print(f"   Failed batch {batch_count}: {e}")
+            
+            batch = []
+            
     if batch:
         batch_count += 1
-        batch_size_mb = batch_size_bytes / (1024 * 1024)
-        try:
-            task = send_batch_to_meilisearch(batch, client, index_name)
-            print(f"✓ Sent final batch {batch_count} ({len(batch)} docs, {batch_size_mb:.2f}MB) - Total processed: {total_processed}")
-        except Exception as e:
-            print(f"✗ Failed to send final batch: {e}")
+        send_batch_to_typesense(batch)
+        total_sentences += len(batch)
+        print(f"   Final Batch {batch_count}: Indexed {len(batch)} sentences.")
+        
+    print(f"\nComplete! Indexed {total_sentences} sentences.")
 
-    print(f"\n{'='*60}")
-    print(f"Processing complete!")
-    print(f"  - Total batches sent: {batch_count}")
-    print(f"  - Total documents processed: {total_processed}")
-    print(f"{'='*60}")
-
-
-def configure_index_only():
-    """Configure index settings without processing documents."""
-    client = Client("http://localhost:7700")
-    index_name = "yt_data"
+def main():
+    print("\n--- Typesense Batch Processor Manager ---")
+    print("1. Index Data (Append to existing)")
+    print("2. Reset & Re-index (Delete all data first)")
+    print("3. Delete Collection Only")
+    print("4. View Collection Stats")
+    print("5. Test Search")
+    print("0. Exit")
     
-    print("Configuring index settings only...")
-    setup_index_settings(client, index_name)
-    print("Index configuration complete!")
-
+    choice = input("\nEnter choice (0-5): ").strip()
+    
+    if choice == '1':
+        process_documents_in_batches(reset=False)
+    elif choice == '2':
+        confirm = input("Are you sure you want to DELETE ALL DATA? (y/n): ")
+        if confirm.lower() == 'y':
+            process_documents_in_batches(reset=True)
+    elif choice == '3':
+        confirm = input("Are you sure you want to DELETE the collection? (y/n): ")
+        if confirm.lower() == 'y':
+            delete_collection()
+    elif choice == '4':
+        get_stats()
+    elif choice == '5':
+        q = input("Enter search query: ")
+        test_search(q)
+    elif choice == '0':
+        print("Exiting.")
+        sys.exit(0)
+    else:
+        print("Invalid choice.")
 
 if __name__ == "__main__":
-    # quick_search("hello")
-    process_documents_in_batches()  # Process documents and configure settings
-    # configure_index_only()  # Only configure settings without processing
-    # delete_index()
+    main()
