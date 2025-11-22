@@ -3,20 +3,21 @@ Simple JSONL file reader for MeiliSearch indexing.
 """
 
 import json
-from pathlib import Path
+import os
 from typing import Iterator, Dict, Any
-
 
 def read_jsonl_lines() -> Iterator[Dict[str, Any]]:
     """
-    Read dataset.jsonl from the same directory and yield each line as a dictionary.
-
-    Yields:
-        Dictionary for each JSON line
+    Read the dataset file from the SAME directory as this script.
     """
-    current_dir = Path(__file__).parent
-    # Go up two levels to root, then into dataset folder
-    filepath = current_dir.parent.parent / "dataset" / "SpiderMan_Dataset_Eng.jsonl"
+    # Get the directory where this script is located
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Look for the file in the same directory
+    filepath = os.path.join(current_dir, "Ben10_Dataset_Eng.jsonl")
+
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"Could not find dataset file at: {filepath}")
 
     with open(filepath, 'r', encoding='utf-8') as file:
         for line in file:
