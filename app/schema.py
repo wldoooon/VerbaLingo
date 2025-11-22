@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 class Category(BaseModel):
-    """Category object structure as stored in Meilisearch."""
+    """Category object structure."""
     type: str  # e.g., "Cartoon"
     title: str  # e.g., "SpongeBob"
 
@@ -17,7 +17,6 @@ class SearchHit(BaseModel):
     start_time: Optional[float] = None
     end_time: Optional[float] = None
     category: Optional[Category] = None
-    language: Optional[str] = None
 
 class SearchResponse(BaseModel):
     total: int
