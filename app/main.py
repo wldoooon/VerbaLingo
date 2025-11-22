@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
         app.state.typesense_client = None
 
 app = FastAPI(
-    title="MiniYouGlish API",
+    title="Verbalingo API",
     description="Search API powered by Typesense",
     version="2.0.0",
     lifespan=lifespan

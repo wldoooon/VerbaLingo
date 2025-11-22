@@ -12,7 +12,6 @@ class Word(BaseModel):
     end: float
 
 class SearchHit(BaseModel):
-    """Search result hit - represents a single sentence/document from Meilisearch."""
     video_id: str
     sentence_text: Optional[str] = None
     start_time: Optional[float] = None

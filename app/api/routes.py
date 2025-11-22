@@ -30,7 +30,8 @@ async def search(
             continue
         
         category_title = source.get("category_title", "Unknown")
-        category_obj = Category(type="Video", title=category_title)
+        category_type = source.get("category_type", "Cartoon")
+        category_obj = Category(type=category_type, title=category_title)
         
         sentence_text = formatted.get("sentence_text", source.get("sentence_text", ""))
         start_time = source.get("start", 0.0)

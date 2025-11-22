@@ -22,6 +22,7 @@ def create_collection_schema():
             {'name': 'video_id', 'type': 'string', 'facet': True},
             {'name': 'channel', 'type': 'string', 'facet': True, 'optional': True},
             {'name': 'category_title', 'type': 'string', 'facet': True, 'optional': True},
+            {'name': 'category_type', 'type': 'string', 'facet': True, 'optional': True},
             {'name': 'language', 'type': 'string', 'facet': True, 'optional': True},
             {'name': 'start', 'type': 'float'},
             {'name': 'end', 'type': 'float'},
@@ -44,8 +45,12 @@ def flatten_video_to_sentences(video_doc):
     video_id = video_doc.get('video_id')
     
     cat_title = "Unknown"
+    cat_type = "Cartoon" # Default type set to Cartoon as requested
+    
     if isinstance(video_doc.get('category'), dict):
         cat_title = video_doc['category'].get('title', 'Unknown')
+        # You can uncomment this if your dataset has 'type' in category
+        # cat_type = video_doc['category'].get('type', 'Cartoon')
     elif isinstance(video_doc.get('category'), str):
         cat_title = video_doc['category']
 
@@ -60,6 +65,7 @@ def flatten_video_to_sentences(video_doc):
             'video_title': video_doc.get('title', ''),
             'channel': video_doc.get('channel', ''),
             'category_title': cat_title,
+            'category_type': cat_type,
             'language': video_doc.get('language', 'en'),
             'sentence_text': sent.get('sentence_text', ''),
             'start': sent.get('start', 0.0),
