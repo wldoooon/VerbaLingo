@@ -69,11 +69,11 @@ export default function WatchClientPage({ word }: { word: string }) {
                 <Navigation user={userData} showNavMenu={false} />
                 <SearchParamSyncer word={word} />
 
-                <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-hidden">
+                <main className="flex-1 p-2 sm:p-4 lg:p-6 overflow-hidden">
                     <div className="max-w-[1800px] mx-auto h-full">
-                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full">
+                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 h-full">
                             {/* Left Column: Video & Transcript */}
-                            <div className="xl:col-span-2 flex flex-col gap-6 min-w-0">
+                            <div className="xl:col-span-2 flex flex-col gap-4 min-w-0">
                                 {/* Video Player Section */}
                                 <div className="w-full">
                                     <Suspense fallback={<VideoPlayerSkeleton />}>

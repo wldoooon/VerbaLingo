@@ -111,7 +111,7 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
 
   return (
     <div className={className}>
-      <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] overflow-hidden rounded-2xl bg-black">
+      <div className="relative w-full h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] overflow-hidden rounded-2xl bg-black">
 
         {/* YouTube Player (Level 2: Hot Swap) */}
         {currentVideoId && (
@@ -125,19 +125,22 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
           />
         )}
 
-        {/* Poster Overlay (Level 4: Poster Hold) */}
+        {/* Poster Overlay (Level 4: Poster Hold + Blur Shine) */}
         <div
-          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-500 ease-out pointer-events-none z-20
-                ${isTransitioning ? 'opacity-100' : 'opacity-0'}
+          className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ease-out pointer-events-none z-20 overflow-hidden
+                ${isTransitioning ? 'opacity-100 scale-105 blur-sm' : 'opacity-0 scale-100 blur-0'}
             `}
           style={{ backgroundImage: `url(${posterUrl})` }}
         >
-          {/* Dark overlay for better text contrast/loading feel */}
-          <div className="absolute inset-0 bg-black/20" />
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-black/10" />
 
-          {/* Loading Spinner (Only show if transitioning takes > 200ms) */}
+          {/* Shine Effect */}
+          <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shine_1.5s_ease-in-out_infinite]" />
+
+          {/* Loading Spinner */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-12 w-12 rounded-full border-4 border-white/20 border-t-white animate-spin shadow-lg" />
+            <div className="h-14 w-14 rounded-full border-4 border-white/10 border-t-white/90 animate-spin shadow-2xl backdrop-blur-md" />
           </div>
         </div>
 
