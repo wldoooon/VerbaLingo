@@ -23,12 +23,12 @@ type VideoPlayerCardProps = {
 export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
   const { state, dispatch, playerRef, setPlayerState } = usePlayerContext()
   const { currentVideoIndex, isMuted } = state
-  
+
   // Read playlist from React Query cache
   const { query, category } = useSearchParams()
   const { data } = useSearch(query, category)
   const playlist = data?.hits || []
-  
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Defensive: clamp currentVideoIndex to valid range
@@ -38,16 +38,18 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
 
   const rawStart = getClipStart(currentClip)
   const startSec = Math.max(0, Math.floor(rawStart))
-  const uniqueKey = `${currentVideoId}-${currentVideoIndex}-${rawStart}`
 
-  const [ready, setReady] = useState(false)
+  // Track if we are transitioning between videos
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [posterUrl, setPosterUrl] = useState<string>("")
 
+  // When video changes, show poster immediately
   useEffect(() => {
-    setReady(false)
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
+    if (currentVideoId) {
+      setIsTransitioning(true)
+      setPosterUrl(`https://i.ytimg.com/vi/${currentVideoId}/hqdefault.jpg`)
     }
-  }, [uniqueKey])
+  }, [currentVideoId, rawStart])
 
   const startPolling = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -65,33 +67,25 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
     }
   }
 
-  // Event handler: YouTube player state changed (playing/paused/etc)
+  // Event handler: YouTube player state changed
   const onPlayerStateChange = (event: { data: number }) => {
-    // YouTube player states:
-    // -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (cued)
     const isNowPlaying = event.data === 1
-    
-    // Update context state (triggers re-renders in AudioCard and other consumers)
+
     setPlayerState(prev => ({ ...prev, isPlaying: isNowPlaying }))
-    
-    // Start/stop polling for currentTime
+
     if (isNowPlaying) {
+      // Video has started playing! Fade out the poster.
+      setIsTransitioning(false)
       startPolling()
     } else {
       stopPolling()
     }
   }
 
-  // Event handler: YouTube player is ready
   const onPlayerReady = (event: { target: YouTubePlayer }) => {
-    // Store player instance in context ref (no re-render)
     playerRef.current = event.target
-    
-    // Get duration and update context state
     const duration = event.target.getDuration()
     setPlayerState(prev => ({ ...prev, duration }))
-    
-    setReady(true)
   }
 
   const opts = {
@@ -109,35 +103,19 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
       fs: 0,
       iv_load_policy: 3,
       cc_load_policy: 0,
+      loop: 1,
+      playlist: currentVideoId,
     },
     loading: "eager",
   } as const
 
   return (
     <div className={className}>
-      {/* Video Player */}
-      <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] overflow-hidden rounded-2xl">
-        {!ready && currentVideoId && (
-          <div
-            className="absolute inset-0 bg-cover bg-center blur-sm scale-105"
-            style={{
-              backgroundImage: `url(https://i.ytimg.com/vi/${currentVideoId}/hqdefault.jpg)`,
-            }}
-          >
-            <div className="absolute inset-0 bg-black/30" />
-            {/* Shine effect */}
-            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shine_1.8s_ease-in-out_infinite]" />
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-16 w-16 rounded-full bg-white/10 border border-white/30 flex items-center justify-center animate-pulse">
-                <Play className="h-7 w-7 text-white/80" />
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[650px] xl:h-[700px] overflow-hidden rounded-2xl bg-black">
+
+        {/* YouTube Player (Level 2: Hot Swap) */}
         {currentVideoId && (
           <YouTube
-            key={uniqueKey}
             videoId={currentVideoId}
             opts={opts}
             onReady={onPlayerReady}
@@ -146,6 +124,23 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
             iframeClassName="w-full h-full"
           />
         )}
+
+        {/* Poster Overlay (Level 4: Poster Hold) */}
+        <div
+          className={`absolute inset-0 bg-cover bg-center transition-opacity duration-500 ease-out pointer-events-none z-20
+                ${isTransitioning ? 'opacity-100' : 'opacity-0'}
+            `}
+          style={{ backgroundImage: `url(${posterUrl})` }}
+        >
+          {/* Dark overlay for better text contrast/loading feel */}
+          <div className="absolute inset-0 bg-black/20" />
+
+          {/* Loading Spinner (Only show if transitioning takes > 200ms) */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-full border-4 border-white/20 border-t-white animate-spin shadow-lg" />
+          </div>
+        </div>
+
       </div>
     </div>
   )
