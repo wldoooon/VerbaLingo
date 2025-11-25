@@ -2,6 +2,9 @@ import typesense
 from typing import Optional
 from app.core.config import get_settings
 import json
+import asyncio
+import math
+from functools import partial
 
 settings = get_settings()
 
@@ -67,24 +70,63 @@ class SearchService:
         }
 
     async def get_full_transcript(self, video_id: str) -> dict:
+        # Step 1: Fetch the first page (limit 250)
+        per_page = 250
         search_params = {
             'q': '*',
             'query_by': 'sentence_text',
             'filter_by': f'video_id:={video_id}',
             'sort_by': 'position:asc',
-            'per_page': 250
+            'per_page': per_page,
+            'page': 1
         }
         
         try:
-            result = self.client.collections[self.collection_name].documents.search(search_params)
+            # We run the first request in a thread to avoid blocking the event loop
+            loop = asyncio.get_running_loop()
+            first_result = await loop.run_in_executor(
+                None, 
+                partial(self.client.collections[self.collection_name].documents.search, search_params)
+            )
         except typesense.exceptions.ObjectNotFound:
             return {"hits": {"hits": []}}
+
+        all_hits = first_result.get('hits', [])
+        total_found = first_result.get('found', 0)
         
+        # Step 2: Calculate if we need more pages
+        if total_found > per_page:
+            total_pages = math.ceil(total_found / per_page)
+            tasks = []
+            
+            # Create tasks for remaining pages
+            for page in range(2, total_pages + 1):
+                params = search_params.copy()
+                params['page'] = page
+                
+                # Schedule search in thread pool
+                func = partial(self.client.collections[self.collection_name].documents.search, params)
+                tasks.append(loop.run_in_executor(None, func))
+            
+            # Step 3: Run all requests in parallel
+            if tasks:
+                results = await asyncio.gather(*tasks)
+                for res in results:
+                    all_hits.extend(res.get('hits', []))
+        
+        # Step 4: Parse 'words' JSON for all hits
+        parsed_hits = []
+        for hit in all_hits:
+            doc = hit.get('document', {})
+            if 'words' in doc and isinstance(doc['words'], str):
+                try:
+                    doc['words'] = json.loads(doc['words'])
+                except:
+                    doc['words'] = []
+            parsed_hits.append({"_source": doc})
+
         return {
             "hits": {
-                "hits": [
-                    {"_source": hit.get('document', {})} 
-                    for hit in result.get('hits', [])
-                ]
+                "hits": parsed_hits
             }
         }
