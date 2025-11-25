@@ -55,9 +55,9 @@ type TranscriptBoxProps = {
   searchQuery: string
   currentTime: number
   isTranscriptLoading: boolean
-  scrollContainerRef: RefObject<HTMLDivElement>
-  activeSentenceRef: RefObject<HTMLDivElement>
-  targetSentenceRef: RefObject<HTMLDivElement>
+  scrollContainerRef: RefObject<HTMLDivElement | null>
+  activeSentenceRef: RefObject<HTMLDivElement | null>
+  targetSentenceRef: RefObject<HTMLDivElement | null>
   targetSentence: Sentence | undefined
   lastActiveSentenceIdxRef: RefObject<number>
   onSearchWord?: (word: string) => void

@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useQuery } from "@tanstack/react-query";
 import { Clips, TranscriptResponse } from "@/lib/types";
@@ -31,7 +31,9 @@ export const useSearch = (query: string, category: string | null) => {
   return useQuery<{ total: number; hits: Clips[] }, Error>({
     queryKey: ["search", query, category],
     queryFn: () => fetchSearchResults(query, category),
-    enabled: false, 
+    enabled: !!query && query.trim().length > 0, // Auto-fetch if query exists
+    staleTime: 1000 * 60 * 5, // Cache results for 5 minutes
+    refetchOnWindowFocus: false, // Don't refetch just because I clicked the window
   });
 };
 
@@ -48,7 +50,7 @@ export const useTranscript = (videoId: string) => {
   return useQuery<TranscriptResponse, Error>({
     queryKey: ["transcript", videoId],
     queryFn: () => fetchTranscript(videoId),
-    enabled: !!videoId, 
+    enabled: !!videoId,
   });
 };
 
