@@ -254,6 +254,6 @@ export const TranscriptBox = ({
           })
         ) : null}
       </div>
-    </div>
+    </div >
   )
 }

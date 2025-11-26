@@ -2,8 +2,7 @@
 
 import dynamic from "next/dynamic"
 const YouTube = dynamic(() => import("react-youtube"), { ssr: false })
-import { useEffect, useState, useRef } from "react"
-import { Play } from "lucide-react"
+import { useRef } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useSearch } from "@/lib/useApi"
@@ -39,18 +38,6 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
   const rawStart = getClipStart(currentClip)
   const startSec = Math.max(0, Math.floor(rawStart))
 
-  // Track if we are transitioning between videos
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const [posterUrl, setPosterUrl] = useState<string>("")
-
-  // When video changes, show poster immediately
-  useEffect(() => {
-    if (currentVideoId) {
-      setIsTransitioning(true)
-      setPosterUrl(`https://i.ytimg.com/vi/${currentVideoId}/hqdefault.jpg`)
-    }
-  }, [currentVideoId, rawStart])
-
   const startPolling = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     intervalRef.current = setInterval(() => {
@@ -74,8 +61,6 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
     setPlayerState(prev => ({ ...prev, isPlaying: isNowPlaying }))
 
     if (isNowPlaying) {
-      // Video has started playing! Fade out the poster.
-      setIsTransitioning(false)
       startPolling()
     } else {
       stopPolling()
@@ -112,8 +97,7 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
   return (
     <div className={className}>
       <div className="relative w-full h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] overflow-hidden rounded-2xl bg-black">
-
-        {/* YouTube Player (Level 2: Hot Swap) */}
+        {/* YouTube Player */}
         {currentVideoId && (
           <YouTube
             videoId={currentVideoId}
@@ -124,26 +108,6 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
             iframeClassName="w-full h-full"
           />
         )}
-
-        {/* Poster Overlay (Level 4: Poster Hold + Blur Shine) */}
-        <div
-          className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ease-out pointer-events-none z-20 overflow-hidden
-                ${isTransitioning ? 'opacity-100 scale-105 blur-sm' : 'opacity-0 scale-100 blur-0'}
-            `}
-          style={{ backgroundImage: `url(${posterUrl})` }}
-        >
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-black/10" />
-
-          {/* Shine Effect */}
-          <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shine_1.5s_ease-in-out_infinite]" />
-
-          {/* Loading Spinner */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-14 w-14 rounded-full border-4 border-white/10 border-t-white/90 animate-spin shadow-2xl backdrop-blur-md" />
-          </div>
-        </div>
-
       </div>
     </div>
   )
