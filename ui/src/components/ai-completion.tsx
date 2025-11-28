@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "@/context/SearchParamsContext";
 import { Button } from "@/components/ui/button";
 import { Response } from "@/components/ui/shadcn-io/ai/response";
-import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, Play, ChevronLeft, ChevronRight } from "lucide-react";
+import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
@@ -194,124 +194,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                 </div>
 
                 <header className="w-full flex-shrink-0">
-                    <div className="relative h-28 w-full flex items-center justify-center mb-6">
-                        {/* Animated rings around the orb */}
-                        <div className="absolute w-32 h-32 rounded-full border-2 border-red-400/20 animate-ping" style={{ animationDuration: '3s' }} />
-                        <div className="absolute w-24 h-24 rounded-full border-2 border-red-400/30 animate-ping" style={{ animationDuration: '2s' }} />
 
-                        {/* Central Orb with enhanced glow */}
-                        <div className="absolute w-20 h-20 bg-red-400/50 rounded-full blur-xl animate-pulse" />
-                        <div className="absolute w-16 h-16 bg-red-400/30 rounded-full blur-lg animate-pulse" style={{ animationDuration: '2s' }} />
-                        <div className="absolute w-14 h-14 bg-gradient-to-br from-red-400 via-red-500 to-red-600 rounded-full shadow-lg animate-pulse shadow-red-500/50">
-                            {/* Sparkle effect inside orb */}
-                            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-white/40 to-transparent" />
-                        </div>
-
-                        {/* Floating Cards with enhanced animations - overlapping closely with orb */}
-                        <motion.div
-                            className="absolute top-1/2 -translate-y-1/2 left-8 sm:left-25 z-10"
-                            animate={{
-                                y: [-4, 4, -4],
-                                rotate: [-2, 2, -2]
-                            }}
-                            transition={{
-                                duration: 4,
-                                repeat: Infinity,
-                                ease: "easeInOut"
-                            }}
-                        >
-                            <div className="bg-card/90 backdrop-blur-sm rounded-lg shadow-lg p-2 flex items-center space-x-2 w-40 border border-red-200/50 dark:border-red-900/50 hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                <motion.div
-                                    className="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-950/50 dark:to-red-900/50 p-1 rounded-md"
-                                    animate={{
-                                        scale: [1, 1.1, 1],
-                                        rotate: [0, 5, 0]
-                                    }}
-                                    transition={{
-                                        duration: 2,
-                                        repeat: Infinity,
-                                        ease: "easeInOut"
-                                    }}
-                                >
-                                    <Play className="h-4 w-4 text-red-600 dark:text-red-400" />
-                                </motion.div>
-                                <div className="space-y-1.5 flex-1">
-                                    <motion.div
-                                        className="h-2 w-full bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
-                                        animate={{ opacity: [0.5, 1, 0.5] }}
-                                        transition={{ duration: 2, repeat: Infinity }}
-                                    />
-                                    <motion.div
-                                        className="h-2 w-4/5 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
-                                        animate={{ opacity: [0.5, 1, 0.5] }}
-                                        transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
-                                    />
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        <motion.div
-                            className="absolute top-1/2 -translate-y-1/2 right-8 sm:right-20 z-10"
-                            animate={{
-                                y: [4, -4, 4],
-                                rotate: [2, -2, 2]
-                            }}
-                            transition={{
-                                duration: 5,
-                                repeat: Infinity,
-                                ease: "easeInOut"
-                            }}
-                        >
-                            <div className="bg-card/90 backdrop-blur-sm rounded-lg shadow-lg p-2 flex items-center space-x-2 w-40 border border-red-200/50 dark:border-red-900/50 hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                <motion.div
-                                    className="bg-gradient-to-br from-red-100 to-red-200 dark:from-red-950/50 dark:to-red-900/50 p-1 rounded-md"
-                                    animate={{
-                                        scale: [1, 1.1, 1],
-                                        rotate: [0, -5, 0]
-                                    }}
-                                    transition={{
-                                        duration: 2.5,
-                                        repeat: Infinity,
-                                        ease: "easeInOut"
-                                    }}
-                                >
-                                    <Play className="h-4 w-4 text-red-600 dark:text-red-400" />
-                                </motion.div>
-                                <div className="space-y-1.5 flex-1">
-                                    <motion.div
-                                        className="h-2 w-full bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
-                                        animate={{ opacity: [0.5, 1, 0.5] }}
-                                        transition={{ duration: 2.2, repeat: Infinity }}
-                                    />
-                                    <motion.div
-                                        className="h-2 w-4/5 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 rounded-sm"
-                                        animate={{ opacity: [0.5, 1, 0.5] }}
-                                        transition={{ duration: 2.2, repeat: Infinity, delay: 0.4 }}
-                                    />
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        {/* Floating particles around orb */}
-                        {[...Array(6)].map((_, i) => (
-                            <motion.div
-                                key={i}
-                                className="absolute w-1.5 h-1.5 bg-red-400 rounded-full"
-                                animate={{
-                                    x: [0, Math.cos(i * 60 * Math.PI / 180) * 40, 0],
-                                    y: [0, Math.sin(i * 60 * Math.PI / 180) * 40, 0],
-                                    opacity: [0, 1, 0],
-                                    scale: [0, 1, 0]
-                                }}
-                                transition={{
-                                    duration: 3,
-                                    repeat: Infinity,
-                                    delay: i * 0.5,
-                                    ease: "easeInOut"
-                                }}
-                            />
-                        ))}
-                    </div>
 
                     <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center">
                         {query ? `Learning about "${query}"` : "What do you want to learn?"}
