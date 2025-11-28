@@ -17,6 +17,7 @@ class SearchHit(BaseModel):
     start_time: Optional[float] = None
     end_time: Optional[float] = None
     category: Optional[Category] = None
+    position: Optional[int] = None
 
 class SearchResponse(BaseModel):
     total: int
@@ -27,6 +28,7 @@ class TranscriptSentence(BaseModel):
     start_time: float
     end_time: float
     words: List[Word] = []
+    position: Optional[int] = None
 
 class TranscriptResponse(BaseModel):
     video_id: str

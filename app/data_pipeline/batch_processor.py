@@ -13,7 +13,7 @@ client = typesense.Client({
     'connection_timeout_seconds': 10
 })
 
-COLLECTION_NAME = "yt_sentences"
+COLLECTION_NAME = "English_Dataset"
 
 def create_collection_schema(reset=False):
     if reset:
@@ -82,7 +82,7 @@ def flatten_video_to_sentences(video_doc):
     video_id = video_doc.get('video_id')
     
     cat_title = "Unknown"
-    cat_type = "Cartoon" 
+    cat_type = "Talks" 
     
     if isinstance(video_doc.get('category'), dict):
         cat_title = video_doc['category'].get('title', 'Unknown')

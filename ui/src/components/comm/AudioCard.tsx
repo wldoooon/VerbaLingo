@@ -100,7 +100,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const validIndex = Math.max(0, Math.min(currentVideoIndex, playlist.length - 1))
   const currentClip = playlist[validIndex]
 
-  // Get transcript data for the current video
+  // Fetch transcript for current video
   const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "")
 
   // Sync playback rate with context controls
@@ -315,6 +315,11 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
             </Button>
             <span className="text-xs text-muted-foreground">Next</span>
           </div>
+        </div>
+
+        {/* Clip Count Indicator - Simple & Clean */}
+        <div className="absolute top-4 right-4 text-xs font-medium text-muted-foreground bg-muted/30 px-2 py-1 rounded-md border border-border/20">
+          Clip {currentVideoIndex + 1} <span className="opacity-50">/</span> {(data as any)?.total || playlist.length}
         </div>
 
         {/* Speed controls - Right side */}

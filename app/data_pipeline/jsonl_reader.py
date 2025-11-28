@@ -14,7 +14,7 @@ def read_jsonl_lines() -> Iterator[Dict[str, Any]]:
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
     # Look for the file in the same directory
-    filepath = os.path.join(current_dir, "Ben10_Dataset_Eng.jsonl")
+    filepath = os.path.join(current_dir, "LexFridman_Dataset_Eng.jsonl")
 
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"Could not find dataset file at: {filepath}")
