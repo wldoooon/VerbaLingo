@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     TYPESENSE_API_KEY: str = "xyz123"
     
     INDEX_NAME: str = "yt_data"
-    COLLECTION_NAME: str = "yt_sentences"
+    COLLECTION_NAME: str = "English_Dataset"
     
     LIBRETRANSLATE_URL: str = "http://127.0.0.1:5000"
 
