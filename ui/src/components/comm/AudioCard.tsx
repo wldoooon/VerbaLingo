@@ -101,7 +101,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const currentClip = playlist[validIndex]
 
   // Fetch transcript for current video
-  const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "")
+  const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "", currentClip?.position)
 
   // Sync playback rate with context controls
   useEffect(() => {
