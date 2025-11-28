@@ -47,7 +47,8 @@ async def search(
             sentence_text=sentence_text,
             start_time=start_time,
             end_time=end_time,
-            words=words
+            words=words,
+            position=source.get("position")
         )
         
         search_hit = SearchHit(
@@ -58,6 +59,7 @@ async def search(
             sentence_text=sentence_text,
             start_time=start_time,
             end_time=end_time,
+            position=source.get("position"),
             transcript=[transcript_sentence] 
         )
         hits.append(search_hit)
@@ -69,9 +71,10 @@ async def search(
 @router.get("/videos/{video_id}/transcript", response_model=TranscriptResponse)
 async def get_transcript(
     video_id: str,
+    center_position: Optional[int] = Query(None),
     service: SearchService = Depends(get_search_service)
 ):
-    raw_results = await service.get_full_transcript(video_id=video_id)
+    raw_results = await service.get_transcript(video_id=video_id, center_position=center_position)
 
     sentences: List[TranscriptSentence] = []
     raw_hits = raw_results.get("hits", {}).get("hits", [])
@@ -96,7 +99,8 @@ async def get_transcript(
             sentence_text=source.get("sentence_text", ""),
             start_time=source.get("start", 0.0),
             end_time=source.get("end", 0.0),
-            words=words
+            words=words,
+            position=source.get("position")
         )
         sentences.append(sentence)
 
