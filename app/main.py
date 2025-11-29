@@ -22,7 +22,8 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         app.state.typesense_client = None
         print(f"Failed to connect to Typesense: {str(e)}")
-        raise
+        # We don't raise here to allow the app to start even if search is down temporarily
+        # raise
 
     yield
 
