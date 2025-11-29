@@ -86,6 +86,9 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const activeSentenceRef = useRef<HTMLDivElement>(null)
 
+  // Start playback slightly before the target sentence for better context
+  const PLAYBACK_START_OFFSET = 0.7
+
   // Get player state and controls from context
   const { state, dispatch, playerState, controls } = usePlayerContext()
   const { currentVideoIndex, currentTime } = state
@@ -137,7 +140,8 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   // Repeat the target sentence (sentence with search word)
   const repeatTargetSentence = () => {
     if (targetSentence) {
-      controls.seekTo(targetSentence.start_time)
+      const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
+      controls.seekTo(startTime)
       if (!isPlaying) {
         controls.play()
       }
@@ -191,7 +195,8 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
       // Start playback after scroll completes (500ms delay)
       setTimeout(() => {
         if (!isPlaying && targetSentence) {
-          controls.seekTo(targetSentence.start_time)
+          const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
+          controls.seekTo(startTime)
           controls.play()
         }
       }, 500)

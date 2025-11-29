@@ -229,18 +229,35 @@ export const TranscriptBox = ({
                     }
 
                     const text = sentence.sentence_text || ""
+
+                    // If Typesense returned <mark> tags, render as HTML
+                    if (text.includes("<mark>")) {
+                      return (
+                        <span
+                          className="relative z-10"
+                          dangerouslySetInnerHTML={{
+                            __html: text.replace(
+                              /<mark>/g,
+                              '<mark class="bg-red-500 text-white px-1 rounded font-semibold">'
+                            )
+                          }}
+                        />
+                      )
+                    }
+
+                    // Fallback: client-side highlighting if no mark tags
                     if (!query) return <span className="relative z-10">{text}</span>
                     const regex = new RegExp(`(${query})`, "gi")
                     const parts = text.split(regex)
                     return parts.map((part: string, partIdx: number) => {
-                      const isMatch = part.toLowerCase() === query
+                      const isMatch = part.toLowerCase() === query.toLowerCase()
                       return (
                         <span
                           key={partIdx}
                           className={cn(
                             "relative z-10",
                             isMatch &&
-                            "border-b-2 border-b-red-500 font-semibold pb-0.5",
+                            "bg-red-500 text-white px-1 rounded font-semibold",
                           )}
                         >
                           {part}
