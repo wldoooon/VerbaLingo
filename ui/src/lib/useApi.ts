@@ -37,8 +37,12 @@ export const useSearch = (query: string, category: string | null) => {
   });
 };
 
-const fetchTranscript = async (videoId: string) => {
-  const url = `/api/v1/videos/${videoId}/transcript`;
+const fetchTranscript = async (videoId: string, centerPosition?: number) => {
+  const params = new URLSearchParams();
+  if (centerPosition !== undefined) {
+    params.append("center_position", centerPosition.toString());
+  }
+  const url = `/api/v1/videos/${videoId}/transcript?${params.toString()}`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error("Network response was not ok");
@@ -46,10 +50,10 @@ const fetchTranscript = async (videoId: string) => {
   return response.json();
 };
 
-export const useTranscript = (videoId: string) => {
+export const useTranscript = (videoId: string, centerPosition?: number) => {
   return useQuery<TranscriptResponse, Error>({
-    queryKey: ["transcript", videoId],
-    queryFn: () => fetchTranscript(videoId),
+    queryKey: ["transcript", videoId, centerPosition],
+    queryFn: () => fetchTranscript(videoId, centerPosition),
     enabled: !!videoId,
   });
 };
