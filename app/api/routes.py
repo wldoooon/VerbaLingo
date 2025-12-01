@@ -35,7 +35,7 @@ async def search(
         
         sentence_text = formatted.get("sentence_text", source.get("sentence_text", ""))
         start_time = source.get("start", 0.0)
-        end_time = source.get("end", 0.0)
+        end_time = source.get("end_time", 0.0)
         
         words_data = source.get("words", [])
         words = [
@@ -98,7 +98,7 @@ async def get_transcript(
         sentence = TranscriptSentence(
             sentence_text=source.get("sentence_text", ""),
             start_time=source.get("start", 0.0),
-            end_time=source.get("end", 0.0),
+            end_time=source.get("end_time", 0.0),
             words=words,
             position=source.get("position")
         )
