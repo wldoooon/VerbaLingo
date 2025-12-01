@@ -1,21 +1,18 @@
 """
-Simple JSONL file reader for MeiliSearch indexing.
+Simple JSONL file reader for Manticore Search indexing.
 """
 
 import json
 import os
 from typing import Iterator, Dict, Any
 
-def read_jsonl_lines() -> Iterator[Dict[str, Any]]:
+def read_jsonl_lines(filepath: str) -> Iterator[Dict[str, Any]]:
     """
-    Read the dataset file from the SAME directory as this script.
-    """
-    # Get the directory where this script is located
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+    Read a JSONL file and yield each line as a dictionary.
     
-    # Look for the file in the same directory
-    filepath = os.path.join(current_dir, "LexFridman_Dataset_Eng.jsonl")
-
+    Args:
+        filepath: Path to the JSONL file to read
+    """
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"Could not find dataset file at: {filepath}")
 
