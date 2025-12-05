@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
     const prompt = originalPrompt
 
-    const backendUrl = 'http://127.0.0.1:8001/api/v1/generate';
+    const backendUrl = 'http://127.0.0.1:5002/api/v1/generate';
 
     const backendResponse = await fetch(backendUrl, {
       method: 'POST',
