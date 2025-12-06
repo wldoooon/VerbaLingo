@@ -3,23 +3,23 @@
 import React, { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 
-const cartoonsList = [
-    { title: "SpongeBob", img: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&q=80" },
-    { title: "Dexter's Lab", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=400&q=80" },
-    { title: "The Simpsons", img: "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?w=400&q=80" },
-    { title: "Adventure Time", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&q=80" },
-    { title: "Rick & Morty", img: "https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400&q=80" },
-    { title: "Avatar: TLA", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&q=80" },
-    { title: "Gravity Falls", img: "https://images.unsplash.com/photo-1534293652835-535c6323f52b?w=400&q=80" },
-    { title: "Phineas & Ferb", img: "https://images.unsplash.com/photo-1560167016-022b78a0258e?w=400&q=80" },
-    { title: "Regular Show", img: "https://images.unsplash.com/photo-1505628346881-b72b27e84530?w=400&q=80" },
-    { title: "Scooby-Doo", img: "https://images.unsplash.com/photo-1626544827763-d516dce335e2?w=400&q=80" },
-    { title: "Tom & Jerry", img: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=400&q=80" },
-    { title: "Looney Tunes", img: "https://images.unsplash.com/photo-1618331835717-801e976710b2?w=400&q=80" },
+const moviesList = [
+    { title: "The Shawshank Redemption", img: "https://image.tmdb.org/t/p/w500/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg" },
+    { title: "The Godfather", img: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg" },
+    { title: "The Dark Knight", img: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg" },
+    { title: "Pulp Fiction", img: "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg" },
+    { title: "Forrest Gump", img: "https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg" },
+    { title: "Inception", img: "https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg" },
+    { title: "Fight Club", img: "https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg" },
+    { title: "The Matrix", img: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg" },
+    { title: "Interstellar", img: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" },
+    { title: "Parasite", img: "https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" },
+    { title: "The Lord of the Rings", img: "https://image.tmdb.org/t/p/w500/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg" },
+    { title: "Gladiator", img: "https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg" },
 ];
 
 // Duplicate items to fill the large circumference and reduce gaps
-const cartoons = [...cartoonsList, ...cartoonsList, ...cartoonsList];
+const movies = [...moviesList, ...moviesList, ...moviesList];
 
 export function CurvedCarousel() {
     const [isHovered, setIsHovered] = useState(false);
@@ -65,11 +65,11 @@ export function CurvedCarousel() {
                     style={{
                         transformStyle: "preserve-3d",
                         width: ITEM_WIDTH,
-                        height: 220
+                        height: 420
                     }}
                 >
-                    {cartoons.map((item, index) => {
-                        const angle = (360 / cartoons.length) * index;
+                    {movies.map((item, index) => {
+                        const angle = (360 / movies.length) * index;
 
                         return (
                             <div
@@ -77,13 +77,13 @@ export function CurvedCarousel() {
                                 className="absolute flex flex-col items-center justify-center p-4 cursor-pointer group"
                                 style={{
                                     width: ITEM_WIDTH,
-                                    height: 220,
+                                    height: 420,
                                     transform: `rotateY(${angle}deg) translateZ(${RADIUS}px)`,
                                     backfaceVisibility: "hidden",
                                 }}
                             >
                                 {/* Image Container */}
-                                <div className="w-full h-32 rounded-xl overflow-hidden mb-4 shadow-lg border border-white/10 bg-muted">
+                                <div className="w-full h-98 rounded-xl overflow-hidden mb-4 shadow-lg border border-white/10 bg-muted">
                                     <img
                                         src={item.img}
                                         alt={item.title}
@@ -96,7 +96,7 @@ export function CurvedCarousel() {
                                         {item.title}
                                     </h3>
                                     <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider font-medium">
-                                        Series
+                                        Movie
                                     </p>
                                 </div>
                             </div>

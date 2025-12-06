@@ -102,6 +102,9 @@ export const TranscriptBox = ({
 
   return (
     <div className="relative mt-1">
+      {/* Top fade gradient */}
+      <div className="pointer-events-none absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent z-10 rounded-t-2xl" />
+      
       <div
         ref={scrollContainerRef}
         className="max-h-[200px] overflow-y-auto rounded-2xl px-3 py-3 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
@@ -307,6 +310,9 @@ export const TranscriptBox = ({
           })()
         ) : null}
       </div>
+      
+      {/* Bottom fade gradient */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent z-10 rounded-b-2xl" />
     </div >
   )
 }
