@@ -104,7 +104,7 @@ export const TranscriptBox = ({
     <div className="relative mt-1">
       <div
         ref={scrollContainerRef}
-        className="max-h-[200px] overflow-y-auto rounded-2xl bg-card px-3 py-3 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="max-h-[200px] overflow-y-auto rounded-2xl px-3 py-3 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
         {isTranscriptLoading ? (
           <div className="w-full py-8 flex items-center justify-center">
