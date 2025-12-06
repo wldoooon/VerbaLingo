@@ -67,8 +67,8 @@ function renderWordsWithHighlighting(
         key={`${word.start}-${word.text}`}
         className={cn(
           "mr-2 transition-colors duration-20",
-          isCurrentWord && "border-5 border-red-500 px-1 rounded font-semibold",
-          isSearchMatch && !isCurrentWord && "bg-red-500 text-white px-1 rounded"
+          isCurrentWord && "border-5 border-primary px-1 rounded font-semibold",
+          isSearchMatch && !isCurrentWord && "bg-primary text-primary-foreground px-1 rounded"
         )}
       >
         {word.text}
@@ -87,7 +87,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const activeSentenceRef = useRef<HTMLDivElement>(null)
 
   // Start playback slightly before the target sentence for better context
-  const PLAYBACK_START_OFFSET = 0.7
+  const PLAYBACK_START_OFFSET = 0.2
 
   // Get player state and controls from context
   const { state, dispatch, playerState, controls } = usePlayerContext()
@@ -271,7 +271,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           <div className="flex flex-col items-center gap-1">
             <Button
               size="icon"
-              className="h-16 w-16 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-xl"
+              className="h-16 w-16 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl"
               onClick={togglePlayPause}
               aria-label={isPlaying ? "Pause" : "Play"}
             >
@@ -340,7 +340,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Playback Speed</span>
-                  <span className="text-sm font-semibold text-red-500">{rate}x</span>
+                  <span className="text-sm font-semibold text-primary">{rate}x</span>
                 </div>
                 <Slider
                   value={[speeds.indexOf(rate)]}
@@ -358,7 +358,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
             </PopoverContent>
           </Popover>
         </div>
-      </div>
+      </div >
 
       <TranscriptBox
         sentences={sentencesInClip}
@@ -391,7 +391,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           onExplainWordPrompt?.(prompt)
         }}
       />
-    </div>
+    </div >
   )
 }
 
