@@ -1,23 +1,23 @@
 "use client"
 
-import { RefObject, useState } from "react"
+import { RefObject, useState, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Search, Sparkles, Bookmark } from "lucide-react"
 
 type Word = { text: string; start: number; end: number }
 
-// Helper to handle cases where backend returns full sentences as single "words"
 function normalizeTranscriptWords(words: Word[]): Word[] {
   if (!words || words.length === 0) return []
 
   const normalized: Word[] = []
 
+  // First pass: normalize split words
+  const tempWords: Word[] = []
   for (const w of words) {
     const text = (w.text || "").trim()
     if (!text) continue
 
-    // If word has spaces, it's likely a sentence/phrase that needs splitting
     if (text.includes(" ")) {
       const parts = text.split(/\s+/)
       const totalLength = parts.reduce((acc, p) => acc + p.length, 0)
@@ -25,11 +25,10 @@ function normalizeTranscriptWords(words: Word[]): Word[] {
       let currentTime = w.start
 
       parts.forEach((part) => {
-        // Distribute duration based on character length (linear interpolation)
         const weight = totalLength > 0 ? part.length / totalLength : 1 / parts.length
         const partDuration = duration * weight
 
-        normalized.push({
+        tempWords.push({
           text: part,
           start: currentTime,
           end: currentTime + partDuration,
@@ -37,9 +36,32 @@ function normalizeTranscriptWords(words: Word[]): Word[] {
         currentTime += partDuration
       })
     } else {
-      normalized.push(w)
+      tempWords.push(w)
     }
   }
+
+  // Second pass: cap long durations to average
+  if (tempWords.length > 0) {
+    const totalDuration = tempWords.reduce((acc, w) => acc + (w.end - w.start), 0)
+    const avgDuration = totalDuration / tempWords.length
+
+    // Cap at average duration or 0.7s, whichever is smaller
+    // This ensures highlights don't linger on long words
+    const capThreshold = Math.min(avgDuration, 0.7)
+
+    for (const w of tempWords) {
+      const duration = w.end - w.start
+      if (duration > capThreshold) {
+        normalized.push({
+          ...w,
+          end: w.start + capThreshold
+        })
+      } else {
+        normalized.push(w)
+      }
+    }
+  }
+
   return normalized
 }
 
@@ -63,7 +85,6 @@ type TranscriptBoxProps = {
   onSearchWord?: (word: string) => void
   onExplainWordInContext?: (payload: { word: string; sentence: string }) => void
 }
-
 export const TranscriptBox = ({
   sentences,
   searchQuery,
@@ -87,188 +108,203 @@ export const TranscriptBox = ({
       >
         {isTranscriptLoading ? (
           <div className="w-full py-8 flex items-center justify-center">
-            <div className="h-8 w-8 rounded-full border-2 border-muted-foreground/40 border-t-red-500 animate-spin" />
+            <div className="h-8 w-8 rounded-full border-2 border-muted-foreground/40 border-t-primary animate-spin" />
           </div>
         ) : sentences.length > 0 ? (
-          sentences.map((sentence: any, idx: number) => {
-            const TIMING_LEAD = 0.08
-            const adjustedTime = currentTime + TIMING_LEAD
-
-            const isActive =
-              adjustedTime >= sentence.start_time &&
-              adjustedTime < sentence.end_time
-            const isTargetSentence =
-              targetSentence && sentence.start_time === targetSentence.start_time
-
-            const activeSentenceIdx = sentences.findIndex((s: any) => {
-              return (
-                adjustedTime >= s.start_time &&
-                adjustedTime < s.end_time
-              )
-            })
-
-            if (activeSentenceIdx !== -1 && lastActiveSentenceIdxRef.current !== null) {
-              lastActiveSentenceIdxRef.current = activeSentenceIdx
+          (() => {
+            // Group sentences into chunks of 3
+            const sentenceGroups = []
+            for (let i = 0; i < sentences.length; i += 3) {
+              sentenceGroups.push(sentences.slice(i, i + 3))
             }
 
-            const centerIdx = lastActiveSentenceIdxRef.current ?? 0
-            const distance = Math.abs(idx - centerIdx)
-            if (distance > 1) return null
+            return sentenceGroups.map((group, groupIdx) => {
+              const groupStart = group[0].start_time
+              const groupEnd = group[group.length - 1].end_time
 
-            return (
-              <div
-                key={`${sentence.start_time}-${idx}`}
-                ref={
-                  isActive
-                    ? activeSentenceRef
-                    : isTargetSentence
-                      ? targetSentenceRef
-                      : null
-                }
-                className={cn(
-                  "mb-3 rounded-2xl border transition-all duration-300 ease-in-out bg-card/80 flex items-center justify-center text-center",
-                  idx === centerIdx
-                    ? "p-4 shadow-lg shadow-red-500/20 border-red-500/80 scale-[1.01]"
-                    : "p-3 opacity-70 hover:opacity-100",
-                  idx === centerIdx - 1 &&
-                  "origin-bottom scale-[0.97] translate-y-1",
-                  idx === centerIdx + 1 &&
-                  "origin-top scale-[0.97] -translate-y-1",
-                )}
-              >
-                <div className="relative text-lg leading-relaxed inline-block">
-                  {(() => {
-                    const query = searchQuery.toLowerCase().trim()
-                    const rawWords = (sentence.words as Word[] | undefined) || []
-                    const words = normalizeTranscriptWords(rawWords)
+              const TIMING_LEAD = 0.08
+              const adjustedTime = currentTime + TIMING_LEAD
 
-                    if (words.length > 0) {
-                      const wordNodes = words.map((w, wi) => {
-                        const wordText = (w.text || "").trim()
-                        const isCurrentWord =
-                          adjustedTime >= w.start &&
-                          adjustedTime < w.end
-                        const isSearchMatch =
-                          !!query && wordText.toLowerCase().includes(query)
+              const isActive =
+                adjustedTime >= groupStart &&
+                adjustedTime < groupEnd
 
-                        const key = `${sentence.start_time}-${w.start}-${wi}`
-                        const isOpen = openWordKey === key
+              const isTargetGroup =
+                targetSentence && group.some(s => s.start_time === targetSentence.start_time)
 
-                        return (
-                          <Popover
-                            key={key}
-                            open={isOpen}
-                            onOpenChange={(next) => {
-                              setOpenWordKey(next ? key : null)
-                            }}
-                          >
-                            <div
-                              onMouseEnter={() => setOpenWordKey(key)}
-                              onMouseLeave={() => setOpenWordKey((current) => (current === key ? null : current))}
-                              className="inline-flex"
-                            >
-                              <PopoverTrigger asChild>
-                                <button
-                                  type="button"
-                                  className={cn(
-                                    "mr-2 pb-0.5 border-b-2 border-transparent transition-all duration-300 ease-in-out text-left inline-flex items-end",
-                                    isSearchMatch && !isCurrentWord &&
-                                    "border-b-red-400",
-                                    isCurrentWord &&
-                                    "border-b-red-500 font-semibold",
-                                    "hover:border-b-muted-foreground/70 hover:text-foreground",
-                                  )}
+              const activeGroupIdx = sentenceGroups.findIndex((g) => {
+                const s = g[0].start_time
+                const e = g[g.length - 1].end_time
+                return adjustedTime >= s && adjustedTime < e
+              })
+
+              if (activeGroupIdx !== -1 && lastActiveSentenceIdxRef.current !== null) {
+                lastActiveSentenceIdxRef.current = activeGroupIdx
+              }
+
+              const centerIdx = lastActiveSentenceIdxRef.current ?? 0
+              const distance = Math.abs(groupIdx - centerIdx)
+              if (distance > 1) return null
+
+              return (
+                <div
+                  key={`${groupStart}-${groupIdx}`}
+                  ref={
+                    isActive
+                      ? activeSentenceRef
+                      : isTargetGroup
+                        ? targetSentenceRef
+                        : null
+                  }
+                  className={cn(
+                    "mb-3 rounded-2xl border transition-all duration-300 ease-in-out bg-card/80 flex items-center justify-center text-center",
+                    groupIdx === centerIdx
+                      ? "p-5 shadow-lg shadow-primary/20 border-primary/80 scale-[1.01]"
+                      : "p-4 opacity-70 hover:opacity-100",
+                    groupIdx === centerIdx - 1 &&
+                    "origin-bottom scale-[0.97] translate-y-1",
+                    groupIdx === centerIdx + 1 &&
+                    "origin-top scale-[0.97] -translate-y-1",
+                  )}
+                >
+                  <div className="relative text-xl leading-relaxed inline-block">
+                    {group.map((sentence, sIdx) => (
+                      <span key={`${sentence.start_time}-${sIdx}`}>
+                        {(() => {
+                          const query = searchQuery.toLowerCase().trim()
+                          const rawWords = (sentence.words as Word[] | undefined) || []
+                          const words = normalizeTranscriptWords(rawWords)
+
+                          if (words.length > 0) {
+                            const wordNodes = words.map((w, wi) => {
+                              const wordText = (w.text || "").trim()
+                              const isCurrentWord =
+                                adjustedTime >= w.start &&
+                                adjustedTime < w.end
+                              const isSearchMatch =
+                                !!query && wordText.toLowerCase().includes(query)
+
+                              const key = `${sentence.start_time}-${w.start}-${wi}`
+                              const isOpen = openWordKey === key
+
+                              return (
+                                <Popover
+                                  key={key}
+                                  open={isOpen}
+                                  onOpenChange={(next) => {
+                                    setOpenWordKey(next ? key : null)
+                                  }}
                                 >
-                                  {wordText || "\u00A0"}
-                                </button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-56 p-3 rounded-[1.3rem] border border-border/50 bg-popover/80 backdrop-blur-xl shadow-xl"
-                                align="start"
-                              >
-                                <div className="space-y-1 text-sm">
-                                  <div className="text-xs uppercase tracking-wide text-muted-foreground px-1">
-                                    {wordText}
+                                  <div
+                                    onMouseEnter={() => setOpenWordKey(key)}
+                                    onMouseLeave={() => setOpenWordKey((current) => (current === key ? null : current))}
+                                    className="inline-flex"
+                                  >
+                                    <PopoverTrigger asChild>
+                                      <button
+                                        type="button"
+                                        className={cn(
+                                          "mr-2 pb-0.5 border-b-2 border-transparent transition-all duration-300 ease-in-out text-left inline-flex items-end",
+                                          isSearchMatch && !isCurrentWord &&
+                                          "bg-primary text-primary-foreground px-1 rounded",
+                                          isCurrentWord &&
+                                          "border-b-primary font-semibold",
+                                          "hover:border-b-muted-foreground/70 hover:text-foreground",
+                                        )}
+                                      >
+                                        {wordText || "\u00A0"}
+                                      </button>
+                                    </PopoverTrigger>
+                                    <PopoverContent
+                                      className="w-56 p-3 rounded-[1.3rem] border border-border/50 bg-popover/80 backdrop-blur-xl shadow-xl"
+                                      align="start"
+                                    >
+                                      <div className="space-y-1 text-sm">
+                                        <div className="text-xs uppercase tracking-wide text-muted-foreground px-1">
+                                          {wordText}
+                                        </div>
+                                        <div className="h-px w-full bg-border/60 my-1" />
+                                        <button
+                                          className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80"
+                                          onClick={() => onSearchWord?.(wordText)}
+                                        >
+                                          <Search className="h-4 w-4 text-muted-foreground" />
+                                          <span>Search clips for "{wordText}"</span>
+                                        </button>
+                                        <div className="h-px w-full bg-border/60 my-1" />
+                                        <button
+                                          className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80"
+                                          onClick={() => {
+                                            const sentenceText =
+                                              sentence.sentence_text ||
+                                              words.map((ww: Word) => ww.text).join(" ")
+                                            onExplainWordInContext?.({
+                                              word: wordText,
+                                              sentence: sentenceText,
+                                            })
+                                          }}
+                                        >
+                                          <Sparkles className="h-4 w-4 text-muted-foreground" />
+                                          <span>Meaning in this context</span>
+                                        </button>
+                                        <div className="h-px w-full bg-border/60 my-1" />
+                                        <button className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80">
+                                          <Bookmark className="h-4 w-4 text-muted-foreground" />
+                                          <span>Save word</span>
+                                        </button>
+                                      </div>
+                                    </PopoverContent>
                                   </div>
-                                  <div className="h-px w-full bg-border/60 my-1" />
-                                  <button
-                                    className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80"
-                                    onClick={() => onSearchWord?.(wordText)}
-                                  >
-                                    <Search className="h-4 w-4 text-muted-foreground" />
-                                    <span>Search clips for "{wordText}"</span>
-                                  </button>
-                                  <div className="h-px w-full bg-border/60 my-1" />
-                                  <button
-                                    className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80"
-                                    onClick={() => {
-                                      const sentenceText =
-                                        sentence.sentence_text ||
-                                        words.map((ww: Word) => ww.text).join(" ")
-                                      onExplainWordInContext?.({
-                                        word: wordText,
-                                        sentence: sentenceText,
-                                      })
-                                    }}
-                                  >
-                                    <Sparkles className="h-4 w-4 text-muted-foreground" />
-                                    <span>Meaning in this context</span>
-                                  </button>
-                                  <div className="h-px w-full bg-border/60 my-1" />
-                                  <button className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80">
-                                    <Bookmark className="h-4 w-4 text-muted-foreground" />
-                                    <span>Save word</span>
-                                  </button>
-                                </div>
-                              </PopoverContent>
-                            </div>
-                          </Popover>
-                        )
-                      })
-                      return <>{wordNodes}</>
-                    }
+                                </Popover>
+                              )
+                            })
+                            return <>{wordNodes}</>
+                          }
 
-                    const text = sentence.sentence_text || ""
+                          const text = sentence.sentence_text || ""
 
-                    // If Typesense returned <mark> tags, render as HTML
-                    if (text.includes("<mark>")) {
-                      return (
-                        <span
-                          className="relative z-10"
-                          dangerouslySetInnerHTML={{
-                            __html: text.replace(
-                              /<mark>/g,
-                              '<mark class="bg-red-500 text-white px-1 rounded font-semibold">'
+                          // If Typesense returned <mark> tags, render as HTML
+                          if (text.includes("<mark>")) {
+                            return (
+                              <span
+                                className="relative z-10 mr-1"
+                                dangerouslySetInnerHTML={{
+                                  __html: text.replace(
+                                    /<mark>/g,
+                                    '<mark class="bg-primary text-primary-foreground px-1 rounded font-semibold">'
+                                  )
+                                }}
+                              />
                             )
-                          }}
-                        />
-                      )
-                    }
+                          }
 
-                    // Fallback: client-side highlighting if no mark tags
-                    if (!query) return <span className="relative z-10">{text}</span>
-                    const regex = new RegExp(`(${query})`, "gi")
-                    const parts = text.split(regex)
-                    return parts.map((part: string, partIdx: number) => {
-                      const isMatch = part.toLowerCase() === query.toLowerCase()
-                      return (
-                        <span
-                          key={partIdx}
-                          className={cn(
-                            "relative z-10",
-                            isMatch &&
-                            "bg-red-500 text-white px-1 rounded font-semibold",
-                          )}
-                        >
-                          {part}
-                        </span>
-                      )
-                    })
-                  })()}
+                          // Fallback: client-side highlighting if no mark tags
+                          if (!query) return <span className="relative z-10 mr-1">{text}</span>
+                          const regex = new RegExp(`(${query})`, "gi")
+                          const parts = text.split(regex)
+                          return parts.map((part: string, partIdx: number) => {
+                            const isMatch = part.toLowerCase() === query.toLowerCase()
+                            return (
+                              <span
+                                key={partIdx}
+                                className={cn(
+                                  "relative z-10 mr-1",
+                                  isMatch &&
+                                  "bg-primary text-primary-foreground px-1 rounded font-semibold",
+                                )}
+                              >
+                                {part}
+                              </span>
+                            )
+                          })
+                        })()}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )
-          })
+              )
+            })
+          })()
         ) : null}
       </div>
     </div >
