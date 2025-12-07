@@ -160,17 +160,17 @@ export const TranscriptBox = ({
                         : null
                   }
                   className={cn(
-                    "mb-3 rounded-2xl border transition-all duration-300 ease-in-out bg-card/80 flex items-center justify-center text-center",
+                    "mb-2 rounded-2xl border transition-all duration-300 ease-in-out bg-card/80 flex items-center justify-center text-center",
                     groupIdx === centerIdx
-                      ? "p-5 shadow-lg shadow-primary/20 border-primary/80 scale-[1.01]"
-                      : "p-4 opacity-70 hover:opacity-100",
+                      ? "p-3 shadow-lg shadow-primary/20 border-primary/80 scale-[1.01]"
+                      : "p-2.5 opacity-70 hover:opacity-100",
                     groupIdx === centerIdx - 1 &&
                     "origin-bottom scale-[0.97] translate-y-1",
                     groupIdx === centerIdx + 1 &&
                     "origin-top scale-[0.97] -translate-y-1",
                   )}
                 >
-                  <div className="relative text-xl leading-relaxed inline-block">
+                  <div className="relative text-base leading-relaxed inline-block">
                     {group.map((sentence, sIdx) => (
                       <span key={`${sentence.start_time}-${sIdx}`}>
                         {(() => {
