@@ -47,6 +47,16 @@ export function CurvedCarousel() {
 
     return (
         <section className="w-full py-4 border-t border-border/50 overflow-hidden bg-background/50 perspective-[600px] relative z-20">
+            {/* Title */}
+            <div className="text-center mb-20 relative z-30">
+                <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+                    Over <span className="text-primary">100,000+</span> Movie Clips
+                </h2>
+                <p className="text-muted-foreground mt-2 text-sm sm:text-base">
+                    Learn from real conversations in your favorite films
+                </p>
+            </div>
+
             {/* Gradient Masks for depth */}
             <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10 pointer-events-none" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,hsl(var(--background))_100%)] z-10 pointer-events-none" />
