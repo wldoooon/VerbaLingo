@@ -2,9 +2,6 @@
 
 import { useEffect, useState, Suspense } from "react"
 import dynamic from "next/dynamic"
-import { AppSidebar } from "@/components/app-sidebar"
-import { Navigation } from "@/components/Navigation"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { VideoPlayerSkeleton, TranscriptSkeleton, AiCompletionSkeleton } from "./WatchSkeletons"
 
@@ -53,21 +50,11 @@ function SearchParamSyncer({ word }: { word: string }) {
 export default function WatchClientPage({ word }: { word: string }) {
     const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
 
-    // Mock user data
-    const userData = {
-        name: "Guest",
-        email: "guest@verbalingo.com",
-        avatar: "/avatars/user.jpg",
-    }
-
     return (
-        <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>
-                <Navigation user={userData} showNavMenu={false} />
-                <SearchParamSyncer word={word} />
+        <>
+            <SearchParamSyncer word={word} />
 
-                <main className="flex-1 p-2 sm:p-4 lg:p-6 overflow-hidden">
+            <main className="flex-1 p-2 sm:p-4 lg:p-6 overflow-hidden">
                     <div className="max-w-[1800px] mx-auto h-full">
                         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 h-full">
                             {/* Left Column: Video & Transcript */}
@@ -104,7 +91,6 @@ export default function WatchClientPage({ word }: { word: string }) {
                         </div>
                     </div>
                 </main>
-            </SidebarInset>
-        </SidebarProvider>
+        </>
     )
 }
