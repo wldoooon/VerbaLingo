@@ -1,14 +1,7 @@
 "use client"
 
-import SearchBar from "@/components/comm/SearchBar"
+import SearchBarNew from "@/components/comm/SearchBarNew"
 import { HeaderToolbar } from "@/components/header-toolbar"
-import { NavMenu } from "@/components/nav-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useSearchParams } from "@/context/SearchParamsContext"
-import { Bangers } from "next/font/google"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-
-const logoFont = Bangers({ subsets: ["latin"], weight: "400" })
 
 interface NavigationProps {
   user: {
@@ -20,59 +13,14 @@ interface NavigationProps {
 }
 
 export function Navigation({ user, showNavMenu = true }: NavigationProps) {
-  const { language, setLanguage, category, setCategory } = useSearchParams()
   return (
-    <header className="sticky top-0 z-50 w-full bg-card">
+    <header className="w-full bg-transparent">
       <div className="relative">
         <div className="flex h-20 items-center px-4 sm:px-6 gap-4">
-          {/* Sidebar Trigger */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <SidebarTrigger />
+          {/* Search Bar with integrated filters - aligned left */}
+          <div className="flex-1">
+            <SearchBarNew />
           </div>
-
-          {/* Spacer - Left - Removed to move search bar to left */}
-          {/* <div className="flex-1 min-w-0" /> */}
-
-          {/* Search Bar + Filters - Centered with right expansion */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-[400px] sm:w-[500px] md:w-[600px] lg:w-[700px]">
-              <SearchBar />
-            </div>
-            {/* Language Selector */}
-            <div className="hidden md:block">
-              <Select value={language} onValueChange={(val) => setLanguage(val)}>
-                <SelectTrigger size="sm" aria-label="Select language">
-                  <SelectValue placeholder="Language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="English">English</SelectItem>
-                  <SelectItem value="Arabic">Arabic</SelectItem>
-                  <SelectItem value="French">French</SelectItem>
-                  <SelectItem value="Spanish">Spanish</SelectItem>
-                  <SelectItem value="German">German</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {/* Category Selector */}
-            <div className="hidden md:block">
-              <Select value={category ?? "General"} onValueChange={(val) => setCategory(val === "General" ? null : val)}>
-                <SelectTrigger size="sm" aria-label="Select category">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="General">General</SelectItem>
-                  <SelectItem value="Movies">Movies</SelectItem>
-                  <SelectItem value="TV">TV Shows</SelectItem>
-                  <SelectItem value="Games">Games</SelectItem>
-                  <SelectItem value="Books">Books</SelectItem>
-                  <SelectItem value="Music">Music</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Spacer - Right */}
-          <div className="flex-1 min-w-0" />
 
           {/* Right Side - User Tools */}
           <div className="flex-shrink-0">
