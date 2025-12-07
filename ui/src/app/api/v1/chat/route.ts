@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     
     // Forward the request to your Ollama FastAPI server
-    const response = await fetch('http://localhost:8001/api/v1/chat', {
+    const response = await fetch('http://localhost:5002/api/v1/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

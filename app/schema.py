@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
+
 class Category(BaseModel):
-    """Category object structure."""
-    type: str  # e.g., "Cartoon"
-    title: str  # e.g., "SpongeBob"
+    type: str
+    title: str
 
 class Word(BaseModel):
     text: str

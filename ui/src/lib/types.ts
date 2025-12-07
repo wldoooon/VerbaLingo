@@ -8,6 +8,32 @@ export interface Clips {
   video_title?: string;
 }
 
+export enum ViewState {
+  LANDING = 'LANDING',
+  SEARCHING = 'SEARCHING',
+  RESULTS = 'RESULTS',
+  PROFILE = 'PROFILE',
+  SAVED = 'SAVED',
+  PRICING = 'PRICING',
+}
+
+export enum SearchCategory {
+  ALL = 'All',
+  CODE = 'Code',
+  ACADEMIC = 'Academic',
+  NEWS = 'News',
+  CREATIVE = 'Creative'
+}
+
+export enum SearchLanguage {
+  ENGLISH = 'en',
+  SPANISH = 'es',
+  FRENCH = 'fr',
+  GERMAN = 'de',
+  JAPANESE = 'ja',
+  CHINESE = 'zh'
+}
+
 export interface TranscriptLine {
   text: string;
   start: number;

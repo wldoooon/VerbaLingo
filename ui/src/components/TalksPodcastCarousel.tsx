@@ -3,39 +3,39 @@
 import React, { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 
-const moviesList = [
-    { title: "The Shawshank Redemption", img: "https://image.tmdb.org/t/p/w500/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg" },
-    { title: "The Godfather", img: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg" },
-    { title: "The Dark Knight", img: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg" },
-    { title: "Pulp Fiction", img: "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg" },
-    { title: "Forrest Gump", img: "https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg" },
-    { title: "Inception", img: "https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg" },
-    { title: "Fight Club", img: "https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg" },
-    { title: "The Matrix", img: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg" },
-    { title: "Interstellar", img: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" },
-    { title: "Parasite", img: "https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" },
-    { title: "The Lord of the Rings", img: "https://image.tmdb.org/t/p/w500/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg" },
-    { title: "Gladiator", img: "https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg" },
+const talksList = [
+    { title: "Lex Fridman", img: "https://yt3.googleusercontent.com/YC7GvWFOuUvVlHxMDsfrKGUhVNvtL2QWQJ3GtLnqKR4vRqGGy7yqKQKL7J9kRr1Xhw=s900-c-k-c0x00ffffff-no-rj", type: "Podcast" },
+    { title: "Joe Rogan", img: "https://yt3.googleusercontent.com/VyQPYHCgdQKfG89O3LNMrXdQPT3J9MdsMHM8OesJBG1YY7mCL2F7lZK9M2jLgFr4xYj0=s900-c-k-c0x00ffffff-no-rj", type: "Podcast" },
+    { title: "TED Talks", img: "https://yt3.googleusercontent.com/ytc/AIdro_l2YLDSqjHKx1fz2k8kY1v8y1XJCxhj3mYO3YS_OEZQYw=s900-c-k-c0x00ffffff-no-rj", type: "Talk" },
+    { title: "Jordan Peterson", img: "https://yt3.googleusercontent.com/PyC7GvWFb5J7Nve7kNqEo1_mRBpDDFaq3v7kPZY5IxbNrF3L5Y9mL_M7O9b6jY7v1w=s900-c-k-c0x00ffffff-no-rj", type: "Podcast" },
+    { title: "Huberman Lab", img: "https://yt3.googleusercontent.com/5DNgJM4Z3xPqXDxHqBd3mOp2qY9RMlGY9xLQ_7zVxKe3_Y0Z3mYQ5bMlEqKHdNL9xQ=s900-c-k-c0x00ffffff-no-rj", type: "Podcast" },
+    { title: "Tim Ferriss", img: "https://yt3.googleusercontent.com/ytc/AIdro_mKP7TQkj_UuPX5nUQNRGrVSR0K3m9u9PKPKXf_qL0I=s900-c-k-c0x00ffffff-no-rj", type: "Podcast" },
+    { title: "Naval Ravikant", img: "https://pbs.twimg.com/profile_images/1256841238298292232/ycqwaMI2_400x400.jpg", type: "Talk" },
+    { title: "Sam Harris", img: "https://yt3.googleusercontent.com/ytc/AIdro_nQUxEh4RVg8lrwUNxvVQFqKBKlZ8vVrLJ2qMHnDA=s900-c-k-c0x00ffffff-no-rj", type: "Podcast" },
+    { title: "Y Combinator", img: "https://yt3.googleusercontent.com/ytc/AIdro_lGDx0_F6k8DmX7Cr6LqpTRQvA0E3J8eCMr9LqGEQ=s900-c-k-c0x00ffffff-no-rj", type: "Talk" },
+    { title: "Vsauce", img: "https://yt3.googleusercontent.com/ytc/AIdro_n8_Kj9E8c9GqFp6Yk7N4Z1LR0I3D5M0QNnZ6Ae=s900-c-k-c0x00ffffff-no-rj", type: "Talk" },
+    { title: "Neil deGrasse Tyson", img: "https://yt3.googleusercontent.com/ytc/AIdro_kxhY9hBTJnQr9yWLJW6VlR9B7dPJN2F1LqE8xH=s900-c-k-c0x00ffffff-no-rj", type: "Talk" },
+    { title: "Diary of a CEO", img: "https://yt3.googleusercontent.com/G5EoVGYKqLz_-YUMZxvXJE0XRkX0_t0M3nC7rNrZ3L5fYk_V7sH8Jw=s900-c-k-c0x00ffffff-no-rj", type: "Podcast" },
 ];
 
-// Duplicate items to fill the large circumference and reduce gaps
-const movies = [...moviesList, ...moviesList, ...moviesList];
+// Duplicate items to fill the large circumference
+const talks = [...talksList, ...talksList, ...talksList];
 
-export function CurvedCarousel() {
+export function TalksPodcastCarousel() {
     const [isHovered, setIsHovered] = useState(false);
     const controls = useAnimation();
 
     // Carousel configuration
-    const ITEM_WIDTH = 300;
-    const RADIUS = 1600; // Adjusted radius for 3D effect
+    const ITEM_WIDTH = 280;
+    const RADIUS = 1500;
 
-    // Auto-rotation animation
+    // Auto-rotation animation (reverse direction)
     useEffect(() => {
         if (!isHovered) {
             controls.start({
-                rotateY: 360,
+                rotateY: -360,
                 transition: {
-                    duration: 120,
+                    duration: 100,
                     ease: "linear",
                     repeat: Infinity,
                 }
@@ -50,10 +50,10 @@ export function CurvedCarousel() {
             {/* Title */}
             <div className="text-center mb-20 relative z-30">
                 <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-                    Over <span className="text-primary">100,000+</span> Movie Clips
+                    Over <span className="text-primary">50,000+</span> Talks & Podcasts
                 </h2>
                 <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-                    Learn from real conversations in your favorite films
+                    Learn from world-renowned speakers and thought leaders
                 </p>
             </div>
 
@@ -75,11 +75,11 @@ export function CurvedCarousel() {
                     style={{
                         transformStyle: "preserve-3d",
                         width: ITEM_WIDTH,
-                        height: 420
+                        height: 380
                     }}
                 >
-                    {movies.map((item, index) => {
-                        const angle = (360 / movies.length) * index;
+                    {talks.map((item, index) => {
+                        const angle = (360 / talks.length) * index;
 
                         return (
                             <div
@@ -87,13 +87,13 @@ export function CurvedCarousel() {
                                 className="absolute flex flex-col items-center justify-center p-4 cursor-pointer group"
                                 style={{
                                     width: ITEM_WIDTH,
-                                    height: 420,
+                                    height: 380,
                                     transform: `rotateY(${angle}deg) translateZ(${RADIUS}px)`,
                                     backfaceVisibility: "hidden",
                                 }}
                             >
-                                {/* Image Container */}
-                                <div className="w-full h-98 rounded-xl overflow-hidden mb-4 shadow-lg border border-white/10 bg-muted">
+                                {/* Circular Image Container */}
+                                <div className="w-48 h-48 rounded-full overflow-hidden mb-4 shadow-lg border-4 border-primary/20 bg-muted">
                                     <img
                                         src={item.img}
                                         alt={item.title}
@@ -102,11 +102,11 @@ export function CurvedCarousel() {
                                 </div>
 
                                 <div className="text-center">
-                                    <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                                    <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
                                         {item.title}
                                     </h3>
                                     <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wider font-medium">
-                                        Movie
+                                        {item.type}
                                     </p>
                                 </div>
                             </div>

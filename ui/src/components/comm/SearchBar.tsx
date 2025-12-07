@@ -105,10 +105,11 @@ export default function SearchBar() {
   return (
     <div ref={searchBarRef} className="relative w-full">
       {/* Fab.com-style Search Bar - Larger & More Visible */}
-      <div className="relative group">
-        <div className="absolute left-5 top-1/2 -translate-y-1/2 z-10">
-          <Search className="h-5 w-5 text-muted-foreground/70" />
-        </div>
+      <div className="flex items-center gap-3">
+        <div className="relative group flex-1">
+          <div className="absolute left-5 top-1/2 -translate-y-1/2 z-10">
+            <Search className="h-5 w-5 text-muted-foreground/70" />
+          </div>
         {/* Animated example text overlay using TextType when input is empty */}
         {!localQuery && (
           <div className="pointer-events-none absolute left-14 right-24 top-1/2 -translate-y-1/2 z-20 flex items-center">
@@ -181,14 +182,12 @@ export default function SearchBar() {
           onFocus={() => setShowSuggestions(true)}
           disabled={isRouting}
         />
+        </div>
 
-        {/* Right-side action: show loader while routing, otherwise show Search button */}
+        {/* Search button - outside the input container */}
         {isRouting ? (
-          <div className="absolute right-5 top-1/2 -translate-y-1/2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground"></div>
-              <span>Searching...</span>
-            </div>
+          <div className="flex items-center justify-center h-12 w-12">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-primary"></div>
           </div>
         ) : (
           <button
@@ -197,16 +196,17 @@ export default function SearchBar() {
             onClick={() => handleSearch()}
             disabled={!localQuery.trim()}
             className={cn(
-              "absolute right-2.5 top-1/2 -translate-y-1/2",
-              "inline-flex items-center gap-2 px-3 py-1.5",
+              "flex-shrink-0",
+              "inline-flex items-center justify-center gap-2 h-10 px-3",
               "rounded-full border",
-              "bg-primary/90 text-primary-foreground border-primary/70",
-              "backdrop-blur-md shadow-sm",
-              "hover:bg-primary hover:shadow-md",
+              "bg-primary text-primary-foreground border-primary/70",
+              "shadow-md",
+              "hover:bg-primary/90 hover:shadow-lg",
+              "transition-all duration-200",
               "disabled:opacity-50 disabled:cursor-not-allowed"
             )}
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-5 w-5" />
             <span className="text-sm font-medium hidden sm:inline">Search</span>
           </button>
         )}

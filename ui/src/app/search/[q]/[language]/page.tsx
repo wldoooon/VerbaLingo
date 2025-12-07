@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useParams } from "next/navigation"
-import { Navigation } from "@/components/Navigation"
-import { SidebarCard } from "@/components/SidebarCard"
 import VideoPlayerCard from "@/components/comm/VideoPlayerCard"
 import AudioCard from "@/components/comm/AudioCard"
 import { AiCompletion } from "@/components/ai-completion"
@@ -60,24 +58,10 @@ export default function RoutedSearchPage() {
     }
   }, [data, dispatch])
 
-  const userData = {
-    name: "wldooon",
-    email: "user@verbalingo.com",
-    avatar: "/avatars/user.jpg",
-  }
-
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Navigation Header */}
-      <Navigation user={userData} />
-
-      {/* Main Content Area - Sidebar + Content */}
-      <main className="flex flex-1">
-        {/* Left Sidebar */}
-        <SidebarCard />
-
-        {/* Main Content */}
-        <div className="flex-1 bg-card text-card-foreground shadow-sm p-4 sm:p-6 pb-12 lg:pb-6">
+    <>
+      {/* Main Content */}
+      <main className="flex-1 bg-transparent text-card-foreground p-4 sm:p-6 pb-12 lg:pb-6">
           {(!hasRequested || isLoading) ? (
             <div className="flex h-full items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -105,8 +89,7 @@ export default function RoutedSearchPage() {
               </div>
             </div>
           )}
-        </div>
-      </main>
-    </div>
+        </main>
+    </>
   )
 }

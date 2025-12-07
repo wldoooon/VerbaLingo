@@ -11,21 +11,18 @@ const slides = [
         title: "Learn from Cartoons",
         description: "Rediscover your childhood favorites. Learn English with simple dialogues and fun stories from classic cartoons.",
         image: "/Cartoon_Picture.jpg",
-        color: "from-orange-500 to-red-600"
     },
     {
         id: 2,
         title: "Master with Podcasts",
         description: "Tune in to native conversations. Improve your listening skills with thousands of hours of engaging podcasts.",
         image: "/PodcastCollection.png",
-        color: "from-purple-600 to-pink-900"
     },
     {
         id: 3,
         title: "Movies & TV Series",
         description: "Immerse yourself in cinema. Learn English naturally by watching your favorite blockbusters and series.",
         image: "/titanic-sinking-lifeboats-cinematic-desktop-wallpaper.jpg",
-        color: "from-blue-600 to-indigo-900"
     }
 ];
 
