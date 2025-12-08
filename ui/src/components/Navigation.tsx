@@ -1,6 +1,6 @@
 "use client"
 
-import SearchBarNew from "@/components/comm/SearchBarNew"
+import { SearchBar } from "@/components/comm/SearchBar"
 import { HeaderToolbar } from "@/components/header-toolbar"
 
 interface NavigationProps {
@@ -19,7 +19,7 @@ export function Navigation({ user, showNavMenu = true }: NavigationProps) {
         <div className="flex h-20 items-center px-4 sm:px-6 gap-4">
           {/* Search Bar with integrated filters - aligned left */}
           <div className="flex-1">
-            <SearchBarNew />
+            <SearchBar />
           </div>
 
           {/* Right Side - User Tools */}
