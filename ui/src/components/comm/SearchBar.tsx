@@ -123,7 +123,7 @@ export function SearchBar() {
     };
 
     return (
-        <div className="w-full max-w-xl relative z-30" ref={containerRef}>
+        <div className="w-full max-w-3xl relative z-30" ref={containerRef}>
             <div className={cn(
                 "rounded-xl border border-border bg-card text-card-foreground transition-all duration-300 ease-in-out p-1 flex flex-row items-center shadow-lg",
                 showRecent && recentSearches.length > 0

@@ -80,21 +80,21 @@ export function Hero() {
     <div className="max-w-[1400px] mx-auto pt-8 pb-22 px-7 lg:px-10 overflow-hidden">
       {/* Split Hero Section */}
       <div className="grid lg:grid-cols-2 gap-14 lg:gap-10 items-center mb-28 min-h-[650px]">
-        
+
         {/* Left Column: Text Content */}
         <div className="text-left space-y-9 relative z-20">
           <div className="inline-flex items-center space-x-2.5 bg-muted/50 dark:bg-white/5 text-foreground dark:text-white px-4 py-2 rounded-full text-sm font-semibold border border-border dark:border-white/10 animate-fade-in backdrop-blur-md">
             <Sparkles className="w-4 h-4 text-primary dark:text-white" />
             <span>New: AI-Powered Pronunciation Coach</span>
           </div>
-          
+
           <h1 className="text-5xl lg:text-7xl font-bold text-foreground dark:text-white tracking-tight leading-[1.1]">
             Master languages through <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-muted-foreground dark:from-white dark:to-slate-500">
               real-world context
             </span>.
           </h1>
-          
+
           <p className="text-xl text-muted-foreground dark:text-slate-400 max-w-xl leading-relaxed">
             Don't just memorize definitions. Immerse yourself in authentic clips from movies, cartoons, podcasts, and talks.
           </p>
@@ -113,22 +113,22 @@ export function Hero() {
           </div>
 
           <div className="flex items-center space-x-4 pt-5">
-             <button 
-               onClick={() => handleSearch("Hello")}
-               className="bg-primary dark:bg-white text-primary-foreground dark:text-black px-9 py-4 rounded-xl font-bold text-lg shadow-lg shadow-primary/25 dark:shadow-white/10 hover:bg-primary/90 dark:hover:bg-slate-200 hover:shadow-primary/30 dark:hover:shadow-white/20 transition-all flex items-center group"
-             >
-                Start Learning
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-             </button>
-             <button className="px-9 py-4 rounded-xl font-semibold text-muted-foreground dark:text-slate-300 hover:bg-muted/50 dark:hover:bg-white/5 transition-colors flex items-center border border-transparent hover:border-border dark:hover:border-white/10">
-                <PlayCircle className="w-5 h-5 mr-2" />
-                Watch Demo
-             </button>
+            <button
+              onClick={() => handleSearch("Hello")}
+              className="bg-primary dark:bg-white text-primary-foreground dark:text-black px-9 py-4 rounded-xl font-bold text-lg shadow-lg shadow-primary/25 dark:shadow-white/10 hover:bg-primary/90 dark:hover:bg-slate-200 hover:shadow-primary/30 dark:hover:shadow-white/20 transition-all flex items-center group"
+            >
+              Start Learning
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button className="px-9 py-4 rounded-xl font-semibold text-muted-foreground dark:text-slate-300 hover:bg-muted/50 dark:hover:bg-white/5 transition-colors flex items-center border border-transparent hover:border-border dark:hover:border-white/10">
+              <PlayCircle className="w-5 h-5 mr-2" />
+              Watch Demo
+            </button>
           </div>
         </div>
 
         {/* Right Column: Curved Carousel */}
-        <div 
+        <div
           className="relative h-[650px] w-full flex items-center justify-center perspective-[1000px]"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -137,12 +137,12 @@ export function Hero() {
             const offset = getOffset(index);
             const absOffset = Math.abs(offset);
             const isActive = offset === 0;
-            
+
             // Calculate transforms for the curve effect
-            const translateX = offset * 170; 
+            const translateX = offset * 140;
             const translateZ = absOffset * -130;
             const rotateY = offset * -15; // Negative to rotate inwards towards center
-            
+
             // Opacity and Visibility logic
             const opacity = isActive ? 1 : Math.max(0.2, 1 - absOffset * 0.4);
             const zIndex = 10 - absOffset;
@@ -153,7 +153,7 @@ export function Hero() {
               <div
                 key={cat.id}
                 onClick={() => setActiveCategory(index)}
-                className={`absolute w-[300px] h-[450px] transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}
+                className={`absolute w-[400px] h-[540px] transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}
                 style={{
                   transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
                   opacity: opacity,
@@ -164,8 +164,8 @@ export function Hero() {
                 <div className="relative w-full h-full rounded-[2rem] overflow-hidden border border-border/50 dark:border-white/10 shadow-2xl bg-card dark:bg-black group">
                   {/* Image Background */}
                   <div className="absolute inset-0">
-                    <img 
-                      src={cat.image} 
+                    <img
+                      src={cat.image}
                       alt={cat.label}
                       className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110"
                     />
@@ -180,13 +180,13 @@ export function Hero() {
 
                   {/* Bottom Content */}
                   <div className="absolute bottom-0 left-0 right-0 p-7 transform transition-transform duration-500">
-                     <div className="w-13 h-13 bg-muted/50 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-border/50 dark:border-white/10 text-foreground dark:text-white shadow-lg">
-                        <cat.icon className="w-6 h-6" />
-                     </div>
-                     <h3 className="text-2xl font-bold text-foreground dark:text-white mb-1">{cat.label}</h3>
-                     <p className="text-sm text-muted-foreground dark:text-slate-400 font-medium">{cat.description}</p>
+                    <div className="w-13 h-13 bg-muted/50 dark:bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-border/50 dark:border-white/10 text-foreground dark:text-white shadow-lg">
+                      <cat.icon className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-foreground dark:text-white mb-1">{cat.label}</h3>
+                    <p className="text-sm text-muted-foreground dark:text-slate-400 font-medium">{cat.description}</p>
                   </div>
-                  
+
                   {/* Hover Border Glow */}
                   <div className={`absolute inset-0 border-2 border-transparent transition-all duration-500 rounded-[2rem] ${isActive ? 'border-primary/20 dark:border-white/20' : 'group-hover:border-primary/20 dark:group-hover:border-white/20'}`} />
                 </div>

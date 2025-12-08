@@ -17,8 +17,8 @@ export function Navigation({ user, showNavMenu = true }: NavigationProps) {
     <header className="w-full bg-transparent">
       <div className="relative">
         <div className="flex h-20 items-center px-4 sm:px-6 gap-4">
-          {/* Search Bar with integrated filters - aligned left */}
-          <div className="flex-1">
+          {/* Search Bar with integrated filters - aligned center */}
+          <div className="flex-1 flex justify-center">
             <SearchBar />
           </div>
 
