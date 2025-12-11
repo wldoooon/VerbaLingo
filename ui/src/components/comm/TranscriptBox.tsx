@@ -104,7 +104,7 @@ export const TranscriptBox = ({
     <div className="relative mt-1">
       {/* Top fade gradient */}
       <div className="pointer-events-none absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent z-10 rounded-t-2xl" />
-      
+
       <div
         ref={scrollContainerRef}
         className="max-h-[200px] overflow-y-auto rounded-2xl px-3 py-3 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
@@ -116,7 +116,7 @@ export const TranscriptBox = ({
         ) : sentences.length > 0 ? (
           (() => {
             // Group sentences into chunks of 3
-            const sentenceGroups = []
+            const sentenceGroups: Sentence[][] = []
             for (let i = 0; i < sentences.length; i += 3) {
               sentenceGroups.push(sentences.slice(i, i + 3))
             }
@@ -126,7 +126,14 @@ export const TranscriptBox = ({
               const groupEnd = group[group.length - 1].end_time
 
               const TIMING_LEAD = 0.08
-              const adjustedTime = currentTime + TIMING_LEAD
+
+              // If video is at adjacent start (loading) but we have a specific search target, 
+              // force the UI to focus on the target sentence immediately.
+              const isInitialLoad = currentTime < 1 && targetSentence
+
+              const adjustedTime = isInitialLoad
+                ? targetSentence!.start_time + 0.01
+                : currentTime + TIMING_LEAD
 
               const isActive =
                 adjustedTime >= groupStart &&
@@ -160,14 +167,10 @@ export const TranscriptBox = ({
                         : null
                   }
                   className={cn(
-                    "mb-2 rounded-2xl border transition-all duration-300 ease-in-out bg-card/80 flex items-center justify-center text-center",
+                    "mb-1 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex items-center justify-center text-center px-4",
                     groupIdx === centerIdx
-                      ? "p-3 shadow-lg shadow-primary/20 border-primary/80 scale-[1.01]"
-                      : "p-2.5 opacity-70 hover:opacity-100",
-                    groupIdx === centerIdx - 1 &&
-                    "origin-bottom scale-[0.97] translate-y-1",
-                    groupIdx === centerIdx + 1 &&
-                    "origin-top scale-[0.97] -translate-y-1",
+                      ? "opacity-100 scale-100 blur-none py-5"
+                      : "opacity-30 scale-95 blur-[0.5px] py-1 grayscale",
                   )}
                 >
                   <div className="relative text-base leading-relaxed inline-block">
@@ -310,7 +313,7 @@ export const TranscriptBox = ({
           })()
         ) : null}
       </div>
-      
+
       {/* Bottom fade gradient */}
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent z-10 rounded-b-2xl" />
     </div >
