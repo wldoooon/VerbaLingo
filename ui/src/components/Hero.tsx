@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Play, Activity, Bot, MessageSquare } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 
 const categories = [
   {
@@ -246,7 +247,13 @@ export function Hero() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
 
             {/* Large Block - Search Context */}
-            <div className="md:col-span-2 row-span-2 bg-card/50 border border-border/50 rounded-3xl p-8 relative overflow-hidden group hover:border-primary/30 transition-all">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="md:col-span-2 row-span-2 bg-card/50 border border-border/50 rounded-3xl p-8 relative overflow-hidden group hover:border-primary/30 transition-all"
+            >
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Search className="w-64 h-64 text-primary transform rotate-12 translate-x-12 -translate-y-12" />
               </div>
@@ -267,10 +274,16 @@ export function Hero() {
                   <Skeleton className="h-2 w-5/6 rounded-full bg-muted/50" />
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Tall Block - AI Tutor (UPDATED) */}
-            <div className="md:col-span-1 row-span-2 bg-primary text-primary-foreground border border-primary rounded-3xl p-8 relative overflow-hidden group shadow-2xl shadow-primary/20">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+              className="md:col-span-1 row-span-2 bg-primary text-primary-foreground border border-primary rounded-3xl p-8 relative overflow-hidden group shadow-2xl shadow-primary/20"
+            >
 
               {/* Fancy Tech Background: Dot Grid Pattern */}
               <div className="absolute inset-0 opacity-20"
@@ -327,10 +340,16 @@ export function Hero() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Medium Block - Pronunciation */}
-            <div className="md:col-span-1 bg-card/50 border border-border/50 rounded-3xl p-8 hover:bg-muted/50 transition-all group">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+              className="md:col-span-1 bg-card/50 border border-border/50 rounded-3xl p-8 hover:bg-muted/50 transition-all group"
+            >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   <Mic className="w-5 h-5 text-primary group-hover:text-primary-foreground" />
@@ -339,10 +358,16 @@ export function Hero() {
               </div>
               <h3 className="text-lg font-bold text-foreground mb-1">Pronunciation</h3>
               <p className="text-muted-foreground text-sm">Compare your voice with native speakers.</p>
-            </div>
+            </motion.div>
 
             {/* Medium Block - Global */}
-            <div className="md:col-span-1 bg-card/50 border border-border/50 rounded-3xl p-8 hover:bg-muted/50 transition-all group">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+              className="md:col-span-1 bg-card/50 border border-border/50 rounded-3xl p-8 hover:bg-muted/50 transition-all group"
+            >
               <div className="flex items-start justify-between mb-4">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   <Globe className="w-5 h-5 text-primary group-hover:text-primary-foreground" />
@@ -351,7 +376,7 @@ export function Hero() {
               </div>
               <h3 className="text-lg font-bold text-foreground mb-1">Global Library</h3>
               <p className="text-muted-foreground text-sm">Content from 50+ countries and cultures.</p>
-            </div>
+            </motion.div>
 
           </div>
         </div>

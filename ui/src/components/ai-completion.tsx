@@ -174,7 +174,11 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
 
                     <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center">
-                        {query ? `Learning about "${query}"` : "What do you want to learn?"}
+                        {query ? (
+                            <>
+                                Learning about <span className="text-primary">"{query}"</span>
+                            </>
+                        ) : "What do you want to learn?"}
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-4 max-w-lg mx-auto text-center">
                         {query
@@ -231,21 +235,21 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         )}
                     </AnimatePresence>
 
+                    {/* Separator */}
+                    <div className="w-full px-8">
+                        <div className="h-px bg-border/40 my-2" />
+                    </div>
+
                     {/* AI Welcome Message - Only show when idle */}
                     {!isLoading && !completion && !error && query && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="flex gap-4 items-start px-4 mt-6 max-w-2xl mx-auto"
+                            className="px-4 mt-6 max-w-2xl mx-auto"
                         >
-                            <div className="flex-shrink-0 mt-1">
-                                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                                    <Bot className="h-4 w-4 text-primary" />
-                                </div>
-                            </div>
-                            <div className="flex-1 space-y-2">
-                                <p className="text-sm text-card-foreground/80 leading-relaxed bg-muted/40 p-4 rounded-2xl rounded-tl-sm border border-border/50 shadow-sm">
+                            <div className="space-y-2">
+                                <p className="text-base text-card-foreground/90 leading-relaxed bg-muted/50 p-5 border border-border/50 shadow-sm rounded-tr-2xl rounded-br-2xl rounded-bl-2xl rounded-tl-none">
                                     Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
                                     <br /><br />
                                     Try tapping a suggestion above or type your own question below!
@@ -407,7 +411,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         <Input
                             type="text"
                             placeholder="Ask about pronunciation, definitions, examples..."
-                            className="w-full rounded-full pl-10 pr-10 py-6 bg-card shadow-sm"
+                            className="w-full rounded-full pl-10 pr-10 py-6 bg-muted shadow-sm border-transparent focus-visible:bg-background transition-colors"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyPress={handleKeyPress}
