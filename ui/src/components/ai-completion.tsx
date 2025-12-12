@@ -168,7 +168,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
     return (
         <div className="w-full h-full flex flex-col">
-            <div className="relative w-full h-full flex flex-col bg-card dark:bg-zinc-950/80 dark:backdrop-blur-xl rounded-2xl p-6 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border border-border">
+            <div className="relative w-full h-full flex flex-col bg-card dark:bg-zinc-950/80 dark:backdrop-blur-xl p-6">
 
                 <header className="w-full flex-shrink-0">
 

@@ -44,7 +44,7 @@ export default function RoutedSearchPage() {
     // Persist last query for components relying on it
     try {
       localStorage.setItem("last_search_query", q)
-    } catch {}
+    } catch { }
 
     setSearchQuery(q)
 
@@ -61,35 +61,35 @@ export default function RoutedSearchPage() {
   return (
     <>
       {/* Main Content */}
-      <main className="flex-1 bg-transparent text-card-foreground p-4 sm:p-6 pb-12 lg:pb-6">
-          {(!hasRequested || isLoading) ? (
-            <div className="flex h-full items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex-1 bg-transparent text-card-foreground">
+        {(!hasRequested || isLoading) ? (
+          <div className="flex h-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-start">
+            {/* Left: Player + Audio */}
+            <div className="space-y-4 p-4 sm:p-6 pb-12 lg:pb-6">
+              <VideoPlayerCard />
+              <AudioCard
+                src={
+                  playlist[state.currentVideoIndex]?.video_id
+                    ? `https://www.youtube.com/watch?v=${playlist[state.currentVideoIndex].video_id}`
+                    : ""
+                }
+                title={playlist[state.currentVideoIndex]?.sentence_text ?? ""}
+                searchQuery={searchQuery}
+                onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
+              />
             </div>
-          ) : (
-            <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-stretch lg:gap-2">
-              {/* Left: Player + Audio */}
-              <div className="space-y-2">
-                <VideoPlayerCard />
-                <AudioCard
-                  src={
-                    playlist[state.currentVideoIndex]?.video_id
-                      ? `https://www.youtube.com/watch?v=${playlist[state.currentVideoIndex].video_id}`
-                      : ""
-                  }
-                  title={playlist[state.currentVideoIndex]?.sentence_text ?? ""}
-                  searchQuery={searchQuery}
-                  onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
-                />
-              </div>
 
-              {/* Right: AI */}
-              <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0">
-                <AiCompletion externalPrompt={externalPrompt} />
-              </div>
+            {/* Right: AI */}
+            <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0 sticky top-0 h-[calc(100vh-5rem)] overflow-hidden border-l">
+              <AiCompletion externalPrompt={externalPrompt} />
             </div>
-          )}
-        </main>
+          </div>
+        )}
+      </div>
     </>
   )
 }

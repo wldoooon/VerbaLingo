@@ -31,7 +31,7 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div 
+    <div
       className={cn(
         "hidden md:flex flex-col bg-transparent border-r border-border h-screen sticky top-0 font-sans transition-all duration-300 ease-in-out",
         isCollapsed ? 'w-24' : 'w-72'
@@ -52,8 +52,8 @@ const Sidebar: React.FC = () => {
             </span>
           )}
         </div>
-        
-        <button 
+
+        <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
@@ -80,7 +80,7 @@ const Sidebar: React.FC = () => {
             <item.icon className={cn(
               "w-6 h-6 shrink-0 transition-colors",
               isActive(item.href)
-                ? 'text-primary' 
+                ? 'text-primary'
                 : 'text-muted-foreground group-hover:text-foreground'
             )} />
             {!isCollapsed && <span className="text-base whitespace-nowrap overflow-hidden">{item.label}</span>}
@@ -92,55 +92,55 @@ const Sidebar: React.FC = () => {
       <div className="px-5 pb-3">
         {!isCollapsed ? (
           <div className="p-5 bg-muted/50 border border-border rounded-2xl relative overflow-hidden group">
-              {/* Decoration */}
-              <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full -mr-10 -mt-10 pointer-events-none transition-transform group-hover:scale-110"></div>
+            {/* Decoration */}
+            <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-primary/10 to-transparent rounded-bl-full -mr-10 -mt-10 pointer-events-none transition-transform group-hover:scale-110"></div>
 
-              <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                          <Zap className="w-4 h-4 text-primary fill-primary" />
-                          Credits
-                      </span>
-                      <span className="text-sm font-semibold text-muted-foreground">
-                          {Math.round(percentUsed)}%
-                      </span>
-                  </div>
-                  
-                  <div className="w-full bg-muted rounded-full h-2.5 mb-3 overflow-hidden">
-                      <div 
-                          className="h-full bg-gradient-to-r from-muted-foreground to-primary rounded-full transition-all duration-500"
-                          style={{ width: `${percentUsed}%` }}
-                      />
-                  </div>
-                  
-                  <div className="flex justify-between items-center text-xs text-muted-foreground font-medium mb-4">
-                      <span>{credits.used.toLocaleString()} used</span>
-                      <span>{credits.total.toLocaleString()} total</span>
-                  </div>
-
-                  <Link 
-                    href="/pricing"
-                    className="w-full py-3 bg-primary hover:bg-primary/90 rounded-xl text-sm font-bold text-primary-foreground shadow-sm transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/10"
-                  >
-                      Upgrade Plan
-                  </Link>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-primary fill-primary" />
+                  Credits
+                </span>
+                <span className="text-sm font-semibold text-muted-foreground">
+                  {Math.round(percentUsed)}%
+                </span>
               </div>
+
+              <div className="w-full bg-muted rounded-full h-2.5 mb-3 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-muted-foreground to-primary rounded-full transition-all duration-500"
+                  style={{ width: `${percentUsed}%` }}
+                />
+              </div>
+
+              <div className="flex justify-between items-center text-xs text-muted-foreground font-medium mb-4">
+                <span>{credits.used.toLocaleString()} used</span>
+                <span>{credits.total.toLocaleString()} total</span>
+              </div>
+
+              <Link
+                href="/pricing"
+                className="w-full py-3 bg-primary hover:bg-primary/90 rounded-xl text-sm font-bold text-primary-foreground shadow-sm transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/10"
+              >
+                Upgrade Plan
+              </Link>
+            </div>
           </div>
         ) : (
-          <Link 
-             href="/pricing"
-             className="w-full aspect-square bg-muted/50 border border-border rounded-xl flex items-center justify-center hover:bg-muted hover:border-primary/20 transition-all group relative"
-             title="Credits & Pricing"
+          <Link
+            href="/pricing"
+            className="w-full aspect-square bg-muted/50 border border-border rounded-xl flex items-center justify-center hover:bg-muted hover:border-primary/20 transition-all group relative"
+            title="Credits & Pricing"
           >
-             <Zap className="w-6 h-6 text-muted-foreground group-hover:text-primary group-hover:fill-primary transition-colors" />
-             <div className="absolute bottom-2 w-1.5 h-1.5 rounded-full bg-destructive"></div>
+            <Zap className="w-6 h-6 text-muted-foreground group-hover:text-primary group-hover:fill-primary transition-colors" />
+            <div className="absolute bottom-2 w-1.5 h-1.5 rounded-full bg-destructive"></div>
           </Link>
         )}
       </div>
 
       {/* Footer */}
       <div className="p-5 pt-3 border-t border-border">
-        <button 
+        <button
           className={cn(
             "flex items-center w-full p-4 text-muted-foreground hover:bg-muted hover:text-foreground rounded-xl transition-colors group",
             isCollapsed ? 'justify-center' : 'gap-4'
@@ -150,7 +150,7 @@ const Sidebar: React.FC = () => {
           <Settings className="w-6 h-6 text-muted-foreground group-hover:text-foreground shrink-0" />
           {!isCollapsed && <span className="font-medium text-base whitespace-nowrap overflow-hidden">Settings</span>}
         </button>
-        <button 
+        <button
           className={cn(
             "flex items-center w-full p-4 text-muted-foreground hover:bg-destructive/10 hover:text-destructive rounded-xl transition-colors mt-2 group",
             isCollapsed ? 'justify-center' : 'gap-4'

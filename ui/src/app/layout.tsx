@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           {/* Background Grid */}
           {/* Background Grid - Absolute Positioned at Top */}
-          <div className="absolute top-0 inset-x-0 z-0 h-[120vh] w-full pointer-events-none overflow-hidden">
+          <div className="absolute top-0 inset-x-0 z-0 h-[100vh] w-full pointer-events-none overflow-hidden">
             {/* Dark Gradient Base */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-muted/40 via-background to-background"></div>
 
