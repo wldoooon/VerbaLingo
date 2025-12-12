@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "@/context/SearchParamsContext";
 import { Button } from "@/components/ui/button";
 import { Response } from "@/components/ui/shadcn-io/ai/response";
-import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight, Bot } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
@@ -193,6 +193,11 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                 </header>
 
                 <main className="w-full flex-1 flex flex-col mt-6 space-y-6 min-h-0">
+                    <div className="flex items-center gap-4 px-8 opacity-60 mb-2">
+                        <div className="h-px bg-border flex-1" />
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Today</span>
+                        <div className="h-px bg-border flex-1" />
+                    </div>
                     {/* Suggestions */}
                     <AnimatePresence>
                         {!shouldHideSuggestions && (
@@ -225,6 +230,29 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                             </motion.div>
                         )}
                     </AnimatePresence>
+
+                    {/* AI Welcome Message - Only show when idle */}
+                    {!isLoading && !completion && !error && query && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="flex gap-4 items-start px-4 mt-6 max-w-2xl mx-auto"
+                        >
+                            <div className="flex-shrink-0 mt-1">
+                                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                                    <Bot className="h-4 w-4 text-primary" />
+                                </div>
+                            </div>
+                            <div className="flex-1 space-y-2">
+                                <p className="text-sm text-card-foreground/80 leading-relaxed bg-muted/40 p-4 rounded-2xl rounded-tl-sm border border-border/50 shadow-sm">
+                                    Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
+                                    <br /><br />
+                                    Try tapping a suggestion above or type your own question below!
+                                </p>
+                            </div>
+                        </motion.div>
+                    )}
 
                     {/* Response Section */}
                     <AnimatePresence>
@@ -392,6 +420,11 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         >
                             <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
                         </button>
+                    </div>
+                    <div className="text-center mt-3 px-4">
+                        <p className="text-[10px] text-muted-foreground/50 font-medium tracking-wide">
+                            AI can make mistakes. Please verify important information.
+                        </p>
                     </div>
                 </footer>
             </div>
