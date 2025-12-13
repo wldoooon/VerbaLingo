@@ -48,6 +48,9 @@ function SearchParamSyncer({ word }: { word: string }) {
 }
 
 export default function WatchClientPage({ word }: { word: string }) {
+    // PREFETCHING OPTIMIZATION: Start fetching data immediately while child components load
+    useSearch(decodeURIComponent(word), null)
+
     const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
 
     return (

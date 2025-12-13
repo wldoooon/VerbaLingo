@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, ArrowRight, ChevronDown, Check, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useSearchParams } from '@/context/SearchParamsContext';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -51,7 +51,13 @@ export function SearchBar() {
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+    const pathname = usePathname();
     const { setLanguage } = useSearchParams();
+
+    // Reset searching state on path change
+    useEffect(() => {
+        setIsSearching(false);
+    }, [pathname]);
 
     // Load recent searches
     useEffect(() => {
@@ -112,10 +118,20 @@ export function SearchBar() {
         const q = searchQuery || query;
         if (!q.trim()) return;
 
+        const targetPath = `/watch/${encodeURIComponent(q.trim())}`;
+
+        // Check if we are already on the target page. 
+        // If yes, we don't show the spinner because navigation won't trigger a pathname change effect to clear it.
+        // TanStack Query will handle background refetching if data is stale.
+        if (pathname === decodeURIComponent(targetPath) || pathname === targetPath) {
+            router.push(targetPath);
+            return;
+        }
+
         saveToRecent(q);
         setShowRecent(false);
         setIsSearching(true);
-        router.push(`/watch/${encodeURIComponent(q.trim())}`);
+        router.push(targetPath);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {

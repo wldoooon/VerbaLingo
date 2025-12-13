@@ -1,7 +1,6 @@
 "use client"
 
-import dynamic from "next/dynamic"
-const YouTube = dynamic(() => import("react-youtube"), { ssr: false })
+import YouTube from "react-youtube"
 import { useRef } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
