@@ -127,15 +127,15 @@ export function SearchBar() {
             <div className={cn(
                 "group relative rounded-xl transition-all duration-300 ease-in-out p-[1.5px]",
                 showRecent && recentSearches.length > 0
-                    ? "rounded-b-none shadow-xl"
-                    : "hover:shadow-xl hover:-translate-y-0.5 shadow-lg"
+                    ? "rounded-b-none"
+                    : "hover:-translate-y-0.5"
             )}>
                 {/* Static Border (Fades out when focused) */}
                 <div className="absolute inset-0 rounded-xl border border-border group-focus-within:border-transparent transition-colors pointer-events-none" />
 
                 {/* Animated Gradient Border Layer */}
-                <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-500">
-                    <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#0000_50%,#3b82f6_100%)] animate-spin-slow" />
+                <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 p-[1.5px] [mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [mask-composite:exclude]">
+                    <div className="absolute top-0 h-full w-1/2 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-border-flow" />
                 </div>
 
                 {/* Inner Content */}
