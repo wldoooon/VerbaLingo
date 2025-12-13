@@ -1,17 +1,20 @@
 "use client"
 
-import YouTube from "react-youtube"
-import { useRef } from "react"
+import YouTube, { YouTubePlayer } from "react-youtube"
+import { useRef, useEffect } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useSearch } from "@/lib/useApi"
-import { YouTubePlayer } from "react-youtube"
+import { cn } from "@/lib/utils"
 
 function getClipStart(clip: any): number {
   if (!clip) return 0
-  if (typeof clip.start === "number") return clip.start
-  if (typeof clip.start_time === "number") return clip.start_time
-  return 0
+  let start = 0
+  if (typeof clip.start === "number") start = clip.start
+  else if (typeof clip.start_time === "number") start = clip.start_time
+
+  // Start 2.5s early to ensure context before the keyword
+  return Math.max(0, start - 2.5)
 }
 
 type VideoPlayerCardProps = {
@@ -27,15 +30,53 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
   const { data } = useSearch(query, category)
   const playlist = data?.hits || []
 
+  // Triple Player Logic (Pool of 3)
+  const activeKey = (['A', 'B', 'C'] as const)[currentVideoIndex % 3]
+
+  const windowIndices = [currentVideoIndex, currentVideoIndex + 1, currentVideoIndex + 2]
+
+  const indexA = windowIndices.find(i => i % 3 === 0)
+  const indexB = windowIndices.find(i => i % 3 === 1)
+  const indexC = windowIndices.find(i => i % 3 === 2)
+
+  const clipA = indexA !== undefined ? playlist[indexA] : undefined
+  const clipB = indexB !== undefined ? playlist[indexB] : undefined
+  const clipC = indexC !== undefined ? playlist[indexC] : undefined
+
+  const playerARef = useRef<YouTubePlayer | null>(null)
+  const playerBRef = useRef<YouTubePlayer | null>(null)
+  const playerCRef = useRef<YouTubePlayer | null>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Defensive: clamp currentVideoIndex to valid range
-  const validIndex = Math.max(0, Math.min(currentVideoIndex, playlist.length - 1))
-  const currentClip = playlist[validIndex]
-  const currentVideoId = currentClip?.video_id
+  // Sync global playerRef & JIT Seek
+  useEffect(() => {
+    let newActivePlayer: YouTubePlayer | null = null
+    if (activeKey === 'A') newActivePlayer = playerARef.current
+    if (activeKey === 'B') newActivePlayer = playerBRef.current
+    if (activeKey === 'C') newActivePlayer = playerCRef.current
 
-  const rawStart = getClipStart(currentClip)
-  const startSec = Math.max(0, Math.floor(rawStart))
+    playerRef.current = newActivePlayer
+
+    if (newActivePlayer && typeof newActivePlayer.playVideo === 'function') {
+      // JIT Seek: Ensure the transition lands on the exact frame
+      const activeClip = activeKey === 'A' ? clipA : activeKey === 'B' ? clipB : clipC
+      if (activeClip) {
+        const start = getClipStart(activeClip)
+        newActivePlayer.seekTo(start, true)
+      }
+
+      newActivePlayer.playVideo()
+
+      if (isMuted) {
+        if (typeof newActivePlayer.mute === 'function') newActivePlayer.mute()
+      } else {
+        if (typeof newActivePlayer.unMute === 'function') {
+          newActivePlayer.unMute()
+          try { newActivePlayer.setVolume(100) } catch { }
+        }
+      }
+    }
+  }, [activeKey, playerRef, isMuted, clipA, clipB, clipC])
 
   const startPolling = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -48,38 +89,84 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
   }
 
   const stopPolling = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current)
-    }
+    if (intervalRef.current) clearInterval(intervalRef.current)
   }
 
-  // Event handler: YouTube player state changed
-  const onPlayerStateChange = (event: { data: number }) => {
+  const onStateChange = (event: { data: number; target: any }, key: 'A' | 'B' | 'C') => {
+    if (key !== activeKey) {
+      if (event.data === 1 && typeof event.target.mute === 'function') {
+        event.target.mute()
+      }
+      return
+    }
+
     const isNowPlaying = event.data === 1
+
+    if (isNowPlaying && !isMuted) {
+      event.target.unMute()
+    }
 
     setPlayerState(prev => ({ ...prev, isPlaying: isNowPlaying }))
 
-    if (isNowPlaying) {
-      startPolling()
+    if (isNowPlaying) startPolling()
+    else stopPolling()
+  }
+
+  // Effect: Recycled players must be manually seeked when their video changes
+  useEffect(() => {
+    if (playerARef.current && clipA) {
+      playerARef.current.seekTo(getClipStart(clipA), true)
+      if (activeKey !== 'A') playerARef.current.playVideo()
+    }
+  }, [clipA?.video_id])
+
+  useEffect(() => {
+    if (playerBRef.current && clipB) {
+      playerBRef.current.seekTo(getClipStart(clipB), true)
+      if (activeKey !== 'B') playerBRef.current.playVideo()
+    }
+  }, [clipB?.video_id])
+
+  useEffect(() => {
+    if (playerCRef.current && clipC) {
+      playerCRef.current.seekTo(getClipStart(clipC), true)
+      if (activeKey !== 'C') playerCRef.current.playVideo()
+    }
+  }, [clipC?.video_id])
+
+
+  const onReady = (event: { target: YouTubePlayer }, key: 'A' | 'B' | 'C') => {
+    if (key === 'A') playerARef.current = event.target
+    if (key === 'B') playerBRef.current = event.target
+    if (key === 'C') playerCRef.current = event.target
+
+    let clip: any = null
+    if (key === 'A') clip = clipA
+    if (key === 'B') clip = clipB
+    if (key === 'C') clip = clipC
+
+    if (clip) {
+      const start = getClipStart(clip)
+      event.target.seekTo(start, true)
+    }
+
+    if (key === activeKey) {
+      playerRef.current = event.target
+      setPlayerState(prev => ({ ...prev, duration: event.target.getDuration() }))
+      if (!isMuted) event.target.unMute()
     } else {
-      stopPolling()
+      event.target.mute()
     }
   }
 
-  const onPlayerReady = (event: { target: YouTubePlayer }) => {
-    playerRef.current = event.target
-    const duration = event.target.getDuration()
-    setPlayerState(prev => ({ ...prev, duration }))
-  }
-
-  const opts = {
+  const getOpts = (clip: any) => ({
     height: "100%",
     width: "100%",
     playerVars: {
       autoplay: 1,
       playsinline: 1,
-      mute: isMuted ? 1 : 0,
-      start: startSec,
+      mute: 1,
+      start: Math.max(0, Math.floor(getClipStart(clip))),
       modestbranding: 1,
       rel: 0,
       controls: 0,
@@ -88,25 +175,60 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
       iv_load_policy: 3,
       cc_load_policy: 0,
       loop: 1,
-      playlist: currentVideoId,
+      playlist: clip?.video_id,
     },
     loading: "eager",
-  } as const
+  } as const)
 
   return (
     <div className={className}>
       <div className="relative w-full h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] overflow-hidden rounded-2xl bg-black">
-        {/* YouTube Player */}
-        {currentVideoId && (
-          <YouTube
-            videoId={currentVideoId}
-            opts={opts}
-            onReady={onPlayerReady}
-            onStateChange={onPlayerStateChange}
-            className="absolute inset-0 w-full h-full"
-            iframeClassName="w-full h-full"
-          />
-        )}
+
+        {/* Layer A */}
+        <div className={cn("absolute inset-0 w-full h-full transition-opacity duration-300",
+          activeKey === 'A' ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none")}>
+          {clipA && (
+            <YouTube
+              videoId={clipA.video_id}
+              opts={getOpts(clipA)}
+              onReady={(e) => onReady(e, 'A')}
+              onStateChange={(e) => onStateChange(e, 'A')}
+              className="w-full h-full"
+              iframeClassName="w-full h-full"
+            />
+          )}
+        </div>
+
+        {/* Layer B */}
+        <div className={cn("absolute inset-0 w-full h-full transition-opacity duration-300",
+          activeKey === 'B' ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none")}>
+          {clipB && (
+            <YouTube
+              videoId={clipB.video_id}
+              opts={getOpts(clipB)}
+              onReady={(e) => onReady(e, 'B')}
+              onStateChange={(e) => onStateChange(e, 'B')}
+              className="w-full h-full"
+              iframeClassName="w-full h-full"
+            />
+          )}
+        </div>
+
+        {/* Layer C */}
+        <div className={cn("absolute inset-0 w-full h-full transition-opacity duration-300",
+          activeKey === 'C' ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none")}>
+          {clipC && (
+            <YouTube
+              videoId={clipC.video_id}
+              opts={getOpts(clipC)}
+              onReady={(e) => onReady(e, 'C')}
+              onStateChange={(e) => onStateChange(e, 'C')}
+              className="w-full h-full"
+              iframeClassName="w-full h-full"
+            />
+          )}
+        </div>
+
       </div>
     </div>
   )
