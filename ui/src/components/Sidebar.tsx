@@ -76,11 +76,11 @@ const Sidebar: React.FC = () => {
   const supportNav = [
     { icon: LifeBuoy, label: 'Support', view: ViewState.LANDING },
     { icon: MessageSquare, label: 'Feedback', view: ViewState.LANDING },
+    { icon: Settings, label: 'Settings', view: ViewState.PROFILE },
   ];
 
   const bottomNav = [
     { icon: User, label: 'Profile', view: ViewState.PROFILE },
-    { icon: Settings, label: 'Settings', view: ViewState.PROFILE },
   ];
 
   return (
@@ -204,23 +204,37 @@ const Sidebar: React.FC = () => {
           </div>
         </div>
 
+        {/* Cat Image & Promo */}
+        {!isCollapsed && (
+          <div className="mt-6 mx-1 flex flex-col items-center justify-center text-center space-y-3 animate-fade-in">
+            {/* Cat Image */}
+            <div className="w-48 h-48 relative sm:w-52 sm:h-52 hover:scale-105 transition-transform duration-500 ease-out cursor-pointer -my-4">
+              <img src="/cat_logo1.png" alt="Get Started" className="w-full h-full object-contain drop-shadow-2xl" />
+            </div>
+
+            {/* Text & Action */}
+            <div className="w-full px-2 space-y-3">
+              <div>
+                <h3 className="text-lg font-bold text-foreground">First Step</h3>
+                <p className="text-xs text-muted-foreground mt-1 px-2 leading-relaxed">
+                  Start your journey with a quick interactive tutorial.
+                </p>
+              </div>
+
+              <button className="w-full py-2.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-2 group/btn">
+                <span>Get Started</span>
+                <Sparkles className="w-3.5 h-3.5 group-hover/btn:rotate-12 transition-transform" />
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* 3. Bottom Credits & Actions */}
       <div className="p-3 bg-transparent">
 
-        {/* Cat Image & Promo */}
-        {!isCollapsed && (
-          <div className="mb-6 flex flex-col items-center justify-center text-center space-y-2 animate-fade-in">
-            <div className="w-40 h-40 relative hover:scale-105 transition-transform duration-300">
-              <img src="/cat_logo1.png" alt="Get Started" className="w-full h-full object-contain drop-shadow-xl" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-foreground">First Step</h3>
-              <p className="text-sm text-muted-foreground font-medium">Get Started</p>
-            </div>
-          </div>
-        )}
+
 
         {/* Credits Trigger */}
         <div className="mb-2 relative">
