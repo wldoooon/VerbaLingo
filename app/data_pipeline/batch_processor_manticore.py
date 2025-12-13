@@ -2,11 +2,18 @@ import json
 import asyncio
 import argparse
 import httpx
+import hashlib
 import manticoresearch
 from jsonl_reader import read_jsonl_lines
 
 MANTICORE_URL = "http://localhost:9308"
 TABLE_NAME = "english_dataset"
+
+def generate_sentence_id(video_id: str, position: int) -> int:
+    """Generate a stable 64-bit integer ID from video_id and position"""
+    unique_str = f"{video_id}_{position}"
+    hash_hex = hashlib.md5(unique_str.encode()).hexdigest()[:15]
+    return int(hash_hex, 16)
 
 
 async def get_api_client():
@@ -74,7 +81,7 @@ async def create_table(reset: bool = False):
 async def get_stats():
     try:
         result = await execute_sql(f"SHOW TABLE {TABLE_NAME} STATUS")
-        print(f"\nTable Stats for '{TABLE_NAME}':")
+        print(f"\\nTable Stats for '{TABLE_NAME}':")
         
         if result.get("error"):
             print(f"   Error: {result['error']}")
@@ -98,10 +105,9 @@ async def get_stats():
 async def import_documents(index_api: manticoresearch.IndexApi, file_path: str, batch_size: int = 1000):
     batch = []
     total_imported = 0
-    doc_id = 1
     video_count = 0
     
-    print(f"\nStarting import from: {file_path}")
+    print(f"\\nStarting import from: {file_path}")
     print(f"   Batch size: {batch_size}")
     
     for line_num, video_doc in enumerate(read_jsonl_lines(file_path), 1):
@@ -118,6 +124,8 @@ async def import_documents(index_api: manticoresearch.IndexApi, file_path: str, 
         video_count += 1
         
         for position, sentence in enumerate(sentences):
+            doc_id = generate_sentence_id(video_id, position)
+            
             manticore_doc = {
                 "insert": {
                     "table": TABLE_NAME,
@@ -126,7 +134,7 @@ async def import_documents(index_api: manticoresearch.IndexApi, file_path: str, 
                         "sentence_text": sentence.get("sentence_text", ""),
                         "video_id": video_id,
                         "channel": channel,
-                        "category_title": category,
+                        "category_title": "Cartoons",
                         "category_type": category,
                         "language": language,
                         "video_title": video_title,
@@ -139,7 +147,6 @@ async def import_documents(index_api: manticoresearch.IndexApi, file_path: str, 
             }
             
             batch.append(manticore_doc)
-            doc_id += 1
             
             if len(batch) >= batch_size:
                 await flush_batch(index_api, batch)
@@ -158,16 +165,29 @@ async def import_documents(index_api: manticoresearch.IndexApi, file_path: str, 
 
 
 async def flush_batch(index_api: manticoresearch.IndexApi, batch: list):
-    try:
-        ndjson_body = "\n".join(json.dumps(doc) for doc in batch)
-        await index_api.bulk(ndjson_body)
-    except Exception as e:
-        print(f"\nBulk insert error: {e}")
-        for doc in batch:
-            try:
-                await index_api.insert(doc["insert"])
-            except Exception as single_err:
-                print(f"   Failed document: {doc['insert']['doc'].get('video_id')}: {single_err}")
+    max_retries = 3
+    retry_delay = 2
+    
+    for attempt in range(max_retries):
+        try:
+            ndjson_body = "\n".join(json.dumps(doc) for doc in batch)
+            await index_api.bulk(ndjson_body)
+            return  # Success, exit function
+            
+        except Exception as e:
+            if attempt < max_retries - 1:
+                print(f"\nBulk error (attempt {attempt+1}/{max_retries}): {e}")
+                print(f"Waiting {retry_delay}s before retry...")
+                await asyncio.sleep(retry_delay)
+                retry_delay *= 2  # Exponential backoff
+            else:
+                print(f"\nFinal Bulk insert error: {e}")
+                print("Falling back to single inserts...")
+                for doc in batch:
+                    try:
+                        await index_api.insert(doc["insert"])
+                    except Exception as single_err:
+                        print(f"   Failed document: {doc['insert']['doc'].get('video_id')}: {single_err}")
 
 
 async def main():

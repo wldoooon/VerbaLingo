@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams } from "@/context/SearchParamsContext";
 import { Button } from "@/components/ui/button";
 import { Response } from "@/components/ui/shadcn-io/ai/response";
-import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight, Bot } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
@@ -168,13 +168,17 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
     return (
         <div className="w-full h-full flex flex-col">
-            <div className="relative w-full h-full flex flex-col bg-card dark:bg-zinc-950/80 dark:backdrop-blur-xl rounded-2xl p-6 shadow-xl dark:shadow-2xl dark:shadow-slate-950/50 border border-border">
+            <div className="relative w-full h-full flex flex-col bg-card p-6">
 
                 <header className="w-full flex-shrink-0">
 
 
                     <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center">
-                        {query ? `Learning about "${query}"` : "What do you want to learn?"}
+                        {query ? (
+                            <>
+                                Learning about <span className="text-primary">"{query}"</span>
+                            </>
+                        ) : "What do you want to learn?"}
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-4 max-w-lg mx-auto text-center">
                         {query
@@ -193,6 +197,11 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                 </header>
 
                 <main className="w-full flex-1 flex flex-col mt-6 space-y-6 min-h-0">
+                    <div className="flex items-center gap-4 px-8 opacity-60 mb-2">
+                        <div className="h-px bg-border flex-1" />
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Today</span>
+                        <div className="h-px bg-border flex-1" />
+                    </div>
                     {/* Suggestions */}
                     <AnimatePresence>
                         {!shouldHideSuggestions && (
@@ -225,6 +234,29 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                             </motion.div>
                         )}
                     </AnimatePresence>
+
+                    {/* Separator */}
+                    <div className="w-full px-8">
+                        <div className="h-px bg-border/40 my-2" />
+                    </div>
+
+                    {/* AI Welcome Message - Only show when idle */}
+                    {!isLoading && !completion && !error && query && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="px-4 mt-6 max-w-2xl mx-auto"
+                        >
+                            <div className="space-y-2">
+                                <p className="text-base text-card-foreground/90 leading-relaxed bg-muted/50 p-5 border border-border/50 shadow-sm rounded-tr-2xl rounded-br-2xl rounded-bl-2xl rounded-tl-none">
+                                    Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
+                                    <br /><br />
+                                    Try tapping a suggestion above or type your own question below!
+                                </p>
+                            </div>
+                        </motion.div>
+                    )}
 
                     {/* Response Section */}
                     <AnimatePresence>
@@ -379,7 +411,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         <Input
                             type="text"
                             placeholder="Ask about pronunciation, definitions, examples..."
-                            className="w-full rounded-full pl-10 pr-10 py-6 bg-card shadow-sm"
+                            className="w-full rounded-full pl-10 pr-10 py-6 bg-muted shadow-sm border-transparent focus-visible:bg-background transition-colors"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyPress={handleKeyPress}
@@ -392,6 +424,11 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         >
                             <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
                         </button>
+                    </div>
+                    <div className="text-center mt-3 px-4">
+                        <p className="text-[10px] text-muted-foreground/50 font-medium tracking-wide">
+                            AI can make mistakes. Please verify important information.
+                        </p>
                     </div>
                 </footer>
             </div>

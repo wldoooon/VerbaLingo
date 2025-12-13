@@ -25,7 +25,7 @@ const userData = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning  style={{fontSize: '80%'}}>
+    <html lang="en" suppressHydrationWarning style={{ fontSize: '80%' }}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=0.80, maximum-scale=1.0, user-scalable=yes" />
         <link rel="preconnect" href="https://www.youtube.com" />
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://s.ytimg.com" />
       </head>
       <body
-        className={`${inter.className} white overflow-x-hidden min-h-screen bg-transparent`}
+        className={`${inter.className} white overflow-x-hidden min-h-screen bg-background`}
         style={{ fontSize: '85%' }}
         suppressHydrationWarning
       >
@@ -47,19 +47,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           disableTransitionOnChange
         >
           {/* Background Grid */}
-          <div className="fixed inset-0 z-0 h-full w-full bg-background pointer-events-none">
+          {/* Background Grid - Absolute Positioned at Top */}
+          <div className="absolute top-0 inset-x-0 z-0 h-[100vh] w-full pointer-events-none overflow-hidden">
             {/* Dark Gradient Base */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-muted/40 via-background to-background"></div>
-            
+
             {/* Grid Pattern with Radial Mask */}
-            <div 
-                className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
-                style={{
-                    maskImage: 'radial-gradient(ellipse at 60% 50%, black 20%, transparent 70%), linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
-                    WebkitMaskImage: 'radial-gradient(ellipse at 60% 50%, black 20%, transparent 70%), linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
-                    maskComposite: 'intersect',
-                    WebkitMaskComposite: 'source-in'
-                }}
+            <div
+              className="absolute inset-0 bg-[linear-gradient(to_right,#00000020_1px,transparent_1px),linear-gradient(to_bottom,#00000020_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff15_1px,transparent_1px),linear-gradient(to_bottom,#ffffff15_1px,transparent_1px)] bg-[size:60px_60px]"
+              style={{
+                maskImage: 'radial-gradient(ellipse at 60% 50%, black 20%, transparent 70%), linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+                WebkitMaskImage: 'radial-gradient(ellipse at 60% 50%, black 20%, transparent 70%), linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+                maskComposite: 'intersect',
+                WebkitMaskComposite: 'source-in'
+              }}
             ></div>
           </div>
 

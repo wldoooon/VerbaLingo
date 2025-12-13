@@ -54,43 +54,32 @@ export default function WatchClientPage({ word }: { word: string }) {
         <>
             <SearchParamSyncer word={word} />
 
-            <main className="flex-1 p-2 sm:p-4 lg:p-6 overflow-hidden">
-                    <div className="max-w-[1800px] mx-auto h-full">
-                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 h-full">
-                            {/* Left Column: Video & Transcript */}
-                            <div className="xl:col-span-2 flex flex-col gap-4 min-w-0">
-                                {/* Video Player Section */}
-                                <div className="w-full">
-                                    <Suspense fallback={<VideoPlayerSkeleton />}>
-                                        <VideoPlayerCard className="w-full shadow-2xl rounded-2xl overflow-hidden border border-border/50" />
-                                    </Suspense>
-                                </div>
-
-                                {/* Controls & Transcript Section */}
-                                <div className="w-full">
-                                    <Suspense fallback={<TranscriptSkeleton />}>
-                                        <AudioCard
-                                            src=""
-                                            title=""
-                                            searchQuery={decodeURIComponent(word)}
-                                            onExplainWordPrompt={setExternalPrompt}
-                                            className="border border-border/50 bg-card/50 backdrop-blur-sm"
-                                        />
-                                    </Suspense>
-                                </div>
-                            </div>
-
-                            {/* Right Column: AI Assistant */}
-                            <div className="xl:col-span-1 h-full min-w-0">
-                                <div className="sticky top-6 h-full">
-                                    <Suspense fallback={<AiCompletionSkeleton />}>
-                                        <AiCompletion externalPrompt={externalPrompt} />
-                                    </Suspense>
-                                </div>
-                            </div>
-                        </div>
+            {/* Main Content */}
+            <div className="flex-1">
+                <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-start">
+                    {/* Left: Player + Audio */}
+                    <div className="space-y-4 p-4 sm:p-6 pb-12 lg:pb-6">
+                        <Suspense fallback={<VideoPlayerSkeleton />}>
+                            <VideoPlayerCard />
+                        </Suspense>
+                        <Suspense fallback={<TranscriptSkeleton />}>
+                            <AudioCard
+                                src=""
+                                title=""
+                                searchQuery={decodeURIComponent(word)}
+                                onExplainWordPrompt={setExternalPrompt}
+                            />
+                        </Suspense>
                     </div>
-                </main>
+
+                    {/* Right: AI */}
+                    <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0 sticky top-0 h-[calc(100vh-5rem)] overflow-hidden border-l">
+                        <Suspense fallback={<AiCompletionSkeleton />}>
+                            <AiCompletion externalPrompt={externalPrompt} />
+                        </Suspense>
+                    </div>
+                </div>
+            </div>
         </>
     )
 }
