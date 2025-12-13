@@ -125,183 +125,194 @@ export function SearchBar() {
     return (
         <div className="w-full max-w-3xl relative z-30" ref={containerRef}>
             <div className={cn(
-                "rounded-xl border border-border bg-card text-card-foreground transition-all duration-300 ease-in-out p-1 flex flex-row items-center shadow-lg",
+                "group relative rounded-xl transition-all duration-300 ease-in-out p-[1.5px]",
                 showRecent && recentSearches.length > 0
-                    ? "rounded-b-none shadow-xl ring-1 ring-ring/10"
-                    : "hover:shadow-xl hover:-translate-y-0.5"
+                    ? "rounded-b-none shadow-xl"
+                    : "hover:shadow-xl hover:-translate-y-0.5 shadow-lg"
             )}>
+                {/* Static Border (Fades out when focused) */}
+                <div className="absolute inset-0 rounded-xl border border-border group-focus-within:border-transparent transition-colors pointer-events-none" />
 
-                {/* Category Dropdown */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className={cn(
-                                "h-9 px-3 rounded-lg gap-2 font-semibold text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground",
-                            )}
-                        >
-                            <div className="flex items-center gap-2">
-                                {/* Animated Filter Icon Replacement */}
-                                <svg
-                                    className={cn("w-4 h-4 transition-colors")}
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <line x1="4" y1="6" x2="20" y2="6" />
-                                    <line x1="4" y1="18" x2="12" y2="18" />
-                                </svg>
-                                <span className="hidden md:inline">{getCategoryLabel()}</span>
-                                <ChevronDown className="w-4 h-4 opacity-50" />
-                            </div>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[200px] p-2 rounded-xl" sideOffset={8}>
-                        <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
-                            Search Context
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                            {CATEGORIES.map((cat) => (
-                                <DropdownMenuCheckboxItem
-                                    key={cat.value}
-                                    checked={isCategorySelected(cat.value)}
-                                    onCheckedChange={() => toggleCategory(cat.value)}
-                                    className="rounded-lg py-2.5 cursor-pointer"
-                                >
-                                    {cat.label}
-                                </DropdownMenuCheckboxItem>
-                            ))}
-                        </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Divider */}
-                <div className="w-px h-6 bg-border mx-2 hidden sm:block" />
-
-                {/* Unified Input Area */}
-                <div className="flex-1 relative flex items-center min-w-0">
-                    {/* Animated placeholder */}
-                    {!query && (
-                        <div className="pointer-events-none absolute left-3 right-12 flex items-center top-1/2 -translate-y-1/2 overflow-hidden">
-                            <TextType
-                                text={[
-                                    "hello, how are you today?",
-                                    "مرحبا، أين يمكنني أن أجد محطة المترو؟",
-                                    "guten Tag, ich hätte gerne ein Stück Kuchen",
-                                    "bonjour, pouvez-vous m'aider?",
-                                    "你好，我想学习如何做这道菜",
-                                ]}
-                                typingSpeed={75}
-                                pauseDuration={1500}
-                                showCursor={true}
-                                cursorCharacter="|"
-                                className="text-sm text-muted-foreground/50 font-normal whitespace-nowrap"
-                            />
-                        </div>
-                    )}
-
-                    <Input
-                        ref={inputRef}
-                        type="text"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onFocus={() => setShowRecent(true)}
-                        onKeyDown={handleKeyDown}
-                        className="border-0 shadow-none focus-visible:ring-0 px-3 h-9 text-base font-medium placeholder:text-transparent min-w-0"
-                    />
-
-                    {query && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                                setQuery('');
-                                inputRef.current?.focus();
-                            }}
-                            className="h-7 w-7 rounded-full absolute right-2 text-muted-foreground hover:bg-muted"
-                        >
-                            <X className="w-3.5 h-3.5" />
-                        </Button>
-                    )}
+                {/* Animated Gradient Border Layer */}
+                <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-500">
+                    <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[conic-gradient(from_90deg_at_50%_50%,#0000_0%,#0000_50%,#3b82f6_100%)] animate-spin-slow" />
                 </div>
 
-                {/* Language Dropdown */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className={cn(
-                                "h-9 px-2 sm:px-3 rounded-lg gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground mr-1"
-                            )}
-                        >
-                            <div className="w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border flex-shrink-0">
-                                <img
-                                    src={LANGUAGES.find(l => l.value === selectedLanguage)?.flag || LANGUAGES[0].flag}
-                                    alt={selectedLanguage}
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                            <span className="hidden md:inline">{selectedLanguage}</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[180px] p-2 rounded-xl" sideOffset={8}>
-                        <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
-                            Language
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {LANGUAGES.map((lang) => (
-                            <DropdownMenuItem
-                                key={lang.value}
-                                onClick={() => {
-                                    setSelectedLanguage(lang.value);
-                                    setLanguage(lang.value);
-                                }}
+                {/* Inner Content */}
+                <div className="relative z-10 bg-muted/20 backdrop-blur-md rounded-[10px] flex flex-row items-center p-1 w-full h-full">
+
+                    {/* Category Dropdown */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="sm"
                                 className={cn(
-                                    "rounded-lg py-2.5 cursor-pointer flex items-center justify-between",
-                                    selectedLanguage === lang.value && "bg-accent text-accent-foreground"
+                                    "h-9 px-3 rounded-lg gap-2 font-semibold text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground",
                                 )}
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border/50">
-                                        <img src={lang.flag} alt={lang.value} className="w-full h-full object-cover" />
-                                    </div>
-                                    <span className="text-sm font-medium">{lang.label}</span>
+                                <div className="flex items-center gap-2">
+                                    {/* Animated Filter Icon Replacement */}
+                                    <svg
+                                        className={cn("w-4 h-4 transition-colors")}
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <line x1="4" y1="6" x2="20" y2="6" />
+                                        <line x1="4" y1="18" x2="12" y2="18" />
+                                    </svg>
+                                    <span className="hidden md:inline">{getCategoryLabel()}</span>
+                                    <ChevronDown className="w-4 h-4 opacity-50" />
                                 </div>
-                                {selectedLanguage === lang.value && <Check className="w-4 h-4 ml-2" />}
-                            </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-[200px] p-2 rounded-xl" sideOffset={8}>
+                            <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
+                                Search Context
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuGroup>
+                                {CATEGORIES.map((cat) => (
+                                    <DropdownMenuCheckboxItem
+                                        key={cat.value}
+                                        checked={isCategorySelected(cat.value)}
+                                        onCheckedChange={() => toggleCategory(cat.value)}
+                                        className="rounded-lg py-2.5 cursor-pointer"
+                                    >
+                                        {cat.label}
+                                    </DropdownMenuCheckboxItem>
+                                ))}
+                            </DropdownMenuGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
-                {/* Search Action Button */}
-                <Button
-                    size="icon"
-                    onClick={() => handleSearch()}
-                    disabled={!query.trim() || isSearching}
-                    className={cn(
-                        "h-9 w-9 rounded-lg shadow-lg transition-all duration-300 shrink-0",
-                        query.trim()
-                            ? 'bg-primary text-primary-foreground hover:scale-105 hover:bg-primary/90'
-                            : 'bg-muted text-muted-foreground shadow-none'
-                    )}
-                >
-                    {isSearching ? (
-                        <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
-                    ) : (
-                        <ArrowRight className="w-4 h-4" />
-                    )}
-                </Button>
+                    {/* Divider */}
+                    <div className="w-px h-6 bg-border mx-2 hidden sm:block" />
+
+                    {/* Unified Input Area */}
+                    <div className="flex-1 relative flex items-center min-w-0">
+                        {/* Animated placeholder */}
+                        {!query && (
+                            <div className="pointer-events-none absolute left-3 right-12 flex items-center top-1/2 -translate-y-1/2 overflow-hidden">
+                                <TextType
+                                    text={[
+                                        "hello, how are you today?",
+                                        "مرحبا، أين يمكنني أن أجد محطة المترو؟",
+                                        "guten Tag, ich hätte gerne ein Stück Kuchen",
+                                        "bonjour, pouvez-vous m'aider?",
+                                        "你好，我想学习如何做这道菜",
+                                    ]}
+                                    typingSpeed={75}
+                                    pauseDuration={1500}
+                                    showCursor={true}
+                                    cursorCharacter="|"
+                                    className="text-sm text-muted-foreground/50 font-normal whitespace-nowrap"
+                                />
+                            </div>
+                        )}
+
+                        <Input
+                            ref={inputRef}
+                            type="text"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            onFocus={() => setShowRecent(true)}
+                            onKeyDown={handleKeyDown}
+                            className="border-0 shadow-none focus-visible:ring-0 px-3 h-9 text-base font-medium placeholder:text-transparent min-w-0"
+                        />
+
+                        {query && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                    setQuery('');
+                                    inputRef.current?.focus();
+                                }}
+                                className="h-7 w-7 rounded-full absolute right-2 text-muted-foreground hover:bg-muted"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </Button>
+                        )}
+                    </div>
+
+                    {/* Language Dropdown */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className={cn(
+                                    "h-9 px-2 sm:px-3 rounded-lg gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground mr-1"
+                                )}
+                            >
+                                <div className="w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border flex-shrink-0">
+                                    <img
+                                        src={LANGUAGES.find(l => l.value === selectedLanguage)?.flag || LANGUAGES[0].flag}
+                                        alt={selectedLanguage}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <span className="hidden md:inline">{selectedLanguage}</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-[180px] p-2 rounded-xl" sideOffset={8}>
+                            <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
+                                Language
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            {LANGUAGES.map((lang) => (
+                                <DropdownMenuItem
+                                    key={lang.value}
+                                    onClick={() => {
+                                        setSelectedLanguage(lang.value);
+                                        setLanguage(lang.value);
+                                    }}
+                                    className={cn(
+                                        "rounded-lg py-2.5 cursor-pointer flex items-center justify-between",
+                                        selectedLanguage === lang.value && "bg-accent text-accent-foreground"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border/50">
+                                            <img src={lang.flag} alt={lang.value} className="w-full h-full object-cover" />
+                                        </div>
+                                        <span className="text-sm font-medium">{lang.label}</span>
+                                    </div>
+                                    {selectedLanguage === lang.value && <Check className="w-4 h-4 ml-2" />}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    {/* Search Action Button */}
+                    <Button
+                        size="icon"
+                        onClick={() => handleSearch()}
+                        disabled={!query.trim() || isSearching}
+                        className={cn(
+                            "h-9 w-9 rounded-lg shadow-lg transition-all duration-300 shrink-0",
+                            query.trim()
+                                ? 'bg-primary text-primary-foreground hover:scale-105 hover:bg-primary/90'
+                                : 'bg-muted text-muted-foreground shadow-none'
+                        )}
+                    >
+                        {isSearching ? (
+                            <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                        ) : (
+                            <ArrowRight className="w-4 h-4" />
+                        )}
+                    </Button>
+                </div>
             </div>
 
             {/* Recent Searches Panel */}
             {showRecent && recentSearches.length > 0 && (
-                <Card className="absolute top-full left-0 right-0 mt-0 rounded-t-none rounded-b-2xl shadow-xl border-t-0 animate-in fade-in-0 zoom-in-95 z-20">
+                <Card className="absolute top-full left-0 right-0 mt-0 rounded-t-none rounded-b-2xl shadow-xl border-t-0 animate-in fade-in-0 zoom-in-95 z-20 bg-muted/20 backdrop-blur-md">
                     <CardContent className="p-2">
                         <div className="text-[10px] font-bold text-muted-foreground px-4 py-2 uppercase tracking-wider flex items-center gap-2">
                             <Clock className="w-3 h-3" /> Recent Searches
