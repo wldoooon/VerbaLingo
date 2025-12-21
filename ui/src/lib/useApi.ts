@@ -17,7 +17,9 @@ const fetchSearchResults = async (query: string, category: string | null) => {
     params.append("category", category);
   }
 
-  const response = await fetch(`/api/v1/search?${params.toString()}`);
+  const url = `/api/v1/search?${params.toString()}`;
+
+  const response = await fetch(url);
 
   if (!response.ok) {
     throw new Error("Network response was not ok");
