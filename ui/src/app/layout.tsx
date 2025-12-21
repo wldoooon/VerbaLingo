@@ -56,8 +56,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div
               className="absolute inset-0 bg-[linear-gradient(to_right,#00000020_1px,transparent_1px),linear-gradient(to_bottom,#00000020_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff15_1px,transparent_1px),linear-gradient(to_bottom,#ffffff15_1px,transparent_1px)] bg-[size:60px_60px]"
               style={{
-                maskImage: 'radial-gradient(ellipse at 60% 50%, black 20%, transparent 70%), linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
-                WebkitMaskImage: 'radial-gradient(ellipse at 60% 50%, black 20%, transparent 70%), linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+                maskImage: 'radial-gradient(ellipse at 90% 50%, black 0%, transparent 55%), linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+                WebkitMaskImage: 'radial-gradient(ellipse at 90% 50%, black 0%, transparent 55%), linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
                 maskComposite: 'intersect',
                 WebkitMaskComposite: 'source-in'
               }}

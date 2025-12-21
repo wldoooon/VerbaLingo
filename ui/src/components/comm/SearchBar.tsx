@@ -25,9 +25,9 @@ import TextType from '@/components/TextType';
 const CATEGORIES = [
     { value: 'All', label: 'All' },
     { value: 'Movies', label: 'Movies' },
-    { value: 'TV', label: 'TV Shows' },
+    { value: 'Cartoons', label: 'TV Shows' },
     { value: 'Podcasts', label: 'Podcasts' },
-    { value: 'Music', label: 'Music' },
+    { value: 'Talks', label: 'Music' },
 ];
 
 // Languages with flags
@@ -52,7 +52,13 @@ export function SearchBar() {
     const containerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const pathname = usePathname();
-    const { setLanguage } = useSearchParams();
+    const { setLanguage, setCategory } = useSearchParams();
+
+    // Sync selected categories to global context
+    useEffect(() => {
+        const cats = selectedCategories.includes('All') ? null : selectedCategories.join(',')
+        setCategory(cats)
+    }, [selectedCategories, setCategory])
 
     // Reset searching state on path change
     useEffect(() => {
