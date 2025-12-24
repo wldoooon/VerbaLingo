@@ -22,6 +22,7 @@ class SearchHit(BaseModel):
 class SearchResponse(BaseModel):
     total: int
     hits: List[SearchHit]
+    aggregations: Optional[dict] = None
 
 class TranscriptSentence(BaseModel):
     sentence_text: str

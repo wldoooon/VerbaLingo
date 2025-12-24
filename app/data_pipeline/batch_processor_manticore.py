@@ -115,6 +115,7 @@ async def import_documents(index_api: manticoresearch.IndexApi, file_path: str, 
         video_title = video_doc.get("title", "")
         channel = video_doc.get("channel", "")
         category = video_doc.get("category", "")
+        movie_name = video_doc.get("movie_name", "")
         language = video_doc.get("language", "en")
         sentences = video_doc.get("sentences", [])
         
@@ -134,8 +135,8 @@ async def import_documents(index_api: manticoresearch.IndexApi, file_path: str, 
                         "sentence_text": sentence.get("sentence_text", ""),
                         "video_id": video_id,
                         "channel": channel,
-                        "category_title": "Cartoons",
-                        "category_type": category,
+                        "category_title": "Movies",
+                        "category_type": movie_name,
                         "language": language,
                         "video_title": video_title,
                         "words": json.dumps(sentence.get("words", [])),

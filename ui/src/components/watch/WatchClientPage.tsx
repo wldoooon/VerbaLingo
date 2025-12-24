@@ -33,21 +33,25 @@ const AiCompletion = dynamic(
 import { useSearch } from "@/lib/useApi"
 
 function SearchParamSyncer({ word }: { word: string }) {
-    const { setQuery, setCategory } = useSearchParams()
+    const { setQuery } = useSearchParams()
 
     const decoded = word ? decodeURIComponent(word) : ""
 
     useEffect(() => {
         if (decoded) {
             setQuery(decoded)
-            setCategory(null)
         }
-    }, [decoded, setQuery, setCategory])
+    }, [decoded, setQuery])
 
     return null
 }
 
 export default function WatchClientPage({ word }: { word: string }) {
+    const { category } = useSearchParams()
+    console.log('[WatchClientPage] Current Category:', category)
+    // PREFETCHING OPTIMIZATION: Start fetching data immediately while child components load
+    useSearch(decodeURIComponent(word), category)
+
     const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
 
     return (

@@ -210,12 +210,12 @@ export const TranscriptBox = ({
                                       <button
                                         type="button"
                                         className={cn(
-                                          "mr-2 pb-0.5 border-b-2 border-transparent transition-all duration-300 ease-in-out text-left inline-flex items-end",
+                                          "mr-2 px-1.5 py-0.5 border-2 border-transparent rounded-md transition-colors duration-200 ease-in-out text-left inline-flex items-center",
                                           isSearchMatch && !isCurrentWord &&
-                                          "bg-primary text-primary-foreground px-1 rounded",
+                                          "bg-primary text-primary-foreground font-semibold",
                                           isCurrentWord &&
-                                          "border-b-primary font-semibold",
-                                          "hover:border-b-muted-foreground/70 hover:text-foreground",
+                                          "border-primary font-semibold bg-accent/20",
+                                          !isCurrentWord && !isSearchMatch && "hover:bg-accent/40 hover:text-foreground",
                                         )}
                                       >
                                         {wordText || "\u00A0"}

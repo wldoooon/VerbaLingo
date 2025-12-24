@@ -103,7 +103,12 @@ export function Hero() {
           <div className="text-left relative z-20 flex flex-col justify-center">
 
             {/* Huge Headline */}
-            <h1 className="text-6xl lg:text-8xl font-black text-foreground tracking-tighter leading-[0.9] mb-6">
+            <h1 className="text-6xl lg:text-8xl font-black text-foreground tracking-tighter leading-[0.9] mb-6 relative">
+              {/* Mascot Behind Text */}
+              <div className="absolute -top-80 -left-10 w-64 h-64 md:w-[450px] md:h-[450px] md:-top-66 md:left-50 -z-10 opacity-90 pointer-events-none">
+                <img src="/cat_logo3.png" alt="Mascot" className="w-full h-full object-contain" />
+              </div>
+
               Stop <br />
               Studying. <br />
               <span className="text-primary">

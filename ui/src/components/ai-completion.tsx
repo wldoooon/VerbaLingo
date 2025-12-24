@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
 import { useResponseHistory } from "@/hooks/useResponseHistory";
-import { useCompletion } from "@ai-sdk/react";
 
 interface SmartSuggestion {
     title: string;
@@ -69,13 +68,54 @@ function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
 
 export function AiCompletion({ externalPrompt }: { externalPrompt: string | null }) {
     const { query } = useSearchParams();
-    const { completion, complete, isLoading, error } = useCompletion({
-        api: "/api/v1/completion",
-    });
+
+    // Replacement for useCompletion
+    const [completion, setCompletion] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
+
+    const complete = async (prompt: string) => {
+        setIsLoading(true);
+        setCompletion("");
+        setError(null);
+
+        try {
+            const response = await fetch("/api/v1/completion", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+            if (!response.body) return;
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value, { stream: true });
+                console.log("DEBUG CHUNK:", chunk);
+                setCompletion((prev) => prev + chunk);
+            }
+        } catch (err: any) {
+            console.error("Completion error:", err);
+            setError(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
     const [inputValue, setInputValue] = useState("");
     const currentPromptRef = useRef<string>("");
     const responseContainerRef = useRef<HTMLDivElement>(null);
+    const scrollContentRef = useRef<HTMLDivElement>(null);
     const [maxResponseHeight, setMaxResponseHeight] = useState<number>(400);
+    const [canScroll, setCanScroll] = useState(false);
 
     // Use our custom history hook
     const {
@@ -120,6 +160,24 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         return () => window.removeEventListener('resize', calculateMaxHeight);
     }, [shouldHideSuggestions]);
 
+    // Check if content is scrollable
+    useEffect(() => {
+        const checkScrollable = () => {
+            if (scrollContentRef.current) {
+                const { scrollHeight, clientHeight } = scrollContentRef.current;
+                setCanScroll(scrollHeight > clientHeight);
+            }
+        };
+
+        const timeout = setTimeout(checkScrollable, 100); // Small delay to allow layout update
+        window.addEventListener('resize', checkScrollable);
+
+        return () => {
+            clearTimeout(timeout);
+            window.removeEventListener('resize', checkScrollable);
+        };
+    }, [completion, currentBranch, maxResponseHeight, isLoading]);
+
     const handleSuggestionClick = (suggestion: SmartSuggestion) => {
         setInputValue(suggestion.prompt);
         currentPromptRef.current = suggestion.prompt;
@@ -150,14 +208,14 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         lastHandledPromptRef.current = externalPrompt;
         currentPromptRef.current = externalPrompt;
         complete(externalPrompt);
-    }, [externalPrompt, complete]);
+    }, [externalPrompt]);
 
     // Store completed response as a branch
     useEffect(() => {
         if (!isLoading && completion && completion.trim() && currentPromptRef.current) {
             addBranch(currentPromptRef.current, completion);
         }
-    }, [isLoading, completion, addBranch]);
+    }, [isLoading]); // Removed completion/addBranch from deps to avoid double-add
 
     // Clear input after submission
     useEffect(() => {
@@ -246,14 +304,26 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="px-4 mt-6 max-w-2xl mx-auto"
+                            className="w-full"
                         >
-                            <div className="space-y-2">
-                                <p className="text-base text-card-foreground/90 leading-relaxed bg-muted/50 p-5 border border-border/50 shadow-sm rounded-tr-2xl rounded-br-2xl rounded-bl-2xl rounded-tl-none">
+                            <div className="relative bg-card rounded-xl p-6 text-left border-x">
+                                {/* Top gradient border */}
+                                <div className="absolute top-0 left-0 right-0 flex h-px">
+                                    <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                                    <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                                </div>
+
+                                <div className="text-base text-card-foreground/90 leading-relaxed">
                                     Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
                                     <br /><br />
                                     Try tapping a suggestion above or type your own question below!
-                                </p>
+                                </div>
+
+                                {/* Bottom gradient border */}
+                                <div className="absolute bottom-0 left-0 right-0 flex h-px">
+                                    <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                                    <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                                </div>
                             </div>
                         </motion.div>
                     )}
@@ -289,10 +359,13 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
                                     <div className="relative">
                                         {/* Top blur gradient */}
-                                        <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300" id="top-blur" />
+                                        {canScroll && (
+                                            <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300" id="top-blur" />
+                                        )}
 
                                         {/* Scrollable content */}
                                         <div
+                                            ref={scrollContentRef}
                                             style={{ maxHeight: `${maxResponseHeight}px` }}
                                             className="overflow-y-auto text-card-foreground pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
                                             onScroll={(e) => {
@@ -336,7 +409,9 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                         </div>
 
                                         {/* Bottom blur gradient */}
-                                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300" id="bottom-blur" />
+                                        {canScroll && (
+                                            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300" id="bottom-blur" />
+                                        )}
                                     </div>
 
                                     {/* Bottom gradient border */}
@@ -411,7 +486,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         <Input
                             type="text"
                             placeholder="Ask about pronunciation, definitions, examples..."
-                            className="w-full rounded-full pl-10 pr-10 py-6 bg-muted shadow-sm border-transparent focus-visible:bg-background transition-colors"
+                            className="w-full rounded-full pl-10 pr-10 py-6 bg-muted shadow-sm border border-blue-500/40 focus-visible:bg-background transition-colors"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyPress={handleKeyPress}

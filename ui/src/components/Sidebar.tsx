@@ -89,18 +89,24 @@ const Sidebar: React.FC = () => {
         }`}
     >
       {/* 1. Logo Section */}
-      <div className="h-16 flex items-center justify-center relative shrink-0 border-b border-border">
+      <div className="h-24 flex items-center justify-center relative shrink-0 border-b border-border/60 px-3">
         <div
-          className="flex items-center gap-3 cursor-pointer group"
+          className="flex items-center gap-3 cursor-pointer group w-full p-2 rounded-2xl hover:bg-muted/40 transition-all duration-300"
           onClick={() => onChangeView(ViewState.LANDING)}
         >
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary blur-xl opacity-0 group-hover:opacity-20 transition-opacity rounded-full"></div>
-            <FoxLogo className="w-8 h-8 text-foreground" />
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-transparent flex items-center justify-center shrink-0 border border-primary/10 shadow-sm group-hover:scale-105 transition-transform duration-300">
+            <img src="/logo.png" alt="VerbaLingo" className="w-full h-full object-contain p-1" />
           </div>
 
           {!isCollapsed && (
-            <h1 className="text-lg font-bold text-foreground tracking-tight animate-fade-in">LingoClip</h1>
+            <div className="flex flex-col justify-center animate-fade-in">
+              <h1 className="text-xl font-black text-foreground tracking-tight leading-none mb-0.5">
+                VerbaLingo
+              </h1>
+              <span className="text-[10px] font-bold text-muted-foreground/80 tracking-wider uppercase">
+                AI Learning
+              </span>
+            </div>
           )}
         </div>
       </div>
@@ -221,10 +227,11 @@ const Sidebar: React.FC = () => {
                 </p>
               </div>
 
-              <button className="w-full py-2.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-2 group/btn">
-                <span>Get Started</span>
-                <Sparkles className="w-3.5 h-3.5 group-hover/btn:rotate-12 transition-transform" />
-              </button>
+              <div className="w-full flex justify-center mt-2">
+                <span className="text-blue-500 text-sm font-bold cursor-pointer hover:text-blue-400 transition-colors flex items-center gap-2">
+                  Get Started
+                </span>
+              </div>
             </div>
           </div>
         )}
