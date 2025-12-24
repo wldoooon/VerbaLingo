@@ -5,6 +5,8 @@ import { useRef, useEffect } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchParams } from "@/context/SearchParamsContext"
 import { useSearch } from "@/lib/useApi"
+import { FacetChips } from "@/components/comm/FacetChips"
+import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 function getClipStart(clip: any): number {
@@ -24,6 +26,7 @@ type VideoPlayerCardProps = {
 export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
   const { state, dispatch, playerRef, setPlayerState } = usePlayerContext()
   const { currentVideoIndex, isMuted } = state
+  const router = useRouter()
 
   // Read playlist from React Query cache
   const { query, category } = useSearchParams()
@@ -180,8 +183,20 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
     loading: "eager",
   } as const)
 
+  // Handle facet selection
+  const handleFacetSelect = (facet: string) => {
+    if (query) {
+      router.push(`/search/${encodeURIComponent(query)}/${facet}`)
+    }
+  }
+
   return (
     <div className={className}>
+      <FacetChips
+        aggregations={data?.aggregations}
+        onSelect={handleFacetSelect}
+        className="mb-3 -mt-2"
+      />
       <div className="relative w-full h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] overflow-hidden rounded-2xl bg-black">
 
         {/* Layer A */}
