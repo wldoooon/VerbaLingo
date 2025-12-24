@@ -3,13 +3,21 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { ChevronDown, Check } from "lucide-react"
+import { Check, ChevronsUpDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface FacetChipsProps {
     aggregations?: Record<string, number>
@@ -67,20 +75,20 @@ export function FacetChips({
                                 key={key}
                                 onClick={() => onSelect?.(key)}
                                 className={cn(
-                                    "relative group flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-colors border",
+                                    "relative group flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 border",
                                     isSelected
-                                        ? "bg-primary text-primary-foreground border-primary shadow-md"
-                                        : "bg-background text-muted-foreground border-border hover:border-primary/50 hover:bg-muted/50"
+                                        ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                                        : "bg-card text-muted-foreground border-border hover:border-primary/50 hover:text-foreground hover:shadow-sm"
                                 )}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                             >
                                 <span>{label}</span>
                                 <span className={cn(
                                     "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.2rem] text-center",
                                     isSelected
                                         ? "bg-primary-foreground/20 text-primary-foreground"
-                                        : "bg-muted-foreground/10 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                                        : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
                                 )}>
                                     {count}
                                 </span>
@@ -92,74 +100,47 @@ export function FacetChips({
                 {hasMore && (
                     <Popover open={open} onOpenChange={setOpen}>
                         <PopoverTrigger asChild>
-                            <motion.button
-                                layout
-                                className={cn(
-                                    "flex items-center gap-1 px-3 py-1.5 text-xs font-semibold transition-colors rounded-full border",
-                                    open
-                                        ? "bg-primary/10 text-primary border-primary/30"
-                                        : "text-muted-foreground hover:text-primary bg-transparent hover:bg-muted/30 border-transparent hover:border-border"
-                                )}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                            <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={open}
+                                className="h-9 px-3 text-xs font-semibold rounded-full border-dashed border-muted-foreground/50 hover:border-primary hover:text-primary text-muted-foreground bg-transparent"
                             >
-                                More
-                                <motion.div
-                                    animate={{ rotate: open ? 180 : 0 }}
-                                    transition={{ duration: 0.2 }}
-                                >
-                                    <ChevronDown size={14} />
-                                </motion.div>
-                            </motion.button>
+                                More...
+                                <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+                            </Button>
                         </PopoverTrigger>
-
-                        <PopoverContent
-                            className="w-[280px] p-0 border-border/50 shadow-2xl backdrop-blur-xl bg-white/80 dark:bg-black/40 text-foreground overflow-hidden"
-                            side="bottom"
-                            align="start"
-                        >
-                            <div className="p-3 border-b border-border/10 bg-muted/20 dark:bg-white/5">
-                                <h4 className="font-medium text-sm text-foreground/80">More Categories</h4>
-                            </div>
-
-                            <ScrollArea className="h-[240px] w-full p-2">
-                                <div className="grid grid-cols-1 gap-1">
-                                    {hiddenFacets.map(({ key, count, label }) => {
-                                        const isSelected = selectedCategory === key
-                                        return (
-                                            <button
+                        <PopoverContent className="w-[240px] p-0" align="start">
+                            <Command>
+                                <CommandInput placeholder="Search category..." />
+                                <CommandList>
+                                    <CommandEmpty>No category found.</CommandEmpty>
+                                    <CommandGroup heading="More Categories">
+                                        {hiddenFacets.map(({ key, count, label }) => (
+                                            <CommandItem
                                                 key={key}
-                                                onClick={() => {
+                                                value={label} // Use label for better searching
+                                                onSelect={() => {
                                                     onSelect?.(key)
                                                     setOpen(false)
                                                 }}
-                                                className={cn(
-                                                    "flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all text-left",
-                                                    isSelected
-                                                        ? "bg-primary/20 text-primary font-medium"
-                                                        : "text-muted-foreground hover:bg-muted dark:hover:bg-white/10 hover:text-foreground"
-                                                )}
+                                                className="cursor-pointer"
                                             >
-                                                <span className="truncate">{label}</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span className={cn(
-                                                        "text-[10px] px-1.5 py-0.5 rounded-full",
-                                                        isSelected
-                                                            ? "bg-primary/20 text-primary"
-                                                            : "bg-muted dark:bg-white/10 text-muted-foreground"
-                                                    )}>
-                                                        {count}
-                                                    </span>
-                                                    {isSelected && <Check size={14} className="text-primary" />}
-                                                </div>
-                                            </button>
-                                        )
-                                    })}
-                                </div>
-                            </ScrollArea>
-
-                            {/* Footer with gradient line */}
-                            <div className="h-1 w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50" />
+                                                <Check
+                                                    className={cn(
+                                                        "mr-2 h-4 w-4",
+                                                        selectedCategory === key ? "opacity-100" : "opacity-0"
+                                                    )}
+                                                />
+                                                <span className="flex-1 truncate">{label}</span>
+                                                <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
+                                                    {count}
+                                                </span>
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
                         </PopoverContent>
                     </Popover>
                 )}
