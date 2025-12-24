@@ -147,21 +147,13 @@ export function SearchBar() {
     return (
         <div className="w-full max-w-3xl relative z-30" ref={containerRef}>
             <div className={cn(
-                "group relative rounded-xl transition-all duration-300 ease-in-out p-[1.5px]",
+                "group relative rounded-xl transition-all duration-300 ease-in-out border border-blue-500/40 overflow-hidden",
                 showRecent && recentSearches.length > 0
                     ? "rounded-b-none"
                     : "hover:-translate-y-0.5"
             )}>
-                {/* Static Border (Fades out when focused) */}
-                <div className="absolute inset-0 rounded-xl border border-border group-focus-within:border-transparent transition-colors pointer-events-none" />
-
-                {/* Animated Gradient Border Layer */}
-                <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 p-[1.5px] [mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [mask-composite:exclude]">
-                    <div className="absolute top-0 h-full w-1/2 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-border-flow" />
-                </div>
-
                 {/* Inner Content */}
-                <div className="relative z-10 bg-muted/20 backdrop-blur-md rounded-[10px] flex flex-row items-center p-1 w-full h-full">
+                <div className="relative z-10 bg-muted/20 backdrop-blur-md flex flex-row items-center p-1 w-full h-full">
 
                     {/* Category Dropdown */}
                     <DropdownMenu>

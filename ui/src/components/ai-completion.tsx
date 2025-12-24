@@ -304,22 +304,25 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="px-4 mt-6 max-w-2xl mx-auto"
+                            className="w-full"
                         >
-                            <div className="flex gap-4 items-start group">
-                                <div className="w-16 h-16 rounded-full bg-background border shadow-sm flex items-center justify-center shrink-0 overflow-hidden">
-                                    <img
-                                        src="/cat_icon.png"
-                                        alt="Cat Icon"
-                                        className="w-full h-full object-cover"
-                                    />
+                            <div className="relative bg-card rounded-xl p-6 text-left border-x">
+                                {/* Top gradient border */}
+                                <div className="absolute top-0 left-0 right-0 flex h-px">
+                                    <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                                    <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
                                 </div>
-                                <div className="space-y-2 max-w-[85%]">
-                                    <div className="text-base text-card-foreground/90 leading-relaxed bg-muted/50 p-5 border border-border/50 shadow-sm rounded-tr-2xl rounded-br-2xl rounded-bl-2xl rounded-tl-none">
-                                        Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
-                                        <br /><br />
-                                        Try tapping a suggestion above or type your own question below!
-                                    </div>
+
+                                <div className="text-base text-card-foreground/90 leading-relaxed">
+                                    Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
+                                    <br /><br />
+                                    Try tapping a suggestion above or type your own question below!
+                                </div>
+
+                                {/* Bottom gradient border */}
+                                <div className="absolute bottom-0 left-0 right-0 flex h-px">
+                                    <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                                    <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
                                 </div>
                             </div>
                         </motion.div>
