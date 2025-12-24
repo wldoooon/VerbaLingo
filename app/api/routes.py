@@ -168,5 +168,5 @@ async def completion(
 ):
     return StreamingResponse(
         service.get_completion_stream(request.prompt),
-        media_type="text/event-stream"
+        media_type="text/plain"
     )
