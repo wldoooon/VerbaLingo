@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Clips, TranscriptResponse } from "@/lib/types";
+import { Clips, TranscriptResponse, SearchResponse } from "@/lib/types";
 
 type TranslateResponse = {
   original: string;
@@ -30,7 +30,7 @@ const fetchSearchResults = async (query: string, category: string | null) => {
 };
 
 export const useSearch = (query: string, category: string | null) => {
-  return useQuery<{ total: number; hits: Clips[] }, Error>({
+  return useQuery<SearchResponse, Error>({
     queryKey: ["search", query, category],
     queryFn: () => fetchSearchResults(query, category),
     enabled: !!query && query.trim().length > 0, // Auto-fetch if query exists

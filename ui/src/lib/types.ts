@@ -1,3 +1,9 @@
+export interface SearchResponse {
+  total: number;
+  hits: Clips[];
+  aggregations?: Record<string, number>;
+}
+
 export interface Clips {
   video_id: string;
   sentence_text: string;
@@ -9,29 +15,29 @@ export interface Clips {
 }
 
 export enum ViewState {
-  LANDING = 'LANDING',
-  SEARCHING = 'SEARCHING',
-  RESULTS = 'RESULTS',
-  PROFILE = 'PROFILE',
-  SAVED = 'SAVED',
-  PRICING = 'PRICING',
+  LANDING = "LANDING",
+  SEARCHING = "SEARCHING",
+  RESULTS = "RESULTS",
+  PROFILE = "PROFILE",
+  SAVED = "SAVED",
+  PRICING = "PRICING",
 }
 
 export enum SearchCategory {
-  ALL = 'All',
-  CODE = 'Code',
-  ACADEMIC = 'Academic',
-  NEWS = 'News',
-  CREATIVE = 'Creative'
+  ALL = "All",
+  CODE = "Code",
+  ACADEMIC = "Academic",
+  NEWS = "News",
+  CREATIVE = "Creative",
 }
 
 export enum SearchLanguage {
-  ENGLISH = 'en',
-  SPANISH = 'es',
-  FRENCH = 'fr',
-  GERMAN = 'de',
-  JAPANESE = 'ja',
-  CHINESE = 'zh'
+  ENGLISH = "en",
+  SPANISH = "es",
+  FRENCH = "fr",
+  GERMAN = "de",
+  JAPANESE = "ja",
+  CHINESE = "zh",
 }
 
 export interface TranscriptLine {
@@ -41,17 +47,17 @@ export interface TranscriptLine {
 }
 
 export interface TranscriptSentence {
-    sentence_text: string;
-    start_time: number;
-    end_time: number;
-    words?: { text: string; start: number; end: number }[];
+  sentence_text: string;
+  start_time: number;
+  end_time: number;
+  words?: { text: string; start: number; end: number }[];
 }
 
 export interface TranscriptResponse {
-    video_id: string;
-    start_time: number;
-    end_time: number;
-    sentences: TranscriptSentence[];
+  video_id: string;
+  start_time: number;
+  end_time: number;
+  sentences: TranscriptSentence[];
 }
 
 export interface PlayerState {
@@ -62,10 +68,9 @@ export interface PlayerState {
 }
 
 export type PlayerAction =
-  | { type: 'NEXT_VIDEO' }
-  | { type: 'PREV_VIDEO' }
-  | { type: 'SET_MUTED'; payload: boolean }
-  | { type: 'SET_CURRENT_TIME'; payload: number }
-  | { type: 'SET_INDEX'; payload: number }
-  | { type: 'RESET_INDEX' }; 
-
+  | { type: "NEXT_VIDEO" }
+  | { type: "PREV_VIDEO" }
+  | { type: "SET_MUTED"; payload: boolean }
+  | { type: "SET_CURRENT_TIME"; payload: number }
+  | { type: "SET_INDEX"; payload: number }
+  | { type: "RESET_INDEX" };
