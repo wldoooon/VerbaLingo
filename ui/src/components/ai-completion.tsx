@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
 import { useResponseHistory } from "@/hooks/useResponseHistory";
-import { useCompletion } from "@ai-sdk/react";
 
 interface SmartSuggestion {
     title: string;
@@ -69,9 +68,48 @@ function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
 
 export function AiCompletion({ externalPrompt }: { externalPrompt: string | null }) {
     const { query } = useSearchParams();
-    const { completion, complete, isLoading, error } = useCompletion({
-        api: "/api/v1/completion",
-    });
+
+    // Replacement for useCompletion
+    const [completion, setCompletion] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<Error | null>(null);
+
+    const complete = async (prompt: string) => {
+        setIsLoading(true);
+        setCompletion("");
+        setError(null);
+
+        try {
+            const response = await fetch("/api/v1/completion", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+            if (!response.body) return;
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value, { stream: true });
+                console.log("DEBUG CHUNK:", chunk);
+                setCompletion((prev) => prev + chunk);
+            }
+        } catch (err: any) {
+            console.error("Completion error:", err);
+            setError(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
     const [inputValue, setInputValue] = useState("");
     const currentPromptRef = useRef<string>("");
     const responseContainerRef = useRef<HTMLDivElement>(null);
@@ -150,14 +188,14 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         lastHandledPromptRef.current = externalPrompt;
         currentPromptRef.current = externalPrompt;
         complete(externalPrompt);
-    }, [externalPrompt, complete]);
+    }, [externalPrompt]);
 
     // Store completed response as a branch
     useEffect(() => {
         if (!isLoading && completion && completion.trim() && currentPromptRef.current) {
             addBranch(currentPromptRef.current, completion);
         }
-    }, [isLoading, completion, addBranch]);
+    }, [isLoading]); // Removed completion/addBranch from deps to avoid double-add
 
     // Clear input after submission
     useEffect(() => {
@@ -248,12 +286,21 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                             transition={{ delay: 0.2 }}
                             className="px-4 mt-6 max-w-2xl mx-auto"
                         >
-                            <div className="space-y-2">
-                                <p className="text-base text-card-foreground/90 leading-relaxed bg-muted/50 p-5 border border-border/50 shadow-sm rounded-tr-2xl rounded-br-2xl rounded-bl-2xl rounded-tl-none">
-                                    Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
-                                    <br /><br />
-                                    Try tapping a suggestion above or type your own question below!
-                                </p>
+                            <div className="flex gap-4 items-start group">
+                                <div className="w-16 h-16 rounded-full bg-background border shadow-sm flex items-center justify-center shrink-0 overflow-hidden">
+                                    <img
+                                        src="/cat_icon.png"
+                                        alt="Cat Icon"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="space-y-2 max-w-[85%]">
+                                    <div className="text-base text-card-foreground/90 leading-relaxed bg-muted/50 p-5 border border-border/50 shadow-sm rounded-tr-2xl rounded-br-2xl rounded-bl-2xl rounded-tl-none">
+                                        Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
+                                        <br /><br />
+                                        Try tapping a suggestion above or type your own question below!
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     )}
