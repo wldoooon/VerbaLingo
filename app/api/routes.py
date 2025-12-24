@@ -153,3 +153,20 @@ async def translation_health(
     if not is_healthy:
         raise HTTPException(status_code=503, detail="Translation service unavailable")
     return {"status": "healthy"}
+
+from fastapi.responses import StreamingResponse
+from app.services.groq_service import get_groq_service, GroqService
+from pydantic import BaseModel
+
+class CompletionRequest(BaseModel):
+    prompt: str
+
+@router.post("/completion")
+async def completion(
+    request: CompletionRequest,
+    service: GroqService = Depends(get_groq_service)
+):
+    return StreamingResponse(
+        service.get_completion_stream(request.prompt),
+        media_type="text/event-stream"
+    )
