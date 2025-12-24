@@ -66,7 +66,8 @@ async def search(
 
     total = raw_results.get("hits", {}).get("total", {}).get("value", 0)
 
-    return SearchResponse(total=total, hits=hits)
+    aggregations = raw_results.get("aggregations", {})
+    return SearchResponse(total=total, hits=hits, aggregations=aggregations)
 
 @router.get("/videos/{video_id}/transcript", response_model=TranscriptResponse)
 async def get_transcript(

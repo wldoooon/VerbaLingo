@@ -95,11 +95,23 @@ class SearchService:
             "limit": limit
         }
 
+        if category:
+            agg_field = "category_type"
+            
+        search_request["aggs"] = {
+            "sub_category_counts": {
+                "terms": {
+                    "field": agg_field,
+                    "size": 20
+                }
+            }
+        }
+
         try:
             result = await self.search_api.search(search_request)
         except Exception as e:
             print(f"Search error for category {category}: {e}")
-            return {"hits": {"hits": [], "total": {"value": 0}}}
+            return {"hits": {"hits": [], "total": {"value": 0}}, "aggregations": {}}
 
         formatted_hits = []
         if result.hits and result.hits.hits:
@@ -108,7 +120,8 @@ class SearchService:
                 source = hit.source if hasattr(hit, 'source') else {}
                 video_id = source.get('video_id')
                 
-                # Deduplicate within this single category list
+                # Deduplication within specific category search
+                # We want 1 clip per video to ensure variety
                 if video_id in seen_videos: 
                     continue
                 seen_videos.add(video_id)
@@ -131,13 +144,23 @@ class SearchService:
                     "_source": source,
                     "_formatted": formatted_doc
                 })
-                
+        
+        aggregations = {}
+        if hasattr(result, 'aggregations') and result.aggregations:
+             # Manticore client might return aggregations as a dict or object
+             aggs = result.aggregations
+             if isinstance(aggs, dict) and 'sub_category_counts' in aggs:
+                 buckets = aggs['sub_category_counts'].get('buckets', [])
+                 # Convert buckets to simple dict {key: count}
+                 aggregations = {b['key']: b['doc_count'] for b in buckets if b['key']}
+        
         total = result.hits.total if result.hits else 0
         return {
             "hits": {
                 "hits": formatted_hits,
                 "total": {"value": total}
-            }
+            },
+            "aggregations": aggregations
         }
 
     async def get_transcript(self, video_id: str, center_position: Optional[int] = None) -> dict:
