@@ -4,3 +4,4 @@ meilisearch
 ollama
 pydantic-settings
 python-dotenv
+groq
