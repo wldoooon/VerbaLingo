@@ -113,7 +113,9 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     const [inputValue, setInputValue] = useState("");
     const currentPromptRef = useRef<string>("");
     const responseContainerRef = useRef<HTMLDivElement>(null);
+    const scrollContentRef = useRef<HTMLDivElement>(null);
     const [maxResponseHeight, setMaxResponseHeight] = useState<number>(400);
+    const [canScroll, setCanScroll] = useState(false);
 
     // Use our custom history hook
     const {
@@ -157,6 +159,24 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         window.addEventListener('resize', calculateMaxHeight);
         return () => window.removeEventListener('resize', calculateMaxHeight);
     }, [shouldHideSuggestions]);
+
+    // Check if content is scrollable
+    useEffect(() => {
+        const checkScrollable = () => {
+            if (scrollContentRef.current) {
+                const { scrollHeight, clientHeight } = scrollContentRef.current;
+                setCanScroll(scrollHeight > clientHeight);
+            }
+        };
+
+        const timeout = setTimeout(checkScrollable, 100); // Small delay to allow layout update
+        window.addEventListener('resize', checkScrollable);
+
+        return () => {
+            clearTimeout(timeout);
+            window.removeEventListener('resize', checkScrollable);
+        };
+    }, [completion, currentBranch, maxResponseHeight, isLoading]);
 
     const handleSuggestionClick = (suggestion: SmartSuggestion) => {
         setInputValue(suggestion.prompt);
@@ -336,10 +356,13 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
                                     <div className="relative">
                                         {/* Top blur gradient */}
-                                        <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300" id="top-blur" />
+                                        {canScroll && (
+                                            <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300" id="top-blur" />
+                                        )}
 
                                         {/* Scrollable content */}
                                         <div
+                                            ref={scrollContentRef}
                                             style={{ maxHeight: `${maxResponseHeight}px` }}
                                             className="overflow-y-auto text-card-foreground pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
                                             onScroll={(e) => {
@@ -383,7 +406,9 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                         </div>
 
                                         {/* Bottom blur gradient */}
-                                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300" id="bottom-blur" />
+                                        {canScroll && (
+                                            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300" id="bottom-blur" />
+                                        )}
                                     </div>
 
                                     {/* Bottom gradient border */}
@@ -458,7 +483,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         <Input
                             type="text"
                             placeholder="Ask about pronunciation, definitions, examples..."
-                            className="w-full rounded-full pl-10 pr-10 py-6 bg-muted shadow-sm border-transparent focus-visible:bg-background transition-colors"
+                            className="w-full rounded-full pl-10 pr-10 py-6 bg-muted shadow-sm border border-blue-500/40 focus-visible:bg-background transition-colors"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyPress={handleKeyPress}
