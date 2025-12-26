@@ -12,6 +12,15 @@ import { useResponseHistory } from "@/hooks/useResponseHistory";
 import { SessionSelector } from "@/components/session-selector";
 import { BranchTimeline } from "@/components/branch-timeline";
 import { useRouter, useSearchParams as useNextSearchParams } from "next/navigation";
+import { anchoredToastManager } from "@/components/ui/toast";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Check } from "lucide-react";
 
 interface SmartSuggestion {
     title: string;
@@ -142,6 +151,26 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         deleteSession,
         branches
     } = useResponseHistory();
+
+    // Copy Logic
+    const copyButtonRef = useRef<HTMLButtonElement>(null);
+    const { isCopied, copyToClipboard } = useCopyToClipboard({
+        onCopy: () => {
+            if (copyButtonRef.current) {
+                anchoredToastManager.add({
+                    data: { tooltipStyle: true },
+                    positionerProps: { anchor: copyButtonRef.current },
+                    timeout: 2000,
+                    title: "Copied!",
+                });
+            }
+        },
+    });
+
+    const handleCopy = () => {
+        const textToCopy = currentBranch ? currentBranch.response : completion;
+        if (textToCopy) copyToClipboard(textToCopy);
+    };
 
     const smartSuggestions = useMemo(() => generateSmartSuggestions(query), [query]);
 
@@ -488,9 +517,25 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
                                             {/* Action Buttons - Moved under timeline */}
                                             <div className="flex items-center gap-2">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary transition-colors">
-                                                    <Copy size={16} />
-                                                </Button>
+                                                <TooltipProvider>
+                                                    <Tooltip delayDuration={0}>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                ref={copyButtonRef}
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 hover:text-primary transition-colors"
+                                                                onClick={handleCopy}
+                                                                disabled={isCopied}
+                                                            >
+                                                                {isCopied ? <Check size={16} /> : <Copy size={16} />}
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent side="bottom">
+                                                            <p>Copy to clipboard</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
                                                 <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-green-500 transition-colors">
                                                     <ThumbsUp size={16} />
                                                 </Button>
