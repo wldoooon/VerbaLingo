@@ -138,7 +138,9 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         getThreadContext,
         sessions,
         switchSession,
-        activeSessionId
+        activeSessionId,
+        deleteSession,
+        branches
     } = useResponseHistory();
 
     const smartSuggestions = useMemo(() => generateSmartSuggestions(query), [query]);
@@ -264,6 +266,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                             sessions={sessions}
                             activeSessionId={activeSessionId}
                             onSelectSession={handleSessionSelect}
+                            onDeleteSession={deleteSession}
                             currentQuery={query}
                         />
                     </div>
@@ -468,7 +471,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                                 <div className="w-full">
                                                     <BranchTimeline
                                                         currentIndex={currentIndex}
-                                                        totalBranches={totalBranches}
+                                                        branches={branches}
                                                         onSelectIndex={(index) => {
                                                             const diff = index - currentIndex;
                                                             if (diff > 0) {

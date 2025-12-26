@@ -5,10 +5,16 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface BranchTimelineProps {
     currentIndex: number;
-    totalBranches: number;
+    branches: { id: string; prompt: string }[];
     onSelectIndex: (index: number) => void;
     onPrevious: () => void;
     onNext: () => void;
@@ -16,7 +22,7 @@ interface BranchTimelineProps {
 
 export function BranchTimeline({
     currentIndex,
-    totalBranches,
+    branches,
     onSelectIndex,
     onPrevious,
     onNext
@@ -63,28 +69,36 @@ export function BranchTimeline({
                         className="relative w-full h-full flex items-center gap-8 overflow-x-auto no-scrollbar px-[40%] scroll-smooth"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                     >
-                        {Array.from({ length: totalBranches }).map((_, i) => {
+                        {branches.map((branch, i) => {
                             const isActive = i === currentIndex;
                             const isPast = i < currentIndex;
 
                             return (
-                                <button
-                                    key={i}
-                                    onClick={() => onSelectIndex(i)}
-                                    className="group relative flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary rounded-full"
-                                >
-                                    {/* The Dot Node */}
-                                    <div className={cn(
-                                        "w-4 h-4 rounded-full transition-all duration-300 relative z-10",
-                                        isActive
-                                            ? "bg-primary w-6 h-6 shadow-[0_0_0_4px_rgba(59,130,246,0.2)]"
-                                            : "bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 scale-90"
-                                    )}>
-                                        {isActive && (
-                                            <div className="absolute inset-0 m-auto w-2 h-2 rounded-full bg-white dark:bg-black" />
-                                        )}
-                                    </div>
-                                </button>
+                                <TooltipProvider key={i}>
+                                    <Tooltip delayDuration={0}>
+                                        <TooltipTrigger asChild>
+                                            <button
+                                                onClick={() => onSelectIndex(i)}
+                                                className="group relative flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary rounded-full"
+                                            >
+                                                {/* The Dot Node */}
+                                                <div className={cn(
+                                                    "w-4 h-4 rounded-full transition-all duration-300 relative z-10",
+                                                    isActive
+                                                        ? "bg-primary w-6 h-6 shadow-[0_0_0_4px_rgba(59,130,246,0.2)]"
+                                                        : "bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 scale-90"
+                                                )}>
+                                                    {isActive && (
+                                                        <div className="absolute inset-0 m-auto w-2 h-2 rounded-full bg-white dark:bg-black" />
+                                                    )}
+                                                </div>
+                                            </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="max-w-[200px] text-xs p-2">
+                                            <p className="line-clamp-3">{branch.prompt}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             );
                         })}
                     </div>
@@ -95,7 +109,7 @@ export function BranchTimeline({
                     variant="ghost"
                     size="icon"
                     onClick={onNext}
-                    disabled={currentIndex === totalBranches - 1}
+                    disabled={currentIndex === branches.length - 1}
                     className="h-8 w-8 rounded-full flex-shrink-0 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20"
                 >
                     <ChevronRight className="h-4 w-4" />
