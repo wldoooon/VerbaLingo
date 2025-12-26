@@ -187,8 +187,8 @@ export const TranscriptBox = ({
                               const isCurrentWord =
                                 adjustedTime >= w.start &&
                                 adjustedTime < w.end
-                              const isSearchMatch =
-                                !!query && wordText.toLowerCase().includes(query)
+                              const queryParts = query.split(/\s+/).filter(part => part.length > 0)
+                              const isSearchMatch = queryParts.length > 0 && queryParts.some(part => wordText.toLowerCase().includes(part))
 
                               const key = `${sentence.start_time}-${w.start}-${wi}`
                               const isOpen = openWordKey === key

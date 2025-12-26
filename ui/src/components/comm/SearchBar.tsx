@@ -50,7 +50,7 @@ export function SearchBar() {
     const [showRecent, setShowRecent] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
 
-    const { suggestions } = useDatamuse(query);
+    const { suggestions, isLoading } = useDatamuse(query);
 
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -357,32 +357,39 @@ export function SearchBar() {
             </div>
 
             {/* Unified Suggestions & Recents Panel */}
-            {showRecent && !isSearching && (recentSearches.length > 0 || (query.length >= 2 && suggestions.length > 0)) && (
+            {showRecent && !isSearching && (recentSearches.length > 0 || (query.length >= 2 && (suggestions.length > 0 || isLoading))) && (
                 <Card className="absolute top-full left-0 right-0 mt-0 rounded-t-none rounded-b-2xl shadow-xl border-t-0 animate-in fade-in-0 zoom-in-95 z-30 bg-background/95 backdrop-blur-md overflow-hidden">
                     <CardContent className="p-0">
                         {/* 1. Autocomplete Suggestions */}
-                        {query.length >= 2 && suggestions.length > 0 && !isSearching && (
+                        {query.length >= 2 && !isSearching && (
                             <div className="p-1">
-                                {suggestions.map((suggestion, idx) => (
-                                    <Button
-                                        key={suggestion.word}
-                                        variant="ghost"
-                                        onClick={() => {
-                                            setQuery(suggestion.word);
-                                            handleSearch(suggestion.word);
-                                            setActiveIndex(-1);
-                                        }}
-                                        className={cn(
-                                            "w-full justify-start h-auto py-2.5 px-4 font-normal text-foreground/80 hover:text-primary hover:bg-muted/50 transition-colors",
-                                            activeIndex === idx && "bg-muted text-primary"
-                                        )}
-                                    >
-                                        <Search className="w-4 h-4 mr-3 opacity-40" />
-                                        <span className="flex-1 text-left">
-                                            {suggestion.word}
-                                        </span>
-                                    </Button>
-                                ))}
+                                {isLoading ? (
+                                    <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+                                        <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                        <span>Searching...</span>
+                                    </div>
+                                ) : suggestions.length > 0 ? (
+                                    suggestions.map((suggestion, idx) => (
+                                        <Button
+                                            key={suggestion.word}
+                                            variant="ghost"
+                                            onClick={() => {
+                                                setQuery(suggestion.word);
+                                                handleSearch(suggestion.word);
+                                                setActiveIndex(-1);
+                                            }}
+                                            className={cn(
+                                                "w-full justify-start h-auto py-2.5 px-4 font-normal text-foreground/80 hover:text-primary hover:bg-muted/50 transition-colors",
+                                                activeIndex === idx && "bg-muted text-primary"
+                                            )}
+                                        >
+                                            <Search className="w-4 h-4 mr-3 opacity-40" />
+                                            <span className="flex-1 text-left">
+                                                {suggestion.word}
+                                            </span>
+                                        </Button>
+                                    ))
+                                ) : null}
                             </div>
                         )}
 
@@ -397,7 +404,7 @@ export function SearchBar() {
                                 <div className="text-[10px] font-bold text-muted-foreground px-4 py-2 uppercase tracking-wider flex items-center gap-2">
                                     <Clock className="w-3 h-3" /> Recent
                                 </div>
-                                {recentSearches.map((search, idx) => (
+                                {recentSearches.slice(0, 3).map((search, idx) => (
                                     <Button
                                         key={idx}
                                         variant="ghost"
