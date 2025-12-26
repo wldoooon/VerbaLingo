@@ -80,10 +80,13 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         setError(null);
 
         try {
+            const context = getThreadContext(2); // Get last 2 branches
+            const fullPrompt = context ? `${context}\n\nUser: ${prompt}` : prompt;
+
             const response = await fetch("/api/v1/completion", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt }),
+                body: JSON.stringify({ prompt: fullPrompt }),
             });
 
             if (!response.ok) {
@@ -127,6 +130,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         addBranch,
         goToPrevious,
         goToNext,
+        getThreadContext,
     } = useResponseHistory();
 
     const smartSuggestions = useMemo(() => generateSmartSuggestions(query), [query]);
@@ -135,7 +139,6 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         return isLoading;
     }, [isLoading]);
 
-    // Calculate available space dynamically
     useEffect(() => {
         const calculateMaxHeight = () => {
             const container = responseContainerRef.current?.closest('.flex.flex-col') as HTMLElement;
