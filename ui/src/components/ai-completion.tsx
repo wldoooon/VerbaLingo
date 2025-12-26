@@ -9,6 +9,18 @@ import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
 import { useResponseHistory } from "@/hooks/useResponseHistory";
+import { SessionSelector } from "@/components/session-selector";
+import { BranchTimeline } from "@/components/branch-timeline";
+import { useRouter, useSearchParams as useNextSearchParams } from "next/navigation";
+import { anchoredToastManager } from "@/components/ui/toast";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Check } from "lucide-react";
 
 interface SmartSuggestion {
     title: string;
@@ -68,6 +80,8 @@ function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
 
 export function AiCompletion({ externalPrompt }: { externalPrompt: string | null }) {
     const { query } = useSearchParams();
+    const router = useRouter();
+    const nextSearchParams = useNextSearchParams();
 
     // Replacement for useCompletion
     const [completion, setCompletion] = useState("");
@@ -80,10 +94,13 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         setError(null);
 
         try {
+            const context = getThreadContext(2); // Get last 2 branches
+            const fullPrompt = context ? `${context}\n\nUser: ${prompt}` : prompt;
+
             const response = await fetch("/api/v1/completion", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt }),
+                body: JSON.stringify({ prompt: fullPrompt }),
             });
 
             if (!response.ok) {
@@ -127,15 +144,53 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         addBranch,
         goToPrevious,
         goToNext,
+        getThreadContext,
+        sessions,
+        switchSession,
+        activeSessionId,
+        deleteSession,
+        branches
     } = useResponseHistory();
+
+    // Copy Logic
+    const copyButtonRef = useRef<HTMLButtonElement>(null);
+    const { isCopied, copyToClipboard } = useCopyToClipboard({
+        onCopy: () => {
+            if (copyButtonRef.current) {
+                anchoredToastManager.add({
+                    data: { tooltipStyle: true },
+                    positionerProps: { anchor: copyButtonRef.current },
+                    timeout: 2000,
+                    title: "Copied!",
+                });
+            }
+        },
+    });
+
+    const handleCopy = () => {
+        const textToCopy = currentBranch ? currentBranch.response : completion;
+        if (textToCopy) copyToClipboard(textToCopy);
+    };
 
     const smartSuggestions = useMemo(() => generateSmartSuggestions(query), [query]);
 
-    const shouldHideSuggestions = useMemo(() => {
-        return isLoading;
-    }, [isLoading]);
+    // Auto-Switch Session when search query changes
+    useEffect(() => {
+        if (query && query.trim() !== "") {
+            switchSession(query);
+        }
+    }, [query, switchSession]);
 
-    // Calculate available space dynamically
+    // Handle manual session selection
+    const handleSessionSelect = (sessionId: string) => {
+        switchSession(sessionId);
+    };
+
+    const shouldHideSuggestions = useMemo(() => {
+        // Hide if loading, or if we have a current response (stream or history)
+        return isLoading || !!completion || !!currentBranch;
+    }, [isLoading, completion, currentBranch]);
+
     useEffect(() => {
         const calculateMaxHeight = () => {
             const container = responseContainerRef.current?.closest('.flex.flex-col') as HTMLElement;
@@ -150,15 +205,20 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
             const footerHeight = footer?.clientHeight || 0;
             const suggestionsHeight = !shouldHideSuggestions && suggestions?.clientHeight || 0;
 
-            // Calculate available space (leaving some padding)
-            const availableSpace = containerHeight - headerHeight - footerHeight - suggestionsHeight - 100;
+            // New timeline height roughly ~100px when active. 
+            // We increase buffer from 100 to 180 to account for the timeline and padding safely.
+            // A more robust solution would be to measure the timeline container if present.
+            const extraBuffer = totalBranches > 1 ? 180 : 100;
+
+            // Calculate available space
+            const availableSpace = containerHeight - headerHeight - footerHeight - suggestionsHeight - extraBuffer;
             setMaxResponseHeight(Math.max(200, Math.min(availableSpace, 600)));
         };
 
         calculateMaxHeight();
         window.addEventListener('resize', calculateMaxHeight);
         return () => window.removeEventListener('resize', calculateMaxHeight);
-    }, [shouldHideSuggestions]);
+    }, [shouldHideSuggestions, totalBranches]); // Added totalBranches to deps
 
     // Check if content is scrollable
     useEffect(() => {
@@ -228,10 +288,19 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         <div className="w-full h-full flex flex-col">
             <div className="relative w-full h-full flex flex-col bg-card p-6">
 
-                <header className="w-full flex-shrink-0">
+                <header className="relative w-full flex-shrink-0">
+                    {/* Session Selector (History) - Top Right */}
+                    <div className="absolute right-0 top-0 z-20">
+                        <SessionSelector
+                            sessions={sessions}
+                            activeSessionId={activeSessionId}
+                            onSelectSession={handleSessionSelect}
+                            onDeleteSession={deleteSession}
+                            currentQuery={query}
+                        />
+                    </div>
 
-
-                    <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center">
+                    <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center pt-2">
                         {query ? (
                             <>
                                 Learning about <span className="text-primary">"{query}"</span>
@@ -253,6 +322,8 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         </div>
                     </div>
                 </header>
+
+
 
                 <main className="w-full flex-1 flex flex-col mt-6 space-y-6 min-h-0">
                     <div className="flex items-center gap-4 px-8 opacity-60 mb-2">
@@ -289,17 +360,19 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                         </motion.div>
                                     ))}
                                 </div>
+                                {/* Separator */}
+                                <div className="w-full px-8">
+                                    <div className="h-px bg-border/40 my-2" />
+                                </div>
+
                             </motion.div>
                         )}
                     </AnimatePresence>
 
-                    {/* Separator */}
-                    <div className="w-full px-8">
-                        <div className="h-px bg-border/40 my-2" />
-                    </div>
 
-                    {/* AI Welcome Message - Only show when idle */}
-                    {!isLoading && !completion && !error && query && (
+
+                    {/* AI Welcome Message - Only show when idle AND no history */}
+                    {!isLoading && !completion && !error && !currentBranch && query && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -341,7 +414,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                             >
                                 <AiAssistantSkeleton />
                             </motion.div>
-                        ) : (completion || error) && (
+                        ) : (completion || error || currentBranch) && (
                             <motion.div
                                 key="completion"
                                 initial={{ opacity: 0, y: 20 }}
@@ -421,46 +494,52 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                     </div>
 
                                     {!isLoading && !error && (
-                                        <div className="flex items-center justify-between gap-2 mt-4 pt-4 border-t">
-                                            {/* Branch Navigation - Only show if we have multiple branches */}
+                                        <div className="flex flex-col items-center gap-4 mt-4 pt-4 border-t">
+                                            {/* Branch Navigation - Timeline Component */}
                                             {totalBranches > 1 && (
-                                                <div className="flex items-center gap-2">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                        onClick={goToPrevious}
-                                                        disabled={!canGoBack}
-                                                    >
-                                                        <ChevronLeft size={16} />
-                                                    </Button>
-                                                    <span className="text-xs text-muted-foreground font-medium tabular-nums">
-                                                        {currentIndex + 1} of {totalBranches}
-                                                    </span>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                        onClick={goToNext}
-                                                        disabled={!canGoForward}
-                                                    >
-                                                        <ChevronRight size={16} />
-                                                    </Button>
+                                                <div className="w-full">
+                                                    <BranchTimeline
+                                                        currentIndex={currentIndex}
+                                                        branches={branches}
+                                                        onSelectIndex={(index) => {
+                                                            const diff = index - currentIndex;
+                                                            if (diff > 0) {
+                                                                for (let i = 0; i < diff; i++) goToNext();
+                                                            } else if (diff < 0) {
+                                                                for (let i = 0; i < Math.abs(diff); i++) goToPrevious();
+                                                            }
+                                                        }}
+                                                        onPrevious={goToPrevious}
+                                                        onNext={goToNext}
+                                                    />
                                                 </div>
                                             )}
 
-                                            {/* Spacer if no navigation */}
-                                            {totalBranches <= 1 && <div />}
-
-                                            {/* Action Buttons */}
+                                            {/* Action Buttons - Moved under timeline */}
                                             <div className="flex items-center gap-2">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                    <Copy size={16} />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <TooltipProvider>
+                                                    <Tooltip delayDuration={0}>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                ref={copyButtonRef}
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8 hover:text-primary transition-colors"
+                                                                onClick={handleCopy}
+                                                                disabled={isCopied}
+                                                            >
+                                                                {isCopied ? <Check size={16} /> : <Copy size={16} />}
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent side="bottom">
+                                                            <p>Copy to clipboard</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-green-500 transition-colors">
                                                     <ThumbsUp size={16} />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-red-500 transition-colors">
                                                     <ThumbsDown size={16} />
                                                 </Button>
                                             </div>

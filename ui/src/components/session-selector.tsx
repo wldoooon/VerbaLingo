@@ -1,0 +1,149 @@
+"use client"
+
+import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { cn, timeAgo } from "@/lib/utils"
+import { Check, ChevronsUpDown, History, Trash2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+
+interface SessionSelectorProps {
+    sessions: Record<string, any>; // Using any for simplicity as we just need keys and lengths
+    activeSessionId: string;
+    onSelectSession: (sessionId: string) => void;
+    onDeleteSession: (sessionId: string, e: React.MouseEvent) => void;
+    className?: string;
+    initialCount?: number;
+    currentQuery?: string;
+}
+
+// Helper for Title Case
+function toTitleCase(str: string) {
+    if (!str) return "Unknown";
+    return str.replace(
+        /\w\S*/g,
+        (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    )
+}
+
+export function SessionSelector({
+    sessions,
+    activeSessionId,
+    onSelectSession,
+    onDeleteSession,
+    className,
+    currentQuery,
+}: SessionSelectorProps) {
+    const [open, setOpen] = useState(false)
+
+    // Filter out empty sessions
+    const sessionKeys = Object.keys(sessions).filter(key =>
+        sessions[key].branches && sessions[key].branches.length > 0
+    );
+
+    if (sessionKeys.length === 0) {
+        return null; // Don't show if no history
+    }
+
+    // Sort by lastActive (most recent first)
+    const sortedSessions = sessionKeys.sort((a, b) => {
+        const timeA = sessions[a].lastActive || 0;
+        const timeB = sessions[b].lastActive || 0;
+        return timeB - timeA;
+    });
+
+    // user request: "default value instead of the current keyword add history"
+    // We strictly show "History" to indicate this is the history menu.
+    const activeLabel = "History";
+
+    return (
+        <div className={cn("w-full mb-4", className)}>
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        role="combobox"
+                        aria-expanded={open}
+                        className="h-8 w-auto gap-2 px-2 text-muted-foreground hover:text-primary font-medium"
+                    >
+                        <History className="h-4 w-4" />
+                        <span className="text-xs">History</span>
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[240px] p-0" align="start">
+                    <Command>
+                        <CommandInput placeholder="Search history..." />
+                        <CommandList>
+                            <CommandEmpty>No topic found.</CommandEmpty>
+
+                            {/* Option to return to current search if we are viewing history */}
+                            {currentQuery && currentQuery !== activeSessionId && (
+                                <CommandGroup heading="Current Search">
+                                    <CommandItem
+                                        value={toTitleCase(currentQuery)}
+                                        onSelect={() => {
+                                            onSelectSession(currentQuery)
+                                            setOpen(false)
+                                        }}
+                                        className="cursor-pointer bg-primary/10 text-primary font-medium"
+                                    >
+                                        <Check className="mr-2 h-4 w-4 opacity-0" /> {/* Spacer */}
+                                        <span className="flex-1 truncate text-sm">Return to: {toTitleCase(currentQuery)}</span>
+                                    </CommandItem>
+                                </CommandGroup>
+                            )}
+
+                            <CommandGroup heading="History">
+                                {sortedSessions.map((key) => (
+                                    <CommandItem
+                                        key={key}
+                                        value={toTitleCase(key)}
+                                        onSelect={() => {
+                                            onSelectSession(key)
+                                            setOpen(false)
+                                        }}
+                                        className="cursor-pointer"
+                                    >
+                                        <Check
+                                            className={cn(
+                                                "mr-2 h-4 w-4",
+                                                activeSessionId === key ? "opacity-100" : "opacity-0"
+                                            )}
+                                        />
+                                        <span className="flex-1 truncate text-sm">{toTitleCase(key)}</span>
+                                        <span className="ml-auto text-[10px] text-muted-foreground/70 mr-2">
+                                            {timeAgo(sessions[key].lastActive || sessions[key].createdAt)}
+                                        </span>
+                                        <div
+                                            role="button"
+                                            className="h-6 w-6 flex items-center justify-center rounded-sm hover:bg-destructive/10 hover:text-destructive text-muted-foreground/50 transition-colors z-50"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                e.preventDefault();
+                                                onDeleteSession(key, e)
+                                            }}
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </div>
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+        </div>
+    )
+}
