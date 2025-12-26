@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Card, CardContent } from '@/components/ui/card';
 import TextType from '@/components/TextType';
+import { useDatamuse } from '@/hooks/useDatamuse';
 
 // Categories for filtering
 const CATEGORIES = [
@@ -47,6 +48,9 @@ export function SearchBar() {
     const [isSearching, setIsSearching] = useState(false);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
     const [showRecent, setShowRecent] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(-1);
+
+    const { suggestions } = useDatamuse(query);
 
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -78,6 +82,7 @@ export function SearchBar() {
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
                 setShowRecent(false);
+                setActiveIndex(-1);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
@@ -141,7 +146,31 @@ export function SearchBar() {
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') handleSearch();
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (suggestions.length > 0) {
+                setActiveIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : 0));
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (suggestions.length > 0) {
+                setActiveIndex(prev => (prev > 0 ? prev - 1 : suggestions.length - 1));
+            }
+        } else if (e.key === 'Enter') {
+            if (activeIndex >= 0 && suggestions[activeIndex]) {
+                e.preventDefault();
+                const selected = suggestions[activeIndex].word;
+                setQuery(selected);
+                handleSearch(selected);
+                setActiveIndex(-1);
+            } else {
+                handleSearch();
+            }
+        } else if (e.key === 'Escape') {
+            setActiveIndex(-1);
+            setShowRecent(false);
+            // Optional: blur input if desired, or just close dropdowns
+        }
     };
 
     return (
@@ -233,7 +262,10 @@ export function SearchBar() {
                             ref={inputRef}
                             type="text"
                             value={query}
-                            onChange={(e) => setQuery(e.target.value)}
+                            onChange={(e) => {
+                                setQuery(e.target.value);
+                                setShowRecent(true);
+                            }}
                             onFocus={() => setShowRecent(true)}
                             onKeyDown={handleKeyDown}
                             className="border-0 shadow-none focus-visible:ring-0 px-3 h-9 text-base font-medium placeholder:text-transparent min-w-0"
@@ -324,28 +356,64 @@ export function SearchBar() {
                 </div>
             </div>
 
-            {/* Recent Searches Panel */}
-            {showRecent && recentSearches.length > 0 && (
-                <Card className="absolute top-full left-0 right-0 mt-0 rounded-t-none rounded-b-2xl shadow-xl border-t-0 animate-in fade-in-0 zoom-in-95 z-20 bg-muted/20 backdrop-blur-md">
-                    <CardContent className="p-2">
-                        <div className="text-[10px] font-bold text-muted-foreground px-4 py-2 uppercase tracking-wider flex items-center gap-2">
-                            <Clock className="w-3 h-3" /> Recent Searches
-                        </div>
-                        {recentSearches.map((search, idx) => (
-                            <Button
-                                key={idx}
-                                variant="ghost"
-                                onClick={() => {
-                                    setQuery(search);
-                                    handleSearch(search);
-                                }}
-                                className="w-full justify-start h-auto py-3 px-4 font-normal text-muted-foreground hover:text-primary group"
-                            >
-                                <Search className="w-4 h-4 mr-3 opacity-50 group-hover:opacity-100 transition-opacity" />
-                                <span className="flex-1 text-left text-foreground">{search}</span>
-                                <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:translate-x-0 group-hover:opacity-100 transition-all text-muted-foreground" />
-                            </Button>
-                        ))}
+            {/* Unified Suggestions & Recents Panel */}
+            {showRecent && !isSearching && (recentSearches.length > 0 || (query.length >= 2 && suggestions.length > 0)) && (
+                <Card className="absolute top-full left-0 right-0 mt-0 rounded-t-none rounded-b-2xl shadow-xl border-t-0 animate-in fade-in-0 zoom-in-95 z-30 bg-background/95 backdrop-blur-md overflow-hidden">
+                    <CardContent className="p-0">
+                        {/* 1. Autocomplete Suggestions */}
+                        {query.length >= 2 && suggestions.length > 0 && !isSearching && (
+                            <div className="p-1">
+                                {suggestions.map((suggestion, idx) => (
+                                    <Button
+                                        key={suggestion.word}
+                                        variant="ghost"
+                                        onClick={() => {
+                                            setQuery(suggestion.word);
+                                            handleSearch(suggestion.word);
+                                            setActiveIndex(-1);
+                                        }}
+                                        className={cn(
+                                            "w-full justify-start h-auto py-2.5 px-4 font-normal text-foreground/80 hover:text-primary hover:bg-muted/50 transition-colors",
+                                            activeIndex === idx && "bg-muted text-primary"
+                                        )}
+                                    >
+                                        <Search className="w-4 h-4 mr-3 opacity-40" />
+                                        <span className="flex-1 text-left">
+                                            {suggestion.word}
+                                        </span>
+                                    </Button>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Separator if both exist */}
+                        {query.length >= 2 && suggestions.length > 0 && !isSearching && recentSearches.length > 0 && (
+                            <div className="h-px bg-border/50 mx-2 my-1" />
+                        )}
+
+                        {/* 2. Recent Searches */}
+                        {recentSearches.length > 0 && (
+                            <div className="p-1">
+                                <div className="text-[10px] font-bold text-muted-foreground px-4 py-2 uppercase tracking-wider flex items-center gap-2">
+                                    <Clock className="w-3 h-3" /> Recent
+                                </div>
+                                {recentSearches.map((search, idx) => (
+                                    <Button
+                                        key={idx}
+                                        variant="ghost"
+                                        onClick={() => {
+                                            setQuery(search);
+                                            handleSearch(search);
+                                            setActiveIndex(-1);
+                                        }}
+                                        className="w-full justify-start h-auto py-2 px-4 font-normal text-muted-foreground hover:text-primary group"
+                                    >
+                                        <ArrowRight className="w-4 h-4 mr-3 opacity-30 group-hover:opacity-100 transition-opacity" />
+                                        <span className="flex-1 text-left">{search}</span>
+                                    </Button>
+                                ))}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             )}
