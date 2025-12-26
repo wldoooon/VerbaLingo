@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
 import { useResponseHistory } from "@/hooks/useResponseHistory";
+import { SessionSelector } from "@/components/session-selector";
+import { useRouter, useSearchParams as useNextSearchParams } from "next/navigation";
 
 interface SmartSuggestion {
     title: string;
@@ -68,6 +70,8 @@ function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
 
 export function AiCompletion({ externalPrompt }: { externalPrompt: string | null }) {
     const { query } = useSearchParams();
+    const router = useRouter(); // For navigating when session selected
+    const nextSearchParams = useNextSearchParams(); // Get the real URL params (v, t, etc.)
 
     // Replacement for useCompletion
     const [completion, setCompletion] = useState("");
@@ -131,9 +135,26 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         goToPrevious,
         goToNext,
         getThreadContext,
+        sessions,
+        switchSession,
+        activeSessionId
     } = useResponseHistory();
 
     const smartSuggestions = useMemo(() => generateSmartSuggestions(query), [query]);
+
+    // Auto-Switch Session when search query changes
+    useEffect(() => {
+        if (query && query.trim() !== "") {
+            switchSession(query);
+        }
+    }, [query, switchSession]);
+
+    // Handle manual session selection
+    // Handle manual session selection
+    const handleSessionSelect = (sessionId: string) => {
+        // Just switch the internal state directly. No routing needed.
+        switchSession(sessionId);
+    };
 
     const shouldHideSuggestions = useMemo(() => {
         return isLoading;
@@ -256,6 +277,15 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         </div>
                     </div>
                 </header>
+
+                {/* Session Selector (History) */}
+                <div className="px-8 mt-4">
+                    <SessionSelector
+                        sessions={sessions}
+                        activeSessionId={activeSessionId}
+                        onSelectSession={handleSessionSelect}
+                    />
+                </div>
 
                 <main className="w-full flex-1 flex flex-col mt-6 space-y-6 min-h-0">
                     <div className="flex items-center gap-4 px-8 opacity-60 mb-2">
