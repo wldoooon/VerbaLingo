@@ -282,6 +282,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         sessions={sessions}
                         activeSessionId={activeSessionId}
                         onSelectSession={handleSessionSelect}
+                        currentQuery={query}
                     />
                 </div>
 

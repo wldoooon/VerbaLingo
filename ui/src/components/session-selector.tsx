@@ -25,6 +25,7 @@ interface SessionSelectorProps {
     onSelectSession: (sessionId: string) => void;
     className?: string;
     initialCount?: number;
+    currentQuery?: string;
 }
 
 // Helper for Title Case
@@ -40,7 +41,8 @@ export function SessionSelector({
     sessions,
     activeSessionId,
     onSelectSession,
-    className
+    className,
+    currentQuery,
 }: SessionSelectorProps) {
     const [open, setOpen] = useState(false)
 
@@ -84,7 +86,25 @@ export function SessionSelector({
                         <CommandInput placeholder="Search history..." />
                         <CommandList>
                             <CommandEmpty>No topic found.</CommandEmpty>
-                            <CommandGroup heading="Recent Topics">
+
+                            {/* Option to return to current search if we are viewing history */}
+                            {currentQuery && currentQuery !== activeSessionId && (
+                                <CommandGroup heading="Current Search">
+                                    <CommandItem
+                                        value={toTitleCase(currentQuery)}
+                                        onSelect={() => {
+                                            onSelectSession(currentQuery)
+                                            setOpen(false)
+                                        }}
+                                        className="cursor-pointer bg-primary/10 text-primary font-medium"
+                                    >
+                                        <Check className="mr-2 h-4 w-4 opacity-0" /> {/* Spacer */}
+                                        <span className="flex-1 truncate text-sm">Return to: {toTitleCase(currentQuery)}</span>
+                                    </CommandItem>
+                                </CommandGroup>
+                            )}
+
+                            <CommandGroup heading="History">
                                 {sortedSessions.map((key) => (
                                     <CommandItem
                                         key={key}
