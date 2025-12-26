@@ -70,8 +70,8 @@ function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
 
 export function AiCompletion({ externalPrompt }: { externalPrompt: string | null }) {
     const { query } = useSearchParams();
-    const router = useRouter(); // For navigating when session selected
-    const nextSearchParams = useNextSearchParams(); // Get the real URL params (v, t, etc.)
+    const router = useRouter();
+    const nextSearchParams = useNextSearchParams();
 
     // Replacement for useCompletion
     const [completion, setCompletion] = useState("");
@@ -150,9 +150,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     }, [query, switchSession]);
 
     // Handle manual session selection
-    // Handle manual session selection
     const handleSessionSelect = (sessionId: string) => {
-        // Just switch the internal state directly. No routing needed.
         switchSession(sessionId);
     };
 
