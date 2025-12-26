@@ -10,6 +10,7 @@ import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
 import { useResponseHistory } from "@/hooks/useResponseHistory";
 import { SessionSelector } from "@/components/session-selector";
+import { BranchTimeline } from "@/components/branch-timeline";
 import { useRouter, useSearchParams as useNextSearchParams } from "next/navigation";
 
 interface SmartSuggestion {
@@ -173,15 +174,20 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
             const footerHeight = footer?.clientHeight || 0;
             const suggestionsHeight = !shouldHideSuggestions && suggestions?.clientHeight || 0;
 
-            // Calculate available space (leaving some padding)
-            const availableSpace = containerHeight - headerHeight - footerHeight - suggestionsHeight - 100;
+            // New timeline height roughly ~100px when active. 
+            // We increase buffer from 100 to 180 to account for the timeline and padding safely.
+            // A more robust solution would be to measure the timeline container if present.
+            const extraBuffer = totalBranches > 1 ? 180 : 100;
+
+            // Calculate available space
+            const availableSpace = containerHeight - headerHeight - footerHeight - suggestionsHeight - extraBuffer;
             setMaxResponseHeight(Math.max(200, Math.min(availableSpace, 600)));
         };
 
         calculateMaxHeight();
         window.addEventListener('resize', calculateMaxHeight);
         return () => window.removeEventListener('resize', calculateMaxHeight);
-    }, [shouldHideSuggestions]);
+    }, [shouldHideSuggestions, totalBranches]); // Added totalBranches to deps
 
     // Check if content is scrollable
     useEffect(() => {
@@ -251,10 +257,18 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         <div className="w-full h-full flex flex-col">
             <div className="relative w-full h-full flex flex-col bg-card p-6">
 
-                <header className="w-full flex-shrink-0">
+                <header className="relative w-full flex-shrink-0">
+                    {/* Session Selector (History) - Top Right */}
+                    <div className="absolute right-0 top-0 z-20">
+                        <SessionSelector
+                            sessions={sessions}
+                            activeSessionId={activeSessionId}
+                            onSelectSession={handleSessionSelect}
+                            currentQuery={query}
+                        />
+                    </div>
 
-
-                    <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center">
+                    <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center pt-2">
                         {query ? (
                             <>
                                 Learning about <span className="text-primary">"{query}"</span>
@@ -277,15 +291,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                     </div>
                 </header>
 
-                {/* Session Selector (History) */}
-                <div className="px-8 mt-4">
-                    <SessionSelector
-                        sessions={sessions}
-                        activeSessionId={activeSessionId}
-                        onSelectSession={handleSessionSelect}
-                        currentQuery={query}
-                    />
-                </div>
+
 
                 <main className="w-full flex-1 flex flex-col mt-6 space-y-6 min-h-0">
                     <div className="flex items-center gap-4 px-8 opacity-60 mb-2">
@@ -456,46 +462,36 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                     </div>
 
                                     {!isLoading && !error && (
-                                        <div className="flex items-center justify-between gap-2 mt-4 pt-4 border-t">
-                                            {/* Branch Navigation - Only show if we have multiple branches */}
+                                        <div className="flex flex-col items-center gap-4 mt-4 pt-4 border-t">
+                                            {/* Branch Navigation - Timeline Component */}
                                             {totalBranches > 1 && (
-                                                <div className="flex items-center gap-2">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                        onClick={goToPrevious}
-                                                        disabled={!canGoBack}
-                                                    >
-                                                        <ChevronLeft size={16} />
-                                                    </Button>
-                                                    <span className="text-xs text-muted-foreground font-medium tabular-nums">
-                                                        {currentIndex + 1} of {totalBranches}
-                                                    </span>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                        onClick={goToNext}
-                                                        disabled={!canGoForward}
-                                                    >
-                                                        <ChevronRight size={16} />
-                                                    </Button>
+                                                <div className="w-full">
+                                                    <BranchTimeline
+                                                        currentIndex={currentIndex}
+                                                        totalBranches={totalBranches}
+                                                        onSelectIndex={(index) => {
+                                                            const diff = index - currentIndex;
+                                                            if (diff > 0) {
+                                                                for (let i = 0; i < diff; i++) goToNext();
+                                                            } else if (diff < 0) {
+                                                                for (let i = 0; i < Math.abs(diff); i++) goToPrevious();
+                                                            }
+                                                        }}
+                                                        onPrevious={goToPrevious}
+                                                        onNext={goToNext}
+                                                    />
                                                 </div>
                                             )}
 
-                                            {/* Spacer if no navigation */}
-                                            {totalBranches <= 1 && <div />}
-
-                                            {/* Action Buttons */}
+                                            {/* Action Buttons - Moved under timeline */}
                                             <div className="flex items-center gap-2">
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary transition-colors">
                                                     <Copy size={16} />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-green-500 transition-colors">
                                                     <ThumbsUp size={16} />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-red-500 transition-colors">
                                                     <ThumbsDown size={16} />
                                                 </Button>
                                             </div>

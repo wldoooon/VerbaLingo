@@ -71,16 +71,13 @@ export function SessionSelector({
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         role="combobox"
                         aria-expanded={open}
-                        className="h-9 px-4 text-xs font-semibold rounded-full border-dashed border-border hover:border-primary hover:text-primary text-muted-foreground bg-transparent w-full sm:w-auto justify-between"
+                        className="h-8 w-auto gap-2 px-2 text-muted-foreground hover:text-primary font-medium"
                     >
-                        <span className="flex items-center gap-2">
-                            <History className="h-3.5 w-3.5" />
-                            <span className="truncate max-w-[150px]">{activeLabel}</span>
-                        </span>
-                        <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
+                        <History className="h-4 w-4" />
+                        <span className="text-xs">History</span>
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[240px] p-0" align="start">
