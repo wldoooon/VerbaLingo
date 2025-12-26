@@ -155,8 +155,9 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     };
 
     const shouldHideSuggestions = useMemo(() => {
-        return isLoading;
-    }, [isLoading]);
+        // Hide if loading, or if we have a current response (stream or history)
+        return isLoading || !!completion || !!currentBranch;
+    }, [isLoading, completion, currentBranch]);
 
     useEffect(() => {
         const calculateMaxHeight = () => {
@@ -321,14 +322,16 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                         </motion.div>
                                     ))}
                                 </div>
+                                {/* Separator */}
+                                <div className="w-full px-8">
+                                    <div className="h-px bg-border/40 my-2" />
+                                </div>
+
                             </motion.div>
                         )}
                     </AnimatePresence>
 
-                    {/* Separator */}
-                    <div className="w-full px-8">
-                        <div className="h-px bg-border/40 my-2" />
-                    </div>
+
 
                     {/* AI Welcome Message - Only show when idle AND no history */}
                     {!isLoading && !completion && !error && !currentBranch && query && (
