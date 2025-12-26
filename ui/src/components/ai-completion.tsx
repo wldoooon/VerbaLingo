@@ -329,8 +329,8 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         <div className="h-px bg-border/40 my-2" />
                     </div>
 
-                    {/* AI Welcome Message - Only show when idle */}
-                    {!isLoading && !completion && !error && query && (
+                    {/* AI Welcome Message - Only show when idle AND no history */}
+                    {!isLoading && !completion && !error && !currentBranch && query && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -372,7 +372,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                             >
                                 <AiAssistantSkeleton />
                             </motion.div>
-                        ) : (completion || error) && (
+                        ) : (completion || error || currentBranch) && (
                             <motion.div
                                 key="completion"
                                 initial={{ opacity: 0, y: 20 }}
