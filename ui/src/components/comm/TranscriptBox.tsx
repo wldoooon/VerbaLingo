@@ -210,7 +210,7 @@ export const TranscriptBox = ({
                                       <button
                                         type="button"
                                         className={cn(
-                                          "mr-2 px-1.5 py-0.5 border-2 border-transparent rounded-md transition-colors duration-200 ease-in-out text-left inline-flex items-center",
+                                          "mr-1 px-0.8 py-0.5 border-2 border-transparent rounded-md transition-colors duration-200 ease-in-out text-left inline-flex items-center",
                                           isSearchMatch && !isCurrentWord &&
                                           "bg-primary text-primary-foreground font-semibold",
                                           isCurrentWord &&
