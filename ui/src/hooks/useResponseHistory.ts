@@ -1,4 +1,5 @@
 import { useReducer, useEffect, useCallback, useRef } from "react";
+import type { ChatSession } from "@/lib/db";
 
 export interface ResponseBranch {
   id: string;
@@ -8,68 +9,47 @@ export interface ResponseBranch {
 }
 
 interface ResponseHistoryState {
-  branches: ResponseBranch[];
-  currentIndex: number;
+  sessions: Record<string, ChatSession>; // In-Memory Cache for UI
+  activeSessionId: string;
+  isLoading: boolean;
 }
 
 type Action =
-  | { type: "LOAD_HISTORY"; payload: ResponseHistoryState }
-  | { type: "ADD_BRANCH"; payload: ResponseBranch }
-  | { type: "GO_PREV" }
-  | { type: "GO_NEXT" }
-  | { type: "GO_TO_INDEX"; payload: number }
-  | { type: "CLEAR_HISTORY" };
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "LOAD_SESSIONS"; payload: ChatSession[] }
+  | { type: "SWITCH_SESSION"; payload: string }
+  | { type: "UPDATE_SESSION"; payload: ChatSession }
+  | { type: "CLEAR_ALL" };
 
-const MAX_BRANCHES = 20;
-const STORAGE_KEY = "ai_response_history";
-
-// The "Department Head" (Reducer)
+// Reducer handles IN-MEMORY state for fast UI
 function historyReducer(
   state: ResponseHistoryState,
   action: Action
 ): ResponseHistoryState {
   switch (action.type) {
-    case "LOAD_HISTORY":
-      return action.payload;
+    case "SET_LOADING":
+      return { ...state, isLoading: action.payload };
 
-    case "ADD_BRANCH": {
-      // "Pro" Logic: Append -> Slice -> Move Index (All in one atomic step)
-      const newBranches = [...state.branches, action.payload];
-
-      // Maintain Max Size
-      if (newBranches.length > MAX_BRANCHES) {
-        newBranches.shift(); // Remove oldest
-      }
-
-      return {
-        branches: newBranches,
-        currentIndex: newBranches.length - 1, // Always jump to new tip
-      };
+    case "LOAD_SESSIONS": {
+      const sessionsMap: Record<string, ChatSession> = {};
+      action.payload.forEach((s) => (sessionsMap[s.id] = s));
+      return { ...state, sessions: sessionsMap, isLoading: false };
     }
 
-    case "GO_PREV":
+    case "SWITCH_SESSION":
+      return { ...state, activeSessionId: action.payload };
+
+    case "UPDATE_SESSION":
       return {
         ...state,
-        currentIndex: Math.max(0, state.currentIndex - 1),
+        sessions: {
+          ...state.sessions,
+          [action.payload.id]: action.payload,
+        },
       };
 
-    case "GO_NEXT":
-      return {
-        ...state,
-        currentIndex: Math.min(
-          state.branches.length - 1,
-          state.currentIndex + 1
-        ),
-      };
-
-    case "GO_TO_INDEX":
-      if (action.payload >= 0 && action.payload < state.branches.length) {
-        return { ...state, currentIndex: action.payload };
-      }
-      return state;
-
-    case "CLEAR_HISTORY":
-      return { branches: [], currentIndex: -1 };
+    case "CLEAR_ALL":
+      return { ...state, sessions: {} };
 
     default:
       return state;
@@ -77,100 +57,257 @@ function historyReducer(
 }
 
 export function useResponseHistory() {
-  // 1. Replaced useState with useReducer
   const [state, dispatch] = useReducer(historyReducer, {
-    branches: [],
-    currentIndex: -1,
+    sessions: {},
+    activeSessionId: "default",
+    isLoading: true,
   });
 
-  const lastStoredId = useRef<string>("");
-
-  // Load from sessionStorage on mount
+  // --- 1. INITIALIZATION & CLEANUP ---
   useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const history: ResponseHistoryState = JSON.parse(stored);
-        dispatch({ type: "LOAD_HISTORY", payload: history });
+    let mounted = true;
+
+    async function initDB() {
+      try {
+        // Dynamic Import (Client-Side Only)
+        const { db } = await import("@/lib/db");
+        if (!db) return;
+
+        // A. CLEANUP (The "Eboueur") - Time To Live (TTL) Strategy
+        const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+        const cutoffDate = Date.now() - THREE_DAYS_MS;
+
+        // Delete old sessions
+        await db.sessions.where("lastActive").below(cutoffDate).delete();
+
+        // Keep only top 50 recent sessions (Optional overflow protection)
+        const allKeys = await db.sessions
+          .orderBy("lastActive")
+          .reverse()
+          .primaryKeys();
+        if (allKeys.length > 50) {
+          const keysToDelete = allKeys.slice(50);
+          await db.sessions.bulkDelete(keysToDelete);
+        }
+
+        // B. LOAD REMAINING
+        const sessions = await db.sessions.toArray();
+
+        if (mounted) {
+          dispatch({ type: "LOAD_SESSIONS", payload: sessions });
+        }
+      } catch (err) {
+        console.error("Failed to init Dexie:", err);
       }
-    } catch (error) {
-      console.error("Failed to load response history:", error);
     }
-  }, []);
 
-  // Sync to sessionStorage
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-      console.error("Failed to save response history:", error);
-    }
-  }, [state]);
+    initDB();
 
-  // Actions
-  const addBranch = useCallback((prompt: string, response: string) => {
-    // Prevent duplicate storage (Pro Check: logic moved here to keep reducer pure)
-    if (lastStoredId.current === response) return;
-    lastStoredId.current = response;
-
-    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const newBranch: ResponseBranch = {
-      id,
-      prompt,
-      response,
-      timestamp: Date.now(),
+    return () => {
+      mounted = false;
     };
-
-    dispatch({ type: "ADD_BRANCH", payload: newBranch });
   }, []);
 
-  const goToPrevious = useCallback(() => dispatch({ type: "GO_PREV" }), []);
-  const goToNext = useCallback(() => dispatch({ type: "GO_NEXT" }), []);
+  // --- 2. ACTIONS ---
+
+  // Switch: Updates State + Updates DB 'lastActive'
+  const switchSession = useCallback((sessionId: string) => {
+    if (!sessionId) return;
+
+    // Optimistic UI Update
+    dispatch({ type: "SWITCH_SESSION", payload: sessionId });
+
+    // Async Background DB Update
+    (async () => {
+      const { db } = await import("@/lib/db");
+      if (!db) return;
+
+      try {
+        // Check if session exists in DB, if not create partial
+        const existing = await db.sessions.get(sessionId);
+        const sessionToSave: ChatSession = existing || {
+          id: sessionId,
+          branches: [],
+          lastActive: Date.now(),
+          createdAt: Date.now(),
+        };
+
+        // Put = Insert or Update (Update timestamp)
+        await db.sessions.put({ ...sessionToSave, lastActive: Date.now() });
+
+        // Update local state to match
+        dispatch({ type: "UPDATE_SESSION", payload: sessionToSave });
+      } catch (err) {
+        console.error("Failed to switch session in DB:", err);
+      }
+    })();
+  }, []);
+
+  // Add Branch: The Main Action
+  const addBranch = useCallback(
+    (prompt: string, response: string) => {
+      // Optimistic update logic could go here, but for safety we await DB currently
+      // to ensure ID consistency. UX improvement: Add optimistic dispatch later if laggy.
+
+      (async () => {
+        const { db } = await import("@/lib/db");
+        if (!db) return;
+
+        const sessionId = state.activeSessionId; // Capture current ID
+        const timestamp = Date.now();
+
+        const newBranch: ResponseBranch = {
+          id: `${timestamp}-${Math.random().toString(36).substr(2, 9)}`,
+          prompt,
+          response,
+          timestamp,
+        };
+
+        try {
+          await db.transaction("rw", db.sessions, async () => {
+            const session = await db.sessions.get(sessionId);
+
+            const currentBranches = session?.branches || [];
+            const updatedBranches = [...currentBranches, newBranch];
+
+            // Limit per session (e.g. 20 messages)
+            if (updatedBranches.length > 20) updatedBranches.shift();
+
+            const updatedSession: ChatSession = {
+              id: sessionId,
+              branches: updatedBranches,
+              lastActive: timestamp,
+              createdAt: session?.createdAt || timestamp,
+            };
+
+            await db.sessions.put(updatedSession);
+
+            // Dispatch to UI
+            dispatch({ type: "UPDATE_SESSION", payload: updatedSession });
+          });
+        } catch (err) {
+          console.error("Failed to add branch to DB:", err);
+        }
+      })();
+    },
+    [state.activeSessionId]
+  );
+
+  // Navigation Logic (Purely Local State)
+  const activeSession = state.sessions[state.activeSessionId] || {
+    branches: [],
+    lastActive: Date.now(),
+  };
+  const branches = activeSession.branches || [];
+
+  // We strictly use the TOP branch as "Current" for now, or maintain a local index
+  // Using simple reducer for local UI state that doesn't need persistence
+  const [localIndex, setLocalIndex] = useReducer(
+    (prev: number, action: any) => {
+      if (action.type === "SET") return action.payload;
+      return prev;
+    },
+    -1
+  );
+
+  // Sync local index when branches change (Auto-scroll to bottom on new message)
+  useEffect(() => {
+    // If we have a persisted currentIndex, use it!
+    if (
+      activeSession.currentIndex !== undefined &&
+      activeSession.currentIndex !== localIndex
+    ) {
+      setLocalIndex({ type: "SET", payload: activeSession.currentIndex });
+    } else if (localIndex === -1 && branches.length > 0) {
+      // Only default to end if uninitialized
+      setLocalIndex({ type: "SET", payload: branches.length - 1 });
+    } else if (branches.length > 0 && localIndex >= branches.length) {
+      // Bound check
+      setLocalIndex({ type: "SET", payload: branches.length - 1 });
+    }
+  }, [branches.length, state.activeSessionId, activeSession.currentIndex]); // Added activeSession.currentIndex dependency
+
+  // Helper to persist index
+  const updateDBIndex = useCallback(
+    (newIndex: number) => {
+      (async () => {
+        const { db } = await import("@/lib/db");
+        if (!db) return;
+        try {
+          await db.sessions.update(state.activeSessionId, {
+            currentIndex: newIndex,
+            lastActive: Date.now(),
+          });
+        } catch (e) {
+          console.error("Index persist failed", e);
+        }
+      })();
+    },
+    [state.activeSessionId]
+  );
+
+  const goToPrevious = useCallback(() => {
+    const newIdx = Math.max(0, localIndex - 1);
+    setLocalIndex({ type: "SET", payload: newIdx });
+    updateDBIndex(newIdx);
+  }, [localIndex, updateDBIndex]);
+  const goToNext = useCallback(() => {
+    const newIdx = Math.min(branches.length - 1, localIndex + 1);
+    setLocalIndex({ type: "SET", payload: newIdx });
+    updateDBIndex(newIdx);
+  }, [branches.length, localIndex, updateDBIndex]);
   const navigateToIndex = useCallback(
-    (index: number) => dispatch({ type: "GO_TO_INDEX", payload: index }),
-    []
+    (index: number) => {
+      setLocalIndex({ type: "SET", payload: index });
+      updateDBIndex(index);
+    },
+    [updateDBIndex]
   );
 
   const clearHistory = useCallback(() => {
-    lastStoredId.current = "";
-    sessionStorage.removeItem(STORAGE_KEY);
-    dispatch({ type: "CLEAR_HISTORY" });
+    (async () => {
+      const { db } = await import("@/lib/db");
+      if (db) {
+        await db.sessions.clear();
+        dispatch({ type: "CLEAR_ALL" });
+      }
+    })();
   }, []);
 
-  // 2. The "Context Window" Feature
-  // Returns the last N branches formatted as a conversation string
+  // Helper for Context
   const getThreadContext = useCallback(
     (limit: number = 2) => {
-      if (state.branches.length === 0) return "";
-
-      // Get last N branches (excluding current one if we are technically adding a new one)
-      const recentHistory = state.branches.slice(-limit);
-
-      return recentHistory
+      if (!branches || branches.length === 0) return "";
+      const recent = branches.slice(-limit);
+      return recent
         .map((b) => `User: ${b.prompt}\nAI: ${b.response}`)
         .join("\n\n");
     },
-    [state.branches]
+    [branches]
   );
 
   return {
-    // State
-    branches: state.branches,
-    currentIndex: state.currentIndex,
-    currentBranch:
-      state.currentIndex >= 0 ? state.branches[state.currentIndex] : null,
-    totalBranches: state.branches.length,
+    // Global State (Metadata for Selector)
+    sessions: state.sessions,
+    activeSessionId: state.activeSessionId,
+
+    // Full Active Session State
+    branches,
+    currentIndex: localIndex,
+    currentBranch: localIndex >= 0 ? branches[localIndex] : null,
+    totalBranches: branches.length,
 
     // Navigation state
-    canGoBack: state.currentIndex > 0,
-    canGoForward: state.currentIndex < state.branches.length - 1,
+    canGoBack: localIndex > 0,
+    canGoForward: localIndex < branches.length - 1,
 
     // Actions
+    switchSession,
     addBranch,
     goToPrevious,
     goToNext,
     navigateToIndex,
     clearHistory,
-    getThreadContext, // Exported for use in ai-completion
+    getThreadContext,
   };
 }
