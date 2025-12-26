@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn, timeAgo } from "@/lib/utils"
-import { Check, ChevronsUpDown, History } from "lucide-react"
+import { Check, ChevronsUpDown, History, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     Command,
@@ -23,6 +23,7 @@ interface SessionSelectorProps {
     sessions: Record<string, any>; // Using any for simplicity as we just need keys and lengths
     activeSessionId: string;
     onSelectSession: (sessionId: string) => void;
+    onDeleteSession: (sessionId: string, e: React.MouseEvent) => void;
     className?: string;
     initialCount?: number;
     currentQuery?: string;
@@ -41,6 +42,7 @@ export function SessionSelector({
     sessions,
     activeSessionId,
     onSelectSession,
+    onDeleteSession,
     className,
     currentQuery,
 }: SessionSelectorProps) {
@@ -121,9 +123,20 @@ export function SessionSelector({
                                             )}
                                         />
                                         <span className="flex-1 truncate text-sm">{toTitleCase(key)}</span>
-                                        <span className="ml-auto text-[10px] text-muted-foreground/70">
+                                        <span className="ml-auto text-[10px] text-muted-foreground/70 mr-2">
                                             {timeAgo(sessions[key].lastActive || sessions[key].createdAt)}
                                         </span>
+                                        <div
+                                            role="button"
+                                            className="h-6 w-6 flex items-center justify-center rounded-sm hover:bg-destructive/10 hover:text-destructive text-muted-foreground/50 transition-colors z-50"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                e.preventDefault();
+                                                onDeleteSession(key, e)
+                                            }}
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </div>
                                     </CommandItem>
                                 ))}
                             </CommandGroup>

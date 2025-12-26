@@ -1,6 +1,8 @@
 import { useReducer, useEffect, useCallback, useRef } from "react";
 import type { ChatSession } from "@/lib/db";
 
+import { nanoid } from "nanoid";
+
 export interface ResponseBranch {
   id: string;
   prompt: string;
@@ -19,6 +21,7 @@ type Action =
   | { type: "LOAD_SESSIONS"; payload: ChatSession[] }
   | { type: "SWITCH_SESSION"; payload: string }
   | { type: "UPDATE_SESSION"; payload: ChatSession }
+  | { type: "REMOVE_SESSION"; payload: string }
   | { type: "CLEAR_ALL" };
 
 // Reducer handles IN-MEMORY state for fast UI
@@ -47,6 +50,12 @@ function historyReducer(
           [action.payload.id]: action.payload,
         },
       };
+
+    case "REMOVE_SESSION": {
+      const nextSessions = { ...state.sessions };
+      delete nextSessions[action.payload];
+      return { ...state, sessions: nextSessions };
+    }
 
     case "CLEAR_ALL":
       return { ...state, sessions: {} };
@@ -286,6 +295,35 @@ export function useResponseHistory() {
     [branches]
   );
 
+  // Delete a session
+  const deleteSession = useCallback(
+    async (sessionId: string, e?: React.MouseEvent) => {
+      if (e) {
+        e.stopPropagation(); // Prevent triggering selection
+        e.preventDefault();
+      }
+
+      try {
+        const { db } = await import("@/lib/db");
+        if (db) {
+          await db.sessions.delete(sessionId);
+          dispatch({ type: "REMOVE_SESSION", payload: sessionId });
+
+          // If we deleted the active session, clear current state
+          if (sessionId === state.activeSessionId) {
+            // We'll let the reducer handle switching to a new session or we force a window reload/reset
+            // For now, let's just create a new session
+            // Actually, the easiest way is to just call createNewSession if empty
+            dispatch({ type: "SWITCH_SESSION", payload: nanoid() });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to delete session:", error);
+      }
+    },
+    [state.activeSessionId]
+  );
+
   return {
     // Global State (Metadata for Selector)
     sessions: state.sessions,
@@ -309,5 +347,6 @@ export function useResponseHistory() {
     navigateToIndex,
     clearHistory,
     getThreadContext,
+    deleteSession, // Export
   };
 }
