@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { cn, timeAgo } from "@/lib/utils"
 import { Check, ChevronsUpDown, History } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -62,7 +62,9 @@ export function SessionSelector({
         return timeB - timeA;
     });
 
-    const activeLabel = sessions[activeSessionId] ? toTitleCase(activeSessionId) : "History";
+    // user request: "default value instead of the current keyword add history"
+    // We strictly show "History" to indicate this is the history menu.
+    const activeLabel = "History";
 
     return (
         <div className={cn("w-full mb-4", className)}>
@@ -122,8 +124,8 @@ export function SessionSelector({
                                             )}
                                         />
                                         <span className="flex-1 truncate text-sm">{toTitleCase(key)}</span>
-                                        <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
-                                            {sessions[key].branches.length}
+                                        <span className="ml-auto text-[10px] text-muted-foreground/70">
+                                            {timeAgo(sessions[key].lastActive || sessions[key].createdAt)}
                                         </span>
                                     </CommandItem>
                                 ))}
