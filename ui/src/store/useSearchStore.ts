@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface SearchState {
   query: string;
@@ -9,11 +10,18 @@ interface SearchState {
   setCategory: (category: string | null) => void;
 }
 
-export const useSearchStore = create<SearchState>((set) => ({
-  query: "",
-  language: "english",
-  category: null,
-  setQuery: (query) => set({ query }),
-  setLanguage: (language) => set({ language }),
-  setCategory: (category) => set({ category }),
-}));
+export const useSearchStore = create<SearchState>()(
+  persist(
+    (set) => ({
+      query: "",
+      language: "English",
+      category: null,
+      setQuery: (query) => set({ query }),
+      setLanguage: (language) => set({ language }),
+      setCategory: (category) => set({ category }),
+    }),
+    {
+      name: "search-preferences",
+    }
+  )
+);
