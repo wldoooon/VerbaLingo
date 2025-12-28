@@ -12,18 +12,22 @@ class SearchService:
         self.search_api = search_api
         self.table_name = settings.TABLE_NAME
 
-    async def search(self, q: str, category: Optional[str] = None) -> dict:
-        # Default categories to mix - ensure these match your database 'category_type' values exactly
+    async def search(self, q: str, language: str, category: Optional[str] = None) -> dict:
+        # Default categories to mix
         MIX_CATEGORIES = ["Movies", "Podcasts", "Talks", "Cartoons"]
         
+        # Resolve the table name dynamically based on language
+        table_name = self._resolve_table(language)
+        print(f"DEBUG: General search for {language} -> {table_name}")
+
         # 1. If user selected a specific category, just search that one normally
         if category:
-            return await self._search_single_category(q, category, limit=50)
+            return await self._search_single_category(q, category, table_name, limit=50)
 
         # 2. General Search: Run parallel queries for each category to ensure diversity
         tasks = []
         for cat in MIX_CATEGORIES:
-            tasks.append(self._search_single_category(q, cat, limit=10))
+            tasks.append(self._search_single_category(q, cat, table_name, limit=10))
         
         # Run all DB queries in parallel
         results_list = await asyncio.gather(*tasks)
@@ -77,13 +81,26 @@ class SearchService:
             }
         }
 
-    async def _search_single_category(self, q: str, category: str, limit: int) -> dict:
+    def _resolve_table(self, language: str) -> str:
+        """Determines the correct Manticore table based on language."""
+        if not language:
+            return self.table_name
+            
+        lang = language.lower().strip()
+        # Convention: {language}_dataset
+        # We only return the default table for "english" (the primary dataset)
+        if lang in ["english", "general"]:
+            return self.table_name
+            
+        return f"{lang}_dataset"
+
+    async def _search_single_category(self, q: str, category: str, table_name: str, limit: int) -> dict:
         """Helper to run a search for one specific category"""
         query_string = f"@sentence_text {q}"
         
         # Build strict boolean query for this category
         search_request = {
-            "table": self.table_name,
+            "table": table_name,
             "query": {
                 "bool": {
                     "must": [
@@ -110,7 +127,7 @@ class SearchService:
         try:
             result = await self.search_api.search(search_request)
         except Exception as e:
-            print(f"Search error for category {category}: {e}")
+            print(f"Search error for category {category} in {table_name}: {e}")
             return {"hits": {"hits": [], "total": {"value": 0}}, "aggregations": {}}
 
         formatted_hits = []
@@ -163,9 +180,10 @@ class SearchService:
             "aggregations": aggregations
         }
 
-    async def get_transcript(self, video_id: str, center_position: Optional[int] = None) -> dict:
+    async def get_transcript(self, video_id: str, language: str, center_position: Optional[int] = None) -> dict:
         window_size = 50
         per_page = 250
+        table_name = self._resolve_table(language)
         filter_conditions = [{"equals": {"video_id": video_id}}]
         if center_position is not None:
             start_pos = max(0, int(center_position) - window_size)
@@ -179,7 +197,7 @@ class SearchService:
                 }
             })
         search_request = {
-            "table": self.table_name,
+            "table": table_name,
             "query": {
                 "bool": {
                     "must": filter_conditions
@@ -191,7 +209,7 @@ class SearchService:
         try:
             result = await self.search_api.search(search_request)
         except Exception as e:
-            print(f"Transcript fetch error: {e}")
+            print(f"Transcript fetch error in {table_name}: {e}")
             return {"hits": {"hits": []}}
         parsed_hits = []
         if result.hits and result.hits.hits:

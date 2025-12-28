@@ -3,7 +3,7 @@
 import YouTube, { YouTubePlayer } from "react-youtube"
 import { useRef, useEffect } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
-import { useSearchParams } from "@/context/SearchParamsContext"
+import { useSearchStore } from "@/store/useSearchStore"
 import { useSearch } from "@/lib/useApi"
 import { FacetChips } from "@/components/comm/FacetChips"
 import { useRouter } from "next/navigation"
@@ -29,8 +29,8 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
   const router = useRouter()
 
   // Read playlist from React Query cache
-  const { query, category } = useSearchParams()
-  const { data } = useSearch(query, category)
+  const { query, category, language } = useSearchStore()
+  const { data } = useSearch(query, language, category)
   const playlist = data?.hits || []
 
   // Triple Player Logic (Pool of 3)
@@ -185,9 +185,15 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
 
   // Handle facet selection
   const handleFacetSelect = (facet: string) => {
-    if (query) {
-      router.push(`/search/${encodeURIComponent(query)}/${facet}`)
-    }
+    // Maintain current path (e.g. /search/[q]/[language]) 
+    // and append category as a query parameter ?category=...
+    const params = new URLSearchParams(window.location.search)
+    params.set('category', facet)
+
+    // Reset index if we change category
+    params.delete('i')
+
+    router.push(`${window.location.pathname}?${params.toString()}`)
   }
 
   return (

@@ -15,7 +15,7 @@ import {
   Gauge
 } from "lucide-react"
 import { usePlayerContext } from "@/context/PlayerContext"
-import { useSearchParams } from "@/context/SearchParamsContext"
+import { useSearchStore } from "@/store/useSearchStore"
 import { useTranscript, useSearch } from "@/lib/useApi"
 import { useRouter } from "next/navigation"
 import type { TranscriptSentence } from "@/lib/types"
@@ -95,8 +95,8 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const { isPlaying, duration } = playerState
 
   // Read playlist from React Query cache
-  const { query, category, setQuery, setCategory } = useSearchParams()
-  const { data } = useSearch(query, category)
+  const { query, category, language, setQuery, setCategory } = useSearchStore()
+  const { data } = useSearch(query, language, category)
   const playlist = data?.hits || []
 
   // Defensive: clamp currentVideoIndex to valid range
@@ -104,7 +104,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const currentClip = playlist[validIndex]
 
   // Fetch transcript for current video
-  const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "", currentClip?.position)
+  const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "", language, currentClip?.position)
 
   // Sync playback rate with context controls
   useEffect(() => {
@@ -378,10 +378,10 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
           setQuery(clean)
           setCategory(null)
 
-          // Navigate to routed watch page
+          // Navigate to routed search page including current language from store
           try {
             const encoded = encodeURIComponent(clean)
-            router.push(`/watch/${encoded}`)
+            router.push(`/search/${encoded}/${language.toLowerCase()}`)
           } catch {
             // ignore navigation errors for now
           }

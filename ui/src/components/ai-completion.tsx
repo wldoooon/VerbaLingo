@@ -1,7 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState, useRef } from "react";
-import { useSearchParams } from "@/context/SearchParamsContext";
+import { useSearchStore } from "@/store/useSearchStore";
 import { Button } from "@/components/ui/button";
 import { Response } from "@/components/ui/shadcn-io/ai/response";
 import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight, Bot } from "lucide-react";
@@ -79,7 +79,7 @@ function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
 }
 
 export function AiCompletion({ externalPrompt }: { externalPrompt: string | null }) {
-    const { query } = useSearchParams();
+    const { query } = useSearchStore();
     const router = useRouter();
     const nextSearchParams = useNextSearchParams();
 

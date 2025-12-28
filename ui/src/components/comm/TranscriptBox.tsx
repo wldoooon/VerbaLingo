@@ -187,8 +187,8 @@ export const TranscriptBox = ({
                               const isCurrentWord =
                                 adjustedTime >= w.start &&
                                 adjustedTime < w.end
-                              const isSearchMatch =
-                                !!query && wordText.toLowerCase().includes(query)
+                              const queryParts = query.split(/\s+/).filter(part => part.length > 0)
+                              const isSearchMatch = queryParts.length > 0 && queryParts.some(part => wordText.toLowerCase().includes(part))
 
                               const key = `${sentence.start_time}-${w.start}-${wi}`
                               const isOpen = openWordKey === key
@@ -210,7 +210,7 @@ export const TranscriptBox = ({
                                       <button
                                         type="button"
                                         className={cn(
-                                          "mr-2 px-1.5 py-0.5 border-2 border-transparent rounded-md transition-colors duration-200 ease-in-out text-left inline-flex items-center",
+                                          "mr-1 px-0.8 py-0.5 border-2 border-transparent rounded-md transition-colors duration-200 ease-in-out text-left inline-flex items-center",
                                           isSearchMatch && !isCurrentWord &&
                                           "bg-primary text-primary-foreground font-semibold",
                                           isCurrentWord &&

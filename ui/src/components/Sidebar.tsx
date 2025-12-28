@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Compass, User, Bookmark, Settings, LogOut, Zap, ChevronLeft, ChevronRight, LayoutGrid, History, Star, Sparkles, Folder, ChevronDown, LifeBuoy, MessageSquare, PieChart, Globe } from 'lucide-react';
+import { Compass, User, Bookmark, Settings, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, MessageSquare, Star } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import FoxLogo from './FoxLogo';
 
@@ -17,7 +17,6 @@ enum ViewState {
 const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
-  const [showCreditDetails, setShowCreditDetails] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -49,18 +48,6 @@ const Sidebar: React.FC = () => {
         break;
     }
   };
-
-
-  // Mock usage data
-  const usageData = {
-    searching: { used: 12, total: 50 },
-    ai: { used: 5, total: 20 },
-    translation: { used: 2, total: 10 }
-  };
-
-  const totalUsed = usageData.searching.used + usageData.ai.used + usageData.translation.used;
-  const totalLimit = usageData.searching.total + usageData.ai.total + usageData.translation.total;
-  const totalPercentage = (totalUsed / totalLimit) * 100;
 
   const mainNav = [
     { icon: Compass, label: 'Discover', view: ViewState.LANDING },
@@ -243,75 +230,7 @@ const Sidebar: React.FC = () => {
 
 
 
-        {/* Credits Trigger */}
-        <div className="mb-2 relative">
-          <button
-            onClick={() => !isCollapsed && setShowCreditDetails(!showCreditDetails)}
-            className={`w-full relative overflow-hidden rounded-xl transition-all duration-300 border ${showCreditDetails && !isCollapsed
-              ? 'bg-muted/50 border-border shadow-lg'
-              : 'bg-transparent border-transparent hover:bg-muted/30'
-              } ${isCollapsed ? 'p-0 flex justify-center items-center h-10 w-full' : 'p-0'}`}
-            title="Credit Usage"
-          >
-            {isCollapsed ? (
-              <Zap className="w-5 h-5 text-muted-foreground" />
-            ) : (
-              /* Expanded Status Widget Style */
-              <div className="flex flex-col w-full">
-                <div className="flex items-center gap-3 p-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 text-primary shrink-0">
-                    <Zap className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1 text-left min-w-0">
-                    <div className="text-xs font-bold text-foreground uppercase tracking-wider">Free Plan</div>
-                    <div className="text-[10px] text-muted-foreground font-medium truncate">{totalUsed} / {totalLimit} Credits</div>
-                  </div>
-                  <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform duration-300 ${showCreditDetails ? 'rotate-180' : ''}`} />
-                </div>
 
-                {/* Integrated Progress Line */}
-                <div className="h-[2px] w-full bg-muted mt-0.5">
-                  <div
-                    className="h-full bg-gradient-to-r from-primary to-purple-500 transition-all duration-1000"
-                    style={{ width: `${totalPercentage}%` }}
-                  ></div>
-                </div>
-              </div>
-            )}
-          </button>
-
-          {/* Redesigned Popover - Matching WhatsNew Style */}
-          {!isCollapsed && showCreditDetails && (
-            <div className="absolute bottom-full left-0 w-full mb-3 bg-popover rounded-xl border border-border shadow-2xl overflow-hidden animate-fade-in-up origin-bottom z-50 ring-1 ring-black/5">
-              {/* Header */}
-              <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-muted/20">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Current Cycle</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="text-[10px] font-medium text-muted-foreground">Resets 12d</span>
-                </div>
-              </div>
-
-              {/* Body: Segmented Bars */}
-              <div className="p-4 space-y-5">
-                <SegmentedUsageBar label="Search Queries" used={usageData.searching.used} total={usageData.searching.total} color="bg-blue-500" icon={Compass} />
-                <SegmentedUsageBar label="AI Companion" used={usageData.ai.used} total={usageData.ai.total} color="bg-purple-500" icon={Sparkles} />
-                <SegmentedUsageBar label="Translation" used={usageData.translation.used} total={usageData.translation.total} color="bg-emerald-500" icon={Globe} />
-              </div>
-
-              {/* Footer: Gradient Action */}
-              <div className="p-1">
-                <button
-                  onClick={() => onChangeView(ViewState.PRICING)}
-                  className="w-full py-2.5 rounded-lg bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-500 text-primary-foreground text-xs font-bold shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2 group/btn border border-primary/20"
-                >
-                  <Star className="w-3.5 h-3.5 fill-primary-foreground/20 group-hover/btn:fill-primary-foreground/40 transition-colors" />
-                  Unlock Unlimited
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Profile Actions */}
         <div className={`flex items-center ${isCollapsed ? 'flex-col gap-2' : 'gap-1'}`}>
@@ -342,31 +261,7 @@ const Sidebar: React.FC = () => {
   );
 };
 
-const SegmentedUsageBar = ({ label, used, total, color, icon: Icon }: any) => {
-  const percentage = Math.min((used / total) * 100, 100);
-  const segments = 8; // Number of blocks
-  const filledSegments = Math.ceil((percentage / 100) * segments);
 
-  return (
-    <div className="space-y-2 group">
-      <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2 text-muted-foreground font-medium group-hover:text-foreground transition-colors">
-          <Icon className={`w-3.5 h-3.5 ${color.replace('bg-', 'text-')}`} />
-          {label}
-        </div>
-        <div className="text-[10px] text-muted-foreground font-mono group-hover:text-foreground/80">{used}/{total}</div>
-      </div>
-      <div className="flex gap-1 h-1.5">
-        {Array.from({ length: segments }).map((_, i) => (
-          <div
-            key={i}
-            className={`flex-1 rounded-sm transition-all duration-500 ${i < filledSegments ? color : 'bg-muted'}`}
-          ></div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const NavItem = ({ item, isActive, isCollapsed, onClick }: any) => (
   <button

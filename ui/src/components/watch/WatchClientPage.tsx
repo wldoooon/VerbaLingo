@@ -2,7 +2,8 @@
 
 import { useEffect, useState, Suspense } from "react"
 import dynamic from "next/dynamic"
-import { useSearchParams } from "@/context/SearchParamsContext"
+import { useSearchStore } from "@/store/useSearchStore"
+import { usePlayerContext } from "@/context/PlayerContext"
 import { VideoPlayerSkeleton, TranscriptSkeleton, AiCompletionSkeleton } from "./WatchSkeletons"
 
 // Dynamic imports for heavy components
@@ -33,7 +34,7 @@ const AiCompletion = dynamic(
 import { useSearch } from "@/lib/useApi"
 
 function SearchParamSyncer({ word }: { word: string }) {
-    const { setQuery } = useSearchParams()
+    const { setQuery } = useSearchStore()
 
     const decoded = word ? decodeURIComponent(word) : ""
 
@@ -47,10 +48,17 @@ function SearchParamSyncer({ word }: { word: string }) {
 }
 
 export default function WatchClientPage({ word }: { word: string }) {
-    const { category } = useSearchParams()
+    const { category, language } = useSearchStore()
+    const { dispatch } = usePlayerContext()
+
+    // Reset index when word changes
+    useEffect(() => {
+        dispatch({ type: 'RESET_INDEX' })
+    }, [word, dispatch])
+
     console.log('[WatchClientPage] Current Category:', category)
     // PREFETCHING OPTIMIZATION: Start fetching data immediately while child components load
-    useSearch(decodeURIComponent(word), category)
+    useSearch(decodeURIComponent(word), language, category)
 
     const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
 
