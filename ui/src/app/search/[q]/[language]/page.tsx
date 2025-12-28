@@ -31,7 +31,7 @@ export default function RoutedSearchPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   // Use a dedicated query instance here and manually fetch on mount
-  const { data, refetch, isLoading } = useSearch(q, categoryForContext)
+  const { data, refetch, isLoading } = useSearch(q, languageParam, categoryForContext)
   const playlist = useMemo(() => data?.hits || [], [data])
 
   useEffect(() => {
