@@ -11,8 +11,8 @@ export default function TranscriptCarousel() {
   const { currentVideoIndex, currentTime } = state
 
   // Read playlist from React Query cache
-  const { query, category } = useSearchStore()
-  const { data: searchData } = useSearch(query, category)
+  const { query, category, language } = useSearchStore()
+  const { data: searchData } = useSearch(query, language, category)
   const playlist = searchData?.hits || []
 
   const [activeSegmentId, setActiveSegmentId] = useState<number | null>(null)
@@ -23,7 +23,7 @@ export default function TranscriptCarousel() {
   const currentVideo = playlist[validIndex];
   const videoId = currentVideo?.video_id;
 
-  const { data, isLoading, isError } = useTranscript(videoId);
+  const { data, isLoading, isError } = useTranscript(videoId || "", language);
 
   useEffect(() => {
     setActiveSegmentId(null)

@@ -96,7 +96,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
 
   // Read playlist from React Query cache
   const { query, category, language, setQuery, setCategory } = useSearchStore()
-  const { data } = useSearch(query, category)
+  const { data } = useSearch(query, language, category)
   const playlist = data?.hits || []
 
   // Defensive: clamp currentVideoIndex to valid range
@@ -104,7 +104,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const currentClip = playlist[validIndex]
 
   // Fetch transcript for current video
-  const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "", currentClip?.position)
+  const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "", language, currentClip?.position)
 
   // Sync playback rate with context controls
   useEffect(() => {

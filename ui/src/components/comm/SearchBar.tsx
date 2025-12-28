@@ -36,7 +36,7 @@ const LANGUAGES = [
     { value: 'English', label: 'English', flag: 'https://flagcdn.com/us.svg' },
     { value: 'Spanish', label: 'Español', flag: 'https://flagcdn.com/es.svg' },
     { value: 'French', label: 'Français', flag: 'https://flagcdn.com/fr.svg' },
-    { value: 'German', label: 'Deutsch', flag: 'https://flagcdn.com/de.svg' },
+    { value: 'Germany', label: 'Deutsch', flag: 'https://flagcdn.com/de.svg' },
     { value: 'Japanese', label: '日本語', flag: 'https://flagcdn.com/jp.svg' },
     { value: 'Chinese', label: '中文', flag: 'https://flagcdn.com/cn.svg' },
 ];
