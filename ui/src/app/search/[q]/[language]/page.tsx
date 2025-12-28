@@ -6,7 +6,7 @@ import VideoPlayerCard from "@/components/comm/VideoPlayerCard"
 import AudioCard from "@/components/comm/AudioCard"
 import { AiCompletion } from "@/components/ai-completion"
 import { usePlayerContext } from "@/context/PlayerContext"
-import { useSearchParams as useSearchParamsCtx } from "@/context/SearchParamsContext"
+import { useSearchStore } from "@/store/useSearchStore"
 import { useSearch } from "@/lib/useApi"
 import { Loader2 } from "lucide-react"
 
@@ -21,7 +21,7 @@ export default function RoutedSearchPage() {
   const categoryParam = searchParams.get("category")
   const categoryForContext = categoryParam || null
 
-  const { setQuery, setCategory, setLanguage } = useSearchParamsCtx()
+  const { setQuery, setCategory, setLanguage } = useSearchStore()
   const { state, dispatch } = usePlayerContext()
 
   const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
