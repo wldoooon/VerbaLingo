@@ -14,10 +14,11 @@ router = APIRouter(
 @router.get("/search", response_model=SearchResponse)
 async def search(
     q: str = Query(..., min_length=2),
+    language: str = Query("english"),
     category: Optional[str] = Query(None),
     service: SearchService = Depends(get_search_service)
 ):
-    raw_results = await service.search(q=q, category=category)
+    raw_results = await service.search(q=q, language=language, category=category)
 
     hits: List[SearchHit] = []
     raw_hits = raw_results.get("hits", {}).get("hits", [])
@@ -72,10 +73,11 @@ async def search(
 @router.get("/videos/{video_id}/transcript", response_model=TranscriptResponse)
 async def get_transcript(
     video_id: str,
+    language: str = Query("english"),
     center_position: Optional[int] = Query(None),
     service: SearchService = Depends(get_search_service)
 ):
-    raw_results = await service.get_transcript(video_id=video_id, center_position=center_position)
+    raw_results = await service.get_transcript(video_id=video_id, language=language, center_position=center_position)
 
     sentences: List[TranscriptSentence] = []
     raw_hits = raw_results.get("hits", {}).get("hits", [])
