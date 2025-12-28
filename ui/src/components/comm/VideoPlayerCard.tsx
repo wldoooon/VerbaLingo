@@ -29,8 +29,8 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
   const router = useRouter()
 
   // Read playlist from React Query cache
-  const { query, category } = useSearchStore()
-  const { data } = useSearch(query, category)
+  const { query, category, language } = useSearchStore()
+  const { data } = useSearch(query, language, category)
   const playlist = data?.hits || []
 
   // Triple Player Logic (Pool of 3)

@@ -10,9 +10,14 @@ type TranslateResponse = {
   target: string;
 };
 
-const fetchSearchResults = async (query: string, category: string | null) => {
+const fetchSearchResults = async (
+  query: string,
+  language: string,
+  category: string | null
+) => {
   const params = new URLSearchParams();
   params.append("q", query);
+  params.append("language", language);
   if (category) {
     params.append("category", category);
   }
@@ -29,18 +34,27 @@ const fetchSearchResults = async (query: string, category: string | null) => {
   return data;
 };
 
-export const useSearch = (query: string, category: string | null) => {
+export const useSearch = (
+  query: string,
+  language: string = "english",
+  category: string | null = null
+) => {
   return useQuery<SearchResponse, Error>({
-    queryKey: ["search", query, category],
-    queryFn: () => fetchSearchResults(query, category),
+    queryKey: ["search", query, language, category],
+    queryFn: () => fetchSearchResults(query, language, category),
     enabled: !!query && query.trim().length > 0, // Auto-fetch if query exists
     staleTime: 1000 * 60 * 5, // Cache results for 5 minutes
     refetchOnWindowFocus: false, // Don't refetch just because I clicked the window
   });
 };
 
-const fetchTranscript = async (videoId: string, centerPosition?: number) => {
+const fetchTranscript = async (
+  videoId: string,
+  language: string,
+  centerPosition?: number
+) => {
   const params = new URLSearchParams();
+  params.append("language", language);
   if (centerPosition !== undefined) {
     params.append("center_position", centerPosition.toString());
   }
@@ -52,10 +66,14 @@ const fetchTranscript = async (videoId: string, centerPosition?: number) => {
   return response.json();
 };
 
-export const useTranscript = (videoId: string, centerPosition?: number) => {
+export const useTranscript = (
+  videoId: string,
+  language: string = "english",
+  centerPosition?: number
+) => {
   return useQuery<TranscriptResponse, Error>({
-    queryKey: ["transcript", videoId, centerPosition],
-    queryFn: () => fetchTranscript(videoId, centerPosition),
+    queryKey: ["transcript", videoId, language, centerPosition],
+    queryFn: () => fetchTranscript(videoId, language, centerPosition),
     enabled: !!videoId,
   });
 };

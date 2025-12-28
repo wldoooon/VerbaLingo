@@ -48,7 +48,7 @@ function SearchParamSyncer({ word }: { word: string }) {
 }
 
 export default function WatchClientPage({ word }: { word: string }) {
-    const { category } = useSearchStore()
+    const { category, language } = useSearchStore()
     const { dispatch } = usePlayerContext()
 
     // Reset index when word changes
@@ -58,7 +58,7 @@ export default function WatchClientPage({ word }: { word: string }) {
 
     console.log('[WatchClientPage] Current Category:', category)
     // PREFETCHING OPTIMIZATION: Start fetching data immediately while child components load
-    useSearch(decodeURIComponent(word), category)
+    useSearch(decodeURIComponent(word), language, category)
 
     const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
 
