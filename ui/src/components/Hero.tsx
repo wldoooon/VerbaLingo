@@ -156,23 +156,7 @@ export function Hero() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              <button
-                onClick={() => handleSearch("Hello")}
-                className="bg-primary text-primary-foreground px-8 py-4 rounded-xl font-bold text-lg shadow-lg shadow-primary/20 hover:bg-primary/90 hover:shadow-primary/40 hover:-translate-y-1 transition-all flex items-center group min-w-[200px] justify-center"
-              >
-                Start Exploring
-                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </button>
-
-              {/* Mini Social Proof Inline */}
-              <div className="flex items-center gap-3 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                <span className="text-xs font-bold text-muted-foreground uppercase mr-2 border-r border-border pr-4">Trusted By</span>
-                <span className="font-serif font-bold text-foreground text-sm">Harvard</span>
-                <span className="font-sans font-bold text-foreground text-sm">MIT</span>
-                <span className="font-sans font-black text-foreground text-sm tracking-tighter">TED</span>
-              </div>
-            </div>
+            {/* Removed: Start Exploring & Trusted By */}
           </div>
 
           {/* Right Column: Curved Carousel (Preserved & Merged) */}
