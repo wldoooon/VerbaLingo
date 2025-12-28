@@ -3,7 +3,7 @@
 import YouTube, { YouTubePlayer } from "react-youtube"
 import { useRef, useEffect } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
-import { useSearchParams } from "@/context/SearchParamsContext"
+import { useSearchStore } from "@/store/useSearchStore"
 import { useSearch } from "@/lib/useApi"
 import { FacetChips } from "@/components/comm/FacetChips"
 import { useRouter } from "next/navigation"
@@ -29,7 +29,7 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
   const router = useRouter()
 
   // Read playlist from React Query cache
-  const { query, category } = useSearchParams()
+  const { query, category } = useSearchStore()
   const { data } = useSearch(query, category)
   const playlist = data?.hits || []
 

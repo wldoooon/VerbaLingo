@@ -2,19 +2,19 @@
 
 import { useEffect, useState, useRef } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
-import { useSearchParams } from "@/context/SearchParamsContext"
+import { useSearchStore } from "@/store/useSearchStore"
 import { useTranscript, useSearch } from "@/lib/useApi"
 import useEmblaCarousel from 'embla-carousel-react'
 
 export default function TranscriptCarousel() {
   const { state } = usePlayerContext()
   const { currentVideoIndex, currentTime } = state
-  
+
   // Read playlist from React Query cache
-  const { query, category } = useSearchParams()
+  const { query, category } = useSearchStore()
   const { data: searchData } = useSearch(query, category)
   const playlist = searchData?.hits || []
-  
+
   const [activeSegmentId, setActiveSegmentId] = useState<number | null>(null)
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "center" });
 
@@ -31,7 +31,7 @@ export default function TranscriptCarousel() {
 
   useEffect(() => {
     if (data) {
-      const adjustedTime = currentTime + 3; 
+      const adjustedTime = currentTime + 3;
       const activeSegmentIndex = data.sentences.findIndex((segment) => {
         if (adjustedTime >= segment.start_time && adjustedTime < segment.end_time) {
           return true;
@@ -52,26 +52,26 @@ export default function TranscriptCarousel() {
 
   if (isLoading || isError || !data) {
     return (
-        <div className="text-center text-lg">
-            <span className="text-zinc-400">{isLoading ? "Loading transcript..." : isError ? "Error loading transcript" : "No transcript available"}</span>
-        </div>
+      <div className="text-center text-lg">
+        <span className="text-zinc-400">{isLoading ? "Loading transcript..." : isError ? "Error loading transcript" : "No transcript available"}</span>
+      </div>
     )
   }
 
   return (
     <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex">
-            {data.sentences.map((segment, index) => {
-                const isActive = index === activeSegmentId
-                return (
-                    <div className="flex-shrink-0 w-full" key={index}>
-                        <p className={`text-center text-lg transition-colors duration-200 ${isActive ? "text-white font-semibold" : "text-zinc-400"}`}>
-                            {segment.sentence_text}
-                        </p>
-                    </div>
-                )
-            })}
-        </div>
+      <div className="flex">
+        {data.sentences.map((segment, index) => {
+          const isActive = index === activeSegmentId
+          return (
+            <div className="flex-shrink-0 w-full" key={index}>
+              <p className={`text-center text-lg transition-colors duration-200 ${isActive ? "text-white font-semibold" : "text-zinc-400"}`}>
+                {segment.sentence_text}
+              </p>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

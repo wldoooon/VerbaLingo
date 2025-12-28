@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, ArrowRight, ChevronDown, Check, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
-import { useSearchParams } from '@/context/SearchParamsContext';
+import { useSearchStore } from '@/store/useSearchStore';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,13 +56,25 @@ export function SearchBar() {
     const containerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const pathname = usePathname();
-    const { setLanguage, setCategory } = useSearchParams();
 
-    // Sync selected categories to global context
+    // Zustand Store
+    const storeLanguage = useSearchStore(s => s.language);
+    const { setLanguage: setStoreLanguage, setCategory: setStoreCategory } = useSearchStore();
+
+    // Sync local language state to store if they differ
+    useEffect(() => {
+        if (storeLanguage && storeLanguage.toLowerCase() !== selectedLanguage.toLowerCase()) {
+            // Capitalize for UI
+            const capitalized = storeLanguage.charAt(0).toUpperCase() + storeLanguage.slice(1);
+            setSelectedLanguage(capitalized);
+        }
+    }, [storeLanguage, selectedLanguage]);
+
+    // Sync selected categories to global store
     useEffect(() => {
         const cats = selectedCategories.includes('All') ? null : selectedCategories.join(',')
-        setCategory(cats)
-    }, [selectedCategories, setCategory])
+        setStoreCategory(cats)
+    }, [selectedCategories, setStoreCategory])
 
     // Reset searching state on path change
     useEffect(() => {
@@ -337,7 +349,7 @@ export function SearchBar() {
                                     key={lang.value}
                                     onClick={() => {
                                         setSelectedLanguage(lang.value);
-                                        setLanguage(lang.value);
+                                        setStoreLanguage(lang.value);
 
                                         // If we are already on a search page, update the URL immediately
                                         if (pathname.startsWith('/search/')) {
