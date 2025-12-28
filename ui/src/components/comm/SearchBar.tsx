@@ -209,7 +209,7 @@ export function SearchBar() {
     return (
         <div className="w-full max-w-3xl relative z-30" ref={containerRef}>
             <div className={cn(
-                "group relative rounded-xl transition-all duration-300 ease-in-out border border-blue-500/40 overflow-hidden",
+                "group relative rounded-xl transition-all duration-300 ease-in-out border border-primary/40 overflow-hidden",
                 showRecent && recentSearches.length > 0
                     ? "rounded-b-none"
                     : "hover:-translate-y-0.5"

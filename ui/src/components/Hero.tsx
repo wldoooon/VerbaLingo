@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Search, Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Play, Activity, Bot, MessageSquare } from 'lucide-react';
+import { Search, Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Play, Activity, Bot, MessageSquare, Layers, Database } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
@@ -153,6 +153,59 @@ export function Hero() {
                   <Play className="w-3 h-3 text-primary fill-current group-hover/btn:text-primary-foreground transition-colors" />
                   <span className="text-xs font-bold text-foreground group-hover/btn:text-primary-foreground uppercase tracking-wide">Watch Contexts</span>
                 </button>
+              </div>
+            </div>
+
+            {/* Library Scale Metrics Strip */}
+            <div className="flex flex-col gap-6 mt-2">
+              <div className="flex items-center gap-4">
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-50">Library Scale</span>
+                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-8 px-4">
+                <div className="flex flex-col gap-2 group cursor-default">
+                  <div className="flex items-center gap-2 text-primary">
+                    <Globe className="w-4 h-4" />
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Global Languages</span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">50+</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Native dialects</span>
+                  </div>
+                  <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-primary/30 w-3/4"></div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 group cursor-default border-x border-border/50 px-8">
+                  <div className="flex items-center gap-2 text-primary">
+                    <Layers className="w-4 h-4" />
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Active Categories</span>
+                  </div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">60+</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Subject areas</span>
+                  </div>
+                  <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-primary/30 w-1/2"></div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 group cursor-default text-right">
+                  <div className="flex items-center justify-end gap-2 text-primary">
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Contextual Clips</span>
+                    <Database className="w-4 h-4" />
+                  </div>
+                  <div className="flex items-baseline justify-end gap-1.5">
+                    <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">14.2M</span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Indexed frames</span>
+                  </div>
+                  <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-primary/30 w-5/6 ml-auto"></div>
+                  </div>
+                </div>
               </div>
             </div>
 

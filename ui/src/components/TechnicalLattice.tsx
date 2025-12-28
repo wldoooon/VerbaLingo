@@ -29,7 +29,7 @@ const TechnicalLattice: React.FC<TechnicalLatticeProps> = ({
         let time = 0;
 
         const labels = [
-            '[ 200 OK ]',
+            '[ ENGLISH ]',
             '[ CONTEXT ]',
             '[ .CLIP ]',
             '[ SYNC ]',

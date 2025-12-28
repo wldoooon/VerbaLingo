@@ -565,7 +565,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         <Input
                             type="text"
                             placeholder="Ask about pronunciation, definitions, examples..."
-                            className="w-full rounded-full pl-10 pr-10 py-6 bg-muted shadow-sm border border-blue-500/40 focus-visible:bg-background transition-colors"
+                            className="w-full rounded-full pl-10 pr-10 py-6 bg-muted shadow-sm border border-primary/40 focus-visible:bg-background transition-colors"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyPress={handleKeyPress}
