@@ -92,6 +92,11 @@ export function SearchBar() {
     const toggleCategory = (cat: string) => {
         if (cat === 'All') {
             setSelectedCategories(['All']);
+            // Push to URL: clear category param
+            const params = new URLSearchParams(window.location.search);
+            params.delete('category');
+            params.delete('i'); // Reset index on filter change
+            router.push(`${pathname}?${params.toString()}`);
             return;
         }
 
@@ -103,6 +108,16 @@ export function SearchBar() {
         }
         if (newCats.length === 0) newCats = ['All'];
         setSelectedCategories(newCats);
+
+        // Push to URL
+        if (pathname.startsWith('/search')) {
+            const params = new URLSearchParams(window.location.search);
+            const catString = newCats.includes('All') ? null : newCats.join(',');
+            if (catString) params.set('category', catString);
+            else params.delete('category');
+            params.delete('i'); // Reset index
+            router.push(`${pathname}?${params.toString()}`);
+        }
     };
 
     const isCategorySelected = (cat: string) => {
@@ -129,20 +144,26 @@ export function SearchBar() {
         const q = searchQuery || query;
         if (!q.trim()) return;
 
-        const targetPath = `/watch/${encodeURIComponent(q.trim())}`;
+        // Use the selected language (lowercase) for the URL path
+        const lang = selectedLanguage.toLowerCase();
 
-        // Check if we are already on the target page. 
-        // If yes, we don't show the spinner because navigation won't trigger a pathname change effect to clear it.
-        // TanStack Query will handle background refetching if data is stale.
+        // Build query params including categories
+        const params = new URLSearchParams();
+        const cats = selectedCategories.includes('All') ? null : selectedCategories.join(',');
+        if (cats) params.set('category', cats);
+
+        const targetPath = `/search/${encodeURIComponent(q.trim())}/${lang}`;
+        const targetUrl = params.toString() ? `${targetPath}?${params.toString()}` : targetPath;
+
         if (pathname === decodeURIComponent(targetPath) || pathname === targetPath) {
-            router.push(targetPath);
+            router.push(targetUrl);
             return;
         }
 
         saveToRecent(q);
         setShowRecent(false);
         setIsSearching(true);
-        router.push(targetPath);
+        router.push(targetUrl);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -317,6 +338,17 @@ export function SearchBar() {
                                     onClick={() => {
                                         setSelectedLanguage(lang.value);
                                         setLanguage(lang.value);
+
+                                        // If we are already on a search page, update the URL immediately
+                                        if (pathname.startsWith('/search/')) {
+                                            const pathParts = pathname.split('/');
+                                            // pathParts = ['', 'search', 'query', 'old-lang']
+                                            if (pathParts.length >= 4) {
+                                                const searchQ = pathParts[2];
+                                                const newLang = lang.value.toLowerCase();
+                                                router.push(`/search/${searchQ}/${newLang}${window.location.search}`);
+                                            }
+                                        }
                                     }}
                                     className={cn(
                                         "rounded-lg py-2.5 cursor-pointer flex items-center justify-between",

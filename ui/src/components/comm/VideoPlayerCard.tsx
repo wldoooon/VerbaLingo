@@ -185,9 +185,15 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
 
   // Handle facet selection
   const handleFacetSelect = (facet: string) => {
-    if (query) {
-      router.push(`/search/${encodeURIComponent(query)}/${facet}`)
-    }
+    // Maintain current path (e.g. /search/[q]/[language]) 
+    // and append category as a query parameter ?category=...
+    const params = new URLSearchParams(window.location.search)
+    params.set('category', facet)
+
+    // Reset index if we change category
+    params.delete('i')
+
+    router.push(`${window.location.pathname}?${params.toString()}`)
   }
 
   return (

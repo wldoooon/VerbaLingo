@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 import VideoPlayerCard from "@/components/comm/VideoPlayerCard"
 import AudioCard from "@/components/comm/AudioCard"
 import { AiCompletion } from "@/components/ai-completion"
@@ -12,12 +12,16 @@ import { Loader2 } from "lucide-react"
 
 export default function RoutedSearchPage() {
   const params = useParams<{ q: string; language: string }>()
+  const searchParams = useSearchParams()
+
   const q = decodeURIComponent(params.q || "")
-  const languageParam = decodeURIComponent(params.language || "General")
+  const languageParam = decodeURIComponent(params.language || "english")
 
-  const categoryForContext: string | null = languageParam === "General" ? null : languageParam
+  // Now Category comes from ?category=... instead of reusing the language
+  const categoryParam = searchParams.get("category")
+  const categoryForContext = categoryParam || null
 
-  const { setQuery, setCategory } = useSearchParamsCtx()
+  const { setQuery, setCategory, setLanguage } = useSearchParamsCtx()
   const { state, dispatch } = usePlayerContext()
 
   const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
@@ -40,6 +44,7 @@ export default function RoutedSearchPage() {
     // Sync URL params into global search context
     setQuery(q)
     setCategory(categoryForContext)
+    setLanguage(languageParam)
 
     // Persist last query for components relying on it
     try {
