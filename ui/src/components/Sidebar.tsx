@@ -215,7 +215,7 @@ const Sidebar: React.FC = () => {
               </div>
 
               <div className="w-full flex justify-center mt-2">
-                <span className="text-blue-500 text-sm font-bold cursor-pointer hover:text-blue-400 transition-colors flex items-center gap-2">
+                <span className="text-primary text-sm font-bold cursor-pointer hover:text-primary/80 transition-colors flex items-center gap-2">
                   Get Started
                 </span>
               </div>

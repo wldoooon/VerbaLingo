@@ -167,6 +167,8 @@ const TechnicalLattice: React.FC<TechnicalLatticeProps> = ({
         height: '100%',
         zIndex: 0,
         pointerEvents: 'none',
+        maskImage: 'linear-gradient(to right, transparent, transparent 300px, black 400px)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, transparent 300px, black 400px)',
     };
 
     return (
