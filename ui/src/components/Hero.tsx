@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Search, Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Play, Activity, Bot, MessageSquare, Layers, Database } from 'lucide-react';
+import { Search, Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Play, Activity, Bot, MessageSquare, Layers, Database, TrendingUp, Quote } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
@@ -69,6 +69,33 @@ export function Hero() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState(2);
   const [isPaused, setIsPaused] = useState(false);
+  const [highlightIdx, setHighlightIdx] = useState(0);
+
+  const trendingHighlights = [
+    {
+      word: "Serendipity",
+      definition: "The occurrence and development of events by chance in a happy or beneficial way.",
+      context: "Finding that old book in the attic was pure serendipity.",
+      frequency: "High",
+      usage: "92%"
+    },
+    {
+      word: "Ephemeral",
+      definition: "Lasting for a very short time.",
+      context: "The beauty of the sunset was ephemeral, fading into night within minutes.",
+      frequency: "Medium",
+      usage: "45%"
+    },
+    {
+      word: "Resilient",
+      definition: "Able to withstand or recover quickly from difficult conditions.",
+      context: "Despite the challenges, the community remained resilient and rebuilt together.",
+      frequency: "Very High",
+      usage: "88%"
+    }
+  ];
+
+  const currentHighlight = trendingHighlights[highlightIdx];
 
   const handleSearch = (query: string) => {
     router.push(`/search/${encodeURIComponent(query)}/General`);
@@ -81,6 +108,14 @@ export function Hero() {
     }, 5000);
     return () => clearInterval(interval);
   }, [isPaused]);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setHighlightIdx((prev) => (prev + 1) % trendingHighlights.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [isPaused, trendingHighlights.length]);
 
   // Helper to get distance from active index handling wrap-around
   const getOffset = (index: number) => {
@@ -99,60 +134,87 @@ export function Hero() {
         {/* Split Hero Section */}
         <div className="grid lg:grid-cols-2 gap-50 lg:gap-12 items-center mb-24 min-h-[600px]">
 
-          {/* Left Column: Redesigned Content */}
-          <div className="text-left relative z-20 flex flex-col justify-center">
+          {/* Left Column: Context Content & Insights */}
+          <div className="flex flex-col justify-center relative z-20">
 
-            {/* Huge Headline */}
-            <h1 className="text-6xl lg:text-8xl font-black text-foreground tracking-tighter leading-[0.9] mb-6 relative">
+
+
+            <h1 className="text-5xl lg:text-7xl font-black text-foreground tracking-tighter leading-[0.85] mb-6 relative">
               {/* Mascot Behind Text */}
-              <div className="absolute -top-80 -left-10 w-64 h-64 md:w-[450px] md:h-[450px] md:-top-66 md:left-50 -z-10 opacity-90 pointer-events-none">
+              <div className="absolute -top-40 left-[85%] w-48 h-48 md:w-[350px] md:h-[350px] md:-top-36 md:left-[35%] -z-10 opacity-80 pointer-events-none transition-transform duration-1000 group-hover:scale-105">
                 <img src="/cat_logo3.png" alt="Mascot" className="w-full h-full object-contain" />
               </div>
 
-              Stop <br />
-              Studying. <br />
-              <span className="text-primary">
-                Start Living.
-              </span>
+              Speak <br />
+              The <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Moment.</span>
             </h1>
 
-            <p className="text-lg text-muted-foreground max-w-lg leading-relaxed mb-10 border-l-2 border-primary/30 pl-6">
-              The world's first context-engine. Forget flashcards—immerse yourself in millions of real-life video moments.
+            <p className="text-lg text-muted-foreground mb-10 max-w-lg leading-relaxed font-medium border-l-2 border-primary/30 pl-6">
+              Bridge the gap between dictionary definitions and native fluency. Our engine indexes <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">14.2M video frames</span> to help you master pronunciation, tone, and cultural nuance in real-time.
             </p>
 
-            {/* Featured Context Preview Widget */}
-            <div className="bg-card/50 border border-border rounded-2xl p-5 mb-10 max-w-md shadow-2xl backdrop-blur-sm relative overflow-hidden group hover:border-primary/30 transition-all">
-              {/* Background decoration */}
-              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-primary/10 blur-2xl rounded-full"></div>
-
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    <Sparkles className="w-3 h-3 text-primary" />
-                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Featured Context</span>
+            {/* Live Context Spotlight Widget */}
+            <div className="w-full max-w-md bg-background/60 backdrop-blur-md border border-border rounded-3xl shadow-xl overflow-hidden mb-10 p-1 group/widget transition-all duration-500 hover:shadow-primary/10">
+              <div className="bg-card rounded-[1.4rem] overflow-hidden border border-border/50 shadow-sm transition-all duration-500">
+                <div className="flex items-center justify-between px-6 py-3 border-b border-border/30 bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-3 h-3 text-primary" />
+                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Live Context Insight</span>
                   </div>
-                  <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-                    <Film className="w-3 h-3 text-primary" />
-                    <span className="text-[10px] font-bold text-primary">142 Clips</span>
+                  <div className="flex items-center gap-1">
+                    <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">Analyzing Stream</span>
                   </div>
                 </div>
 
-                <div className="flex items-baseline space-x-3 mb-2">
-                  <h3 className="text-2xl font-bold text-foreground">Serendipity</h3>
-                  <span className="text-sm font-mono text-muted-foreground">/ˌserənˈdipədē/</span>
+                <div className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="max-w-[70%]">
+                      <h2 className="text-3xl font-black text-foreground tracking-tighter mb-1 animate-in fade-in duration-500" key={currentHighlight.word}>
+                        {currentHighlight.word}
+                      </h2>
+                      <p className="text-xs font-medium text-muted-foreground leading-snug line-clamp-2">
+                        {currentHighlight.definition}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[9px] font-bold text-muted-foreground opacity-50 uppercase mb-0.5">Freq</div>
+                      <div className="text-lg font-mono font-black text-primary">{currentHighlight.frequency}</div>
+                    </div>
+                  </div>
+
+                  <div className="relative bg-muted/30 rounded-2xl p-4 border border-border/50 group-hover/widget:border-primary/20 transition-colors">
+                    <Quote className="absolute -top-2 -left-1 w-6 h-6 text-muted-foreground opacity-20" />
+                    <p className="text-foreground font-bold italic text-base leading-relaxed relative z-10 px-1">
+                      "{currentHighlight.context}"
+                    </p>
+                    <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3">
+                      <div className="flex items-center gap-1.5">
+                        <Activity className="w-3 h-3 text-primary" />
+                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tight">Density: {currentHighlight.usage}</span>
+                      </div>
+                      <button
+                        onClick={() => handleSearch(currentHighlight.word)}
+                        className="bg-foreground text-background hover:bg-primary hover:text-primary-foreground px-3.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all active:scale-95 group/btn"
+                      >
+                        View
+                        <ArrowRight className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                  The occurrence and development of events by chance in a happy or beneficial way.
-                </p>
-
-                <button
-                  onClick={() => handleSearch("Serendipity")}
-                  className="w-full py-2.5 bg-muted/50 hover:bg-primary border border-border hover:border-primary rounded-xl flex items-center justify-center space-x-2 transition-all group/btn"
-                >
-                  <Play className="w-3 h-3 text-primary fill-current group-hover/btn:text-primary-foreground transition-colors" />
-                  <span className="text-xs font-bold text-foreground group-hover/btn:text-primary-foreground uppercase tracking-wide">Watch Contexts</span>
-                </button>
+                <div className="px-6 py-3 bg-muted/20 border-t border-border/30 flex items-center justify-between">
+                  <div className="flex gap-1">
+                    {trendingHighlights.map((_, i) => (
+                      <div key={i} className={`h-1 rounded-full transition-all duration-300 ${i === highlightIdx ? 'w-6 bg-primary' : 'w-1.5 bg-border'}`}></div>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-muted-foreground opacity-60">
+                    <Sparkles className="w-3 h-3 text-primary/60" />
+                    <span className="text-[8px] font-black uppercase tracking-widest">Neural Index</span>
+                  </div>
+                </div>
               </div>
             </div>
 
