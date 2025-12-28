@@ -76,23 +76,23 @@ const Sidebar: React.FC = () => {
         }`}
     >
       {/* 1. Logo Section */}
-      <div className="h-24 flex items-center justify-center relative shrink-0 border-b border-border/60 px-3">
+      <div className="h-24 flex items-center px-4 relative shrink-0 border-b border-border/60">
         <div
-          className="flex items-center gap-3 cursor-pointer group w-full p-2 rounded-2xl hover:bg-muted/40 transition-all duration-300"
+          className="flex items-center justify-center cursor-pointer group w-full py-2 transition-all duration-300"
           onClick={() => onChangeView(ViewState.LANDING)}
         >
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-transparent flex items-center justify-center shrink-0 border border-primary/10 shadow-sm group-hover:scale-105 transition-transform duration-300">
-            <img src="/logo.png" alt="VerbaLingo" className="w-full h-full object-contain p-1" />
-          </div>
-
-          {!isCollapsed && (
-            <div className="flex flex-col justify-center animate-fade-in">
-              <h1 className="text-xl font-black text-foreground tracking-tight leading-none mb-0.5">
-                VerbaLingo
+          {!isCollapsed ? (
+            <div className="flex flex-col items-center text-center justify-center animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <h1 className="text-xl font-black text-foreground tracking-[0.1em] leading-none mb-1 font-mono">
+                VERBALIN<span className="text-primary">GO</span>
               </h1>
-              <span className="text-[10px] font-bold text-muted-foreground/80 tracking-wider uppercase">
-                AI Learning
+              <span className="text-[9px] font-black text-muted-foreground/60 tracking-[0.2em] uppercase">
+                Neural Context Engine
               </span>
+            </div>
+          ) : (
+            <div className="w-full flex justify-center">
+              <span className="text-xl font-black text-primary font-mono">V</span>
             </div>
           )}
         </div>
