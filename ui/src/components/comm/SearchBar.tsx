@@ -152,6 +152,14 @@ export function SearchBar() {
         } catch { }
     };
 
+    const removeRecent = (termToRemove: string) => {
+        const updated = recentSearches.filter(s => s !== termToRemove);
+        setRecentSearches(updated);
+        try {
+            localStorage.setItem('recent_searches', JSON.stringify(updated));
+        } catch { }
+    };
+
     const handleSearch = (searchQuery?: string) => {
         const q = searchQuery || query;
         if (!q.trim()) return;
@@ -449,19 +457,33 @@ export function SearchBar() {
                                     <Clock className="w-3 h-3" /> Recent
                                 </div>
                                 {recentSearches.slice(0, 3).map((search, idx) => (
-                                    <Button
+                                    <div
                                         key={idx}
-                                        variant="ghost"
-                                        onClick={() => {
-                                            setQuery(search);
-                                            handleSearch(search);
-                                            setActiveIndex(-1);
-                                        }}
-                                        className="w-full justify-start h-auto py-2 px-4 font-normal text-muted-foreground hover:text-primary group"
+                                        className="relative group block w-full"
                                     >
-                                        <ArrowRight className="w-4 h-4 mr-3 opacity-30 group-hover:opacity-100 transition-opacity" />
-                                        <span className="flex-1 text-left">{search}</span>
-                                    </Button>
+                                        <Button
+                                            variant="ghost"
+                                            onClick={() => {
+                                                setQuery(search);
+                                                handleSearch(search);
+                                                setActiveIndex(-1);
+                                            }}
+                                            className="w-full justify-start h-auto py-2 px-4 font-normal text-muted-foreground hover:text-primary pr-8"
+                                        >
+                                            <ArrowRight className="w-4 h-4 mr-3 opacity-30 group-hover:opacity-100 transition-opacity" />
+                                            <span className="flex-1 text-left">{search}</span>
+                                        </Button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeRecent(search);
+                                            }}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-muted-foreground/50 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                                            title="Remove from history"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </div>
                                 ))}
                             </div>
                         )}

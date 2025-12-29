@@ -220,7 +220,18 @@ export function useResponseHistory() {
   );
 
   // Sync local index when branches change (Auto-scroll to bottom on new message)
+  const prevBranchesLen = useRef(branches.length);
+
   useEffect(() => {
+    // 1. Detect New Branch Addition (Auto-jump to end)
+    if (branches.length > prevBranchesLen.current) {
+      setLocalIndex({ type: "SET", payload: branches.length - 1 });
+      prevBranchesLen.current = branches.length;
+      return;
+    }
+    prevBranchesLen.current = branches.length;
+
+    // 2. Standard Sync Logic
     // If we have a persisted currentIndex, use it!
     if (
       activeSession.currentIndex !== undefined &&

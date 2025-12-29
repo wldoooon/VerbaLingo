@@ -73,25 +73,46 @@ export function Hero() {
 
   const trendingHighlights = [
     {
-      word: "Serendipity",
-      definition: "The occurrence and development of events by chance in a happy or beneficial way.",
-      context: "Finding that old book in the attic was pure serendipity.",
-      frequency: "High",
-      usage: "92%"
+      word: "Schadenfreude",
+      definition: "Pleasure derived from another's misfortune.",
+      context: "A sense of schadenfreude swept the crowd as the rival fumbled.",
+      frequency: "German Context",
+      usage: "82%"
     },
     {
-      word: "Ephemeral",
-      definition: "Lasting for a very short time.",
-      context: "The beauty of the sunset was ephemeral, fading into night within minutes.",
-      frequency: "Medium",
-      usage: "45%"
+      word: "Bite the bullet",
+      definition: "To endure an unpleasant but unavoidable situation.",
+      context: "She decided to bite the bullet and finally start the complex migration.",
+      frequency: "English Idiom",
+      usage: "95%"
     },
     {
-      word: "Resilient",
-      definition: "Able to withstand or recover quickly from difficult conditions.",
-      context: "Despite the challenges, the community remained resilient and rebuilt together.",
-      frequency: "Very High",
+      word: "Feierabend",
+      definition: "The state of being finished with work for the day.",
+      context: "It's 5:00 PM—time to close the laptop and enjoy the Feierabend.",
+      frequency: "German Context",
       usage: "88%"
+    },
+    {
+      word: "Break the ice",
+      definition: "To say or do something to relieve tension in a social setting.",
+      context: "He told a joke to break the ice at the start of the meeting.",
+      frequency: "English Idiom",
+      usage: "91%"
+    },
+    {
+      word: "Under the weather",
+      definition: "Feeling slightly unwell or sick.",
+      context: "I'm feeling a bit under the weather today, so I'll stay home.",
+      frequency: "English Phrase",
+      usage: "84%"
+    },
+    {
+      word: "Piece of cake",
+      definition: "Something that is very easy to do.",
+      context: "Don't worry about the exam; it was a total piece of cake!",
+      frequency: "English Idiom",
+      usage: "94%"
     }
   ];
 
@@ -150,7 +171,7 @@ export function Hero() {
             </h1>
 
             <p className="text-lg text-muted-foreground mb-10 max-w-lg leading-relaxed font-medium border-l-2 border-primary/30 pl-6">
-              Bridge the gap between dictionary definitions and native fluency. Our engine indexes <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">14.2M video frames</span> to help you master pronunciation, tone, and cultural nuance in real-time.
+              Bridge the gap between dictionary definitions and native fluency. Our engine indexes <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">14.2M video frames</span>, paired with an <span className="text-foreground font-bold">AI Assistant</span> you can ask anything about usage, tone, and cultural nuance.
             </p>
 
             {/* Live Context Spotlight Widget */}
@@ -233,7 +254,7 @@ export function Hero() {
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Global Languages</span>
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">50+</span>
+                    <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">3+</span>
                     <span className="text-[10px] font-bold text-muted-foreground uppercase">Native dialects</span>
                   </div>
                   <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
@@ -247,7 +268,7 @@ export function Hero() {
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Active Categories</span>
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">60+</span>
+                    <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">3+</span>
                     <span className="text-[10px] font-bold text-muted-foreground uppercase">Subject areas</span>
                   </div>
                   <div className="h-1 w-full bg-muted rounded-full overflow-hidden">

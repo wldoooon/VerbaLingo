@@ -7,7 +7,7 @@ import ReactMarkdown, { type Options } from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import { CodeBlock, CodeBlockCopyButton } from './code-block';
+
 import 'katex/dist/katex.min.css';
 import hardenReactMarkdown from 'harden-react-markdown';
 
@@ -209,59 +209,50 @@ const components: Options['components'] = {
     </a>
   ),
   h1: ({ node, children, className, ...props }) => (
-      <h1
-        className={cn('mt-8 mb-4 font-semibold text-3xl', className)}
-        {...props}
-      >
-        {children}
-      </h1>
+    <h1
+      className={cn('mt-8 mb-4 font-semibold text-3xl', className)}
+      {...props}
+    >
+      {children}
+    </h1>
   ),
   h2: ({ node, children, className, ...props }) => (
-      <h2
-        className={cn('mt-8 mb-4 font-semibold text-2xl', className)}
-        {...props}
-      >
-        {children}
-      </h2>
+    <h2
+      className={cn('mt-8 mb-4 font-semibold text-2xl', className)}
+      {...props}
+    >
+      {children}
+    </h2>
   ),
   h3: ({ node, children, className, ...props }) => (
-      <h3 className={cn('mt-8 mb-4 font-semibold text-xl', className)} {...props}>
-        {children}
-      </h3>
+    <h3 className={cn('mt-8 mb-4 font-semibold text-xl', className)} {...props}>
+      {children}
+    </h3>
   ),
   h4: ({ node, children, className, ...props }) => (
-      <h4 className={cn('mt-8 mb-4 font-semibold text-lg', className)} {...props}>
-        {children}
-      </h4>
+    <h4 className={cn('mt-8 mb-4 font-semibold text-lg', className)} {...props}>
+      {children}
+    </h4>
   ),
   h5: ({ node, children, className, ...props }) => (
-      <h5
-        className={cn('mt-8 mb-4 font-semibold text-base', className)}
-        {...props}
-      >
-        {children}
-      </h5>
+    <h5
+      className={cn('mt-8 mb-4 font-semibold text-base', className)}
+      {...props}
+    >
+      {children}
+    </h5>
   ),
   h6: ({ node, children, className, ...props }) => (
-      <h6 className={cn('mt-8 mb-4 font-semibold text-sm', className)} {...props}>
-        {children}
-      </h6>
+    <h6 className={cn('mt-8 mb-4 font-semibold text-sm', className)} {...props}>
+      {children}
+    </h6>
   ),
-    p: ({ node, children, className, ...props }) => (
-      <p className={cn('mt-3', className)} {...props}>
-        {children}
-      </p>
-    ),
-    ul: ({ node, children, className, ...props }) => (
-      <ul className={cn('ml-4 list-outside list-disc mt-3', className)} {...props}>
-        {children}
-      </ul>
-    ),
-    ol: ({ node, children, className, ...props }) => (
-      <ol className={cn('ml-4 list-outside list-decimal mt-3', className)} {...props}>
-        {children}
-      </ol>
-    ),
+  p: ({ node, children, className, ...props }) => (
+    <p className={cn('mt-3', className)} {...props}>
+      {children}
+    </p>
+  ),
+
   table: ({ node, children, className, ...props }) => (
     <div className="my-4 overflow-x-auto">
       <table
@@ -328,36 +319,17 @@ const components: Options['components'] = {
       />
     );
   },
-  pre: ({ node, className, children }) => {
-    let language = 'javascript';
-
-    if (typeof node?.properties?.className === 'string') {
-      language = node.properties.className.replace('language-', '');
-    }
-
-    // Extract code content from children safely
-    let code = '';
-    if (
-      isValidElement(children) &&
-      children.props &&
-      typeof (children.props as any).children === 'string'
-    ) {
-      code = (children.props as any).children;
-    } else if (typeof children === 'string') {
-      code = children;
-    }
-
+  pre: ({ node, className, children, ...props }) => {
     return (
-      <CodeBlock
-        className={cn('my-4 h-auto', className)}
-        code={code}
-        language={language}
+      <pre
+        className={cn(
+          'mb-4 mt-6 overflow-x-auto rounded-lg border bg-black py-4 px-4 text-white',
+          className
+        )}
+        {...props}
       >
-        <CodeBlockCopyButton
-          onCopy={() => console.log('Copied code to clipboard')}
-          onError={() => console.error('Failed to copy code to clipboard')}
-        />
-      </CodeBlock>
+        {children}
+      </pre>
     );
   },
 };
