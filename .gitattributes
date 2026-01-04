@@ -1,0 +1,9 @@
+ui/** linguist-detectable=false
+
+*.jpg linguist-documentation
+*.png linguist-documentation
+*.webp linguist-documentation
+*.svg linguist-documentation
+*.md linguist-documentation
+
+app/**/*.py linguist-detectable=true
