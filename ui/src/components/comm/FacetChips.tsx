@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     Command,
@@ -23,6 +23,7 @@ interface FacetChipsProps {
     aggregations?: Record<string, number>
     onSelect?: (category: string) => void
     selectedCategory?: string | null
+    isLoading?: boolean
     className?: string
     initialCount?: number
 }
@@ -39,6 +40,7 @@ export function FacetChips({
     aggregations,
     onSelect,
     selectedCategory,
+    isLoading,
     className,
     initialCount = 5
 }: FacetChipsProps) {
@@ -84,14 +86,18 @@ export function FacetChips({
                                 whileTap={{ scale: 0.98 }}
                             >
                                 <span>{label}</span>
-                                <span className={cn(
-                                    "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.2rem] text-center",
-                                    isSelected
-                                        ? "bg-primary-foreground/20 text-primary-foreground"
-                                        : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-                                )}>
-                                    {count}
-                                </span>
+                                {isSelected && isLoading ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                    <span className={cn(
+                                        "text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.2rem] text-center",
+                                        isSelected
+                                            ? "bg-primary-foreground/20 text-primary-foreground"
+                                            : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                                    )}>
+                                        {count}
+                                    </span>
+                                )}
                             </motion.button>
                         )
                     })}

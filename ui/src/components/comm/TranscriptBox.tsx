@@ -188,7 +188,11 @@ export const TranscriptBox = ({
                                 adjustedTime >= w.start &&
                                 adjustedTime < w.end
                               const queryParts = query.split(/\s+/).filter(part => part.length > 0)
-                              const isSearchMatch = queryParts.length > 0 && queryParts.some(part => wordText.toLowerCase().includes(part))
+                              const isSearchMatch = queryParts.length > 0 && queryParts.some(part => {
+                                // Strip punctuation from transcript word for comparison
+                                const cleanWord = wordText.toLowerCase().replace(/[.,!?;:()\[\]{}"']/g, '');
+                                return cleanWord === part.toLowerCase();
+                              })
 
                               const key = `${sentence.start_time}-${w.start}-${wi}`
                               const isOpen = openWordKey === key
@@ -286,8 +290,12 @@ export const TranscriptBox = ({
 
                           // Fallback: client-side highlighting if no mark tags
                           if (!query) return <span className="relative z-10 mr-1">{text}</span>
-                          const regex = new RegExp(`(${query})`, "gi")
+
+                          // Escape query for regex and use word boundaries
+                          const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                          const regex = new RegExp(`\\b(${escapedQuery})\\b`, "gi")
                           const parts = text.split(regex)
+
                           return parts.map((part: string, partIdx: number) => {
                             const isMatch = part.toLowerCase() === query.toLowerCase()
                             return (

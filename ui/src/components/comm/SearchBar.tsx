@@ -59,6 +59,7 @@ export function SearchBar() {
 
     // Zustand Store
     const storeLanguage = useSearchStore(s => s.language);
+    const storeCategory = useSearchStore(s => s.category);
     const { setLanguage: setStoreLanguage, setCategory: setStoreCategory } = useSearchStore();
 
     // Sync local language state to store if they differ
@@ -75,6 +76,15 @@ export function SearchBar() {
         const cats = selectedCategories.includes('All') ? null : selectedCategories.join(',')
         setStoreCategory(cats)
     }, [selectedCategories, setStoreCategory])
+
+    // Sync local category state from store
+    useEffect(() => {
+        if (storeCategory) {
+            setSelectedCategories(storeCategory.split(','));
+        } else {
+            setSelectedCategories(['All']);
+        }
+    }, [storeCategory]);
 
     // Reset searching state on path change
     useEffect(() => {
@@ -121,7 +131,7 @@ export function SearchBar() {
         if (newCats.length === 0) newCats = ['All'];
         setSelectedCategories(newCats);
 
-        // Push to URL
+        // Push to URL: Auto-search
         if (pathname.startsWith('/search')) {
             const params = new URLSearchParams(window.location.search);
             const catString = newCats.includes('All') ? null : newCats.join(',');
@@ -357,12 +367,11 @@ export function SearchBar() {
                                     key={lang.value}
                                     onClick={() => {
                                         setSelectedLanguage(lang.value);
-                                        setStoreLanguage(lang.value);
+                                        setStoreLanguage(lang.value.toLowerCase());
 
-                                        // If we are already on a search page, update the URL immediately
+                                        // Auto-search logic for language
                                         if (pathname.startsWith('/search/')) {
                                             const pathParts = pathname.split('/');
-                                            // pathParts = ['', 'search', 'query', 'old-lang']
                                             if (pathParts.length >= 4) {
                                                 const searchQ = pathParts[2];
                                                 const newLang = lang.value.toLowerCase();
