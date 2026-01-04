@@ -16,9 +16,10 @@ async def search(
     q: str = Query(..., min_length=2),
     language: str = Query("english"),
     category: Optional[str] = Query(None),
+    sub_category: Optional[str] = Query(None),
     service: SearchService = Depends(get_search_service)
 ):
-    raw_results = await service.search(q=q, language=language, category=category)
+    raw_results = await service.search(q=q, language=language, category=category, sub_category=sub_category)
 
     hits: List[SearchHit] = []
     raw_hits = raw_results.get("hits", {}).get("hits", [])

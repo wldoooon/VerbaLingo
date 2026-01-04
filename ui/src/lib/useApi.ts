@@ -13,13 +13,17 @@ type TranslateResponse = {
 const fetchSearchResults = async (
   query: string,
   language: string,
-  category: string | null
+  category: string | null,
+  subCategory: string | null
 ) => {
   const params = new URLSearchParams();
   params.append("q", query);
   params.append("language", language);
   if (category) {
     params.append("category", category);
+  }
+  if (subCategory) {
+    params.append("sub_category", subCategory);
   }
 
   const url = `/api/v1/search?${params.toString()}`;
@@ -37,11 +41,12 @@ const fetchSearchResults = async (
 export const useSearch = (
   query: string,
   language: string = "english",
-  category: string | null = null
+  category: string | null = null,
+  subCategory: string | null = null
 ) => {
   return useQuery<SearchResponse, Error>({
-    queryKey: ["search", query, language, category],
-    queryFn: () => fetchSearchResults(query, language, category),
+    queryKey: ["search", query, language, category, subCategory],
+    queryFn: () => fetchSearchResults(query, language, category, subCategory),
     enabled: !!query && query.trim().length > 0, // Auto-fetch if query exists
     staleTime: 1000 * 60 * 5, // Cache results for 5 minutes
     refetchOnWindowFocus: false, // Don't refetch just because I clicked the window

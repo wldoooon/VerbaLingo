@@ -4,6 +4,7 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const query = searchParams.get("q");
   const category = searchParams.get("category");
+  const sub_category = searchParams.get("sub_category");
   const language = searchParams.get("language");
 
   const backendUrl = new URL("http://127.0.0.1:5001/api/v1/search");
@@ -13,6 +14,9 @@ export async function GET(request: NextRequest) {
   }
   if (category) {
     backendUrl.searchParams.append("category", category);
+  }
+  if (sub_category) {
+    backendUrl.searchParams.append("sub_category", sub_category);
   }
   if (language) {
     backendUrl.searchParams.append("language", language);

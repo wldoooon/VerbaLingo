@@ -12,7 +12,7 @@ class SearchService:
         self.search_api = search_api
         self.table_name = settings.TABLE_NAME
 
-    async def search(self, q: str, language: str, category: Optional[str] = None) -> dict:
+    async def search(self, q: str, language: str, category: Optional[str] = None, sub_category: Optional[str] = None) -> dict:
         # Default categories to mix
         MIX_CATEGORIES = ["Movies", "Podcasts", "Talks", "Cartoons"]
         
@@ -22,7 +22,7 @@ class SearchService:
 
         # 1. If user selected a specific category, just search that one normally
         if category:
-            return await self._search_single_category(q, category, table_name, limit=50)
+            return await self._search_single_category(q, category, table_name, limit=20, sub_category=sub_category)
 
         # 2. General Search: Run parallel queries for each category to ensure diversity
         tasks = []
@@ -94,22 +94,27 @@ class SearchService:
             
         return f"{lang}_dataset"
 
-    async def _search_single_category(self, q: str, category: str, table_name: str, limit: int) -> dict:
+    async def _search_single_category(self, q: str, category: str, table_name: str, limit: int, sub_category: Optional[str] = None) -> dict:
         """Helper to run a search for one specific category"""
         query_string = f"@sentence_text {q}"
         
+        must_conditions = [
+            {"query_string": query_string},
+            {"equals": {"category_title": category}}
+        ]
+
+        if sub_category:
+            must_conditions.append({"equals": {"category_type": sub_category}})
+
         # Build strict boolean query for this category
         search_request = {
             "table": table_name,
             "query": {
                 "bool": {
-                    "must": [
-                        {"query_string": query_string},
-                        {"equals": {"category_title": category}}
-                    ]
+                    "must": must_conditions
                 }
             },
-            "limit": limit
+            "limit": 20 # User requested to limit results to 20
         }
 
         if category:

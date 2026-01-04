@@ -9,6 +9,7 @@ import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchStore } from "@/store/useSearchStore"
 import { useSearch } from "@/lib/useApi"
 import { Loader2 } from "lucide-react"
+import { FacetChips } from "@/components/comm/FacetChips"
 
 export default function RoutedSearchPage() {
   const params = useParams<{ q: string; language: string }>()
@@ -21,7 +22,7 @@ export default function RoutedSearchPage() {
   const categoryParam = searchParams.get("category")
   const categoryForContext = categoryParam || null
 
-  const { setQuery, setCategory, setLanguage } = useSearchStore()
+  const { setQuery, setCategory, setLanguage, subCategory, setSubCategory } = useSearchStore()
   const { state, dispatch } = usePlayerContext()
 
   const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
@@ -31,7 +32,7 @@ export default function RoutedSearchPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   // Use a dedicated query instance here and manually fetch on mount
-  const { data, refetch, isLoading } = useSearch(q, languageParam, categoryForContext)
+  const { data, refetch, isLoading, isFetching } = useSearch(q, languageParam, categoryForContext, subCategory)
   const playlist = useMemo(() => data?.hits || [], [data])
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export default function RoutedSearchPage() {
     <>
       {/* Main Content */}
       <div className="flex-1 bg-transparent text-card-foreground">
-        {(!hasRequested || isLoading) ? (
+        {(!hasRequested || isLoading || isFetching) ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
@@ -75,14 +76,15 @@ export default function RoutedSearchPage() {
           <div className="mt-0 max-w-full lg:grid lg:grid-cols-[1fr_560px] lg:items-start">
             {/* Left: Player + Audio */}
             <div className="space-y-4 p-4 sm:p-6 pb-12 lg:pb-6">
-              <VideoPlayerCard />
+              <VideoPlayerCard
+                playlist={playlist}
+                isFetching={isFetching}
+                aggregations={data?.aggregations}
+              />
               <AudioCard
-                src={
-                  playlist[state.currentVideoIndex]?.video_id
-                    ? `https://www.youtube.com/watch?v=${playlist[state.currentVideoIndex].video_id}`
-                    : ""
-                }
-                title={playlist[state.currentVideoIndex]?.sentence_text ?? ""}
+                currentClip={playlist[state.currentVideoIndex]}
+                playlist={playlist}
+                totalItems={data?.total}
                 searchQuery={searchQuery}
                 onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
               />

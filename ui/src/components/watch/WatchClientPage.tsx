@@ -48,17 +48,17 @@ function SearchParamSyncer({ word }: { word: string }) {
 }
 
 export default function WatchClientPage({ word }: { word: string }) {
-    const { category, language } = useSearchStore()
-    const { dispatch } = usePlayerContext()
+    const { category, language, subCategory } = useSearchStore()
+    const { state, dispatch } = usePlayerContext()
 
     // Reset index when word changes
     useEffect(() => {
         dispatch({ type: 'RESET_INDEX' })
     }, [word, dispatch])
 
-    console.log('[WatchClientPage] Current Category:', category)
-    // PREFETCHING OPTIMIZATION: Start fetching data immediately while child components load
-    useSearch(decodeURIComponent(word), language, category)
+    // PREFETCHING & DATA: Use the hook and capture the results
+    const { data, isFetching } = useSearch(decodeURIComponent(word), language, category, subCategory)
+    const playlist = data?.hits || []
 
     const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
 
@@ -72,12 +72,17 @@ export default function WatchClientPage({ word }: { word: string }) {
                     {/* Left: Player + Audio */}
                     <div className="space-y-4 p-4 sm:p-6 pb-12 lg:pb-6">
                         <Suspense fallback={<VideoPlayerSkeleton />}>
-                            <VideoPlayerCard />
+                            <VideoPlayerCard
+                                playlist={playlist}
+                                isFetching={isFetching}
+                                aggregations={data?.aggregations}
+                            />
                         </Suspense>
                         <Suspense fallback={<TranscriptSkeleton />}>
                             <AudioCard
-                                src=""
-                                title=""
+                                currentClip={playlist[state.currentVideoIndex]}
+                                playlist={playlist}
+                                totalItems={data?.total}
                                 searchQuery={decodeURIComponent(word)}
                                 onExplainWordPrompt={setExternalPrompt}
                             />

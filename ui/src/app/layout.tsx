@@ -7,6 +7,7 @@ import QueryProvider from "@/components/QueryProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 import Sidebar from "@/components/Sidebar";
 import { Navigation } from "@/components/Navigation";
+import TechnicalLattice from "@/components/TechnicalLattice";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,23 +46,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          {/* Background Grid */}
-          {/* Background Grid - Absolute Positioned at Top */}
-          <div className="absolute top-0 inset-x-0 z-0 h-[100vh] w-full pointer-events-none overflow-hidden">
-            {/* Dark Gradient Base */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-muted/40 via-background to-background"></div>
-
-            {/* Grid Pattern with Radial Mask */}
-            <div
-              className="absolute inset-0 bg-[linear-gradient(to_right,#00000020_1px,transparent_1px),linear-gradient(to_bottom,#00000020_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff15_1px,transparent_1px),linear-gradient(to_bottom,#ffffff15_1px,transparent_1px)] bg-[size:60px_60px]"
-              style={{
-                maskImage: 'radial-gradient(ellipse at 90% 50%, black 0%, transparent 55%), linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
-                WebkitMaskImage: 'radial-gradient(ellipse at 90% 50%, black 0%, transparent 55%), linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
-                maskComposite: 'intersect',
-                WebkitMaskComposite: 'source-in'
-              }}
-            ></div>
-          </div>
+          {/* Technical Dynamic Background */}
+          <TechnicalLattice gridSize={80} opacity={0.6} />
 
           <QueryProvider>
             <PlayerProvider>

@@ -16,9 +16,9 @@ import {
 } from "lucide-react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchStore } from "@/store/useSearchStore"
-import { useTranscript, useSearch } from "@/lib/useApi"
+import { useTranscript } from "@/lib/useApi"
 import { useRouter } from "next/navigation"
-import type { TranscriptSentence } from "@/lib/types"
+import type { TranscriptSentence, Clips } from "@/lib/types"
 import {
   Popover,
   PopoverContent,
@@ -27,8 +27,9 @@ import {
 import { TranscriptBox } from "./TranscriptBox"
 
 type AudioCardProps = {
-  src: string
-  title: string
+  currentClip: Clips | undefined
+  playlist: Clips[]
+  totalItems?: number
   className?: string
   defaultRate?: number
   searchQuery?: string
@@ -60,7 +61,10 @@ function renderWordsWithHighlighting(
 
   return words.map((word, index) => {
     const isCurrentWord = adjustedTime >= word.start && adjustedTime < word.end
-    const isSearchMatch = query && word.text.toLowerCase().includes(query)
+
+    // Clean word for exact comparison
+    const cleanWord = word.text.toLowerCase().replace(/[.,!?;:()\[\]{}"']/g, '');
+    const isSearchMatch = query && query.split(/\s+/).some(part => cleanWord === part.toLowerCase())
 
     return (
       <span
@@ -77,7 +81,15 @@ function renderWordsWithHighlighting(
   })
 }
 
-export default function AudioCard({ src, title, className, defaultRate = 1, searchQuery = "", onExplainWordPrompt }: AudioCardProps & { onExplainWordPrompt?: (prompt: string) => void }) {
+export default function AudioCard({
+  currentClip,
+  playlist,
+  totalItems,
+  className,
+  defaultRate = 1,
+  searchQuery = "",
+  onExplainWordPrompt
+}: AudioCardProps & { onExplainWordPrompt?: (prompt: string) => void }) {
   const [rate, setRate] = useState(defaultRate)
   const [volume, setVolume] = useState(100)
   const router = useRouter()
@@ -94,14 +106,8 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
   const { currentVideoIndex, currentTime } = state
   const { isPlaying, duration } = playerState
 
-  // Read playlist from React Query cache
-  const { query, category, language, setQuery, setCategory } = useSearchStore()
-  const { data } = useSearch(query, language, category)
-  const playlist = data?.hits || []
-
-  // Defensive: clamp currentVideoIndex to valid range
-  const validIndex = Math.max(0, Math.min(currentVideoIndex, playlist.length - 1))
-  const currentClip = playlist[validIndex]
+  // Read settings from store
+  const { language, setQuery, setCategory } = useSearchStore()
 
   // Fetch transcript for current video
   const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "", language, currentClip?.position)
@@ -324,7 +330,7 @@ export default function AudioCard({ src, title, className, defaultRate = 1, sear
 
         {/* Clip Count Indicator - Simple & Clean */}
         <div className="absolute top-4 right-4 text-xs font-medium text-muted-foreground bg-muted/30 px-2 py-1 rounded-md border border-border/20">
-          Clip {currentVideoIndex + 1} <span className="opacity-50">/</span> {(data as any)?.total || playlist.length}
+          Clip {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
         </div>
 
         {/* Speed controls - Right side */}
