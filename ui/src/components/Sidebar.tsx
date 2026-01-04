@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Compass, User, Bookmark, Settings, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, MessageSquare, Star } from 'lucide-react';
+import { Compass, User, Bookmark, Settings, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, Star } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import FoxLogo from './FoxLogo';
 
@@ -62,7 +62,6 @@ const Sidebar: React.FC = () => {
 
   const supportNav = [
     { icon: LifeBuoy, label: 'Support', view: ViewState.LANDING },
-    { icon: MessageSquare, label: 'Feedback', view: ViewState.LANDING },
     { icon: Settings, label: 'Settings', view: ViewState.PROFILE },
   ];
 

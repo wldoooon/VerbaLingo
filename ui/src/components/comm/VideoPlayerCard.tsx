@@ -4,10 +4,10 @@ import YouTube, { YouTubePlayer } from "react-youtube"
 import { useRef, useEffect } from "react"
 import { usePlayerContext } from "@/context/PlayerContext"
 import { useSearchStore } from "@/store/useSearchStore"
-import { useSearch } from "@/lib/useApi"
 import { FacetChips } from "@/components/comm/FacetChips"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
+import type { Clips } from "@/lib/types"
 
 function getClipStart(clip: any): number {
   if (!clip) return 0
@@ -20,18 +20,31 @@ function getClipStart(clip: any): number {
 }
 
 type VideoPlayerCardProps = {
+  playlist: Clips[]
+  isFetching?: boolean
+  aggregations?: Record<string, number>
   className?: string
 }
 
-export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
+export default function VideoPlayerCard({
+  playlist,
+  isFetching,
+  aggregations,
+  className
+}: VideoPlayerCardProps) {
   const { state, dispatch, playerRef, setPlayerState } = usePlayerContext()
   const { currentVideoIndex, isMuted } = state
   const router = useRouter()
 
   // Read playlist from React Query cache
-  const { query, category, language } = useSearchStore()
-  const { data } = useSearch(query, language, category)
-  const playlist = data?.hits || []
+  const { category, language, subCategory, setSubCategory, lastAggregations, setLastAggregations } = useSearchStore()
+
+  // Sync aggregations only when there is no sub-category (to keep "all chips" context)
+  useEffect(() => {
+    if (aggregations && !subCategory) {
+      setLastAggregations(aggregations);
+    }
+  }, [aggregations, subCategory, setLastAggregations]);
 
   // Triple Player Logic (Pool of 3)
   const activeKey = (['A', 'B', 'C'] as const)[currentVideoIndex % 3]
@@ -185,22 +198,22 @@ export default function VideoPlayerCard({ className }: VideoPlayerCardProps) {
 
   // Handle facet selection
   const handleFacetSelect = (facet: string) => {
-    // Maintain current path (e.g. /search/[q]/[language]) 
-    // and append category as a query parameter ?category=...
-    const params = new URLSearchParams(window.location.search)
-    params.set('category', facet)
-
+    if (facet === subCategory) {
+      setSubCategory(null); // Deselect
+    } else {
+      setSubCategory(facet);
+    }
     // Reset index if we change category
-    params.delete('i')
-
-    router.push(`${window.location.pathname}?${params.toString()}`)
+    dispatch({ type: "RESET_INDEX" });
   }
 
   return (
     <div className={className}>
       <FacetChips
-        aggregations={data?.aggregations}
+        aggregations={lastAggregations || aggregations}
         onSelect={handleFacetSelect}
+        selectedCategory={subCategory}
+        isLoading={isFetching}
         className="mb-3 -mt-2"
       />
       <div className="relative w-full h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] overflow-hidden rounded-2xl bg-black">
