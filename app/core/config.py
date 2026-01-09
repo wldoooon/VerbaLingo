@@ -1,3 +1,4 @@
+from urllib.parse import quote_plus
 from pydantic_settings import BaseSettings
 
 
@@ -24,9 +25,10 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000"] 
 
 
-    class Config:
-        env_file = ".env"
-        extra = "ignore"
+    model_config = {
+        "env_file": ".env",
+        "extra": "ignore"
+    }
 
     @property
     def manticore_url(self) -> str:
@@ -34,7 +36,9 @@ class Settings(BaseSettings):
 
     @property
     def postgres_url(self) -> str:
-        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        encoded_user = quote_plus(self.POSTGRES_USER)
+        encoded_password = quote_plus(self.POSTGRES_PASSWORD)
+        return f"postgresql+asyncpg://{encoded_user}:{encoded_password}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
 
 def get_settings():
