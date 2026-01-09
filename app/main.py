@@ -4,6 +4,8 @@ import manticoresearch
 from .core.config import get_settings
 from .core.manticore_client import get_manticore_configuration
 from .api.routes import router
+from .api.v1.auth import router as auth_router
+from fastapi.middleware.cors import CORSMiddleware
 
 settings = get_settings()
 
@@ -38,4 +40,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# 1. CORS Middleware - Required for Next.js to talk to the API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 2. Routes Inclusion
+app.include_router(auth_router)
 app.include_router(router)
