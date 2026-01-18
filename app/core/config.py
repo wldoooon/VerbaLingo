@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    COOKIE_NAME: str = "access_token"
+    COOKIE_SECURE: bool = False
+    COOKIE_SAMESITE: str = "lax"
+
     BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000"] 
 
 

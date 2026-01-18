@@ -1,4 +1,5 @@
 import { type NextRequest } from "next/server";
+import { getBackendBaseUrl } from "../_backend";
 
 // The Vercel AI SDK and modern Next.js deployments work best with the edge runtime.
 export const runtime = "nodejs";
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
       return new Response("Prompt is required.", { status: 400 });
     }
 
-    const backendUrl = "http://127.0.0.1:5001/api/v1/completion";
+    const backendUrl = `${getBackendBaseUrl()}/api/v1/completion`;
 
     const backendResponse = await fetch(backendUrl, {
       method: "POST",
