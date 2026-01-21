@@ -1,17 +1,39 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import axios from "axios"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { Eye, EyeOff } from "lucide-react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 
-import { Eye, EyeOff } from "lucide-react"
 import { useLoginMutation, useMeQuery, useSignupMutation } from "@/lib/authHooks"
+
+// 1. The Schema (The Law)
+const signupSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  terms: z.boolean().refine((val) => val === true, {
+    message: "You must agree to the terms and privacy policy",
+  }),
+})
+
+type SignupValues = z.infer<typeof signupSchema>
 
 function getErrorMessage(err: unknown) {
   if (axios.isAxiosError(err)) {
@@ -31,32 +53,35 @@ export default function SignupPage() {
   const signupMutation = useSignupMutation()
   const loginMutation = useLoginMutation()
 
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  // 2. The Hook (The Brain)
+  const form = useForm<SignupValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      terms: false,
+    },
+  })
+
+  // Local UI state
   const [showPassword, setShowPassword] = useState(false)
-  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const isBusy = signupMutation.isPending || loginMutation.isPending
 
-  const canSubmit = useMemo(
-    () => email.trim().length > 3 && password.trim().length >= 6 && !isBusy && termsAccepted,
-    [email, password, isBusy, termsAccepted]
-  )
+  // Side Effect: Redirect if already logged in
+  if (!meLoading && me) {
+    router.replace(nextUrl)
+  }
 
-  useEffect(() => {
-    if (meLoading) return
-    if (me) router.replace(nextUrl)
-  }, [me, meLoading, router, nextUrl])
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  // 3. The Handler (The Action)
+  async function onSubmit(values: SignupValues) {
     try {
-      await signupMutation.mutateAsync({ email, password })
-      // Backend signup does not set a cookie currently, so we auto-login.
-      await loginMutation.mutateAsync({ email, password })
+      await signupMutation.mutateAsync({ email: values.email, password: values.password })
+      // Auto-login after signup
+      await loginMutation.mutateAsync({ email: values.email, password: values.password })
       router.replace(nextUrl)
     } catch {
-      // handled by mutation state
+      // Errors handled by mutation state, displayed below
     }
   }
 
@@ -71,88 +96,113 @@ export default function SignupPage() {
             <CardDescription>Sign up to save clips and track your progress.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={onSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="email">Email</label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                />
-              </div>
+            {/* 4. The Form (The Body) */}
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="password">Password</label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="new-password"
-                    placeholder="At least 6 characters"
-                    className="pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                    )}
-                    <span className="sr-only">Toggle password visibility</span>
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-2 py-2">
-                <Checkbox
-                  id="terms"
-                  checked={termsAccepted}
-                  onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                {/* Email Field */}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="you@example.com" autoComplete="email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <label
-                  htmlFor="terms"
-                  className="text-xs text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 pt-0.5"
-                >
-                  By creating an account, you agree to our{" "}
-                  <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
-                    Terms of Service
-                  </Link>{" "}
-                  and{" "}
-                  <Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
-                    Privacy Policy
+
+                {/* Password Field */}
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="At least 6 characters"
+                            autoComplete="new-password"
+                            className="pr-10"
+                            {...field}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                            tabIndex={-1}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4 text-muted-foreground" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-muted-foreground" />
+                            )}
+                            <span className="sr-only">Toggle password visibility</span>
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Terms Checkbox */}
+                <FormField
+                  control={form.control}
+                  name="terms"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start gap-3 space-y-0 py-3">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="translate-y-[2px]"
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="text-sm font-normal text-muted-foreground block leading-tight">
+                          I agree to the{" "}
+                          <Link href="/terms" className="text-primary hover:underline underline-offset-4">
+                            Terms of Service
+                          </Link>{" "}
+                          and{" "}
+                          <Link href="/privacy" className="text-primary hover:underline underline-offset-4">
+                            Privacy Policy
+                          </Link>
+                          .
+                        </FormLabel>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                {/* General Error Message */}
+                {(signupMutation.isError || loginMutation.isError) && (
+                  <div className="text-sm text-destructive font-medium">
+                    {getErrorMessage(error)}
+                  </div>
+                )}
+
+                <Button type="submit" className="w-full" disabled={isBusy}>
+                  {isBusy ? "Creating account…" : "Sign up"}
+                </Button>
+
+                <div className="text-sm text-muted-foreground text-center">
+                  Already have an account?{" "}
+                  <Link href={`/login?next=${encodeURIComponent(nextUrl)}`} className="text-primary hover:underline">
+                    Log in
                   </Link>
-                  .
-                </label>
-              </div>
-
-              {(signupMutation.isError || loginMutation.isError) && (
-                <div className="text-sm text-destructive">
-                  {getErrorMessage(error)}
                 </div>
-              )}
-
-              <Button type="submit" className="w-full" disabled={!canSubmit}>
-                {isBusy ? "Creating account…" : "Sign up"}
-              </Button>
-
-              <div className="text-sm text-muted-foreground text-center">
-                Already have an account?{" "}
-                <Link href={`/login?next=${encodeURIComponent(nextUrl)}`} className="text-primary hover:underline">
-                  Log in
-                </Link>
-              </div>
-            </form>
+              </form>
+            </Form>
           </CardContent>
         </Card>
       </div>
