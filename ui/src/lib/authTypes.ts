@@ -16,3 +16,5 @@ export type LoginResponse = {
     tier: UserTier
   }
 }
+
+export type SignupResponse = UserRead

@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { apiClient } from "@/lib/apiClient"
-import type { LoginResponse, UserRead } from "@/lib/authTypes"
+import type { LoginResponse, SignupResponse, UserRead } from "@/lib/authTypes"
 import axios from "axios"
 
 export function useMeQuery() {
@@ -47,6 +47,21 @@ export function useLogoutMutation() {
       const res = await apiClient.post<{ message: string }>("/auth/logout")
       return res.data
     },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["me"] })
+    },
+  })
+}
+
+export function useSignupMutation() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (vars: { email: string; password: string }) => {
+      const res = await apiClient.post<SignupResponse>("/auth/signup", vars)
+      return res.data
+    },
+    // Note: signup does not set a cookie currently; the page can chain signup -> login.
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["me"] })
     },
