@@ -8,6 +8,7 @@ import axios from "axios"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 
 import { useLoginMutation, useMeQuery, useSignupMutation } from "@/lib/authHooks"
 
@@ -31,12 +32,13 @@ export default function SignupPage() {
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [termsAccepted, setTermsAccepted] = useState(false)
 
   const isBusy = signupMutation.isPending || loginMutation.isPending
 
   const canSubmit = useMemo(
-    () => email.trim().length > 3 && password.trim().length >= 6 && !isBusy,
-    [email, password, isBusy]
+    () => email.trim().length > 3 && password.trim().length >= 6 && !isBusy && termsAccepted,
+    [email, password, isBusy, termsAccepted]
   )
 
   useEffect(() => {
@@ -92,6 +94,28 @@ export default function SignupPage() {
                 />
               </div>
 
+              <div className="flex items-start space-x-2 py-2">
+                <Checkbox
+                  id="terms"
+                  checked={termsAccepted}
+                  onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                />
+                <label
+                  htmlFor="terms"
+                  className="text-xs text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 pt-0.5"
+                >
+                  By creating an account, you agree to our{" "}
+                  <Link href="/terms" className="underline underline-offset-4 hover:text-primary">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className="underline underline-offset-4 hover:text-primary">
+                    Privacy Policy
+                  </Link>
+                  .
+                </label>
+              </div>
+
               {(signupMutation.isError || loginMutation.isError) && (
                 <div className="text-sm text-destructive">
                   {getErrorMessage(error)}
@@ -102,7 +126,7 @@ export default function SignupPage() {
                 {isBusy ? "Creating account…" : "Sign up"}
               </Button>
 
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-muted-foreground text-center">
                 Already have an account?{" "}
                 <Link href={`/login?next=${encodeURIComponent(nextUrl)}`} className="text-primary hover:underline">
                   Log in
