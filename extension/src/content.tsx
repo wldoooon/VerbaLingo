@@ -1,9 +1,16 @@
 import type { PlasmoCSConfig } from "plasmo"
 import { useEffect, useState } from "react"
 import { Storage } from "@plasmohq/storage"
+import cssText from "data-text:./style.css"
 
 export const config: PlasmoCSConfig = {
     matches: ["<all_urls>"]
+}
+
+export const getStyle = () => {
+    const style = document.createElement("style")
+    style.textContent = cssText
+    return style
 }
 
 const storage = new Storage({

@@ -5,6 +5,8 @@ from ...models.user import UserCreate, UserRead
 from ...services.auth_service import create_new_user, authenticate_user
 from ...core.security import create_access_token, create_refresh_token
 from ...core.config import get_settings
+from ..deps import get_current_user
+from ...models.user import User
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 settings = get_settings()
@@ -36,12 +38,12 @@ async def login(
     # 2. Secure Cookie Implementation
     # This prevents JavaScript from ever seeing the token (Anti-XSS)
     response.set_cookie(
-        key="access_token",
+        key=settings.COOKIE_NAME,
         value=access_token,
         httponly=True,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        samesite="lax",
-        secure=False, # Set to True in Production (HTTPS)
+        samesite=settings.COOKIE_SAMESITE,
+        secure=settings.COOKIE_SECURE,
     )
     
     return {
@@ -52,3 +54,20 @@ async def login(
             "tier": user.tier
         }
     }
+
+
+@router.get("/me", response_model=UserRead)
+async def me(current_user: User = Depends(get_current_user)):
+    """Return the currently authenticated user (based on HTTPOnly cookie)."""
+    return current_user
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    """Clear the auth cookie."""
+    response.delete_cookie(
+        key=settings.COOKIE_NAME,
+        samesite=settings.COOKIE_SAMESITE,
+        secure=settings.COOKIE_SECURE,
+    )
+    return {"message": "Logged out"}

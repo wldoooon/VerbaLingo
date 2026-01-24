@@ -17,7 +17,7 @@ async def get_current_user(
     It reads the HTTPOnly cookie, validates the JWT, and returns the User.
     """
     # 1. Extraction
-    token = request.cookies.get("access_token")
+    token = request.cookies.get(settings.COOKIE_NAME)
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

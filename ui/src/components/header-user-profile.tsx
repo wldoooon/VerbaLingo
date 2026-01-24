@@ -29,12 +29,14 @@ import { Button } from "@/components/ui/button"
 
 export function HeaderUserProfile({
   user,
+  onLogout,
 }: {
   user: {
     name: string
     email: string
     avatar: string
   }
+  onLogout?: () => void
 }) {
   const { theme, setTheme } = useTheme()
   return (
@@ -97,7 +99,12 @@ export function HeaderUserProfile({
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator className="my-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10" />
-        <DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault()
+            onLogout?.()
+          }}
+        >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>
