@@ -10,6 +10,7 @@ import { Crown } from 'lucide-react'
 import Link from "next/link"
 import { useAuthStore } from "@/stores/authStore"
 import { useLogoutMutation } from "@/lib/authHooks"
+import { AuthDialog } from "@/components/auth-dialog"
 
 export function HeaderToolbar({
   user,
@@ -31,10 +32,10 @@ export function HeaderToolbar({
   const displayUser =
     status === "authenticated" && authUser
       ? {
-          name: (authUser.email.split("@")[0] || "User").replace(/^./, (c) => c.toUpperCase()),
-          email: authUser.email,
-          avatar: "/avatars/user.jpg",
-        }
+        name: (authUser.email.split("@")[0] || "User").replace(/^./, (c) => c.toUpperCase()),
+        email: authUser.email,
+        avatar: "/avatars/user.jpg",
+      }
       : user
 
   // Prevent hydration mismatch
@@ -78,16 +79,16 @@ export function HeaderToolbar({
         />
       ) : (
         <div className="flex items-center gap-2">
-          <Link href="/login">
+          <AuthDialog defaultTab="login">
             <Button variant="outline" size="sm" className="rounded-full">
               Log in
             </Button>
-          </Link>
-          <Link href="/signup">
+          </AuthDialog>
+          <AuthDialog defaultTab="signup">
             <Button size="sm" className="rounded-full">
               Sign up
             </Button>
-          </Link>
+          </AuthDialog>
         </div>
       )}
     </div>
