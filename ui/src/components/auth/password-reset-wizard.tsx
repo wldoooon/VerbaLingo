@@ -113,78 +113,95 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
     if (step === "otp") {
         return (
             <Card className="border-0 shadow-none">
-                <CardHeader className="px-0 pt-0">
-                    <CardTitle>Enter Code</CardTitle>
-                    <CardDescription>
-                        We sent a code to <span className="font-medium text-foreground">{email}</span>.
+                <CardHeader className="px-0 pt-0 pb-4">
+                    <CardTitle className="text-xl font-bold">Verify your login</CardTitle>
+                    <CardDescription className="text-sm">
+                        Enter the verification code we sent to your email address: <span className="font-medium text-foreground">{email}</span>.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="px-0">
-                    <div className="space-y-6">
-                        <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="text-sm font-medium">6-digit code</label>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
-                                    onClick={() => forgotPasswordMutation.mutate({ email })}
-                                >
-                                    {forgotPasswordMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCwIcon className="mr-1 w-3 h-3" />}
-                                    Resend
-                                </Button>
-                            </div>
-                            <InputOTP
-                                maxLength={6}
-                                value={otpValue}
-                                onChange={(value) => {
-                                    setOtpValue(value)
-                                    setOtpError("")
-                                }}
-                            >
-                                <InputOTPGroup>
-                                    <InputOTPSlot index={0} />
-                                    <InputOTPSlot index={1} />
-                                </InputOTPGroup>
-                                <InputOTPSeparator />
-                                <InputOTPGroup>
-                                    <InputOTPSlot index={2} />
-                                    <InputOTPSlot index={3} />
-                                </InputOTPGroup>
-                                <InputOTPSeparator />
-                                <InputOTPGroup>
-                                    <InputOTPSlot index={4} />
-                                    <InputOTPSlot index={5} />
-                                </InputOTPGroup>
-                            </InputOTP>
-                            {otpError && <p className="text-sm text-red-500 mt-2">{otpError}</p>}
-                        </div>
-                        {verifyOtpMutation.isError && <p className="text-sm text-red-500">{getErrorMessage(verifyOtpMutation.error)}</p>}
+                <CardContent className="px-0 space-y-4">
+                    {/* Label Row */}
+                    <div className="flex items-center justify-between">
+                        <label className="text-sm font-bold text-foreground">Verification code</label>
                         <Button
                             type="button"
-                            className="w-full"
-                            disabled={verifyOtpMutation.isPending}
-                            onClick={async () => {
-                                if (otpValue.length !== 6) {
-                                    setOtpError("Code must be 6 digits")
-                                    return
-                                }
-                                try {
-                                    await verifyOtpMutation.mutateAsync({ email, otp: otpValue })
-                                    setStep("reset")
-                                } catch { }
-                            }}
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs rounded-md"
+                            onClick={() => forgotPasswordMutation.mutate({ email })}
+                            disabled={forgotPasswordMutation.isPending}
                         >
-                            {verifyOtpMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Verify Code
+                            {forgotPasswordMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <RefreshCwIcon className="w-3 h-3 mr-1" />}
+                            Resend Code
                         </Button>
                     </div>
+
+                    {/* OTP Input - Centered, Bigger */}
+                    <div className="flex justify-center">
+                        <InputOTP
+                            maxLength={6}
+                            value={otpValue}
+                            onChange={(value) => {
+                                setOtpValue(value)
+                                setOtpError("")
+                            }}
+                        >
+                            <InputOTPGroup className="gap-1">
+                                <InputOTPSlot index={0} className="w-12 h-14 text-xl rounded-lg border-2" />
+                                <InputOTPSlot index={1} className="w-12 h-14 text-xl rounded-lg border-2" />
+                                <InputOTPSlot index={2} className="w-12 h-14 text-xl rounded-lg border-2" />
+                            </InputOTPGroup>
+                            <InputOTPSeparator className="mx-2 text-muted-foreground">—</InputOTPSeparator>
+                            <InputOTPGroup className="gap-1">
+                                <InputOTPSlot index={3} className="w-12 h-14 text-xl rounded-lg border-2" />
+                                <InputOTPSlot index={4} className="w-12 h-14 text-xl rounded-lg border-2" />
+                                <InputOTPSlot index={5} className="w-12 h-14 text-xl rounded-lg border-2" />
+                            </InputOTPGroup>
+                        </InputOTP>
+                    </div>
+
+                    {otpError && <p className="text-sm text-red-500 text-center">{otpError}</p>}
+                    {verifyOtpMutation.isError && <p className="text-sm text-red-500 text-center">{getErrorMessage(verifyOtpMutation.error)}</p>}
+
+                    {/* Help Link */}
+                    <p className="text-xs text-muted-foreground text-center">
+                        <button className="hover:text-primary underline underline-offset-2 transition-colors">
+                            I no longer have access to this email address.
+                        </button>
+                    </p>
                 </CardContent>
-                <CardFooter className="px-0 justify-center">
-                    <Button variant="link" onClick={() => setStep("email")} size="sm" className="text-slate-500">
-                        Change Email
+
+                {/* Divider + Verify Button */}
+                <div className="border-t border-border pt-4 mt-2">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full h-11 text-sm font-medium rounded-lg"
+                        disabled={verifyOtpMutation.isPending}
+                        onClick={async () => {
+                            if (otpValue.length !== 6) {
+                                setOtpError("Code must be 6 digits")
+                                return
+                            }
+                            try {
+                                await verifyOtpMutation.mutateAsync({ email, otp: otpValue })
+                                setStep("reset")
+                            } catch { }
+                        }}
+                    >
+                        {verifyOtpMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Verify
                     </Button>
+                </div>
+
+                {/* Footer */}
+                <CardFooter className="px-0 pt-4 justify-center">
+                    <p className="text-xs text-muted-foreground">
+                        Having trouble signing in?{' '}
+                        <button onClick={() => setStep("email")} className="text-primary hover:underline font-medium">
+                            Contact support
+                        </button>
+                    </p>
                 </CardFooter>
             </Card>
         )
