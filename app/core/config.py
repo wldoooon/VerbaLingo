@@ -17,6 +17,16 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = ""
 
+    # Email
+    MAIL_USERNAME: str = ""
+    MAIL_PASSWORD: str = ""
+    MAIL_FROM: str = ""
+    MAIL_PORT: int = 587
+    MAIL_SERVER: str = "smtp.gmail.com"
+
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6000
+
     SECRET_KEY: str = "" 
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
@@ -37,6 +47,10 @@ class Settings(BaseSettings):
     @property
     def manticore_url(self) -> str:
         return f"{self.MANTICORE_PROTOCOL}://{self.MANTICORE_HOST}:{self.MANTICORE_PORT}"
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
 
     @property
     def postgres_url(self) -> str:
