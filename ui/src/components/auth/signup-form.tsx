@@ -22,9 +22,13 @@ const signupSchema = z.object({
     // full_name: z.string().min(2, "Name must be at least 2 characters"), // REMOVED as per request
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string(),
     terms: z.boolean().refine((val) => val === true, {
         message: "You must agree to the terms",
     }),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
 })
 
 type SignupValues = z.infer<typeof signupSchema>
@@ -42,10 +46,11 @@ export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
     const signupMutation = useSignupMutation()
     const loginMutation = useLoginMutation()
     const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
     const form = useForm<SignupValues>({
         resolver: zodResolver(signupSchema),
-        defaultValues: { email: "", password: "", terms: false },
+        defaultValues: { email: "", password: "", confirmPassword: "", terms: false },
     })
 
     async function onSubmit(values: SignupValues) {
@@ -77,7 +82,7 @@ export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
                             <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1">Email</label>
                             <FormControl>
                                 <Input
-                                    placeholder="name@company.com"
+                                    placeholder="Email"
                                     className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium text-sm h-auto"
                                     {...field}
                                 />
@@ -97,7 +102,7 @@ export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
                                 <div className="relative group">
                                     <Input
                                         type={showPassword ? "text" : "password"}
-                                        placeholder="Create a password"
+                                        placeholder="Password"
                                         className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium text-sm h-auto pr-10"
                                         {...field}
                                     />
@@ -107,6 +112,34 @@ export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                                     >
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                        <FormItem className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-1">Confirm Password</label>
+                            <FormControl>
+                                <div className="relative group">
+                                    <Input
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        placeholder="Confirm your password"
+                                        className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium text-sm h-auto pr-10"
+                                        {...field}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
                                 </div>
                             </FormControl>
