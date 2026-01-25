@@ -30,7 +30,13 @@ import axios from "axios"
 
 const emailSchema = z.object({ email: z.string().email() })
 const otpSchema = z.object({ otp: z.string().min(6, "Must be 6 digits") })
-const resetSchema = z.object({ password: z.string().min(6) })
+const resetSchema = z.object({
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"]
+})
 
 function getErrorMessage(err: unknown) {
     if (axios.isAxiosError(err)) {
@@ -60,8 +66,8 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
     }
 
     // Step 3: Reset Form
-    const resetForm = useForm<{ password: string }>({ resolver: zodResolver(resetSchema) })
-    const onResetSubmit = async (data: { password: string }) => {
+    const resetForm = useForm<{ password: string; confirmPassword: string }>({ resolver: zodResolver(resetSchema) })
+    const onResetSubmit = async (data: { password: string; confirmPassword: string }) => {
         try {
             // Using the otp from state
             await resetPasswordMutation.mutateAsync({ email, otp: otpValue, new_password: data.password })
@@ -209,11 +215,13 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
 
     return (
         <Card className="border-0 shadow-none">
-            <CardHeader className="px-0 pt-0">
-                <CardTitle>New Password</CardTitle>
-                <CardDescription>Secure your account with a strong password.</CardDescription>
+            <CardHeader className="px-0 pt-0 pb-4">
+                <CardTitle className="text-xl font-bold">Set new password</CardTitle>
+                <CardDescription className="text-sm">
+                    Create a strong password to secure your account.
+                </CardDescription>
             </CardHeader>
-            <CardContent className="px-0">
+            <CardContent className="px-0 space-y-4">
                 <Form {...resetForm}>
                     <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">
                         <FormField
@@ -221,22 +229,74 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>New Password</FormLabel>
+                                    <FormLabel className="text-sm font-bold text-foreground">New Password</FormLabel>
                                     <FormControl>
-                                        <Input type="password" placeholder="••••••••" {...field} className="h-10" />
+                                        <Input
+                                            type="password"
+                                            placeholder="Enter your new password"
+                                            {...field}
+                                            className="h-12 text-base rounded-lg border-2"
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        {resetPasswordMutation.isError && <p className="text-sm text-red-500">{getErrorMessage(resetPasswordMutation.error)}</p>}
-                        <Button type="submit" className="w-full" disabled={resetPasswordMutation.isPending}>
-                            {resetPasswordMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Reset Password
-                        </Button>
+
+                        <FormField
+                            control={resetForm.control}
+                            name="confirmPassword"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-sm font-bold text-foreground">Confirm Password</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="password"
+                                            placeholder="Confirm your new password"
+                                            {...field}
+                                            className="h-12 text-base rounded-lg border-2"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {resetPasswordMutation.isError && (
+                            <p className="text-sm text-red-500 text-center">{getErrorMessage(resetPasswordMutation.error)}</p>
+                        )}
+
+                        {/* Help Text */}
+                        <p className="text-xs text-muted-foreground">
+                            Use 6+ characters with a mix of letters, numbers & symbols.
+                        </p>
                     </form>
                 </Form>
             </CardContent>
+
+            {/* Divider + Reset Button */}
+            <div className="border-t border-border pt-4 mt-2">
+                <Button
+                    type="submit"
+                    variant="outline"
+                    className="w-full h-11 text-sm font-medium rounded-lg"
+                    disabled={resetPasswordMutation.isPending}
+                    onClick={resetForm.handleSubmit(onResetSubmit)}
+                >
+                    {resetPasswordMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Reset Password
+                </Button>
+            </div>
+
+            {/* Footer */}
+            <CardFooter className="px-0 pt-4 justify-center">
+                <p className="text-xs text-muted-foreground">
+                    Remember your password?{' '}
+                    <button onClick={onBack} className="text-primary hover:underline font-medium">
+                        Back to login
+                    </button>
+                </p>
+            </CardFooter>
         </Card>
     )
 }
