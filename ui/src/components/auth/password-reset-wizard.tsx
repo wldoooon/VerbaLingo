@@ -123,7 +123,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                     <Button
                         type="submit"
                         variant="outline"
-                        className="w-full h-11 bg-orange-500 text-white font-bold rounded-xl cursor-pointer hover:bg-orange-500 border-0"
+                        className="w-full h-11 bg-orange-500 text-white hover:text-white font-bold rounded-xl cursor-pointer hover:bg-orange-500 border-0"
                         disabled={forgotPasswordMutation.isPending}
                         onClick={emailForm.handleSubmit(onEmailSubmit)}
                     >
@@ -211,7 +211,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                     <Button
                         type="button"
                         variant="outline"
-                        className="w-full h-11 bg-orange-500 text-white font-bold rounded-xl cursor-pointer hover:bg-orange-500 border-0"
+                        className="w-full h-11 bg-orange-500 text-white hover:text-white font-bold rounded-xl cursor-pointer hover:bg-orange-500 border-0"
                         disabled={verifyOtpMutation.isPending}
                         onClick={async () => {
                             if (otpValue.length !== 6) {
@@ -308,7 +308,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                 <Button
                     type="submit"
                     variant="outline"
-                    className="w-full h-11 bg-orange-500 text-white font-bold rounded-xl cursor-pointer hover:bg-orange-500 border-0"
+                    className="w-full h-11 bg-orange-500 text-white hover:text-white font-bold rounded-xl cursor-pointer hover:bg-orange-500 border-0"
                     disabled={resetPasswordMutation.isPending}
                     onClick={resetForm.handleSubmit(onResetSubmit)}
                 >

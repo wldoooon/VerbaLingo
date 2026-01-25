@@ -117,7 +117,7 @@ export function LoginForm({ onSuccess, onForgot }: { onSuccess: () => void, onFo
                 <Button
                     type="submit"
                     disabled={loginMutation.isPending}
-                    className="w-full h-11 bg-orange-500 text-white font-bold rounded-xl cursor-pointer hover:bg-orange-500 border-0"
+                    className="w-full h-11 bg-orange-500 text-white hover:text-white font-bold rounded-xl cursor-pointer hover:bg-orange-500 border-0"
                 >
                     {loginMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Log In

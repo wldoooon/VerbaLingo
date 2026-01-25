@@ -144,7 +144,7 @@ export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
                 <Button
                     type="submit"
                     disabled={isBusy}
-                    className="w-full h-11 bg-orange-500 text-white font-bold rounded-xl cursor-pointer hover:bg-orange-500 border-0"
+                    className="w-full h-11 bg-orange-500 text-white hover:text-white font-bold rounded-xl cursor-pointer hover:bg-orange-500 border-0"
                 >
                     {isBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Create Account
