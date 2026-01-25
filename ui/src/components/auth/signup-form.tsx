@@ -78,7 +78,7 @@ export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
                             <FormControl>
                                 <Input
                                     placeholder="name@company.com"
-                                    className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium text-sm h-auto"
+                                    className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium text-sm h-auto"
                                     {...field}
                                 />
                             </FormControl>
@@ -98,7 +98,7 @@ export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
                                     <Input
                                         type={showPassword ? "text" : "password"}
                                         placeholder="Create a password"
-                                        className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium text-sm h-auto pr-10"
+                                        className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium text-sm h-auto pr-10"
                                         {...field}
                                     />
                                     <button
@@ -122,12 +122,12 @@ export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
                         <FormItem className="py-2">
                             <div className="flex items-start gap-2">
                                 <FormControl>
-                                    <div className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center cursor-pointer transition-colors ${field.value ? 'bg-primary border-primary text-white' : 'bg-slate-50 border-slate-300'}`} onClick={() => field.onChange(!field.value)}>
+                                    <div className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center cursor-pointer transition-colors ${field.value ? 'bg-orange-500 border-orange-500 text-white' : 'bg-slate-50 border-slate-300'}`} onClick={() => field.onChange(!field.value)}>
                                         {field.value && <Check className="w-3 h-3" />}
                                     </div>
                                 </FormControl>
                                 <div className="text-xs text-slate-500 leading-snug">
-                                    I agree to the <Link href="/terms" className="text-slate-900 dark:text-slate-100 font-bold hover:underline">Terms of Service</Link> and <Link href="/privacy" className="text-slate-900 dark:text-slate-100 font-bold hover:underline">Privacy Policy</Link>.
+                                    I agree to the <Link href="/terms" className="text-orange-500 hover:text-orange-600 font-bold relative cursor-pointer after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300">Terms of Service</Link> and <Link href="/privacy" className="text-orange-500 hover:text-orange-600 font-bold relative cursor-pointer after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300">Privacy Policy</Link>.
                                 </div>
                             </div>
                             <FormMessage />

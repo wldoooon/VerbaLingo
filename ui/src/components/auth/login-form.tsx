@@ -63,7 +63,7 @@ export function LoginForm({ onSuccess, onForgot }: { onSuccess: () => void, onFo
                             <FormControl>
                                 <Input
                                     placeholder="name@company.com"
-                                    className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium text-sm h-auto"
+                                    className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium text-sm h-auto"
                                     {...field}
                                 />
                             </FormControl>
@@ -86,7 +86,7 @@ export function LoginForm({ onSuccess, onForgot }: { onSuccess: () => void, onFo
                                     <Input
                                         type={showPassword ? "text" : "password"}
                                         placeholder="Enter your password"
-                                        className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary transition-all font-medium text-sm h-auto pr-10"
+                                        className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/20 focus-visible:border-orange-500 transition-all font-medium text-sm h-auto pr-10"
                                         {...field}
                                     />
                                     <button
