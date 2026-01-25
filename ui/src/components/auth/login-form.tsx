@@ -114,14 +114,14 @@ export function LoginForm({ onSuccess, onForgot }: { onSuccess: () => void, onFo
                     </div>
                 )}
 
-                <button
+                <Button
                     type="submit"
                     disabled={loginMutation.isPending}
-                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all text-sm mt-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+                    className="w-full h-11 bg-orange-500 text-white font-bold rounded-xl cursor-pointer hover:bg-orange-500 border-0"
                 >
                     {loginMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Log In
-                </button>
+                </Button>
             </form>
         </Form>
     )
