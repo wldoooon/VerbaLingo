@@ -69,5 +69,31 @@ export function useSignupMutation() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["me"] });
     },
-  });
+  }); }
+
+export function useForgotPasswordMutation() {
+    return useMutation({
+        mutationFn: async (vars: { email: string }) => {
+            const res = await apiClient.post<{ message: string }>("/auth/forgot-password", vars);
+            return res.data;
+        }
+    })
+}
+
+export function useVerifyOtpMutation() {
+    return useMutation({
+        mutationFn: async (vars: { email: string; otp: string }) => {
+            const res = await apiClient.post<{ message: string }>("/auth/verify-otp", vars);
+            return res.data;
+        }
+    })
+}
+
+export function useResetPasswordMutation() {
+    return useMutation({
+        mutationFn: async (vars: { email: string; otp: string; new_password: string }) => {
+            const res = await apiClient.post<{ message: string }>("/auth/reset-password", vars);
+            return res.data;
+        }
+    })
 }
