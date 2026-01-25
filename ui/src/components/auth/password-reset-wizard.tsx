@@ -79,11 +79,13 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
     if (step === "email") {
         return (
             <Card className="border-0 shadow-none">
-                <CardHeader className="px-0 pt-0">
-                    <CardTitle>Reset Password</CardTitle>
-                    <CardDescription>Enter your email address and we'll send you a code.</CardDescription>
+                <CardHeader className="px-0 pt-0 pb-4">
+                    <CardTitle className="text-xl font-bold">Reset your password</CardTitle>
+                    <CardDescription className="text-sm">
+                        Enter your email address and we'll send you a verification code.
+                    </CardDescription>
                 </CardHeader>
-                <CardContent className="px-0">
+                <CardContent className="px-0 space-y-4">
                     <Form {...emailForm}>
                         <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
                             <FormField
@@ -91,26 +93,53 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email</FormLabel>
+                                        <FormLabel className="text-sm font-bold text-foreground">Email address</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="m@example.com" {...field} className="h-10 text-sm" />
+                                            <Input
+                                                placeholder="name@example.com"
+                                                {...field}
+                                                className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium text-sm h-auto"
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                            {forgotPasswordMutation.isError && <p className="text-sm text-red-500">{getErrorMessage(forgotPasswordMutation.error)}</p>}
-                            <Button type="submit" className="w-full" disabled={forgotPasswordMutation.isPending}>
-                                {forgotPasswordMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Send Code
-                            </Button>
+
+                            {forgotPasswordMutation.isError && (
+                                <p className="text-sm text-red-500 text-center">{getErrorMessage(forgotPasswordMutation.error)}</p>
+                            )}
+
+                            {/* Help Text */}
+                            <p className="text-xs text-muted-foreground">
+                                We'll send a 6-digit code to verify it's you.
+                            </p>
                         </form>
                     </Form>
                 </CardContent>
-                <CardFooter className="px-0 justify-center">
-                    <Button variant="link" onClick={onBack} size="sm" className="text-slate-500">
-                        <ArrowLeft className="mr-2 w-4 h-4" /> Back to Login
+
+                {/* Divider + Send Button */}
+                <div className="border-t border-border pt-4 mt-2">
+                    <Button
+                        type="submit"
+                        variant="outline"
+                        className="w-full h-11 text-sm font-medium rounded-lg cursor-pointer"
+                        disabled={forgotPasswordMutation.isPending}
+                        onClick={emailForm.handleSubmit(onEmailSubmit)}
+                    >
+                        {forgotPasswordMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Send Code
                     </Button>
+                </div>
+
+                {/* Footer */}
+                <CardFooter className="px-0 pt-4 justify-center">
+                    <p className="text-xs text-muted-foreground">
+                        Remember your password?{' '}
+                        <button onClick={onBack} className="text-orange-500 hover:text-orange-600 font-medium relative cursor-pointer after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300">
+                            Back to login
+                        </button>
+                    </p>
                 </CardFooter>
             </Card>
         )
@@ -171,7 +200,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
 
                     {/* Help Link */}
                     <p className="text-xs text-muted-foreground text-center">
-                        <button className="hover:text-primary underline underline-offset-2 transition-colors">
+                        <button className="text-orange-500 hover:text-orange-600 relative cursor-pointer after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300">
                             I no longer have access to this email address.
                         </button>
                     </p>
@@ -182,7 +211,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                     <Button
                         type="button"
                         variant="outline"
-                        className="w-full h-11 text-sm font-medium rounded-lg"
+                        className="w-full h-11 text-sm font-medium rounded-lg cursor-pointer"
                         disabled={verifyOtpMutation.isPending}
                         onClick={async () => {
                             if (otpValue.length !== 6) {
@@ -204,7 +233,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                 <CardFooter className="px-0 pt-4 justify-center">
                     <p className="text-xs text-muted-foreground">
                         Having trouble signing in?{' '}
-                        <button onClick={() => setStep("email")} className="text-primary hover:underline font-medium">
+                        <button onClick={() => setStep("email")} className="text-orange-500 hover:text-orange-600 font-medium relative cursor-pointer after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300">
                             Contact support
                         </button>
                     </p>
@@ -235,7 +264,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                                             type="password"
                                             placeholder="Enter your new password"
                                             {...field}
-                                            className="h-12 text-base rounded-lg border-2"
+                                            className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium text-sm h-auto"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -254,7 +283,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                                             type="password"
                                             placeholder="Confirm your new password"
                                             {...field}
-                                            className="h-12 text-base rounded-lg border-2"
+                                            className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium text-sm h-auto"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -279,7 +308,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                 <Button
                     type="submit"
                     variant="outline"
-                    className="w-full h-11 text-sm font-medium rounded-lg"
+                    className="w-full h-11 text-sm font-medium rounded-lg cursor-pointer"
                     disabled={resetPasswordMutation.isPending}
                     onClick={resetForm.handleSubmit(onResetSubmit)}
                 >
@@ -292,7 +321,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
             <CardFooter className="px-0 pt-4 justify-center">
                 <p className="text-xs text-muted-foreground">
                     Remember your password?{' '}
-                    <button onClick={onBack} className="text-primary hover:underline font-medium">
+                    <button onClick={onBack} className="text-orange-500 hover:text-orange-600 font-medium relative cursor-pointer after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300">
                         Back to login
                     </button>
                 </p>

@@ -104,7 +104,7 @@ export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
                                     >
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
@@ -144,7 +144,7 @@ export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
                 <button
                     type="submit"
                     disabled={isBusy}
-                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all text-sm mt-2 disabled:opacity-50 disabled:pointer-events-none"
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all text-sm mt-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
                 >
                     {isBusy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Create Account
