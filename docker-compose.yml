@@ -51,10 +51,27 @@ services:
       - cloudbeaver_data:/opt/cloudbeaver/workspace
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    container_name: verbalingo-redis
+    restart: always
+    ports:
+      - "6000:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --save 60 1 --loglevel warning
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
 volumes:
   manticore_data:
     driver: local
   postgres_data:
     driver: local
   cloudbeaver_data:
+    driver: local
+  redis_data:
     driver: local
