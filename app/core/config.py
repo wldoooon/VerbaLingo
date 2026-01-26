@@ -36,6 +36,14 @@ class Settings(BaseSettings):
     COOKIE_SECURE: bool = False
     COOKIE_SAMESITE: str = "lax"
 
+    # Google OAuth
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = "http://127.0.0.1:5001/auth/google/callback"
+    
+    # Frontend URL (for redirects and postMessage origin)
+    FRONTEND_URL: str = "http://localhost:3000"
+
     BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000"] 
 
 

@@ -20,7 +20,11 @@ class User(UserBase, table=True):
         index=True,
         nullable=False
     )
-    hashed_password: str = Field(nullable=False)
+    hashed_password: str | None = Field(default=None)
+    
+    oauth_provider: str | None = Field(default=None, index=True)
+    oauth_id: str | None = Field(default=None, index=True)
+    
     created_at: datetime = Field(
         default_factory=datetime.utcnow
     )
