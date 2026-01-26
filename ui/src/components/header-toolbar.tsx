@@ -54,14 +54,6 @@ export function HeaderToolbar({
 
   return (
     <div className="flex items-center gap-3">
-      <Button
-        variant="outline"
-        size="sm"
-        className="rounded-full"
-      >
-        <Crown className="w-4 h-4 mr-1.5" />
-        Upgrade
-      </Button>
       <FeedbackDialog />
       {mounted && (
         <ThemeToggleButton

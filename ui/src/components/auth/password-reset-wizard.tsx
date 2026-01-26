@@ -162,7 +162,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="h-7 text-xs rounded-md"
+                            className="h-7 text-xs rounded-md bg-orange-500 text-white hover:text-white hover:bg-orange-600 border-0 font-bold cursor-pointer"
                             onClick={() => forgotPasswordMutation.mutate({ email })}
                             disabled={forgotPasswordMutation.isPending}
                         >
