@@ -1,3 +1,4 @@
+from functools import lru_cache
 from urllib.parse import quote_plus
 from pydantic_settings import BaseSettings
 
@@ -7,9 +8,6 @@ class Settings(BaseSettings):
     MANTICORE_PORT: str = "9308"
     MANTICORE_PROTOCOL: str = "http"
     TABLE_NAME: str = "english_dataset"
-    LIBRETRANSLATE_URL: str = "http://127.0.0.1:5000"
-
-    GROQ_API_KEY: str = ""
 
     POSTGRES_USER: str = ""
     POSTGRES_PASSWORD: str = ""
@@ -31,6 +29,10 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # OTP Settings
+    OTP_LENGTH: int = 6
+    OTP_EXPIRE_SECONDS: int = 600  # 10 minutes
 
     COOKIE_NAME: str = "access_token"
     COOKIE_SECURE: bool = False
@@ -67,5 +69,6 @@ class Settings(BaseSettings):
         return f"postgresql+asyncpg://{encoded_user}:{encoded_password}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
 
-def get_settings():
+@lru_cache()
+def get_settings() -> Settings:
     return Settings()

@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Body
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Body, Request
 from fastapi.responses import HTMLResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
-from starlette.requests import Request
+from starlette.requests import Request as StarletteRequest
 from redis.asyncio import Redis
 
 from ...db.session import get_session
@@ -13,18 +13,33 @@ from ...services.email import email_service
 from ...core.security import create_access_token, generate_otp, get_password_hash
 from ...core.config import get_settings
 from ...core.redis import get_redis
+from ...core.limiter import rate_limit_tier
 from ..deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 settings = get_settings()
 
+
+# =============================================================================
+# AUTH ENDPOINTS - Always use override limits (stricter than tier defaults)
+# These are security-critical and need specific limits regardless of user tier
+# =============================================================================
+
 @router.post("/signup", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-async def signup(user_data: UserCreate, db: AsyncSession = Depends(get_session)):
+@rate_limit_tier(override_limit="3/minute")  # Strict: prevent mass account creation
+async def signup(
+    request: Request,
+    user_data: UserCreate,
+    db: AsyncSession = Depends(get_session)
+):
     """The entry point for new users. Starts them at the 'FREE' tier."""
     return await create_new_user(db, user_data)
 
+
 @router.post("/login")
+@rate_limit_tier(override_limit="5/minute")  # Prevent brute force
 async def login(
+    request: Request,
     response: Response,
     login_data: UserCreate, 
     db: AsyncSession = Depends(get_session)
@@ -76,7 +91,9 @@ async def logout(response: Response):
 # --- PASSWORD RESET FLOW ---
 
 @router.post("/forgot-password")
+@rate_limit_tier(override_limit="3/hour")  # Very strict: expensive operation (email)
 async def forgot_password(
+    request: Request,
     email: str = Body(..., embed=True),
     db: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis)
@@ -97,11 +114,11 @@ async def forgot_password(
         return {"message": "If that email exists, we sent a code."}
 
     # 2. Generate OTP
-    otp = generate_otp()
+    otp = generate_otp(settings.OTP_LENGTH)
     
     # 3. Store in Redis
     # Key: "reset:alice@example.com" -> Value: "123456"
-    await redis.set(f"reset:{email}", otp, ex=600)
+    await redis.set(f"reset:{email}", otp, ex=settings.OTP_EXPIRE_SECONDS)
     
     # 4. Send Email
     await email_service.send_otp([email], otp)
@@ -110,7 +127,9 @@ async def forgot_password(
 
 
 @router.post("/verify-otp")
+@rate_limit_tier(override_limit="5/minute")  # Prevent OTP brute force
 async def verify_otp(
+    request: Request,
     email: str = Body(...),
     otp: str = Body(...),
     redis: Redis = Depends(get_redis)
@@ -128,7 +147,9 @@ async def verify_otp(
 
 
 @router.post("/reset-password")
+@rate_limit_tier(override_limit="5/minute")  # Prevent password reset abuse
 async def reset_password(
+    request: Request,
     email: str = Body(...),
     otp: str = Body(...),
     new_password: str = Body(...),
