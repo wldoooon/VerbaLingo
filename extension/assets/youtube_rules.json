@@ -1,0 +1,48 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://www.youtube.com/"
+        },
+        {
+          "header": "Origin",
+          "operation": "set",
+          "value": "https://www.youtube.com"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://www.youtube.com/embed/*",
+      "resourceTypes": ["sub_frame"]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://www.youtube-nocookie.com/"
+        },
+        {
+          "header": "Origin",
+          "operation": "set",
+          "value": "https://www.youtube-nocookie.com"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://www.youtube-nocookie.com/embed/*",
+      "resourceTypes": ["sub_frame"]
+    }
+  }
+]

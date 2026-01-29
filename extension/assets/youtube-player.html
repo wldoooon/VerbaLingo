@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VerbaLingo Player</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { 
+      width: 100%; 
+      height: 100%; 
+      background: #000; 
+      overflow: hidden;
+    }
+    #player {
+      width: 100%;
+      height: 100%;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .error {
+      color: #ff6b6b;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="player"></div>
+  
+  <script>
+    // This page runs OUTSIDE the extension's CSP restrictions
+    // It can load YouTube embeds normally
+    
+    function getUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        videoId: params.get('v'),
+        start: parseInt(params.get('start') || '0', 10),
+        end: params.get('end') ? parseInt(params.get('end'), 10) : null,
+        autoplay: params.get('autoplay') !== '0'
+      };
+    }
+
+    function createPlayer() {
+      const { videoId, start, autoplay } = getUrlParams();
+      
+      if (!videoId) {
+        document.getElementById('player').innerHTML = '<div class="error">No video ID provided</div>';
+        return;
+      }
+
+      const params = new URLSearchParams({
+        autoplay: autoplay ? '1' : '0',
+        start: String(start),
+        playsinline: '1',
+        modestbranding: '1',
+        rel: '0',
+        iv_load_policy: '3',
+        fs: '1'
+      });
+
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      
+      document.getElementById('player').appendChild(iframe);
+    }
+
+    // Listen for messages from the extension
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'LOAD_VIDEO') {
+        const { videoId, start } = event.data;
+        const params = new URLSearchParams({
+          autoplay: '1',
+          start: String(start || 0),
+          playsinline: '1',
+          modestbranding: '1',
+          rel: '0'
+        });
+        
+        const player = document.getElementById('player');
+        player.innerHTML = '';
+        
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.allowFullscreen = true;
+        player.appendChild(iframe);
+      }
+    });
+
+    createPlayer();
+  </script>
+</body>
+</html>

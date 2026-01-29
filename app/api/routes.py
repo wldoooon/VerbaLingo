@@ -1,22 +1,29 @@
-from fastapi import APIRouter, Query, Depends, HTTPException
+﻿from fastapi import APIRouter, Query, Depends, HTTPException, Request
 from typing import Optional, List
 
 from app.dependencies import get_search_service
 from app.services.search_service import SearchService
-from app.services.translation_service import get_translation_service, TranslationService
 from app.schema import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word, Category
+from app.core.limiter import rate_limit_tier
+from app.api.deps import get_current_user_optional
+from app.models.user import User
 
 router = APIRouter(
     prefix="/api/v1",
     tags=["Search"]
 )
 
+
 @router.get("/search", response_model=SearchResponse)
+@rate_limit_tier()  # Uses tier-based limits: Anonymous=5/min, Free=30/min, Pro=100/min
 async def search(
+    request: Request,
     q: str = Query(..., min_length=2),
     language: str = Query("english"),
     category: Optional[str] = Query(None),
     sub_category: Optional[str] = Query(None),
+    # Optional auth: sets request.state.user for rate limiter
+    current_user: Optional[User] = Depends(get_current_user_optional),
     service: SearchService = Depends(get_search_service)
 ):
     raw_results = await service.search(q=q, language=language, category=category, sub_category=sub_category)
@@ -71,11 +78,16 @@ async def search(
     aggregations = raw_results.get("aggregations", {})
     return SearchResponse(total=total, hits=hits, aggregations=aggregations)
 
+
 @router.get("/videos/{video_id}/transcript", response_model=TranscriptResponse)
+@rate_limit_tier()  # Uses tier-based limits
 async def get_transcript(
+    request: Request,
     video_id: str,
     language: str = Query("english"),
     center_position: Optional[int] = Query(None),
+    # Optional auth: sets request.state.user for rate limiter
+    current_user: Optional[User] = Depends(get_current_user_optional),
     service: SearchService = Depends(get_search_service)
 ):
     raw_results = await service.get_transcript(video_id=video_id, language=language, center_position=center_position)
@@ -119,57 +131,4 @@ async def get_transcript(
         start_time=video_start_time,
         end_time=video_end_time,
         sentences=sentences
-    )
-
-@router.get("/translate")
-async def translate_text(
-    text: str = Query(..., min_length=1),
-    source: str = Query("en"),
-    target: str = Query("ar"),
-    translator: TranslationService = Depends(get_translation_service)
-):
-    translated = translator.translate_text(text, source, target)
-    if translated is None:
-        raise HTTPException(status_code=500, detail="Translation failed")
-    
-    return {
-        "original": text,
-        "translated": translated,
-        "source": source,
-        "target": target
-    }
-
-@router.get("/translate/languages")
-async def get_supported_languages(
-    translator: TranslationService = Depends(get_translation_service)
-):
-    languages = translator.get_supported_languages()
-    if not languages:
-        raise HTTPException(status_code=503, detail="Translation service unavailable")
-    return {"languages": languages}
-
-@router.get("/translate/health")
-async def translation_health(
-    translator: TranslationService = Depends(get_translation_service)
-):
-    is_healthy = translator.health_check()
-    if not is_healthy:
-        raise HTTPException(status_code=503, detail="Translation service unavailable")
-    return {"status": "healthy"}
-
-from fastapi.responses import StreamingResponse
-from app.services.groq_service import get_groq_service, GroqService
-from pydantic import BaseModel
-
-class CompletionRequest(BaseModel):
-    prompt: str
-
-@router.post("/completion")
-async def completion(
-    request: CompletionRequest,
-    service: GroqService = Depends(get_groq_service)
-):
-    return StreamingResponse(
-        service.get_completion_stream(request.prompt),
-        media_type="text/plain"
     )

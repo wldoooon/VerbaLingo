@@ -1,11 +1,16 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from contextlib import asynccontextmanager
 import manticoresearch
+
 from .core.config import get_settings
 from .core.manticore_client import get_manticore_configuration
+from .core.limiter import limiter
 from .api.routes import router
 from .api.v1.auth import router as auth_router
-from fastapi.middleware.cors import CORSMiddleware
 
 settings = get_settings()
 
@@ -40,6 +45,10 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Rate limiting setup
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # 1. CORS Middleware - Required for Next.js to talk to the API
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +58,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 2. Routes Inclusion
+# 2. Session Middleware - Required for OAuth state management
+# Authlib stores the 'state' parameter in session to prevent CSRF attacks
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+
 app.include_router(auth_router)
 app.include_router(router)

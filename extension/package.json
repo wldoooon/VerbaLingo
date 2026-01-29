@@ -31,14 +31,20 @@
     "permissions": [
       "sidePanel",
       "storage",
-      "tabs"
+      "tabs",
+      "offscreen"
     ],
     "host_permissions": [
-      "*://localhost/*",
-      "https://*/*"
+      "<all_urls>"
     ],
     "sidePanel": {
       "default_path": "sidepanel.html"
-    }
+    },
+    "web_accessible_resources": [
+      {
+        "resources": ["assets/*"],
+        "matches": ["<all_urls>"]
+      }
+    ]
   }
 }

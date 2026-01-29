@@ -10,6 +10,7 @@ class UserTier(str, Enum):
 
 class UserBase(SQLModel):
     email: str = Field(unique=True, index=True, nullable=False)
+    full_name: str | None = Field(default=None, max_length=255)
     is_active: bool = Field(default=True)
     tier: UserTier = Field(default=UserTier.FREE)
 
@@ -20,7 +21,11 @@ class User(UserBase, table=True):
         index=True,
         nullable=False
     )
-    hashed_password: str = Field(nullable=False)
+    hashed_password: str | None = Field(default=None)
+    
+    oauth_provider: str | None = Field(default=None, index=True)
+    oauth_id: str | None = Field(default=None, index=True)
+    
     created_at: datetime = Field(
         default_factory=datetime.utcnow
     )
@@ -30,6 +35,7 @@ class UserCreate(SQLModel):
     """What the user sends when registering"""
     email: str
     password: str
+    full_name: str | None = None
 
 class UserRead(UserBase):
     """What the API returns to the frontend"""

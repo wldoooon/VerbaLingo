@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>VerbaLingo Player</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: #000; 
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+    #player-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #youtube-player {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .loading {
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="player-container">
+    <div class="loading">Loading player...</div>
+  </div>
+
+  <script>
+    // YouTube IFrame API
+    let player = null;
+    let currentClip = null;
+    let isLooping = false;
+    let checkInterval = null;
+
+    // Load YouTube IFrame API
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+
+    window.onYouTubeIframeAPIReady = function() {
+      console.log('[Offscreen] YouTube API Ready');
+      chrome.runtime.sendMessage({ type: 'OFFSCREEN_READY' });
+    };
+
+    function createPlayer(videoId, start, end) {
+      const container = document.getElementById('player-container');
+      container.innerHTML = '<div id="youtube-player"></div>';
+
+      currentClip = { videoId, start, end };
+
+      player = new YT.Player('youtube-player', {
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          start: Math.floor(start),
+          controls: 1,
+          modestbranding: 1,
+          rel: 0,
+          fs: 0,
+          origin: window.location.origin
+        },
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange,
+          onError: onPlayerError
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      console.log('[Offscreen] Player ready');
+      if (currentClip && currentClip.start) {
+        event.target.seekTo(currentClip.start, true);
+      }
+      event.target.playVideo();
+      startTimeCheck();
+      chrome.runtime.sendMessage({ type: 'PLAYER_READY' });
+    }
+
+    function onPlayerStateChange(event) {
+      chrome.runtime.sendMessage({ 
+        type: 'PLAYER_STATE', 
+        state: event.data 
+      });
+
+      if (event.data === YT.PlayerState.ENDED && isLooping && currentClip) {
+        player.seekTo(currentClip.start, true);
+        player.playVideo();
+      }
+    }
+
+    function onPlayerError(event) {
+      console.error('[Offscreen] Player error:', event.data);
+      chrome.runtime.sendMessage({ 
+        type: 'PLAYER_ERROR', 
+        error: event.data 
+      });
+    }
+
+    function startTimeCheck() {
+      if (checkInterval) clearInterval(checkInterval);
+      
+      checkInterval = setInterval(() => {
+        if (player && player.getCurrentTime && currentClip && currentClip.end) {
+          const currentTime = player.getCurrentTime();
+          if (currentTime >= currentClip.end) {
+            if (isLooping) {
+              player.seekTo(currentClip.start, true);
+            } else {
+              player.pauseVideo();
+              chrome.runtime.sendMessage({ type: 'CLIP_ENDED' });
+            }
+          }
+        }
+      }, 100);
+    }
+
+    // Listen for commands from background
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      console.log('[Offscreen] Received:', message);
+
+      switch (message.type) {
+        case 'LOAD_VIDEO':
+          createPlayer(message.videoId, message.start, message.end);
+          currentClip = { 
+            videoId: message.videoId, 
+            start: message.start, 
+            end: message.end 
+          };
+          sendResponse({ success: true });
+          break;
+
+        case 'PLAY':
+          if (player && player.playVideo) player.playVideo();
+          sendResponse({ success: true });
+          break;
+
+        case 'PAUSE':
+          if (player && player.pauseVideo) player.pauseVideo();
+          sendResponse({ success: true });
+          break;
+
+        case 'SEEK':
+          if (player && player.seekTo) player.seekTo(message.time, true);
+          sendResponse({ success: true });
+          break;
+
+        case 'REPLAY':
+          if (player && currentClip) {
+            player.seekTo(currentClip.start, true);
+            player.playVideo();
+          }
+          sendResponse({ success: true });
+          break;
+
+        case 'SET_LOOP':
+          isLooping = message.loop;
+          sendResponse({ success: true });
+          break;
+
+        case 'GET_TIME':
+          const time = player ? player.getCurrentTime() : 0;
+          sendResponse({ time });
+          break;
+
+        default:
+          sendResponse({ success: false, error: 'Unknown command' });
+      }
+
+      return true;
+    });
+
+    console.log('[Offscreen] Script loaded');
+  </script>
+</body>
+</html>
