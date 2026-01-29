@@ -32,17 +32,19 @@
       "sidePanel",
       "storage",
       "tabs",
-      "declarativeNetRequest"
+      "offscreen"
     ],
     "host_permissions": [
-      "*://localhost/*",
-      "https://*/*"
+      "<all_urls>"
     ],
     "sidePanel": {
       "default_path": "sidepanel.html"
     },
-    "content_security_policy": {
-      "extension_pages": "script-src 'self' http://localhost; object-src 'self'; frame-src 'self' data: https://www.youtube.com https://www.youtube-nocookie.com;"
-    }
+    "web_accessible_resources": [
+      {
+        "resources": ["assets/*"],
+        "matches": ["<all_urls>"]
+      }
+    ]
   }
 }

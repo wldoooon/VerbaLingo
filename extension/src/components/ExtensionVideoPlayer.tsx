@@ -33,20 +33,9 @@ export default function ExtensionVideoPlayer({
         if (!clip) return ""
         const startSeconds = Math.floor(Math.max(0, clip.start - 1))
 
-        const origin = (() => {
-            try {
-                if (typeof chrome !== "undefined" && chrome.runtime?.getURL) {
-                    return new URL(chrome.runtime.getURL("/")).origin
-                }
-            } catch {
-                // ignore
-            }
-            if (typeof window !== "undefined") {
-                return window.location.origin
-            }
-            return ""
-        })()
-
+        // IMPORTANT: Do NOT set the 'origin' parameter when embedding from a chrome-extension:// URL.
+        // YouTube rejects chrome-extension:// as a valid origin, causing Error 152/153.
+        // The declarativeNetRequest rules in background.ts inject the proper Referer and Origin headers.
         const params = new URLSearchParams({
             autoplay: "1",
             playsinline: "1",
@@ -55,15 +44,10 @@ export default function ExtensionVideoPlayer({
             rel: "0",
             iv_load_policy: "3",
             fs: "0",
-            mute: "1"
+            mute: "0",  // Enable audio
+            enablejsapi: "0"  // Disable JS API to avoid cross-origin issues
         })
 
-        if (origin) {
-            params.set("origin", origin)
-        }
-
-        // Use a direct YouTube iframe instead of a data: wrapper.
-        // This avoids "Video player configuration error" issues seen with data: origins.
         return `https://www.youtube.com/embed/${clip.video_id}?${params.toString()}`
     }, [clip])
 
