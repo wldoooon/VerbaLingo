@@ -1,12 +1,13 @@
 from fastapi import Depends, HTTPException, status, Request
 from jose import jwt, JWTError
-from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
+from typing import Optional
 from ..core.config import get_settings
 from ..db.session import get_session
 from ..models.user import User
 
 settings = get_settings()
+
 
 async def get_current_user(
     request: Request,
@@ -15,6 +16,8 @@ async def get_current_user(
     """
     The 'Guard' that protects our routes. 
     It reads the HTTPOnly cookie, validates the JWT, and returns the User.
+    
+    IMPORTANT: Also sets user on request.state for rate limiting!
     """
     # 1. Extraction
     token = request.cookies.get(settings.COOKIE_NAME)
@@ -50,5 +53,53 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User no longer exists.",
         )
+    
+    # 4. Set on request.state for rate limiter access
+    # This allows the rate_limit_tier decorator to identify the user
+    request.state.user = user
+    
+    return user
+
+
+async def get_current_user_optional(
+    request: Request,
+    db: AsyncSession = Depends(get_session)
+) -> Optional[User]:
+    """
+    Like get_current_user, but returns None instead of raising.
+    
+    Use this for endpoints that work for both anonymous and authenticated users,
+    but want different rate limits based on auth status.
+    
+    Usage:
+        @router.get("/search")
+        @rate_limit_tier()
+        async def search(
+            request: Request,
+            current_user: Optional[User] = Depends(get_current_user_optional)
+        ):
+            # Rate limiter will use user_id if authenticated, IP if not
+            ...
+    """
+    token = request.cookies.get(settings.COOKIE_NAME)
+    if not token:
+        return None
+    
+    try:
+        payload = jwt.decode(
+            token, 
+            settings.SECRET_KEY, 
+            algorithms=[settings.ALGORITHM]
+        )
+        user_id = payload.get("sub")
+        if user_id is None:
+            return None
+    except JWTError:
+        return None
+    
+    user = await db.get(User, user_id)
+    if user:
+        # Set on request.state for rate limiter
+        request.state.user = user
     
     return user
