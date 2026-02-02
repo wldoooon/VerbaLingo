@@ -55,7 +55,7 @@ async def get_current_user(
         )
     
     # 4. Set on request.state for rate limiter access
-    # This allows the rate_limit_tier decorator to identify the user
+    # This allows feature/security rate limiters to identify the user
     request.state.user = user
     
     return user
@@ -73,7 +73,7 @@ async def get_current_user_optional(
     
     Usage:
         @router.get("/search")
-        @rate_limit_tier()
+        @feature_rate_limit("search")
         async def search(
             request: Request,
             current_user: Optional[User] = Depends(get_current_user_optional)

@@ -13,7 +13,7 @@ from ...services.email import email_service
 from ...core.security import create_access_token, generate_otp, get_password_hash
 from ...core.config import get_settings
 from ...core.redis import get_redis
-from ...core.limiter import rate_limit_tier
+from ...core.limiter import security_rate_limit
 from ..deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -21,12 +21,12 @@ settings = get_settings()
 
 
 # =============================================================================
-# AUTH ENDPOINTS - Always use override limits (stricter than tier defaults)
-# These are security-critical and need specific limits regardless of user tier
+# AUTH ENDPOINTS - Security rate limits (IP-based)
+# Limits are configured in app.core.limiter.config.SECURITY_LIMITS
 # =============================================================================
 
 @router.post("/signup", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-@rate_limit_tier(override_limit="3/minute")  # Strict: prevent mass account creation
+@security_rate_limit()
 async def signup(
     request: Request,
     user_data: UserCreate,
@@ -37,7 +37,7 @@ async def signup(
 
 
 @router.post("/login")
-@rate_limit_tier(override_limit="5/minute")  # Prevent brute force
+@security_rate_limit()
 async def login(
     request: Request,
     response: Response,
@@ -91,7 +91,7 @@ async def logout(response: Response):
 # --- PASSWORD RESET FLOW ---
 
 @router.post("/forgot-password")
-@rate_limit_tier(override_limit="3/hour")  # Very strict: expensive operation (email)
+@security_rate_limit()
 async def forgot_password(
     request: Request,
     email: str = Body(..., embed=True),
@@ -127,7 +127,7 @@ async def forgot_password(
 
 
 @router.post("/verify-otp")
-@rate_limit_tier(override_limit="5/minute")  # Prevent OTP brute force
+@security_rate_limit()
 async def verify_otp(
     request: Request,
     email: str = Body(...),
@@ -147,7 +147,7 @@ async def verify_otp(
 
 
 @router.post("/reset-password")
-@rate_limit_tier(override_limit="5/minute")  # Prevent password reset abuse
+@security_rate_limit()
 async def reset_password(
     request: Request,
     email: str = Body(...),
