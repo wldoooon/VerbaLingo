@@ -4,7 +4,7 @@ from typing import Optional, List
 from app.dependencies import get_search_service
 from app.services.search_service import SearchService
 from app.schema import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word, Category
-from app.core.limiter import rate_limit_tier
+from app.core.limiter import feature_rate_limit
 from app.api.deps import get_current_user_optional
 from app.models.user import User
 
@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.get("/search", response_model=SearchResponse)
-@rate_limit_tier()  # Uses tier-based limits: Anonymous=5/min, Free=30/min, Pro=100/min
+@feature_rate_limit("search")
 async def search(
     request: Request,
     q: str = Query(..., min_length=2),
@@ -80,7 +80,7 @@ async def search(
 
 
 @router.get("/videos/{video_id}/transcript", response_model=TranscriptResponse)
-@rate_limit_tier()  # Uses tier-based limits
+@feature_rate_limit("search")
 async def get_transcript(
     request: Request,
     video_id: str,

@@ -5,7 +5,7 @@ __pycache__/
 *.egg-info/
 venv/
 
-.env
+*.env
 
 output_transcripts.jsonl
 
