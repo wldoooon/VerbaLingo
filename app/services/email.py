@@ -65,4 +65,25 @@ class EmailService:
         await self.fastmail.send_message(message)
         logger.info(f"OTP email sent to {email[0]}")
 
+    async def send_verification_otp(self, email: List[EmailStr], otp: str):
+        if not settings.MAIL_USERNAME:
+            logger.warning(f"Email not configured (MOCK): Verification OTP {otp} for {email}")
+            return
+
+        html = self._render_template(
+            "verification_email.html",
+            otp=otp,
+            year=datetime.now().year
+        )
+
+        message = MessageSchema(
+            subject="VerbaLingo - Verify Your Email",
+            recipients=email,
+            body=html,
+            subtype=MessageType.html
+        )
+
+        await self.fastmail.send_message(message)
+        logger.info(f"Verification email sent to {email[0]}")
+
 email_service = EmailService()
