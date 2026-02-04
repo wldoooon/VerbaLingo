@@ -1,14 +1,19 @@
 import uuid
 import uuid6 
-from datetime import datetime, date, timezone
+from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional
-from sqlmodel import SQLModel, Field
+from typing import Optional, TYPE_CHECKING
+from sqlmodel import SQLModel, Field, Relationship
+
+if TYPE_CHECKING:
+    from .user_usage import UserUsage
+
 
 class UserTier(str, Enum):
     FREE = "free"
     PRO = "pro"
     UNLIMITED = "unlimited"
+
 
 class UserBase(SQLModel):
     email: str = Field(unique=True, index=True, nullable=False)
@@ -43,22 +48,21 @@ class User(UserBase, table=True):
     tier_updated_at: datetime | None = Field(default=None)
     tier_expires_at: datetime | None = Field(default=None)
     
-    # Usage tracking (for rate limiting)
-    daily_searches_count: int = Field(default=0)
-    daily_ai_chats_count: int = Field(default=0)
-    daily_exports_count: int = Field(default=0)
-    usage_reset_date: date | None = Field(default=None)
-    
     # Timestamps
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime | None = Field(default=lambda: datetime.now(timezone.utc), sa_column_kwargs={"onupdate": datetime.now(timezone.utc)})
+    
+    # Relationship to Usage (1-to-1)
+    usage: Optional["UserUsage"] = Relationship(back_populates="user")
 
-# 4. API Schemas
+
+# API Schemas
 class UserCreate(SQLModel):
     """What the user sends when registering"""
     email: str
     password: Optional[str] | None = None
     full_name: Optional[str] | None = None
+
 
 class UserRead(UserBase):
     """What the API returns to the frontend"""
@@ -68,6 +72,4 @@ class UserRead(UserBase):
     oauth_avatar_url: str | None = None
     last_login_at: datetime | None = None
     tier_expires_at: datetime | None = None
-    daily_searches_count: int = 0
-    daily_ai_chats_count: int = 0
     created_at: datetime
