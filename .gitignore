@@ -16,3 +16,6 @@ Thumbs.db
 
 dataset
 garbage
+
+# Loguru log files
+logs/
