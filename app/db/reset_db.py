@@ -12,6 +12,7 @@ WARNING: This is DESTRUCTIVE. All data will be lost.
 import asyncio
 from sqlalchemy import text
 from .session import engine
+from ..core.logging import logger
 
 
 async def reset_database():
@@ -26,7 +27,7 @@ async def reset_database():
         # Restore default grants for the public schema
         await conn.execute(text("GRANT ALL ON SCHEMA public TO public"))
     
-    print("✓ Database reset complete. All tables dropped.")
+    logger.success("Database reset complete. All tables dropped.")
 
 
 if __name__ == "__main__":
@@ -35,4 +36,5 @@ if __name__ == "__main__":
     if confirm.lower() == "yes":
         asyncio.run(reset_database())
     else:
-        print("Aborted.")
+        logger.info("Database reset aborted by user.")
+

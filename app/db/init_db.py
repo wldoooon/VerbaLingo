@@ -6,6 +6,7 @@ SQLModel's `metadata.create_all()` is idempotent - it only creates tables
 that don't already exist, so it's safe to run on every startup.
 """
 from sqlmodel import SQLModel
+from ..core.logging import logger
 
 # CRITICAL: Import all models here so SQLModel registers them in its metadata
 # If you add new models (e.g., Transcript, Subscription), import them here
@@ -26,4 +27,4 @@ async def init_db():
         # run_sync allows us to run synchronous SQLAlchemy methods
         # inside an async transaction
         await conn.run_sync(SQLModel.metadata.create_all)
-    print("✓ Database tables verified/created")
+    logger.success("Database tables verified/created")
