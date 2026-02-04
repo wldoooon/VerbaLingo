@@ -1,12 +1,13 @@
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Body, Request
 from fastapi.responses import HTMLResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
-from starlette.requests import Request as StarletteRequest
 from redis.asyncio import Redis
 
 from ...db.session import get_session
 from ...models.user import UserCreate, UserRead, User
+from ...models.user_usage import UserUsage
 from ...services.auth_service import create_new_user, authenticate_user
 from ...services.oauth_service import oauth
 from ...services.email import email_service
@@ -266,8 +267,11 @@ async def google_callback(
                 # User registered with email/password, linking Google account
                 user.oauth_provider = "google"
                 user.oauth_id = google_id
-                db.add(user)
-                await db.commit()
+            # Update last login
+            user.last_login_at = datetime.now(timezone.utc)
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
         else:
             # New user - create account (no password needed for OAuth)
             user = User(
@@ -275,8 +279,15 @@ async def google_callback(
                 hashed_password=None,  # OAuth users don't have passwords
                 oauth_provider="google",
                 oauth_id=google_id,
+                is_email_verified=True,  # Google already verified email
             )
             db.add(user)
+            await db.flush()  # Get user.id without committing
+            
+            # Create usage tracker
+            user_usage = UserUsage(user_id=user.id)
+            db.add(user_usage)
+            
             await db.commit()
             await db.refresh(user)
         
