@@ -1,5 +1,6 @@
 from groq import AsyncGroq
 from app.core.config import get_settings
+from app.core.logging import logger
 
 settings = get_settings()
 
@@ -9,9 +10,9 @@ class GroqService:
         self.model = "openai/gpt-oss-20b"
 
     async def get_completion_stream(self, prompt: str):
-        print(f"DEBUG: Starting Groq completion with model: {self.model}")
+        logger.debug(f"Starting Groq completion with model: {self.model}")
         try:
-            print("DEBUG: Sending request to Groq SDK...")
+            logger.debug("Sending request to Groq SDK...")
             stream = await self.client.chat.completions.create(
                 messages=[
                     {
@@ -49,17 +50,15 @@ CORE DIRECTIVES:
                 model=self.model,
                 stream=True,
             )
-            print("DEBUG: Request sent, awaiting stream...")
+            logger.debug("Request sent, awaiting stream...")
             
             async for chunk in stream:
                 content = chunk.choices[0].delta.content
                 if content:
-                    print(f"DEBUG BACKEND CHUNK: {content}")
+                    logger.trace(f"Groq chunk: {content[:50]}...")  # TRACE level for high-volume debug
                     yield content
         except Exception as e:
-            print(f"CRITICAL GROQ ERROR: {type(e).__name__}: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Groq API error: {type(e).__name__}: {e}")
             yield f"Error: {str(e)}"
 
 _groq_service = None

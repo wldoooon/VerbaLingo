@@ -2,6 +2,7 @@ from typing import List
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pydantic import EmailStr
 from app.core.config import get_settings
+from app.core.logging import logger
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 from datetime import datetime
@@ -44,7 +45,7 @@ class EmailService:
         Sends an OTP code for password reset.
         """
         if not settings.MAIL_USERNAME:
-            print(f"Authentication (MOCK): Sending OTP {otp} to {email}")
+            logger.warning(f"Email not configured (MOCK): OTP {otp} for {email}")
             return
 
         # Render the professional OTP email template
@@ -62,7 +63,6 @@ class EmailService:
         )
 
         await self.fastmail.send_message(message)
-        print(f"Email sent to {email}")
+        logger.info(f"OTP email sent to {email[0]}")
 
 email_service = EmailService()
-
