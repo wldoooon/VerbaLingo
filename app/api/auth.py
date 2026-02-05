@@ -1,17 +1,14 @@
-from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Body, Request
 from fastapi.responses import HTMLResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlmodel import select
 from redis.asyncio import Redis
 
 from ..db.session import get_session
 from ..models.user import UserCreate, UserRead, User
-from ..models.user_usage import UserUsage
-from ..services.auth_service import create_new_user, authenticate_user
+from ..services.auth_service import create_new_user, authenticate_user, get_or_create_oauth_user
+from ..services import verification_service
 from ..services.oauth_service import oauth
-from ..services.email import email_service
-from ..core.security import create_access_token, generate_otp, get_password_hash
+from ..core.security import create_access_token
 from ..core.config import get_settings
 from ..core.redis import get_redis
 from ..core.limiter import security_rate_limit
@@ -22,9 +19,17 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 settings = get_settings()
 
 
-# =============================================================================
-# SIGNUP + EMAIL VERIFICATION
-# =============================================================================
+def _set_auth_cookie(response: Response, access_token: str):
+    """Helper to set the authentication cookie."""
+    response.set_cookie(
+        key=settings.COOKIE_NAME,
+        value=access_token,
+        httponly=True,
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        samesite=settings.COOKIE_SAMESITE,
+        secure=settings.COOKIE_SECURE,
+    )
+
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 @security_rate_limit()
@@ -34,15 +39,11 @@ async def signup(
     db: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis)
 ):
+    """Create new user and send verification email."""
     user = await create_new_user(db, user_data)
+    await verification_service.send_verification_otp(redis, user.email)
     
-    otp = generate_otp(settings.OTP_LENGTH)
-    await redis.set(f"verify:{user.email}", otp, ex=settings.VERIFY_OTP_EXPIRE_SECONDS)
-    await redis.set(f"verify_attempts:{user.email}", "0", ex=settings.VERIFY_OTP_EXPIRE_SECONDS)
-    
-    await email_service.send_verification_otp([user.email], otp)
     logger.info(f"New user signup: {user.email}")
-    
     return {
         "message": "Account created. Please check your email for verification code.",
         "email": user.email
@@ -59,43 +60,11 @@ async def verify_email(
     db: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis)
 ):
-    attempts = await redis.get(f"verify_attempts:{email}")
-    if attempts and int(attempts) >= settings.VERIFY_MAX_ATTEMPTS:
-        await redis.delete(f"verify:{email}")
-        await redis.delete(f"verify_attempts:{email}")
-        raise HTTPException(status_code=429, detail="Too many attempts. Please request a new code.")
-    
-    stored_otp = await redis.get(f"verify:{email}")
-    if not stored_otp or stored_otp != otp:
-        await redis.incr(f"verify_attempts:{email}")
-        raise HTTPException(status_code=400, detail="Invalid or expired code")
-    
-    statement = select(User).where(User.email == email)
-    result = await db.exec(statement)
-    user = result.first()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    if user.is_email_verified:
-        return {"message": "Email already verified"}
-    
-    user.is_email_verified = True
-    db.add(user)
-    await db.commit()
-    
-    await redis.delete(f"verify:{email}")
-    await redis.delete(f"verify_attempts:{email}")
+    """Verify email with OTP code."""
+    user = await verification_service.verify_email_otp(db, redis, email, otp)
     
     access_token = create_access_token(data={"sub": str(user.id)})
-    response.set_cookie(
-        key=settings.COOKIE_NAME,
-        value=access_token,
-        httponly=True,
-        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        samesite=settings.COOKIE_SAMESITE,
-        secure=settings.COOKIE_SECURE,
-    )
+    _set_auth_cookie(response, access_token)
     
     logger.info(f"Email verified: {email}")
     return {
@@ -112,50 +81,21 @@ async def resend_verification(
     db: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis)
 ):
-    cooldown = await redis.get(f"verify_cooldown:{email}")
-    if cooldown:
-        raise HTTPException(status_code=429, detail="Please wait before requesting another code")
-    
-    resend_count = await redis.get(f"verify_resends:{email}")
-    if resend_count and int(resend_count) >= settings.VERIFY_MAX_RESENDS_PER_HOUR:
-        raise HTTPException(status_code=429, detail="Too many resend requests. Try again later.")
-    
-    statement = select(User).where(User.email == email)
-    result = await db.exec(statement)
-    user = result.first()
-    
-    if not user:
-        return {"message": "If that email exists, we sent a code."}
-    
-    if user.is_email_verified:
-        return {"message": "Email already verified"}
-    
-    otp = generate_otp(settings.OTP_LENGTH)
-    await redis.set(f"verify:{email}", otp, ex=settings.VERIFY_OTP_EXPIRE_SECONDS)
-    await redis.set(f"verify_attempts:{email}", "0", ex=settings.VERIFY_OTP_EXPIRE_SECONDS)
-    
-    await redis.set(f"verify_cooldown:{email}", "1", ex=settings.VERIFY_RESEND_COOLDOWN)
-    
-    await redis.incr(f"verify_resends:{email}")
-    await redis.expire(f"verify_resends:{email}", 3600)
-    
-    await email_service.send_verification_otp([email], otp)
-    
-    return {"message": "Verification code sent"}
+    """Resend verification email."""
+    _, message = await verification_service.resend_verification_otp(db, redis, email)
+    return {"message": message}
 
 
-# =============================================================================
-# LOGIN / LOGOUT / ME
-# =============================================================================
 
 @router.post("/login")
 @security_rate_limit()
 async def login(
     request: Request,
     response: Response,
-    login_data: UserCreate, 
+    login_data: UserCreate,
     db: AsyncSession = Depends(get_session)
 ):
+    """Login with email and password."""
     user = await authenticate_user(db, login_data.email, login_data.password)
     
     if not user:
@@ -171,33 +111,23 @@ async def login(
         )
     
     access_token = create_access_token(data={"sub": str(user.id)})
-    
-    response.set_cookie(
-        key=settings.COOKIE_NAME,
-        value=access_token,
-        httponly=True,
-        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        samesite=settings.COOKIE_SAMESITE,
-        secure=settings.COOKIE_SECURE,
-    )
+    _set_auth_cookie(response, access_token)
     
     return {
         "message": "Login successful",
-        "user": {
-            "id": user.id,
-            "email": user.email,
-            "tier": user.tier
-        }
+        "user": {"id": str(user.id), "email": user.email, "tier": user.tier.value}
     }
 
 
 @router.get("/me", response_model=UserRead)
 async def me(current_user: User = Depends(get_current_user)):
+    """Get current authenticated user."""
     return current_user
 
 
 @router.post("/logout")
 async def logout(response: Response):
+    """Logout and clear cookie."""
     response.delete_cookie(
         key=settings.COOKIE_NAME,
         samesite=settings.COOKIE_SAMESITE,
@@ -206,9 +136,6 @@ async def logout(response: Response):
     return {"message": "Logged out"}
 
 
-# =============================================================================
-# PASSWORD RESET
-# =============================================================================
 
 @router.post("/forgot-password")
 @security_rate_limit()
@@ -218,18 +145,9 @@ async def forgot_password(
     db: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis)
 ):
-    statement = select(User).where(User.email == email)
-    result = await db.exec(statement)
-    user = result.first()
-    
-    if not user:
-        return {"message": "If that email exists, we sent a code."}
-
-    otp = generate_otp(settings.OTP_LENGTH)
-    await redis.set(f"reset:{email}", otp, ex=settings.OTP_EXPIRE_SECONDS)
-    await email_service.send_otp([email], otp)
-    
-    return {"message": "If that email exists, we sent a code."}
+    """Send password reset OTP."""
+    _, message = await verification_service.send_password_reset_otp(db, redis, email)
+    return {"message": message}
 
 
 @router.post("/verify-reset-otp")
@@ -240,11 +158,8 @@ async def verify_reset_otp(
     otp: str = Body(...),
     redis: Redis = Depends(get_redis)
 ):
-    stored_otp = await redis.get(f"reset:{email}")
-    
-    if not stored_otp or stored_otp != otp:
-        raise HTTPException(status_code=400, detail="Invalid or expired code")
-        
+    """Verify password reset OTP without consuming it."""
+    await verification_service.verify_reset_otp(redis, email, otp)
     return {"message": "Code valid"}
 
 
@@ -258,31 +173,14 @@ async def reset_password(
     db: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis)
 ):
-    stored_otp = await redis.get(f"reset:{email}")
-    if not stored_otp or stored_otp != otp:
-        raise HTTPException(status_code=400, detail="Invalid or expired code")
-    
-    statement = select(User).where(User.email == email)
-    result = await db.exec(statement)
-    user = result.first()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-        
-    user.hashed_password = get_password_hash(new_password)
-    db.add(user)
-    await db.commit()
-    await redis.delete(f"reset:{email}")
-    
+    """Reset password with OTP."""
+    await verification_service.reset_password(db, redis, email, otp, new_password)
     return {"message": "Password updated successfully"}
 
 
-# =============================================================================
-# GOOGLE OAUTH
-# =============================================================================
-
 @router.get("/google/login")
 async def google_login(request: Request):
+    """Redirect to Google OAuth."""
     redirect_uri = request.url_for('google_callback')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
@@ -292,6 +190,7 @@ async def google_callback(
     request: Request,
     db: AsyncSession = Depends(get_session)
 ):
+    """Handle Google OAuth callback."""
     try:
         token = await oauth.google.authorize_access_token(request)
         user_info = token.get('userinfo')
@@ -301,41 +200,23 @@ async def google_callback(
         
         email = user_info.get('email')
         google_id = user_info.get('sub')
+        avatar = user_info.get('picture')
         
         if not email:
             raise HTTPException(status_code=400, detail="Email not provided by Google")
         
-        statement = select(User).where(User.email == email)
-        result = await db.exec(statement)
-        user = result.first()
-        
-        if user:
-            if not user.oauth_provider:
-                user.oauth_provider = "google"
-                user.oauth_id = google_id
-            user.last_login_at = datetime.now(timezone.utc)
-            db.add(user)
-            await db.commit()
-            await db.refresh(user)
-        else:
-            user = User(
-                email=email,
-                hashed_password=None,
-                oauth_provider="google",
-                oauth_id=google_id,
-                is_email_verified=True,
-            )
-            db.add(user)
-            await db.flush()
-            
-            user_usage = UserUsage(user_id=user.id)
-            db.add(user_usage)
-            
-            await db.commit()
-            await db.refresh(user)
+        # Get or create user via service
+        user = await get_or_create_oauth_user(
+            db=db,
+            email=email,
+            oauth_provider="google",
+            oauth_id=google_id,
+            avatar_url=avatar
+        )
         
         access_token = create_access_token(data={"sub": str(user.id)})
         
+        # Return HTML that posts message to opener and closes
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -360,18 +241,11 @@ async def google_callback(
         """
         
         response = HTMLResponse(content=html_content)
-        response.set_cookie(
-            key=settings.COOKIE_NAME,
-            value=access_token,
-            httponly=True,
-            max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-            samesite=settings.COOKIE_SAMESITE,
-            secure=settings.COOKIE_SECURE,
-        )
-        
+        _set_auth_cookie(response, access_token)
         return response
         
     except Exception as e:
+        logger.error(f"Google OAuth error: {e}")
         error_html = f"""
         <!DOCTYPE html>
         <html>
