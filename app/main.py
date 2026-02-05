@@ -9,16 +9,29 @@ import manticoresearch
 from .core.config import get_settings
 from .core.manticore_client import get_manticore_configuration
 from .core.limiter import limiter
+from .core.logging import logger, setup_logging
 from .api.routes import router
-from .api.v1.auth import router as auth_router
+from .api.auth import router as auth_router
+from .db.init_db import init_db
 
 settings = get_settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Initialize logging first
+    setup_logging()
+    
     app.state.api_client = None
     app.state.search_api = None
+    
+    # 1. Initialize Database Tables
+    try:
+        await init_db()
+    except Exception as db_err:
+        logger.error(f"Database initialization failed: {db_err}")
+    
+    # 2. Initialize Manticore Search Client
     try:
         config = get_manticore_configuration()
         api_client = manticoresearch.ApiClient(config)
@@ -27,15 +40,20 @@ async def lifespan(app: FastAPI):
         app.state.utils_api = manticoresearch.UtilsApi(api_client)
         try:
             await app.state.utils_api.sql("SHOW STATUS LIKE 'uptime'")
-            print(f"✓ Connected to Manticore at {settings.manticore_url}")
+            logger.success(f"Connected to Manticore at {settings.manticore_url}")
         except Exception as health_err:
-            print(f"⚠ Manticore health check failed: {health_err}")
+            logger.warning(f"Manticore health check failed: {health_err}")
     except Exception as e:
-        print(f"✗ Failed to initialize Manticore client: {e}")
+        logger.error(f"Failed to initialize Manticore client: {e}")
+    
+    logger.info("Application startup complete")
     yield
+    
+    # Shutdown
     if app.state.api_client:
         await app.state.api_client.close()
-        print("Manticore client closed")
+        logger.info("Manticore client closed")
+    logger.info("Application shutdown complete")
 
 
 app = FastAPI(

@@ -30,9 +30,15 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # OTP Settings
+    # OTP Settings (Password Reset)
     OTP_LENGTH: int = 6
     OTP_EXPIRE_SECONDS: int = 600  # 10 minutes
+
+    # Email Verification Settings
+    VERIFY_OTP_EXPIRE_SECONDS: int = 600     # 10 minutes
+    VERIFY_MAX_ATTEMPTS: int = 5              # Max wrong attempts before invalidate
+    VERIFY_RESEND_COOLDOWN: int = 60          # Seconds between resends
+    VERIFY_MAX_RESENDS_PER_HOUR: int = 5      # Anti-spam per email
 
     COOKIE_NAME: str = "access_token"
     COOKIE_SECURE: bool = False

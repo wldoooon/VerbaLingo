@@ -1,17 +1,28 @@
+"""
+Email Service
+=============
+Handles all email sending operations (OTP, verification, etc.)
+"""
+
 from typing import List
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pydantic import EmailStr
-from app.core.config import get_settings
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 from datetime import datetime
+
+from ..core.config import get_settings
+from ..core.logging import logger
 
 settings = get_settings()
 
 # Get the templates directory path
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 
+
 class EmailService:
+    """Service for sending templated emails."""
+    
     def __init__(self):
         self.config = ConnectionConfig(
             MAIL_USERNAME=settings.MAIL_USERNAME,
@@ -19,12 +30,11 @@ class EmailService:
             MAIL_FROM=settings.MAIL_FROM,
             MAIL_PORT=settings.MAIL_PORT,
             MAIL_SERVER=settings.MAIL_SERVER,
-            # For Gmail, SSL is usually False, TLS is True (StartTLS) on port 587
             MAIL_STARTTLS=True,
             MAIL_SSL_TLS=False,
             USE_CREDENTIALS=True,
             VALIDATE_CERTS=True,
-            TEMPLATE_FOLDER=None  # We handle templates manually with Jinja2
+            TEMPLATE_FOLDER=None
         )
         self.fastmail = FastMail(self.config)
         
@@ -40,14 +50,11 @@ class EmailService:
         return template.render(**context)
 
     async def send_otp(self, email: List[EmailStr], otp: str):
-        """
-        Sends an OTP code for password reset.
-        """
+        """Sends an OTP code for password reset."""
         if not settings.MAIL_USERNAME:
-            print(f"Authentication (MOCK): Sending OTP {otp} to {email}")
+            logger.warning(f"Email not configured (MOCK): OTP {otp} for {email}")
             return
 
-        # Render the professional OTP email template
         html = self._render_template(
             "otp_email.html",
             otp=otp,
@@ -62,7 +69,30 @@ class EmailService:
         )
 
         await self.fastmail.send_message(message)
-        print(f"Email sent to {email}")
+        logger.info(f"OTP email sent to {email[0]}")
 
+    async def send_verification_otp(self, email: List[EmailStr], otp: str):
+        """Sends an OTP code for email verification."""
+        if not settings.MAIL_USERNAME:
+            logger.warning(f"Email not configured (MOCK): Verification OTP {otp} for {email}")
+            return
+
+        html = self._render_template(
+            "verification_email.html",
+            otp=otp,
+            year=datetime.now().year
+        )
+
+        message = MessageSchema(
+            subject="VerbaLingo - Verify Your Email",
+            recipients=email,
+            body=html,
+            subtype=MessageType.html
+        )
+
+        await self.fastmail.send_message(message)
+        logger.info(f"Verification email sent to {email[0]}")
+
+
+# Singleton instance
 email_service = EmailService()
-

@@ -1,6 +1,7 @@
 import manticoresearch
 from typing import Optional
 from app.core.config import get_settings
+from app.core.logging import logger
 import json
 import asyncio
 
@@ -18,7 +19,7 @@ class SearchService:
         
         # Resolve the table name dynamically based on language
         table_name = self._resolve_table(language)
-        print(f"DEBUG: General search for {language} -> {table_name}")
+        logger.debug(f"General search for {language} -> {table_name}")
 
         # 1. If user selected a specific category, just search that one normally
         if category:
@@ -132,7 +133,7 @@ class SearchService:
         try:
             result = await self.search_api.search(search_request)
         except Exception as e:
-            print(f"Search error for category {category} in {table_name}: {e}")
+            logger.error(f"Search error for category {category} in {table_name}: {e}")
             return {"hits": {"hits": [], "total": {"value": 0}}, "aggregations": {}}
 
         formatted_hits = []
@@ -151,7 +152,7 @@ class SearchService:
                 if 'words' in source and isinstance(source['words'], str):
                     try:
                         source['words'] = json.loads(source['words'])
-                    except:
+                    except json.JSONDecodeError:
                         source['words'] = []
                 
                 formatted_doc = source.copy()
@@ -214,7 +215,7 @@ class SearchService:
         try:
             result = await self.search_api.search(search_request)
         except Exception as e:
-            print(f"Transcript fetch error in {table_name}: {e}")
+            logger.error(f"Transcript fetch error in {table_name}: {e}")
             return {"hits": {"hits": []}}
         parsed_hits = []
         if result.hits and result.hits.hits:
@@ -223,7 +224,7 @@ class SearchService:
                 if 'words' in source and isinstance(source['words'], str):
                     try:
                         source['words'] = json.loads(source['words'])
-                    except:
+                    except json.JSONDecodeError:
                         source['words'] = []
                 parsed_hits.append({"_source": source})
         total = result.hits.total if result.hits else 0
