@@ -152,7 +152,7 @@ class SearchService:
                 if 'words' in source and isinstance(source['words'], str):
                     try:
                         source['words'] = json.loads(source['words'])
-                    except:
+                    except json.JSONDecodeError:
                         source['words'] = []
                 
                 formatted_doc = source.copy()
@@ -224,7 +224,7 @@ class SearchService:
                 if 'words' in source and isinstance(source['words'], str):
                     try:
                         source['words'] = json.loads(source['words'])
-                    except:
+                    except json.JSONDecodeError:
                         source['words'] = []
                 parsed_hits.append({"_source": source})
         total = result.hits.total if result.hits else 0
