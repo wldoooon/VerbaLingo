@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime, date, timezone
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, Column
+from sqlalchemy import DateTime
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -36,9 +37,15 @@ class UserUsage(SQLModel, table=True):
     total_ai_chats: int = Field(default=0)
     total_exports: int = Field(default=0)
     
-    # Timestamps
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    # Timestamps (with timezone support)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(DateTime(timezone=True), onupdate=lambda: datetime.now(timezone.utc))
+    )
     
     # Relationship back to User
     user: "User" = Relationship(back_populates="usage")

@@ -3,7 +3,8 @@ import uuid6
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional, TYPE_CHECKING
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, Column
+from sqlalchemy import DateTime
 
 if TYPE_CHECKING:
     from .user_usage import UserUsage
@@ -39,18 +40,39 @@ class User(UserBase, table=True):
     is_email_verified: bool = Field(default=False)
     
     # Login tracking & security
-    last_login_at: datetime | None = Field(default=None)
+    last_login_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True))
+    )
     failed_login_attempts: int = Field(default=0)
-    locked_until: datetime | None = Field(default=None)
-    password_changed_at: datetime | None = Field(default=None)
+    locked_until: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True))
+    )
+    password_changed_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True))
+    )
     
     # Tier management
-    tier_updated_at: datetime | None = Field(default=None)
-    tier_expires_at: datetime | None = Field(default=None)
+    tier_updated_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True))
+    )
+    tier_expires_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True))
+    )
     
-    # Timestamps
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime | None = Field(default=lambda: datetime.now(timezone.utc), sa_column_kwargs={"onupdate": datetime.now(timezone.utc)})
+    # Timestamps (with timezone support)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
+    updated_at: datetime | None = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(DateTime(timezone=True), onupdate=lambda: datetime.now(timezone.utc))
+    )
     
     # Relationship to Usage (1-to-1)
     usage: Optional["UserUsage"] = Relationship(back_populates="user")

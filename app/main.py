@@ -11,7 +11,7 @@ from .core.manticore_client import get_manticore_configuration
 from .core.limiter import limiter
 from .core.logging import logger, setup_logging
 from .api.routes import router
-from .api.v1.auth import router as auth_router
+from .api.auth import router as auth_router
 from .db.init_db import init_db
 
 settings = get_settings()
