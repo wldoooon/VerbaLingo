@@ -1,10 +1,14 @@
+from typing import TYPE_CHECKING, Optional
 from fastapi import Depends, HTTPException, status, Request
 from jose import jwt, JWTError
 from sqlmodel.ext.asyncio.session import AsyncSession
-from typing import Optional
 from ..core.config import get_settings
 from ..db.session import get_session
 from ..models.user import User
+
+if TYPE_CHECKING:
+    import manticoresearch
+    from ..services.search_service import SearchService
 
 settings = get_settings()
 
@@ -103,3 +107,20 @@ async def get_current_user_optional(
         request.state.user = user
     
     return user
+
+
+# =============================================================================
+# SEARCH DEPENDENCIES
+# =============================================================================
+
+def get_search_api(request: Request) -> "manticoresearch.SearchApi":
+    if not hasattr(request.app.state, "search_api"):
+        raise RuntimeError("SearchApi not initialized. Check app lifespan.")
+    return request.app.state.search_api
+
+
+def get_search_service(
+    search_api = Depends(get_search_api)
+) -> "SearchService":
+    from ..services.search_service import SearchService
+    return SearchService(search_api=search_api)

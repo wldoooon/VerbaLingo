@@ -5,18 +5,18 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from redis.asyncio import Redis
 
-from ...db.session import get_session
-from ...models.user import UserCreate, UserRead, User
-from ...models.user_usage import UserUsage
-from ...services.auth_service import create_new_user, authenticate_user
-from ...services.oauth_service import oauth
-from ...services.email import email_service
-from ...core.security import create_access_token, generate_otp, get_password_hash
-from ...core.config import get_settings
-from ...core.redis import get_redis
-from ...core.limiter import security_rate_limit
-from ...core.logging import logger
-from ..deps import get_current_user
+from ..db.session import get_session
+from ..models.user import UserCreate, UserRead, User
+from ..models.user_usage import UserUsage
+from ..services.auth_service import create_new_user, authenticate_user
+from ..services.oauth_service import oauth
+from ..services.email import email_service
+from ..core.security import create_access_token, generate_otp, get_password_hash
+from ..core.config import get_settings
+from ..core.redis import get_redis
+from ..core.limiter import security_rate_limit
+from ..core.logging import logger
+from .deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 settings = get_settings()
@@ -36,12 +36,10 @@ async def signup(
 ):
     user = await create_new_user(db, user_data)
     
-    # Generate verification OTP
     otp = generate_otp(settings.OTP_LENGTH)
     await redis.set(f"verify:{user.email}", otp, ex=settings.VERIFY_OTP_EXPIRE_SECONDS)
     await redis.set(f"verify_attempts:{user.email}", "0", ex=settings.VERIFY_OTP_EXPIRE_SECONDS)
     
-    # Send verification email
     await email_service.send_verification_otp([user.email], otp)
     logger.info(f"New user signup: {user.email}")
     
@@ -61,20 +59,17 @@ async def verify_email(
     db: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis)
 ):
-    # Check attempt count
     attempts = await redis.get(f"verify_attempts:{email}")
     if attempts and int(attempts) >= settings.VERIFY_MAX_ATTEMPTS:
         await redis.delete(f"verify:{email}")
         await redis.delete(f"verify_attempts:{email}")
         raise HTTPException(status_code=429, detail="Too many attempts. Please request a new code.")
     
-    # Validate OTP
     stored_otp = await redis.get(f"verify:{email}")
     if not stored_otp or stored_otp != otp:
         await redis.incr(f"verify_attempts:{email}")
         raise HTTPException(status_code=400, detail="Invalid or expired code")
     
-    # Get user and mark as verified
     statement = select(User).where(User.email == email)
     result = await db.exec(statement)
     user = result.first()
@@ -89,11 +84,9 @@ async def verify_email(
     db.add(user)
     await db.commit()
     
-    # Cleanup Redis
     await redis.delete(f"verify:{email}")
     await redis.delete(f"verify_attempts:{email}")
     
-    # Auto-login after verification
     access_token = create_access_token(data={"sub": str(user.id)})
     response.set_cookie(
         key=settings.COOKIE_NAME,
@@ -119,17 +112,14 @@ async def resend_verification(
     db: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis)
 ):
-    # Check cooldown
     cooldown = await redis.get(f"verify_cooldown:{email}")
     if cooldown:
         raise HTTPException(status_code=429, detail="Please wait before requesting another code")
     
-    # Check hourly rate limit
     resend_count = await redis.get(f"verify_resends:{email}")
     if resend_count and int(resend_count) >= settings.VERIFY_MAX_RESENDS_PER_HOUR:
         raise HTTPException(status_code=429, detail="Too many resend requests. Try again later.")
     
-    # Verify user exists and is not verified
     statement = select(User).where(User.email == email)
     result = await db.exec(statement)
     user = result.first()
@@ -140,19 +130,15 @@ async def resend_verification(
     if user.is_email_verified:
         return {"message": "Email already verified"}
     
-    # Generate new OTP
     otp = generate_otp(settings.OTP_LENGTH)
     await redis.set(f"verify:{email}", otp, ex=settings.VERIFY_OTP_EXPIRE_SECONDS)
     await redis.set(f"verify_attempts:{email}", "0", ex=settings.VERIFY_OTP_EXPIRE_SECONDS)
     
-    # Set cooldown
     await redis.set(f"verify_cooldown:{email}", "1", ex=settings.VERIFY_RESEND_COOLDOWN)
     
-    # Increment hourly resend counter
     await redis.incr(f"verify_resends:{email}")
     await redis.expire(f"verify_resends:{email}", 3600)
     
-    # Send email
     await email_service.send_verification_otp([email], otp)
     
     return {"message": "Verification code sent"}
@@ -178,7 +164,6 @@ async def login(
             detail="Invalid email or password",
         )
     
-    # Block unverified users
     if not user.is_email_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

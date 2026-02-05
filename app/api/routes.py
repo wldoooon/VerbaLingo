@@ -1,12 +1,11 @@
 ﻿from fastapi import APIRouter, Query, Depends, HTTPException, Request
 from typing import Optional, List
 
-from app.dependencies import get_search_service
-from app.services.search_service import SearchService
-from app.schema import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word, Category
-from app.core.limiter import feature_rate_limit
-from app.api.deps import get_current_user_optional
-from app.models.user import User
+from .deps import get_search_service, get_current_user_optional
+from ..services.search_service import SearchService
+from ..schemas.search import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word, Category
+from ..core.limiter import feature_rate_limit
+from ..models.user import User
 
 router = APIRouter(
     prefix="/api/v1",
