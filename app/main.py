@@ -5,6 +5,9 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from contextlib import asynccontextmanager
 import manticoresearch
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from .core.redis import redis_client
+from .services.usage_service import sync_all_dirty_users
 
 from .core.config import get_settings
 from .core.manticore_client import get_manticore_configuration
@@ -46,10 +49,33 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Failed to initialize Manticore client: {e}")
     
+    # 3. Initialize Background Scheduler
+    try:
+        scheduler = AsyncIOScheduler()
+        # Use the dedicated redis_client singleton
+        redis_conn = await redis_client.get_client()
+        scheduler.add_job(
+            sync_all_dirty_users, 
+            "interval", 
+            minutes=5, 
+            args=[redis_conn],
+            id="usage_sync",
+            replace_existing=True
+        )
+        scheduler.start()
+        app.state.scheduler = scheduler
+        logger.success("Background scheduler started (AsyncIO)")
+    except Exception as e:
+        logger.error(f"Failed to start background scheduler: {e}")
+    
     logger.info("Application startup complete")
     yield
     
     # Shutdown
+    if hasattr(app.state, "scheduler"):
+        app.state.scheduler.shutdown()
+        logger.info("Background scheduler shut down")
+
     if app.state.api_client:
         await app.state.api_client.close()
         logger.info("Manticore client closed")

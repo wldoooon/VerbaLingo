@@ -14,6 +14,8 @@ from redis.asyncio import Redis
 from ..config import get_settings
 from .config import RateLimitTier
 from .core import TieredRateLimiter
+from ...services import usage_service
+from ..redis import get_redis
 
 
 # =============================================================================
@@ -72,11 +74,6 @@ def security_rate_limit():
     """
     IP-based security rate limiting.
     Use on auth endpoints to prevent brute force attacks.
-    
-    Example:
-        @security_rate_limit()
-        async def login(request: Request):
-            pass
     """
     def decorator(func: Callable):
         @wraps(func)
@@ -118,44 +115,59 @@ def security_rate_limit():
 def feature_rate_limit(feature: str):
     """
     Feature-specific daily limits based on user tier.
-    Use on business endpoints (search, AI chat, exports).
-    
-    Example:
-        @feature_rate_limit("search")
-        async def search(request: Request):
-            pass
+    Uses unified UsageService for tracking and persistence.
     """
     def decorator(func: Callable):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            request = kwargs.get("request")
-            if request is None:
+            request: Request = kwargs.get("request")
+            if not request:
                 for arg in args:
                     if isinstance(arg, Request):
                         request = arg
                         break
             
-            if request is None:
+            if not request:
                 return await func(*args, **kwargs)
             
-            identifier, tier = get_identifier_and_tier(request)
-            limiter_instance = await get_limiter()
+            redis_client = await get_redis()
             
-            allowed, error_msg, retry_after = await limiter_instance.check_feature_limit(
-                identifier=identifier, feature=feature, tier=tier
-            )
+            # We need a DB session to check/restore limits if Redis misses
+            from ...db.session import engine
+            from sqlmodel.ext.asyncio.session import AsyncSession
             
-            if not allowed:
-                # 403 for blocked features, 429 for rate limits
-                status_code = status.HTTP_403_FORBIDDEN if retry_after is None else status.HTTP_429_TOO_MANY_REQUESTS
-                raise HTTPException(
-                    status_code=status_code,
-                    detail=error_msg,
-                    headers={"Retry-After": str(retry_after)} if retry_after else {},
+            user = getattr(request.state, "user", None)
+            client_ip = TieredRateLimiter.get_client_ip(request)
+
+            async with AsyncSession(engine) as db_session:
+                # 1. Check if allowed
+                allowed, error_msg, current, limit = await usage_service.check_usage_limit(
+                    redis=redis_client,
+                    db=db_session,
+                    user=user,
+                    feature=feature,
+                    client_ip=client_ip
                 )
-            
-            return await func(*args, **kwargs)
+                
+                if not allowed:
+                    raise HTTPException(
+                        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                        detail=error_msg
+                    )
+                
+                # 2. Execute the actual function
+                result = await func(*args, **kwargs)
+                
+                # 3. If we got here, it succeeded. Increment usage and track for sync.
+                await usage_service.increment_usage(
+                    redis=redis_client,
+                    db=db_session,
+                    user=user,
+                    feature=feature,
+                    client_ip=client_ip
+                )
+                
+                return result
+                
         return wrapper
     return decorator
-
-
