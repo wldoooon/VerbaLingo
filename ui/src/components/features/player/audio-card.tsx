@@ -14,17 +14,18 @@ import {
   Repeat,
   Gauge
 } from "lucide-react"
-import { usePlayerContext } from "@/context/PlayerContext"
-import { useSearchStore } from "@/store/useSearchStore"
+import { usePlayerStore } from "@/stores/use-player-store"
+import { useSearchStore } from "@/stores/use-search-store"
 import { useTranscript } from "@/lib/useApi"
 import { useRouter } from "next/navigation"
 import type { TranscriptSentence, Clips } from "@/lib/types"
+import { formatTime } from "@/lib/player-utils"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { TranscriptBox } from "./TranscriptBox"
+import { TranscriptBox } from "./transcript-box"
 
 type AudioCardProps = {
   currentClip: Clips | undefined
@@ -33,52 +34,6 @@ type AudioCardProps = {
   className?: string
   defaultRate?: number
   searchQuery?: string
-}
-
-function formatTime(seconds: number) {
-  const s = Math.max(0, Math.floor(seconds))
-  const h = Math.floor(s / 3600)
-  const m = Math.floor((s % 3600) / 60)
-  const rem = s % 60
-  return h > 0
-    ? `${h}:${m.toString().padStart(2, "0")}:${rem.toString().padStart(2, "0")}`
-    : `${m}:${rem.toString().padStart(2, "0")}`
-}
-
-function renderWordsWithHighlighting(
-  words: { text: string; start: number; end: number }[],
-  currentTime: number,
-  searchQuery: string
-) {
-  if (!words || words.length === 0) {
-    return <span>No words available</span>
-  }
-
-  const query = searchQuery.toLowerCase().trim()
-  // Small lead to compensate for player time polling latency
-  const TIMING_LEAD_SECONDS = 0.08
-  const adjustedTime = currentTime + TIMING_LEAD_SECONDS
-
-  return words.map((word, index) => {
-    const isCurrentWord = adjustedTime >= word.start && adjustedTime < word.end
-
-    // Clean word for exact comparison
-    const cleanWord = word.text.toLowerCase().replace(/[.,!?;:()\[\]{}"']/g, '');
-    const isSearchMatch = query && query.split(/\s+/).some(part => cleanWord === part.toLowerCase())
-
-    return (
-      <span
-        key={`${word.start}-${word.text}`}
-        className={cn(
-          "mr-2 transition-colors duration-20",
-          isCurrentWord && "border-5 border-primary px-1 rounded font-semibold",
-          isSearchMatch && !isCurrentWord && "bg-primary text-primary-foreground px-1 rounded"
-        )}
-      >
-        {word.text}
-      </span>
-    )
-  })
 }
 
 export default function AudioCard({
@@ -101,10 +56,20 @@ export default function AudioCard({
   // Start playback slightly before the target sentence for better context
   const PLAYBACK_START_OFFSET = 0.2
 
-  // Get player state and controls from context
-  const { state, dispatch, playerState, controls } = usePlayerContext()
-  const { currentVideoIndex, currentTime } = state
-  const { isPlaying, duration } = playerState
+  // Get player state and controls from Zustand store
+  const { 
+    currentVideoIndex, 
+    currentTime, 
+    isPlaying, 
+    duration, 
+    nextVideo, 
+    prevVideo,
+    play,
+    pause,
+    seekTo,
+    setPlaybackRate,
+    setVolume: setPlayerVolume 
+  } = usePlayerStore()
 
   // Read settings from store
   const { language, setQuery, setCategory } = useSearchStore()
@@ -112,34 +77,34 @@ export default function AudioCard({
   // Fetch transcript for current video
   const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "", language, currentClip?.position)
 
-  // Sync playback rate with context controls
+  // Sync playback rate with store
   useEffect(() => {
-    controls.setPlaybackRate(rate)
-  }, [rate, controls])
+    setPlaybackRate(rate)
+  }, [rate, setPlaybackRate])
 
-  // Sync volume with context controls
+  // Sync volume with store
   useEffect(() => {
-    controls.setVolume(volume)
-  }, [volume, controls])
+    setPlayerVolume(volume)
+  }, [volume, setPlayerVolume])
 
-  // Skip backward 10 seconds using context controls
+  // Skip backward 10 seconds
   function skipBackward() {
     const newTime = Math.max(0, currentTime - 10)
-    controls.seekTo(newTime)
+    seekTo(newTime)
   }
 
-  // Skip forward 10 seconds using context controls
+  // Skip forward 10 seconds
   function skipForward() {
     const newTime = Math.min(duration, currentTime + 10)
-    controls.seekTo(newTime)
+    seekTo(newTime)
   }
 
-  // Toggle play/pause using context controls
+  // Toggle play/pause
   function togglePlayPause() {
     if (isPlaying) {
-      controls.pause()
+      pause()
     } else {
-      controls.play()
+      play()
     }
   }
 
@@ -147,9 +112,9 @@ export default function AudioCard({
   const repeatTargetSentence = () => {
     if (targetSentence) {
       const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
-      controls.seekTo(startTime)
+      seekTo(startTime)
       if (!isPlaying) {
-        controls.play()
+        play()
       }
     }
   }
@@ -202,12 +167,12 @@ export default function AudioCard({
       setTimeout(() => {
         if (!isPlaying && targetSentence) {
           const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
-          controls.seekTo(startTime)
-          controls.play()
+          seekTo(startTime)
+          play()
         }
       }, 500)
     }
-  }, [targetSentence, scrollContainerRef, controls, isPlaying])
+  }, [targetSentence, scrollContainerRef, seekTo, play, isPlaying])
 
   // Auto-scroll to active sentence during playback - CONSTRAINED to transcript box only
   useEffect(() => {
@@ -253,7 +218,7 @@ export default function AudioCard({
               variant="ghost"
               size="icon"
               className="h-11 w-11 rounded-full hover:bg-muted"
-              onClick={() => dispatch({ type: "PREV_VIDEO" })}
+              onClick={prevVideo}
               aria-label="Previous clip"
             >
               <SkipBack size={20} />
@@ -319,7 +284,7 @@ export default function AudioCard({
               variant="ghost"
               size="icon"
               className="h-11 w-11 rounded-full hover:bg-muted"
-              onClick={() => dispatch({ type: "NEXT_VIDEO" })}
+              onClick={nextVideo}
               aria-label="Next clip"
             >
               <SkipForward size={20} />
@@ -369,13 +334,11 @@ export default function AudioCard({
       <TranscriptBox
         sentences={sentencesInClip}
         searchQuery={searchQuery}
-        currentTime={currentTime}
         isTranscriptLoading={isTranscriptLoading}
         scrollContainerRef={scrollContainerRef}
         activeSentenceRef={activeSentenceRef}
         targetSentenceRef={targetSentenceRef}
         targetSentence={targetSentence}
-        lastActiveSentenceIdxRef={lastActiveSentenceIdx}
         onSearchWord={(word) => {
           const clean = word.trim()
           if (!clean) return
@@ -399,19 +362,4 @@ export default function AudioCard({
       />
     </div >
   )
-}
-
-// Translation UI removed from AudioCard as requested
-
-// Simple sentence progress (0..1) using only sentence start/end and desired offsets
-function computeSentenceProgress(sentence: TranscriptSentence, currentTime: number) {
-  const lead = 0.08
-  const preOffset = 0.7
-  const postOffset = 0.9
-  const t = currentTime + lead
-  const start = (sentence.start_time ?? 0) - preOffset
-  const end = (sentence.end_time ?? 0) - postOffset
-  const span = Math.max(0.001, end - start)
-  const p = (t - start) / span
-  return Math.min(Math.max(p, 0), 1)
 }
