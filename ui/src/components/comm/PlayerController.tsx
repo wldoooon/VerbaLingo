@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, Play, Pause, Rewind, FastForward, Volume1, Volume2 } from "lucide-react";
 import ElasticSlider from "@/components/ElasticSlider";
-import TranscriptCarousel from "@/components/comm/TranscriptCarousel";
+import TranscriptCarousel from "@/components/features/player/transcript-carousel";
 
 export function PlayerController() {
     return (

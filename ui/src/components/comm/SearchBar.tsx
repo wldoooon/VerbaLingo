@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Search, X, ArrowRight, ChevronDown, Check, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
-import { useSearchStore } from '@/store/useSearchStore';
+import { useSearchStore } from '@/stores/use-search-store';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

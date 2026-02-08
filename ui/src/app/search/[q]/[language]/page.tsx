@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useParams, useSearchParams } from "next/navigation"
-import VideoPlayerCard from "@/components/comm/VideoPlayerCard"
-import AudioCard from "@/components/comm/AudioCard"
+import VideoPlayerCard from "@/components/features/player/video-player-card"
+import AudioCard from "@/components/features/player/audio-card"
 import { AiCompletion } from "@/components/ai-completion"
-import { usePlayerContext } from "@/context/PlayerContext"
-import { useSearchStore } from "@/store/useSearchStore"
+import { usePlayerStore } from "@/stores/use-player-store"
+import { useSearchStore } from "@/stores/use-search-store"
 import { useSearch } from "@/lib/useApi"
 import { Loader2 } from "lucide-react"
 import { FacetChips } from "@/components/comm/FacetChips"
@@ -23,7 +23,7 @@ export default function RoutedSearchPage() {
   const categoryForContext = categoryParam || null
 
   const { setQuery, setCategory, setLanguage, subCategory, setSubCategory } = useSearchStore()
-  const { state, dispatch } = usePlayerContext()
+  const { currentVideoIndex, resetIndex } = usePlayerStore()
 
   const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
   const [hasRequested, setHasRequested] = useState(false)
@@ -60,9 +60,9 @@ export default function RoutedSearchPage() {
   // Reset video index when new results arrive
   useEffect(() => {
     if (data && data.hits && data.hits.length > 0) {
-      dispatch({ type: "RESET_INDEX" })
+      resetIndex()
     }
-  }, [data, dispatch])
+  }, [data, resetIndex])
 
   return (
     <>
@@ -82,7 +82,7 @@ export default function RoutedSearchPage() {
                 aggregations={data?.aggregations}
               />
               <AudioCard
-                currentClip={playlist[state.currentVideoIndex]}
+                currentClip={playlist[currentVideoIndex]}
                 playlist={playlist}
                 totalItems={data?.total}
                 searchQuery={searchQuery}

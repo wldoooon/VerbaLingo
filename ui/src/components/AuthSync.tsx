@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { useMeQuery } from "@/lib/authHooks"
-import { useAuthStore } from "@/stores/authStore"
+import { useAuthStore } from "@/stores/auth-store"
 
 export default function AuthSync() {
   const { data: me, isLoading } = useMeQuery()
