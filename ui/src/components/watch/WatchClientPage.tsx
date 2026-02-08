@@ -2,13 +2,13 @@
 
 import { useEffect, useState, Suspense } from "react"
 import dynamic from "next/dynamic"
-import { useSearchStore } from "@/store/useSearchStore"
-import { usePlayerContext } from "@/context/PlayerContext"
+import { useSearchStore } from "@/stores/use-search-store"
+import { usePlayerStore } from "@/stores/use-player-store"
 import { VideoPlayerSkeleton, TranscriptSkeleton, AiCompletionSkeleton } from "./WatchSkeletons"
 
 // Dynamic imports for heavy components
 const VideoPlayerCard = dynamic(
-    () => import("@/components/comm/VideoPlayerCard"),
+    () => import("@/components/features/player/video-player-card"),
     {
         ssr: false,
         loading: () => <VideoPlayerSkeleton />
@@ -16,7 +16,7 @@ const VideoPlayerCard = dynamic(
 )
 
 const AudioCard = dynamic(
-    () => import("@/components/comm/AudioCard"),
+    () => import("@/components/features/player/audio-card"),
     {
         ssr: false,
         loading: () => <TranscriptSkeleton />
@@ -49,12 +49,12 @@ function SearchParamSyncer({ word }: { word: string }) {
 
 export default function WatchClientPage({ word }: { word: string }) {
     const { category, language, subCategory } = useSearchStore()
-    const { state, dispatch } = usePlayerContext()
+    const { currentVideoIndex, resetIndex } = usePlayerStore()
 
     // Reset index when word changes
     useEffect(() => {
-        dispatch({ type: 'RESET_INDEX' })
-    }, [word, dispatch])
+        resetIndex()
+    }, [word, resetIndex])
 
     // PREFETCHING & DATA: Use the hook and capture the results
     const { data, isFetching } = useSearch(decodeURIComponent(word), language, category, subCategory)
@@ -80,7 +80,7 @@ export default function WatchClientPage({ word }: { word: string }) {
                         </Suspense>
                         <Suspense fallback={<TranscriptSkeleton />}>
                             <AudioCard
-                                currentClip={playlist[state.currentVideoIndex]}
+                                currentClip={playlist[currentVideoIndex]}
                                 playlist={playlist}
                                 totalItems={data?.total}
                                 searchQuery={decodeURIComponent(word)}

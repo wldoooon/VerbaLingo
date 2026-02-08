@@ -1,7 +1,7 @@
 "use client"
 
 import { Navigation } from "@/components/Navigation"
-import { useAuthStore } from "@/stores/authStore"
+import { useAuthStore } from "@/stores/auth-store"
 
 function emailToName(email: string) {
   const local = email.split("@")[0] || "User"
