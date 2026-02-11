@@ -58,8 +58,8 @@ export function SearchBar() {
     const { hasAccess, remaining, limit, current, isUnlimited, isLoaded } = useEntitlements('search');
     const isAnonymous = useAuthStore((s) => s.status) !== 'authenticated';
 
-    // Track if we already showed the "limit hit" toast this session
-    const limitToastShown = useRef(false);
+    // Cooldown for limit toast (prevent spam, allow re-showing after 5s)
+    const lastLimitToast = useRef(0);
 
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -180,8 +180,9 @@ export function SearchBar() {
     };
 
     const showLimitToast = useCallback(() => {
-        if (limitToastShown.current) return;
-        limitToastShown.current = true;
+        const now = Date.now();
+        if (now - lastLimitToast.current < 5000) return;
+        lastLimitToast.current = now;
 
         if (isAnonymous) {
             toastManager.add({
@@ -332,7 +333,14 @@ export function SearchBar() {
                     <div className="w-px h-6 bg-border mx-2 hidden sm:block" />
 
                     {/* Unified Input Area */}
-                    <div className="flex-1 relative flex items-center min-w-0">
+                    <div
+                        className="flex-1 relative flex items-center min-w-0"
+                        onClick={() => {
+                            if (!hasAccess && isLoaded) {
+                                showLimitToast();
+                            }
+                        }}
+                    >
                         {/* Animated placeholder */}
                         {!query && (
                             <div className="pointer-events-none absolute left-3 right-12 flex items-center top-1/2 -translate-y-1/2 overflow-hidden">
@@ -357,11 +365,7 @@ export function SearchBar() {
                             ref={inputRef}
                             type="text"
                             value={hasAccess ? query : ''}
-                            placeholder={!hasAccess
-                                ? (isAnonymous ? "Sign up for more searches..." : "Daily limit reached — resets tomorrow")
-                                : ""
-                            }
-                            disabled={!hasAccess}
+                                disabled={!hasAccess}
                             onChange={(e) => {
                                 setQuery(e.target.value);
                                 setShowRecent(true);
@@ -387,7 +391,7 @@ export function SearchBar() {
                                 <X className="w-3.5 h-3.5" />
                             </Button>
                         )}
-                        
+
                         {!hasAccess && isLoaded && (
                             <Link
                                 href={isAnonymous ? "/signup" : "/pricing"}
@@ -480,7 +484,7 @@ export function SearchBar() {
                         disabled={(!query.trim() && hasAccess) || isSearching || !isLoaded}
                         className={cn(
                             "h-9 w-9 rounded-lg shadow-lg transition-all duration-300 shrink-0",
-                            !hasAccess 
+                            !hasAccess
                                 ? "bg-orange-500/20 text-orange-500 hover:bg-orange-500/30 shadow-none cursor-pointer"
                                 : query.trim()
                                     ? 'bg-primary text-primary-foreground hover:scale-105 hover:bg-primary/90'
