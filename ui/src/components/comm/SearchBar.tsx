@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, X, ArrowRight, ChevronDown, Check, Clock, Lock, Sparkles, UserPlus } from 'lucide-react';
+import { Search, X, ArrowRight, ChevronDown, Check, Clock, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSearchStore } from '@/stores/use-search-store';
@@ -11,6 +11,7 @@ import { toastManager } from '@/components/ui/toast';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { UsageCircle } from '@/components/comm/UsageCircle';
 import Link from 'next/link';
 import {
     DropdownMenu,
@@ -393,16 +394,16 @@ export function SearchBar() {
                         )}
 
                         {!hasAccess && isLoaded && (
-                            <Link
-                                href={isAnonymous ? "/signup" : "/pricing"}
-                                className="absolute right-2 text-[10px] font-bold text-primary hover:underline uppercase tracking-tighter bg-primary/10 px-1.5 py-0.5 rounded flex items-center gap-1"
-                            >
-                                {isAnonymous ? (
-                                    <><UserPlus className="w-3 h-3" /> Sign Up</>
-                                ) : (
-                                    <><Sparkles className="w-3 h-3" /> Upgrade</>
-                                )}
-                            </Link>
+                            <div className="absolute right-2">
+                                <UsageCircle
+                                    current={current}
+                                    limit={limit}
+                                    remaining={remaining}
+                                    hasAccess={hasAccess}
+                                    isAnonymous={isAnonymous}
+                                    size="sm"
+                                />
+                            </div>
                         )}
                     </div>
 
@@ -465,16 +466,17 @@ export function SearchBar() {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
-                    {/* Remaining counter badge (when getting close) */}
+                    {/* Usage circle (when getting close) */}
                     {hasAccess && isLoaded && !isUnlimited && remaining <= 5 && (
-                        <span className={cn(
-                            "text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md mr-1 shrink-0 transition-colors",
-                            remaining <= 2
-                                ? "bg-red-500/15 text-red-500"
-                                : "bg-orange-500/15 text-orange-500"
-                        )}>
-                            {remaining}
-                        </span>
+                        <UsageCircle
+                            current={current}
+                            limit={limit}
+                            remaining={remaining}
+                            hasAccess={hasAccess}
+                            isAnonymous={isAnonymous}
+                            size="sm"
+                            className="mr-1"
+                        />
                     )}
 
                     {/* Search Action Button */}
