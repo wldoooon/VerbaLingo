@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Clips, TranscriptResponse, SearchResponse } from "@/lib/types";
+import { apiClient } from "@/lib/apiClient";
 
 type TranslateResponse = {
   original: string;
@@ -26,16 +27,8 @@ const fetchSearchResults = async (
     params.append("sub_category", subCategory);
   }
 
-  const url = `/api/v1/search?${params.toString()}`;
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-
-  const data = await response.json();
-  return data;
+  const response = await apiClient.get<SearchResponse>(`/search?${params.toString()}`);
+  return response.data;
 };
 
 export const useSearch = (
@@ -63,12 +56,8 @@ const fetchTranscript = async (
   if (centerPosition !== undefined) {
     params.append("center_position", centerPosition.toString());
   }
-  const url = `/api/v1/videos/${videoId}/transcript?${params.toString()}`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-  return response.json();
+  const response = await apiClient.get<TranscriptResponse>(`/videos/${videoId}/transcript?${params.toString()}`);
+  return response.data;
 };
 
 export const useTranscript = (
@@ -94,12 +83,8 @@ const fetchTranslate = async (
   params.append("source", source);
   params.append("target", target);
 
-  const response = await fetch(`/api/v1/translate?${params.toString()}`);
-  if (!response.ok) {
-    throw new Error("Failed to translate text");
-  }
-  const data: TranslateResponse = await response.json();
-  return data;
+  const response = await apiClient.get<TranslateResponse>(`/translate?${params.toString()}`);
+  return response.data;
 };
 
 export const useTranslate = (
