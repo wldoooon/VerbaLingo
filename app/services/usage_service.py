@@ -43,7 +43,7 @@ FEATURE_LIMITS = {
 
 # Anonymous limits (by IP)
 ANONYMOUS_LIMITS = {
-    "search": 5,
+    "search": 11,
     "ai_chat": 0,  # blocked
     "export": 0,   # blocked
 }

@@ -2,7 +2,7 @@ import uuid
 import uuid6 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Dict, Any
 from sqlmodel import SQLModel, Field, Relationship, Column
 from sqlalchemy import DateTime
 
@@ -30,15 +30,15 @@ class User(UserBase, table=True):
         nullable=False
     )
     hashed_password: str | None = Field(default=None)
-    
+
     # OAuth fields
     oauth_provider: str | None = Field(default=None, index=True)
     oauth_id: str | None = Field(default=None, index=True)
     oauth_avatar_url: str | None = Field(default=None)
-    
+
     # Email verification
     is_email_verified: bool = Field(default=False)
-    
+
     # Login tracking & security
     last_login_at: datetime | None = Field(
         default=None,
@@ -53,7 +53,7 @@ class User(UserBase, table=True):
         default=None,
         sa_column=Column(DateTime(timezone=True))
     )
-    
+
     # Tier management
     tier_updated_at: datetime | None = Field(
         default=None,
@@ -63,7 +63,7 @@ class User(UserBase, table=True):
         default=None,
         sa_column=Column(DateTime(timezone=True))
     )
-    
+
     # Timestamps (with timezone support)
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
@@ -73,7 +73,7 @@ class User(UserBase, table=True):
         default_factory=lambda: datetime.now(timezone.utc),
         sa_column=Column(DateTime(timezone=True), onupdate=lambda: datetime.now(timezone.utc))
     )
-    
+
     # Relationship to Usage (1-to-1)
     usage: Optional["UserUsage"] = Relationship(back_populates="user")
 
@@ -95,3 +95,5 @@ class UserRead(UserBase):
     last_login_at: datetime | None = None
     tier_expires_at: datetime | None = None
     created_at: datetime
+    # Real-time usage data (not persisted in User table)
+    usage: Optional[Dict[str, Any]] = None
