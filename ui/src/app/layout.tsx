@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/QueryProvider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ToastProvider } from "@/components/ui/toast";
 import Sidebar from "@/components/Sidebar";
 import NavigationWrapper from "@/components/NavigationWrapper";
 import TechnicalLattice from "@/components/TechnicalLattice";
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           <QueryProvider>
             <AuthSync />
+            <ToastProvider position="bottom-right">
             {/* Main App Layout with Sidebar + Content */}
             <div className="flex min-h-screen relative z-10">
               <Sidebar />
@@ -53,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </main>
               </div>
             </div>
+            </ToastProvider>
           </QueryProvider>
         </ThemeProvider>
       </body>

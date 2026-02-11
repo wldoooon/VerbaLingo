@@ -28,6 +28,8 @@ import { Badge } from "@/components/ui/badge"
 import { FilterTree } from "@/components/FilterTree"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
+import { UsageSection } from "@/components/UsageSection"
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -105,6 +107,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <UsageSection />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
