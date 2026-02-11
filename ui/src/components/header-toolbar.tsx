@@ -8,7 +8,7 @@ import { ThemeToggleButton, useThemeTransition } from '@/components/ui/shadcn-io
 import { Button } from '@/components/ui/button'
 import { Crown } from 'lucide-react'
 import Link from "next/link"
-import { useAuthStore } from "@/stores/authStore"
+import { useAuthStore } from "@/stores/auth-store"
 import { useLogoutMutation } from "@/lib/authHooks"
 import { AuthDialog } from "@/components/auth-dialog"
 

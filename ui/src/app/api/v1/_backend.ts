@@ -6,6 +6,32 @@ export function getBackendBaseUrl() {
   return process.env.BACKEND_URL || DEFAULT_BACKEND_URL
 }
 
+/**
+ * Forwards all headers from the backend response to the client.
+ * Specifically ensures RateLimit-* headers are preserved.
+ */
+function copyBackendHeaders(backendResponse: Response, nextResponse: NextResponse) {
+  backendResponse.headers.forEach((value, key) => {
+    // Skip headers that Next.js might want to control or that are already handled
+    if (["content-encoding", "content-length", "set-cookie"].includes(key.toLowerCase())) {
+      return
+    }
+    nextResponse.headers.set(key, value)
+  })
+
+  // Special handling for Set-Cookie (can be multiple)
+  const anyHeaders = backendResponse.headers as any
+  const setCookies: string[] | undefined =
+    typeof anyHeaders.getSetCookie === "function" ? anyHeaders.getSetCookie() : undefined
+
+  if (setCookies && setCookies.length) {
+    for (const c of setCookies) nextResponse.headers.append("set-cookie", c)
+  } else {
+    const setCookie = backendResponse.headers.get("set-cookie")
+    if (setCookie) nextResponse.headers.set("set-cookie", setCookie)
+  }
+}
+
 export async function proxyJsonToBackend(request: Request, backendPath: string) {
   const backendUrl = `${getBackendBaseUrl()}${backendPath}`
 
@@ -27,24 +53,9 @@ export async function proxyJsonToBackend(request: Request, backendPath: string) 
 
   const nextResponse = new NextResponse(responseText, {
     status: backendResponse.status,
-    headers: {
-      "Content-Type": backendResponse.headers.get("content-type") || "application/json",
-    },
   })
 
-  // Forward Set-Cookie (login/logout)
-  // In Node/undici, this may be accessible via getSetCookie().
-  // Fall back to single header if present.
-  const anyHeaders = backendResponse.headers as any
-  const setCookies: string[] | undefined =
-    typeof anyHeaders.getSetCookie === "function" ? anyHeaders.getSetCookie() : undefined
-
-  if (setCookies && setCookies.length) {
-    for (const c of setCookies) nextResponse.headers.append("set-cookie", c)
-  } else {
-    const setCookie = backendResponse.headers.get("set-cookie")
-    if (setCookie) nextResponse.headers.set("set-cookie", setCookie)
-  }
+  copyBackendHeaders(backendResponse, nextResponse)
 
   return nextResponse
 }
@@ -59,10 +70,9 @@ export async function proxyGetToBackend(request: Request, backendUrl: string) {
 
   const nextResponse = new NextResponse(responseText, {
     status: backendResponse.status,
-    headers: {
-      "Content-Type": backendResponse.headers.get("content-type") || "application/json",
-    },
   })
+
+  copyBackendHeaders(backendResponse, nextResponse)
 
   return nextResponse
 }

@@ -5,6 +5,7 @@ from redis.asyncio import Redis
 
 from ..db.session import get_session
 from ..models.user import UserCreate, UserRead, User
+from ..services import usage_service
 from ..services.auth_service import create_new_user, authenticate_user, get_or_create_oauth_user
 from ..services import verification_service
 from ..services.oauth_service import oauth
@@ -120,8 +121,32 @@ async def login(
 
 
 @router.get("/me", response_model=UserRead)
-async def me(current_user: User = Depends(get_current_user)):
-    """Get current authenticated user."""
+async def me(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+    redis: Redis = Depends(get_redis)
+):
+    """Get current authenticated user with real-time usage stats."""
+    # Inject usage stats for all relevant features
+    features = ["search", "ai_chat", "export"]
+    usage_data = {}
+    
+    for feature in features:
+        # We use check_usage_limit just to get the 'current' and 'limit' values
+        # without actually incrementing or blocking anything.
+        _, _, current, limit = await usage_service.check_usage_limit(
+            redis=redis,
+            db=db,
+            user=current_user,
+            feature=feature
+        )
+        usage_data[feature] = {
+            "current": current,
+            "limit": limit,
+            "remaining": max(0, limit - current) if limit != -1 else -1
+        }
+    
+    current_user.usage = usage_data
     return current_user
 
 

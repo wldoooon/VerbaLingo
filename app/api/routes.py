@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Query, Depends, HTTPException, Request
+﻿from fastapi import APIRouter, Query, Depends, HTTPException, Request, Response
 from typing import Optional, List
 
 from .deps import get_search_service, get_current_user_optional
@@ -17,6 +17,7 @@ router = APIRouter(
 @feature_rate_limit("search")
 async def search(
     request: Request,
+    response: Response,
     q: str = Query(..., min_length=2),
     language: str = Query("english"),
     category: Optional[str] = Query(None),
@@ -82,6 +83,7 @@ async def search(
 @feature_rate_limit("search")
 async def get_transcript(
     request: Request,
+    response: Response,
     video_id: str,
     language: str = Query("english"),
     center_position: Optional[int] = Query(None),

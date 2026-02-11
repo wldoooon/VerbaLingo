@@ -1,14 +1,13 @@
 'use client'
 
 import { useEffect, useState, useRef } from "react"
-import { usePlayerContext } from "@/context/PlayerContext"
-import { useSearchStore } from "@/store/useSearchStore"
+import { usePlayerStore } from "@/stores/use-player-store"
+import { useSearchStore } from "@/stores/use-search-store"
 import { useTranscript, useSearch } from "@/lib/useApi"
 import useEmblaCarousel from 'embla-carousel-react'
 
 export default function TranscriptCarousel() {
-  const { state } = usePlayerContext()
-  const { currentVideoIndex, currentTime } = state
+  const { currentVideoIndex, currentTime } = usePlayerStore()
 
   // Read playlist from React Query cache
   const { query, category, language } = useSearchStore()

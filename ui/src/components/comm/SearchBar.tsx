@@ -1,13 +1,17 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Search, X, ArrowRight, ChevronDown, Check, Clock } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Search, X, ArrowRight, ChevronDown, Check, Clock, Lock, Sparkles, UserPlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
-import { useSearchStore } from '@/store/useSearchStore';
+import { useSearchStore } from '@/stores/use-search-store';
+import { useEntitlements } from '@/hooks/use-entitlements';
+import { useAuthStore } from '@/stores/auth-store';
+import { toastManager } from '@/components/ui/toast';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -51,6 +55,11 @@ export function SearchBar() {
     const [activeIndex, setActiveIndex] = useState(-1);
 
     const { suggestions, isLoading } = useDatamuse(query);
+    const { hasAccess, remaining, limit, current, isUnlimited, isLoaded } = useEntitlements('search');
+    const isAnonymous = useAuthStore((s) => s.status) !== 'authenticated';
+
+    // Track if we already showed the "limit hit" toast this session
+    const limitToastShown = useRef(false);
 
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -170,9 +179,44 @@ export function SearchBar() {
         } catch { }
     };
 
+    const showLimitToast = useCallback(() => {
+        if (limitToastShown.current) return;
+        limitToastShown.current = true;
+
+        if (isAnonymous) {
+            toastManager.add({
+                title: 'Search limit reached',
+                description: 'Create a free account for 50 searches/day',
+                type: 'info',
+            });
+        } else {
+            toastManager.add({
+                title: `Daily search limit reached (${limit}/day)`,
+                description: 'Resets at midnight — upgrade for unlimited searches',
+                type: 'warning',
+            });
+        }
+    }, [isAnonymous, limit]);
+
+    // Show toast when limit flips to blocked
+    useEffect(() => {
+        if (isLoaded && !hasAccess && !isUnlimited) {
+            showLimitToast();
+        }
+    }, [isLoaded, hasAccess, isUnlimited, showLimitToast]);
+
     const handleSearch = (searchQuery?: string) => {
         const q = searchQuery || query;
         if (!q.trim()) return;
+
+        // "Getting close" warning
+        if (!isUnlimited && remaining <= 3 && remaining > 0) {
+            toastManager.add({
+                title: `${remaining} search${remaining === 1 ? '' : 'es'} remaining today`,
+                description: isAnonymous ? 'Sign up for more' : 'Upgrade for unlimited',
+                type: 'info',
+            });
+        }
 
         // Use the selected language (lowercase) for the URL path
         const lang = selectedLanguage.toLowerCase();
@@ -312,17 +356,25 @@ export function SearchBar() {
                         <Input
                             ref={inputRef}
                             type="text"
-                            value={query}
+                            value={hasAccess ? query : ''}
+                            placeholder={!hasAccess
+                                ? (isAnonymous ? "Sign up for more searches..." : "Daily limit reached — resets tomorrow")
+                                : ""
+                            }
+                            disabled={!hasAccess}
                             onChange={(e) => {
                                 setQuery(e.target.value);
                                 setShowRecent(true);
                             }}
                             onFocus={() => setShowRecent(true)}
                             onKeyDown={handleKeyDown}
-                            className="border-0 shadow-none focus-visible:ring-0 px-3 h-9 text-base font-medium placeholder:text-transparent min-w-0"
+                            className={cn(
+                                "border-0 shadow-none focus-visible:ring-0 px-3 h-9 text-base font-medium placeholder:text-transparent min-w-0",
+                                !hasAccess && "placeholder:text-muted-foreground/60 cursor-not-allowed opacity-60"
+                            )}
                         />
 
-                        {query && (
+                        {query && hasAccess && (
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -334,6 +386,19 @@ export function SearchBar() {
                             >
                                 <X className="w-3.5 h-3.5" />
                             </Button>
+                        )}
+                        
+                        {!hasAccess && isLoaded && (
+                            <Link
+                                href={isAnonymous ? "/signup" : "/pricing"}
+                                className="absolute right-2 text-[10px] font-bold text-primary hover:underline uppercase tracking-tighter bg-primary/10 px-1.5 py-0.5 rounded flex items-center gap-1"
+                            >
+                                {isAnonymous ? (
+                                    <><UserPlus className="w-3 h-3" /> Sign Up</>
+                                ) : (
+                                    <><Sparkles className="w-3 h-3" /> Upgrade</>
+                                )}
+                            </Link>
                         )}
                     </div>
 
@@ -396,20 +461,36 @@ export function SearchBar() {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
+                    {/* Remaining counter badge (when getting close) */}
+                    {hasAccess && isLoaded && !isUnlimited && remaining <= 5 && (
+                        <span className={cn(
+                            "text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md mr-1 shrink-0 transition-colors",
+                            remaining <= 2
+                                ? "bg-red-500/15 text-red-500"
+                                : "bg-orange-500/15 text-orange-500"
+                        )}>
+                            {remaining}
+                        </span>
+                    )}
+
                     {/* Search Action Button */}
                     <Button
                         size="icon"
-                        onClick={() => handleSearch()}
-                        disabled={!query.trim() || isSearching}
+                        onClick={() => hasAccess ? handleSearch() : router.push(isAnonymous ? '/signup' : '/pricing')}
+                        disabled={(!query.trim() && hasAccess) || isSearching || !isLoaded}
                         className={cn(
                             "h-9 w-9 rounded-lg shadow-lg transition-all duration-300 shrink-0",
-                            query.trim()
-                                ? 'bg-primary text-primary-foreground hover:scale-105 hover:bg-primary/90'
-                                : 'bg-muted text-muted-foreground shadow-none'
+                            !hasAccess 
+                                ? "bg-orange-500/20 text-orange-500 hover:bg-orange-500/30 shadow-none cursor-pointer"
+                                : query.trim()
+                                    ? 'bg-primary text-primary-foreground hover:scale-105 hover:bg-primary/90'
+                                    : 'bg-muted text-muted-foreground shadow-none'
                         )}
                     >
                         {isSearching ? (
                             <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                        ) : !hasAccess && isLoaded ? (
+                            <Lock className="w-4 h-4" />
                         ) : (
                             <ArrowRight className="w-4 h-4" />
                         )}

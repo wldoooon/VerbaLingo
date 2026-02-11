@@ -2,8 +2,8 @@
 
 import YouTube, { YouTubePlayer } from "react-youtube"
 import { useRef, useEffect } from "react"
-import { usePlayerContext } from "@/context/PlayerContext"
-import { useSearchStore } from "@/store/useSearchStore"
+import { usePlayerStore } from "@/stores/use-player-store"
+import { useSearchStore } from "@/stores/use-search-store"
 import { FacetChips } from "@/components/comm/FacetChips"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -32,8 +32,15 @@ export default function VideoPlayerCard({
   aggregations,
   className
 }: VideoPlayerCardProps) {
-  const { state, dispatch, playerRef, setPlayerState } = usePlayerContext()
-  const { currentVideoIndex, isMuted } = state
+  const { 
+    currentVideoIndex, 
+    isMuted, 
+    setCurrentTime, 
+    setPlayerState, 
+    setPlayer,
+    player: activePlayer,
+    resetIndex 
+  } = usePlayerStore()
   const router = useRouter()
 
   // Read playlist from React Query cache
@@ -71,7 +78,7 @@ export default function VideoPlayerCard({
     if (activeKey === 'B') newActivePlayer = playerBRef.current
     if (activeKey === 'C') newActivePlayer = playerCRef.current
 
-    playerRef.current = newActivePlayer
+    setPlayer(newActivePlayer)
 
     if (newActivePlayer && typeof newActivePlayer.playVideo === 'function') {
       // JIT Seek: Ensure the transition lands on the exact frame
@@ -92,14 +99,14 @@ export default function VideoPlayerCard({
         }
       }
     }
-  }, [activeKey, playerRef, isMuted, clipA, clipB, clipC])
+  }, [activeKey, isMuted, clipA, clipB, clipC, setPlayer])
 
   const startPolling = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
     intervalRef.current = setInterval(() => {
-      const currentTime = playerRef.current?.getCurrentTime()
+      const currentTime = activePlayer?.getCurrentTime()
       if (typeof currentTime === 'number') {
-        dispatch({ type: 'SET_CURRENT_TIME', payload: currentTime })
+        setCurrentTime(currentTime)
       }
     }, 100)
   }
@@ -122,7 +129,7 @@ export default function VideoPlayerCard({
       event.target.unMute()
     }
 
-    setPlayerState(prev => ({ ...prev, isPlaying: isNowPlaying }))
+    setPlayerState({ isPlaying: isNowPlaying })
 
     if (isNowPlaying) startPolling()
     else stopPolling()
@@ -134,21 +141,21 @@ export default function VideoPlayerCard({
       playerARef.current.seekTo(getClipStart(clipA), true)
       if (activeKey !== 'A') playerARef.current.playVideo()
     }
-  }, [clipA?.video_id])
+  }, [clipA?.video_id, activeKey, clipA])
 
   useEffect(() => {
     if (playerBRef.current && clipB) {
       playerBRef.current.seekTo(getClipStart(clipB), true)
       if (activeKey !== 'B') playerBRef.current.playVideo()
     }
-  }, [clipB?.video_id])
+  }, [clipB?.video_id, activeKey, clipB])
 
   useEffect(() => {
     if (playerCRef.current && clipC) {
       playerCRef.current.seekTo(getClipStart(clipC), true)
       if (activeKey !== 'C') playerCRef.current.playVideo()
     }
-  }, [clipC?.video_id])
+  }, [clipC?.video_id, activeKey, clipC])
 
 
   const onReady = (event: { target: YouTubePlayer }, key: 'A' | 'B' | 'C') => {
@@ -167,8 +174,8 @@ export default function VideoPlayerCard({
     }
 
     if (key === activeKey) {
-      playerRef.current = event.target
-      setPlayerState(prev => ({ ...prev, duration: event.target.getDuration() }))
+      setPlayer(event.target)
+      setPlayerState({ duration: event.target.getDuration() })
       if (!isMuted) event.target.unMute()
     } else {
       event.target.mute()
@@ -204,7 +211,7 @@ export default function VideoPlayerCard({
       setSubCategory(facet);
     }
     // Reset index if we change category
-    dispatch({ type: "RESET_INDEX" });
+    resetIndex();
   }
 
   return (

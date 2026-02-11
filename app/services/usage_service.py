@@ -43,7 +43,7 @@ FEATURE_LIMITS = {
 
 # Anonymous limits (by IP)
 ANONYMOUS_LIMITS = {
-    "search": 5,
+    "search": 11,
     "ai_chat": 0,  # blocked
     "export": 0,   # blocked
 }
@@ -126,6 +126,8 @@ async def increment_usage(
     """
     if user:
         identifier = f"user:{user.id}"
+        # Track this user as 'dirty' for the background sync task
+        await redis.sadd("usage:dirty_users", str(user.id))
     else:
         identifier = f"ip:{client_ip}"
     
@@ -265,3 +267,72 @@ async def _restore_from_db(
     except Exception as e:
         logger.error(f"Failed to restore from DB: {e}")
         return 0
+
+async def sync_all_dirty_users(redis: Redis):
+    """
+    Background task to sync usage from Redis to PostgreSQL for all 'dirty' users.
+    Called by APScheduler every few minutes.
+    """
+    from ..db.session import engine
+    from sqlmodel.ext.asyncio.session import AsyncSession
+    from ..models.user_usage import UserUsage
+    import uuid
+
+    # 1. Get a batch of dirty user IDs
+    # We use SPOP to atomically get and remove IDs from the set
+    user_ids = await redis.spop("usage:dirty_users", 100)
+    if not user_ids:
+        return
+
+    logger.info(f"Starting usage sync for {len(user_ids)} users")
+    
+    today = date.today().isoformat()
+    synced_count = 0
+
+    async with AsyncSession(engine) as session:
+        for user_id_str in user_ids:
+            try:
+                user_id = uuid.UUID(user_id_str)
+                # Get the latest daily counts from Redis
+                # Keys: usage:user:{id}:{feature}:{today}
+                identifier = f"user:{user_id}"
+                
+                search_count = int(await redis.get(f"usage:{identifier}:search:{today}") or 0)
+                ai_chat_count = int(await redis.get(f"usage:{identifier}:ai_chat:{today}") or 0)
+                export_count = int(await redis.get(f"usage:{identifier}:export:{today}") or 0)
+
+                # Get the DB record
+                usage = await session.get(UserUsage, user_id)
+                if not usage:
+                    continue
+                
+                # Update DB to match Redis source-of-truth
+                # We also update lifetime totals by the delta
+                if usage.usage_reset_date == date.today():
+                    # Same day: add the difference to total
+                    usage.total_searches += (search_count - usage.daily_searches_count)
+                    usage.total_ai_chats += (ai_chat_count - usage.daily_ai_chats_count)
+                    usage.total_exports += (export_count - usage.daily_exports_count)
+                else:
+                    # New day in DB: the Redis count is the new daily, and we add it all to total
+                    usage.total_searches += search_count
+                    usage.total_ai_chats += ai_chat_count
+                    usage.total_exports += export_count
+                    usage.usage_reset_date = date.today()
+
+                usage.daily_searches_count = search_count
+                usage.daily_ai_chats_count = ai_chat_count
+                usage.daily_exports_count = export_count
+                usage.updated_at = datetime.now(timezone.utc)
+                
+                session.add(usage)
+                synced_count += 1
+            except Exception as e:
+                logger.error(f"Failed to sync user {user_id_str}: {e}")
+                # Put the ID back so we don't lose the data
+                await redis.sadd("usage:dirty_users", user_id_str)
+
+        await session.commit()
+    
+    if synced_count > 0:
+        logger.success(f"Usage sync complete: {synced_count} records updated")
