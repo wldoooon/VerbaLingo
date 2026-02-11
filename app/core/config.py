@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     VERIFY_MAX_RESENDS_PER_HOUR: int = 5      # Anti-spam per email
 
     COOKIE_NAME: str = "access_token"
-    COOKIE_SECURE: bool = False
+    COOKIE_SECURE: bool = False  # Set to True in production (.env: COOKIE_SECURE=true)
     COOKIE_SAMESITE: str = "lax"
 
     # Google OAuth
