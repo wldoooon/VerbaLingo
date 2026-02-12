@@ -35,7 +35,7 @@ function getErrorMessage(err: unknown) {
     return "Authentication failed"
 }
 
-export function LoginForm({ onSuccess, onForgot }: { onSuccess: () => void, onForgot: () => void }) {
+export function LoginForm({ onSuccess, onForgot, externalError }: { onSuccess: () => void, onForgot: () => void, externalError?: string | null }) {
     const loginMutation = useLoginMutation()
     const form = useForm<LoginValues>({
         resolver: zodResolver(loginSchema),
@@ -108,9 +108,9 @@ export function LoginForm({ onSuccess, onForgot }: { onSuccess: () => void, onFo
                     )}
                 />
 
-                {loginMutation.isError && (
+                {(loginMutation.isError || externalError) && (
                     <div className="text-sm text-destructive font-bold bg-destructive/10 p-3 rounded-xl border border-destructive/20">
-                        {getErrorMessage(loginMutation.error)}
+                        {externalError || getErrorMessage(loginMutation.error)}
                     </div>
                 )}
 

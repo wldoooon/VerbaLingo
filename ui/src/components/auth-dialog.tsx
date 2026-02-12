@@ -15,28 +15,41 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
     const [isOpen, setIsOpen] = useState(false)
     const [tab, setTab] = useState<"login" | "signup" | "forgot_password">(defaultTab)
     const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
     const { openGoogleOAuth } = useGoogleOAuth()
     const queryClient = useQueryClient()
 
     const handleClose = () => {
         setIsOpen(false)
-        setTimeout(() => setTab("login"), 300)
+        setTimeout(() => {
+            setTab("login")
+            setError(null)
+        }, 300)
     }
 
     const handleGoogleLogin = async () => {
         setIsGoogleLoading(true)
+        setError(null)
         try {
-            const result = await openGoogleOAuth()
+            // Pass 'signup' mode if we are on the signup tab
+            const mode = tab === 'signup' ? 'signup' : 'login'
+            const result = await openGoogleOAuth(mode)
             if (result.success) {
                 // OAuth message received - close dialog immediately
                 // The global AuthSync component and useMeQuery will handle the background refetch
                 handleClose()
             } else if (result.error) {
+                setError(result.error)
                 console.error('Google OAuth failed:', result.error)
             }
         } finally {
             setIsGoogleLoading(false)
         }
+    }
+
+    const switchTab = (newTab: "login" | "signup" | "forgot_password") => {
+        setTab(newTab)
+        setError(null)
     }
 
     return (
@@ -130,9 +143,16 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                         {/* Forms Container */}
                         <div className="w-full">
                             {tab === "login" ? (
-                                <LoginForm onSuccess={() => setIsOpen(false)} onForgot={() => setTab("forgot_password")} />
+                                <LoginForm 
+                                    onSuccess={() => setIsOpen(false)} 
+                                    onForgot={() => setTab("forgot_password")} 
+                                    externalError={error}
+                                />
                             ) : tab === "signup" ? (
-                                <SignupForm onSuccess={() => setIsOpen(false)} />
+                                <SignupForm 
+                                    onSuccess={() => setIsOpen(false)} 
+                                    externalError={error}
+                                />
                             ) : (
                                 <PasswordResetWizard onBack={() => setTab("login")} />
                             )}
@@ -144,7 +164,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                                 <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">
                                     {tab === "login" ? "Don't have an account?" : "Already have an account?"}{' '}
                                     <button
-                                        onClick={() => setTab(tab === "login" ? "signup" : "login")}
+                                        onClick={() => switchTab(tab === "login" ? "signup" : "login")}
                                         className="text-orange-500 hover:text-orange-600 font-bold relative cursor-pointer after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300"
                                     >
                                         {tab === "login" ? "Sign up" : "Log in"}

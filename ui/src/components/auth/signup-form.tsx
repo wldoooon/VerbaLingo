@@ -42,7 +42,7 @@ function getErrorMessage(err: unknown) {
     return "Authentication failed"
 }
 
-export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
+export function SignupForm({ onSuccess, externalError }: { onSuccess: () => void, externalError?: string | null }) {
     const signupMutation = useSignupMutation()
     const loginMutation = useLoginMutation()
     const [showPassword, setShowPassword] = useState(false)
@@ -168,9 +168,9 @@ export function SignupForm({ onSuccess }: { onSuccess: () => void }) {
                     )}
                 />
 
-                {(signupMutation.isError || loginMutation.isError) && (
+                {(signupMutation.isError || loginMutation.isError || externalError) && (
                     <div className="text-sm text-destructive font-bold bg-destructive/10 p-3 rounded-xl border border-destructive/20">
-                        {getErrorMessage(error)}
+                        {externalError || getErrorMessage(error)}
                     </div>
                 )}
 
