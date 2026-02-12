@@ -203,10 +203,11 @@ async def reset_password(
 
 
 @router.get("/google/login")
-async def google_login(request: Request):
+async def google_login(request: Request, mode: str = "login"):
     """Redirect to Google OAuth."""
     redirect_uri = request.url_for('google_callback')
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    # Store mode in OAuth state to check in callback
+    return await oauth.google.authorize_redirect(request, redirect_uri, mode=mode)
 
 
 @router.get("/google/callback", response_class=HTMLResponse)
@@ -231,16 +232,33 @@ async def google_callback(
         avatar = user_info.get('picture')
         full_name = user_info.get('name')
 
-        logger.info(f"DEBUG: Getting or creating user: {email}")
+        # Read mode from OAuth state/token
+        mode = token.get('mode', 'login')
+        logger.info(f"DEBUG: Handling OAuth callback in mode: {mode}")
+
+        logger.info(f"DEBUG: Processing user: {email}")
         user_start = time.time()
-        user = await get_or_create_oauth_user(
-            db=db,
-            email=email,
-            oauth_provider="google",
-            oauth_id=google_id,
-            avatar_url=avatar,
-            full_name=full_name
-        )
+        
+        if mode == "signup":
+            user = await get_or_create_oauth_user(
+                db=db,
+                email=email,
+                oauth_provider="google",
+                oauth_id=google_id,
+                avatar_url=avatar,
+                full_name=full_name
+            )
+        else:
+            from ..services.auth_service import get_oauth_user_only
+            user = await get_oauth_user_only(
+                db=db,
+                email=email,
+                oauth_provider="google",
+                oauth_id=google_id,
+                avatar_url=avatar,
+                full_name=full_name
+            )
+        
         logger.info(f"DEBUG: User handled in {time.time() - user_start:.4f}s")
 
         access_token = create_access_token(data={"sub": str(user.id)})

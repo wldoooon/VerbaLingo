@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { X, Loader2 } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
 
 import { LoginForm } from "./auth/login-form"
 import { SignupForm } from "./auth/signup-form"
@@ -15,6 +16,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
     const [tab, setTab] = useState<"login" | "signup" | "forgot_password">(defaultTab)
     const [isGoogleLoading, setIsGoogleLoading] = useState(false)
     const { openGoogleOAuth } = useGoogleOAuth()
+    const queryClient = useQueryClient()
 
     const handleClose = () => {
         setIsOpen(false)
@@ -26,10 +28,10 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
         try {
             const result = await openGoogleOAuth()
             if (result.success) {
-                // OAuth succeeded - close the dialog
+                // OAuth message received - close dialog immediately
+                // The global AuthSync component and useMeQuery will handle the background refetch
                 handleClose()
             } else if (result.error) {
-                // Could show error toast here
                 console.error('Google OAuth failed:', result.error)
             }
         } finally {
@@ -51,6 +53,22 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                 <DialogTitle className="sr-only">Authentication</DialogTitle>
                 <DialogDescription className="sr-only">Login, sign up, or recover password</DialogDescription>
                 <div className="relative bg-white dark:bg-zinc-950 rounded-3xl shadow-2xl border border-slate-100 dark:border-zinc-800 p-8 overflow-hidden">
+
+                    {/* Google OAuth Loading Overlay */}
+                    {isGoogleLoading && (
+                        <div className="absolute inset-0 z-40 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm flex flex-col items-center justify-center rounded-3xl">
+                            <div className="relative mb-4">
+                                <div className="w-12 h-12 border-4 border-slate-200 dark:border-zinc-700 rounded-full" />
+                                <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-orange-500 rounded-full animate-spin" />
+                            </div>
+                            <p className="text-slate-700 dark:text-slate-300 font-semibold text-sm">
+                                Connecting to Google...
+                            </p>
+                            <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">
+                                Complete sign-in in the popup window
+                            </p>
+                        </div>
+                    )}
 
                     {/* Explicit Close Button */}
                     <button

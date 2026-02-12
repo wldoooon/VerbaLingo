@@ -4,17 +4,20 @@
  * Handles the popup-based OAuth flow for Google authentication.
  *
  * How it works:
- * 1. Opens a popup window pointing to /api/v1/auth/google/login
+ * 1. Opens a popup window pointing to /auth/google/login
  * 2. Popup goes through Google authentication
  * 3. Backend callback sets auth cookie and returns HTML with postMessage
  * 4. This hook listens for the message and resolves the promise
+ * 5. On success, invalidates the "me" query to refetch full user profile
  */
 
 import { useCallback, useEffect, useRef } from "react";
 import { useAuthStore } from "@/stores/auth-store";
+import { useQueryClient } from "@tanstack/react-query";
 
 const OAUTH_POPUP_WIDTH = 500;
 const OAUTH_POPUP_HEIGHT = 600;
+const OAUTH_TIMEOUT_MS = 5 * 60 * 1000; // 5 minute max timeout for popup
 
 // For OAuth, we need the direct backend URL (not proxied through Next.js)
 // because Google redirects directly to the backend callback
@@ -34,29 +37,65 @@ interface OAuthResult {
 export function useGoogleOAuth() {
   const popupRef = useRef<Window | null>(null);
   const resolveRef = useRef<((result: OAuthResult) => void) | null>(null);
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const setUser = useAuthStore((s) => s.setUser);
   const setStatus = useAuthStore((s) => s.setStatus);
+  const queryClient = useQueryClient();
+
+  // Cleanup helper
+  const cleanup = useCallback(() => {
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, []);
 
   // Listen for messages from the popup
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       // Security: Only accept messages from our backend
-      if (event.origin !== BACKEND_URL) {
+      // In development, allow some flexibility for localhost vs 127.0.0.1
+      const isAllowedOrigin = 
+        event.origin === BACKEND_URL || 
+        event.origin.includes('localhost:5001') || 
+        event.origin.includes('127.0.0.1:5001');
+
+      if (!isAllowedOrigin) {
+        console.warn('DEBUG: Ignored message from unknown origin:', event.origin);
         return;
       }
 
+      console.log('DEBUG: Received auth message:', event.data);
       const { type, user, error } = event.data;
 
-      if (type === "oauth-success" && user) {
-        // OAuth succeeded - update auth state
-        setStatus("authenticated");
-        setUser(user);
+                  if (type === "oauth-success") {
 
-        if (resolveRef.current) {
-          resolveRef.current({ success: true, user });
-          resolveRef.current = null;
-        }
-      } else if (type === "oauth-error") {
+                    // Trigger background refetch immediately (don't await)
+
+                    // This is the ONLY way to get into 'authenticated' status
+
+                    queryClient.invalidateQueries({ queryKey: ["me"] });
+
+            
+
+                    if (resolveRef.current) {
+
+                      resolveRef.current({ success: true });
+
+                      resolveRef.current = null;
+
+                    }
+
+                  }
+
+            
+
+       else if (type === "oauth-error") {
         if (resolveRef.current) {
           resolveRef.current({ success: false, error });
           resolveRef.current = null;
@@ -67,14 +106,19 @@ export function useGoogleOAuth() {
       if (popupRef.current && !popupRef.current.closed) {
         popupRef.current.close();
       }
+
+      cleanup();
     };
 
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [setUser, setStatus]);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      cleanup();
+    };
+  }, [setUser, setStatus, queryClient, cleanup]);
 
   // Open the OAuth popup
-  const openGoogleOAuth = useCallback((): Promise<OAuthResult> => {
+  const openGoogleOAuth = useCallback((mode: 'login' | 'signup' = 'login'): Promise<OAuthResult> => {
     return new Promise((resolve) => {
       // Store resolver for when popup responds
       resolveRef.current = resolve;
@@ -84,9 +128,9 @@ export function useGoogleOAuth() {
       const top =
         window.screenY + (window.innerHeight - OAUTH_POPUP_HEIGHT) / 2;
 
-      // Open popup
+      // Open popup with mode parameter
       const popup = window.open(
-        `${BACKEND_URL}/auth/google/login`,
+        `${BACKEND_URL}/auth/google/login?mode=${mode}`,
         "google-oauth",
         `width=${OAUTH_POPUP_WIDTH},height=${OAUTH_POPUP_HEIGHT},left=${left},top=${top},scrollbars=yes`,
       );
@@ -102,9 +146,9 @@ export function useGoogleOAuth() {
       popupRef.current = popup;
 
       // Poll to check if popup was closed without completing
-      const pollTimer = setInterval(() => {
+      pollTimerRef.current = setInterval(() => {
         if (popup.closed) {
-          clearInterval(pollTimer);
+          cleanup();
           // If we haven't received a message, user closed the popup
           if (resolveRef.current) {
             resolveRef.current({
@@ -115,8 +159,23 @@ export function useGoogleOAuth() {
           }
         }
       }, 500);
+
+      // Safety: max timeout so the promise doesn't hang forever
+      timeoutRef.current = setTimeout(() => {
+        cleanup();
+        if (popupRef.current && !popupRef.current.closed) {
+          popupRef.current.close();
+        }
+        if (resolveRef.current) {
+          resolveRef.current({
+            success: false,
+            error: "Authentication timed out. Please try again.",
+          });
+          resolveRef.current = null;
+        }
+      }, OAUTH_TIMEOUT_MS);
     });
-  }, []);
+  }, [cleanup]);
 
   return { openGoogleOAuth };
 }

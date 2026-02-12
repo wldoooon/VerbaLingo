@@ -74,6 +74,44 @@ async def authenticate_user(db: AsyncSession, email: str, password: str) -> User
     return user
 
 
+async def get_oauth_user_only(
+    db: AsyncSession,
+    email: str,
+    oauth_provider: str,
+    oauth_id: str,
+    avatar_url: str | None = None,
+    full_name: str | None = None
+) -> User:
+    """
+    STRICT: Get existing user for OAuth login.
+    Fails if the user does not exist.
+    """
+    statement = select(User).where(User.email == email)
+    result = await db.exec(statement)
+    user = result.first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Account not found. Please sign up first."
+        )
+    
+    # Update avatar/name/last_login logic (same as get_or_create)
+    if not user.oauth_provider:
+        user.oauth_provider = oauth_provider
+        user.oauth_id = oauth_id
+    
+    if avatar_url:
+        user.oauth_avatar_url = avatar_url
+    if full_name and not user.full_name:
+        user.full_name = full_name
+    
+    user.last_login_at = datetime.now(timezone.utc)
+    db.add(user)
+    await db.commit()
+    return user
+
+
 async def get_or_create_oauth_user(
     db: AsyncSession,
     email: str,
