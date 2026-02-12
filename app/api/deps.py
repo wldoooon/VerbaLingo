@@ -135,3 +135,10 @@ def get_search_service(
 ) -> "SearchService":
     from ..services.search_service import SearchService
     return SearchService(search_api=search_api)
+
+def get_groq_service():
+    """
+    Dependency to provide the Groq Service singleton.
+    """
+    from ..services.groq_service import get_groq_service as get_service
+    return get_service()
