@@ -205,9 +205,12 @@ async def reset_password(
 @router.get("/google/login")
 async def google_login(request: Request, mode: str = "login"):
     """Redirect to Google OAuth."""
+    # Store mode in session because Google won't return it to us
+    request.session["oauth_mode"] = mode
+    logger.info(f"DEBUG: Starting OAuth flow in mode: {mode}")
+    
     redirect_uri = request.url_for('google_callback')
-    # Store mode in OAuth state to check in callback
-    return await oauth.google.authorize_redirect(request, redirect_uri, mode=mode)
+    return await oauth.google.authorize_redirect(request, redirect_uri)
 
 
 @router.get("/google/callback", response_class=HTMLResponse)
@@ -232,8 +235,8 @@ async def google_callback(
         avatar = user_info.get('picture')
         full_name = user_info.get('name')
 
-        # Read mode from OAuth state/token
-        mode = token.get('mode', 'login')
+        # Read mode from session (defaults to login if missing)
+        mode = request.session.pop("oauth_mode", "login")
         logger.info(f"DEBUG: Handling OAuth callback in mode: {mode}")
 
         logger.info(f"DEBUG: Processing user: {email}")
@@ -296,7 +299,15 @@ async def google_callback(
         logger.error(f"Google OAuth error: {e}")
         # Sanitize error message to prevent XSS injection
         import html
-        safe_error = html.escape(str(e))
+        
+        # Expert Move: Extract detail from HTTPException to avoid "404: ..." prefixes
+        error_msg = str(e)
+        if hasattr(e, 'detail'):
+            error_msg = e.detail
+        elif hasattr(e, 'message'):
+            error_msg = e.message
+            
+        safe_error = html.escape(error_msg)
         # Also escape single quotes for JS string context
         safe_error_js = safe_error.replace("'", "\\'")
         

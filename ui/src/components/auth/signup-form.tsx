@@ -169,7 +169,7 @@ export function SignupForm({ onSuccess, externalError }: { onSuccess: () => void
                 />
 
                 {(signupMutation.isError || loginMutation.isError || externalError) && (
-                    <div className="text-sm text-destructive font-bold bg-destructive/10 p-3 rounded-xl border border-destructive/20">
+                    <div className="text-sm text-destructive font-bold ml-1 mt-1">
                         {externalError || getErrorMessage(error)}
                     </div>
                 )}
