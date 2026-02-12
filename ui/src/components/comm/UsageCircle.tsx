@@ -19,19 +19,15 @@ interface UsageCircleProps {
 
 /* ── Color helpers ── */
 
-/** Returns an HSL color string interpolating green (120°) → yellow (60°) → red (0°) based on ratio 0→1 */
+/** Returns the app's primary orange color with dynamic saturation/lightness based on ratio if needed, but keeping it branded */
 function ratioToColor(ratio: number): string {
-    const clamped = Math.min(Math.max(ratio, 0), 1)
-    const hue = 120 * (1 - clamped) // 120=green  60=yellow  0=red
-    const sat = 70 + clamped * 15    // slightly more saturated as it gets critical
-    const light = 45 + clamped * 5
-    return `hsl(${hue}, ${sat}%, ${light}%)`
+    // Keep it branded orange but maybe slightly darker as it fills?
+    // Using tailwind orange-500 equivalent: hsl(24.6 95% 53.1%)
+    return `hsl(24.6, 95%, 53.1%)`
 }
 
 function ratioToBg(ratio: number, alpha = 0.15): string {
-    const clamped = Math.min(Math.max(ratio, 0), 1)
-    const hue = 120 * (1 - clamped)
-    return `hsla(${hue}, 70%, 50%, ${alpha})`
+    return `hsla(24.6, 95%, 53.1%, ${alpha})`
 }
 
 /* ── Component ── */
