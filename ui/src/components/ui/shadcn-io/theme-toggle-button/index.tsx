@@ -82,17 +82,21 @@ export const ThemeToggleButton = ({
   
             }
   
-                      ::view-transition-new(root) {
+                                          ::view-transition-new(root) {
   
-                        animation: circle-expand 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+                                            animation: circle-expand 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   
-                        z-index: 2147483647;
+                                            z-index: 2147483647;
   
-                        clip-path: circle(0% at ${x}px ${y}px);
+                                            clip-path: circle(150% at ${x}px ${y}px);
   
-                        ${isBlur ? 'filter: blur(0);' : ''}
+                                            ${isBlur ? 'filter: blur(0);' : ''}
   
-                      }
+                                          }
+  
+                                
+  
+                      
   
             
   
@@ -195,7 +199,7 @@ export const ThemeToggleButton = ({
         if (styleEl) {
           styleEl.remove();
         }
-      }, 3000);
+      }, 5000);
     }
     
     // Call the onClick handler if provided
