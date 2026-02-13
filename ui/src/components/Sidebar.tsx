@@ -1,9 +1,40 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Compass, User, Bookmark, Settings, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, Star } from 'lucide-react';
+import { Compass, User, Bookmark, Settings, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, Star, ChevronsUpDown, Plus, Sparkles, CreditCard, Bell, BadgeCheck } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import FoxLogo from './FoxLogo';
+import { useAuthStore } from '@/stores/auth-store';
+import { useLogoutMutation } from '@/lib/authHooks';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+    DropdownMenuGroup,
+    DropdownMenuShortcut,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+// New Sidebar Primitives (Localized from the new sidebar.tsx)
+const SidebarMenu = ({ children, className }: { children: React.ReactNode, className?: string }) => (
+    <ul className={`flex w-full min-w-0 flex-col gap-1 ${className}`}>{children}</ul>
+);
+
+const SidebarMenuItem = ({ children, className }: { children: React.ReactNode, className?: string }) => (
+    <li className={`group/menu-item relative ${className}`}>{children}</li>
+);
+
+const SidebarMenuButton = ({ children, className, isActive, size = "default", ...props }: any) => (
+    <button
+        className={`flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm transition-all hover:bg-muted/50 active:bg-muted ${isActive ? 'bg-muted/50 font-medium' : ''} ${className}`}
+        {...props}
+    >
+        {children}
+    </button>
+);
 
 // Enum for mapping routes to views
 enum ViewState {
@@ -20,6 +51,16 @@ const Sidebar: React.FC = () => {
 
   const router = useRouter();
   const pathname = usePathname();
+  const authUser = useAuthStore((s) => s.user);
+  const authStatus = useAuthStore((s) => s.status);
+  const logoutMutation = useLogoutMutation();
+
+  // Mock data for Team Switcher
+  const teams = [
+    { name: "VerbaLingo", logo: Compass, plan: "Enterprise" },
+    { name: "Personal", logo: User, plan: "Free" },
+  ];
+  const [activeTeam, setActiveTeam] = useState(teams[0]);
 
   // Determine current view based on pathname
   const currentView = React.useMemo(() => {
@@ -74,27 +115,65 @@ const Sidebar: React.FC = () => {
       className={`hidden md:flex flex-col h-screen sticky top-0 border-r border-border bg-transparent transition-[width] duration-300 ease-in-out relative z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[260px]'
         }`}
     >
-      {/* 1. Logo Section */}
-      <div className="h-24 flex items-center px-4 relative shrink-0 border-b border-border/60">
-        <div
-          className="flex items-center justify-center cursor-pointer group w-full py-2 transition-all duration-300"
-          onClick={() => onChangeView(ViewState.LANDING)}
-        >
-          {!isCollapsed ? (
-            <div className="flex flex-col items-center text-center justify-center animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <h1 className="text-xl font-black text-foreground tracking-[0.1em] leading-none mb-1 font-mono">
-                VERBALIN<span className="text-primary">GO</span>
-              </h1>
-              <span className="text-[9px] font-black text-muted-foreground/60 tracking-[0.2em] uppercase">
-                Neural Context Engine
-              </span>
-            </div>
-          ) : (
-            <div className="w-full flex justify-center">
-              <span className="text-xl font-black text-primary font-mono">V</span>
-            </div>
-          )}
-        </div>
+      {/* 1. Top Section: Team Switcher */}
+      <div className="p-3 border-b border-border/60">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                    <activeTeam.logo className="size-4" />
+                  </div>
+                  {!isCollapsed && (
+                    <>
+                      <div className="grid flex-1 text-left text-sm leading-tight ml-1">
+                        <span className="truncate font-semibold">
+                          {activeTeam.name}
+                        </span>
+                        <span className="truncate text-xs">{activeTeam.plan}</span>
+                      </div>
+                      <ChevronsUpDown className="ml-auto size-4" />
+                    </>
+                  )}
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                align="start"
+                side="right"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-widest">
+                  Contexts
+                </DropdownMenuLabel>
+                {teams.map((team, index) => (
+                  <DropdownMenuItem
+                    key={team.name}
+                    onClick={() => setActiveTeam(team)}
+                    className="gap-2 p-2 cursor-pointer"
+                  >
+                    <div className="flex size-6 items-center justify-center rounded-sm border">
+                      <team.logo className="size-4 shrink-0" />
+                    </div>
+                    {team.name}
+                    <DropdownMenuShortcut>âŒ˜{index + 1}</DropdownMenuShortcut>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="gap-2 p-2 cursor-pointer">
+                  <div className="flex size-6 items-center justify-center rounded-md border bg-background">
+                    <Plus className="size-4" />
+                  </div>
+                  <div className="font-medium text-muted-foreground">Add context</div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </div>
 
       {/* 2. Navigation */}
@@ -224,29 +303,87 @@ const Sidebar: React.FC = () => {
 
       </div>
 
-      {/* 3. Bottom Credits & Actions */}
-      <div className="p-3 bg-transparent">
-
-
-
-
-
-        {/* Profile Actions */}
-        <div className={`flex items-center ${isCollapsed ? 'flex-col gap-2' : 'gap-1'}`}>
-          {bottomNav.map((item, idx) => (
-            <button
-              key={idx}
-              onClick={() => onChangeView(item.view)}
-              className={`p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all ${isCollapsed ? '' : 'flex-1 flex items-center justify-center'}`}
-              title={item.label}
-            >
-              <item.icon className="w-4 h-4" />
-            </button>
-          ))}
-          <button className={`p-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all ${isCollapsed ? '' : 'flex-1 flex items-center justify-center'}`}>
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
+      {/* 3. Bottom Section: User Profile */}
+      <div className="p-3 bg-transparent border-t border-border/60">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar className="h-8 w-8 rounded-lg shadow-sm">
+                    <AvatarImage src={authUser?.oauth_avatar_url || "/avatars/user.jpg"} alt={authUser?.full_name || "User"} />
+                    <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-bold">
+                        {(authUser?.email?.[0] || "U").toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {!isCollapsed && (
+                    <>
+                      <div className="grid flex-1 text-left text-sm leading-tight ml-1">
+                        <span className="truncate font-semibold">
+                          {authUser?.full_name || (authUser?.email?.split('@')[0] || "Guest")}
+                        </span>
+                        <span className="truncate text-xs">{authUser?.email || "No account"}</span>
+                      </div>
+                      <ChevronsUpDown className="ml-auto size-4" />
+                    </>
+                  )}
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                side="right"
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarImage src={authUser?.oauth_avatar_url || "/avatars/user.jpg"} alt={authUser?.full_name || "User"} />
+                      <AvatarFallback className="rounded-lg">{(authUser?.email?.[0] || "U").toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">{authUser?.full_name || "Guest"}</span>
+                      <span className="truncate text-xs">{authUser?.email || ""}</span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => router.push('/pricing')}>
+                    <Sparkles className="size-4" />
+                    Upgrade to Pro
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => router.push('/profile')}>
+                    <BadgeCheck className="size-4" />
+                    Account
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer gap-2">
+                    <CreditCard className="size-4" />
+                    Billing
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer gap-2">
+                    <Bell className="size-4" />
+                    Notifications
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                    className="cursor-pointer gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+                    onClick={() => logoutMutation.mutate()}
+                >
+                  <LogOut className="size-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </div>
 
       {/* Sidebar Toggle */}
