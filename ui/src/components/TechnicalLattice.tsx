@@ -116,16 +116,6 @@ const TechnicalLattice: React.FC<TechnicalLatticeProps> = ({
                 }
             }
 
-            // 3. Draw Animated Scanning Wash
-            const scanY = (time * 1.5) % (height + 200);
-            const gradient = ctx.createLinearGradient(0, scanY - 150, 0, scanY);
-            gradient.addColorStop(0, 'transparent');
-            gradient.addColorStop(0.5, `rgba(255, 77, 0, ${0.06 * opacity})`);
-            gradient.addColorStop(1, 'transparent');
-
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, scanY - 150, width, 150);
-
             // 4. Draw Labels and Glowing Stars
             staticElements.forEach((el, i) => {
                 const x = el.x * width;
