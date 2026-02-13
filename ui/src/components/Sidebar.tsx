@@ -18,6 +18,7 @@ import {
     DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 // New Sidebar Primitives (Localized from the new sidebar.tsx)
 const SidebarMenu = ({ children, className }: { children: React.ReactNode, className?: string }) => (
@@ -118,6 +119,18 @@ const Sidebar: React.FC = () => {
       className={`hidden md:flex flex-col h-screen sticky top-0 border-r border-border bg-transparent transition-[width] duration-300 ease-in-out relative z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[300px]'
         }`}
     >
+      {/* 0. Brand Header */}
+      {!isCollapsed && (
+        <div className="px-6 pt-8 pb-2 flex items-center gap-3">
+          <h1 className="text-xl font-black text-foreground tracking-tighter">
+            VerbaLin<span className="text-primary">go</span>
+          </h1>
+          <Badge variant="secondary" className="text-[10px] px-2 h-5 font-bold uppercase tracking-widest bg-primary/10 text-primary border-primary/20 rounded-full">
+            Beta
+          </Badge>
+        </div>
+      )}
+
       {/* 1. Top Section: Team Switcher */}
       <div className="p-4 border-b border-border/60">
         <SidebarMenu>
