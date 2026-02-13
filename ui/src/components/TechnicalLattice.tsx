@@ -157,8 +157,11 @@ const TechnicalLattice: React.FC<TechnicalLatticeProps> = ({
         height: '100%',
         zIndex: 0,
         pointerEvents: 'none',
-        maskImage: 'linear-gradient(to right, transparent, transparent 300px, black 400px)',
-        WebkitMaskImage: 'linear-gradient(to right, transparent, transparent 300px, black 400px)',
+        // Combined Mask: Fades from top (navbar) AND from left (sidebar)
+        maskImage: 'linear-gradient(to bottom, transparent, transparent 100px, black 150px), linear-gradient(to right, transparent, transparent 300px, black 400px)',
+        WebkitMaskImage: 'linear-gradient(to bottom, transparent, transparent 100px, black 150px), linear-gradient(to right, transparent, transparent 300px, black 400px)',
+        maskComposite: 'intersect',
+        WebkitMaskComposite: 'source-in',
     };
 
     return (
