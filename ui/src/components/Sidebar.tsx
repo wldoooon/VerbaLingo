@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Compass, User, Bookmark, Settings, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, Star, ChevronsUpDown, Plus, Sparkles, CreditCard, Bell, BadgeCheck } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import FoxLogo from './FoxLogo';
+import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/stores/auth-store';
 import { useLogoutMutation } from '@/lib/authHooks';
 import {
@@ -48,6 +49,12 @@ enum ViewState {
 const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -276,7 +283,11 @@ const Sidebar: React.FC = () => {
           <div className="mt-6 mx-1 flex flex-col items-center justify-center text-center space-y-3 animate-fade-in">
             {/* Cat Image */}
             <div className="w-48 h-48 relative sm:w-52 sm:h-52 hover:scale-105 transition-transform duration-500 ease-out cursor-pointer -my-4">
-              <img src="/cat_logo1.png" alt="Get Started" className="w-full h-full object-contain drop-shadow-2xl" />
+              <img 
+                src={mounted && resolvedTheme === 'dark' ? "/sleeping_cat2.png" : "/cat_logo1.png"} 
+                alt="Get Started" 
+                className="w-full h-full object-contain drop-shadow-2xl" 
+              />
             </div>
 
             {/* Text & Action */}

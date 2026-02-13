@@ -5,6 +5,8 @@ import { Search, Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowR
 import { useRouter } from 'next/navigation';
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/animate-ui/components/radix/tooltip";
+import { useTheme } from "next-themes";
 
 const categories = [
   {
@@ -67,9 +69,16 @@ const categories = [
 
 export function Hero() {
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [activeCategory, setActiveCategory] = useState(2);
   const [isPaused, setIsPaused] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(0);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const trendingHighlights = [
     {
@@ -163,7 +172,11 @@ export function Hero() {
             <h1 className="text-5xl lg:text-7xl font-black text-foreground tracking-tighter leading-[0.85] mb-6 relative">
               {/* Mascot Behind Text */}
               <div className="absolute -top-40 left-[85%] w-48 h-48 md:w-[350px] md:h-[350px] md:-top-36 md:left-[35%] -z-10 opacity-80 pointer-events-none transition-transform duration-1000 group-hover:scale-105">
-                <img src="/cat_logo3.png" alt="Mascot" className="w-full h-full object-contain" />
+                <img 
+                  src={mounted && resolvedTheme === 'dark' ? "/sleeping_cat.png" : "/cat_logo3.png"} 
+                  alt="Mascot" 
+                  className="w-full h-full object-contain" 
+                />
               </div>
 
               Speak <br />
