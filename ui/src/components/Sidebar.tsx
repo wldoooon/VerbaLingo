@@ -29,7 +29,7 @@ const SidebarMenuItem = ({ children, className }: { children: React.ReactNode, c
 
 const SidebarMenuButton = ({ children, className, isActive, size = "default", ...props }: any) => (
     <button
-        className={`flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm transition-all hover:bg-muted/50 active:bg-muted ${isActive ? 'bg-muted/50 font-medium' : ''} ${className}`}
+        className={`flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm transition-all hover:bg-muted/50 active:bg-muted cursor-pointer ${isActive ? 'bg-muted/50 font-medium' : ''} ${className}`}
         {...props}
     >
         {children}
@@ -106,66 +106,62 @@ const Sidebar: React.FC = () => {
     { icon: Settings, label: 'Settings', view: ViewState.PROFILE },
   ];
 
-  const bottomNav = [
-    { icon: User, label: 'Profile', view: ViewState.PROFILE },
-  ];
-
   return (
     <aside
-      className={`hidden md:flex flex-col h-screen sticky top-0 border-r border-border bg-transparent transition-[width] duration-300 ease-in-out relative z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[260px]'
+      className={`hidden md:flex flex-col h-screen sticky top-0 border-r border-border bg-transparent transition-[width] duration-300 ease-in-out relative z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[300px]'
         }`}
     >
       {/* 1. Top Section: Team Switcher */}
-      <div className="p-3 border-b border-border/60">
+      <div className="p-4 border-b border-border/60">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="h-12 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                    <activeTeam.logo className="size-4" />
+                  <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+                    <activeTeam.logo className="size-5" />
                   </div>
                   {!isCollapsed && (
                     <>
-                      <div className="grid flex-1 text-left text-sm leading-tight ml-1">
-                        <span className="truncate font-semibold">
+                      <div className="grid flex-1 text-left text-sm leading-tight ml-2">
+                        <span className="truncate font-bold text-base">
                           {activeTeam.name}
                         </span>
-                        <span className="truncate text-xs">{activeTeam.plan}</span>
+                        <span className="truncate text-xs text-muted-foreground">{activeTeam.plan}</span>
                       </div>
-                      <ChevronsUpDown className="ml-auto size-4" />
+                      <ChevronsUpDown className="ml-auto size-4 opacity-50" />
                     </>
                   )}
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-64 rounded-xl"
                 align="start"
                 side="right"
                 sideOffset={4}
               >
-                <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-widest">
+                <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-widest p-3">
                   Contexts
                 </DropdownMenuLabel>
                 {teams.map((team, index) => (
                   <DropdownMenuItem
                     key={team.name}
                     onClick={() => setActiveTeam(team)}
-                    className="gap-2 p-2 cursor-pointer"
+                    className="gap-3 p-3 cursor-pointer rounded-lg"
                   >
-                    <div className="flex size-6 items-center justify-center rounded-sm border">
+                    <div className="flex size-8 items-center justify-center rounded-md border bg-muted/50">
                       <team.logo className="size-4 shrink-0" />
                     </div>
-                    {team.name}
-                    <DropdownMenuShortcut>âŒ˜{index + 1}</DropdownMenuShortcut>
+                    <span className="font-medium">{team.name}</span>
+                    <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
                   </DropdownMenuItem>
                 ))}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="gap-2 p-2 cursor-pointer">
-                  <div className="flex size-6 items-center justify-center rounded-md border bg-background">
+                <DropdownMenuItem className="gap-3 p-3 cursor-pointer rounded-lg">
+                  <div className="flex size-8 items-center justify-center rounded-md border bg-background">
                     <Plus className="size-4" />
                   </div>
                   <div className="font-medium text-muted-foreground">Add context</div>
@@ -177,10 +173,10 @@ const Sidebar: React.FC = () => {
       </div>
 
       {/* 2. Navigation */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8 custom-scrollbar">
 
         {/* Main Section */}
-        <div className="space-y-0.5">
+        <div className="space-y-1.5">
           {mainNav.map((item, idx) => (
             <NavItem
               key={idx}
@@ -198,21 +194,21 @@ const Sidebar: React.FC = () => {
             <>
               <button
                 onClick={() => setIsLibraryOpen(!isLibraryOpen)}
-                className={`w-full flex items-center justify-between p-2 rounded-lg transition-all duration-200 group mb-1 ${isLibraryOpen ? 'text-foreground' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 group mb-1 cursor-pointer ${isLibraryOpen ? 'text-foreground' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                   }`}
               >
-                <div className="flex items-center gap-3 px-1">
-                  <Folder className={`w-4 h-4 ${isLibraryOpen ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <span className="text-[13px] font-medium tracking-wide">Library</span>
+                <div className="flex items-center gap-4 px-1">
+                  <Folder className={`w-5 h-5 ${isLibraryOpen ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <span className="text-sm font-bold tracking-wide">Library</span>
                 </div>
-                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isLibraryOpen ? 'rotate-0 text-muted-foreground' : '-rotate-90 text-muted-foreground'}`} />
+                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isLibraryOpen ? 'rotate-0 text-muted-foreground' : '-rotate-90 text-muted-foreground'}`} />
               </button>
 
               <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${isLibraryOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
                 <div className="overflow-hidden">
-                  <div className="relative space-y-0.5">
+                  <div className="relative space-y-1 mt-1">
                     {/* Vertical Tree Line */}
-                    <div className="absolute left-[19px] top-0 bottom-3 w-[1px] bg-border"></div>
+                    <div className="absolute left-[23px] top-0 bottom-4 w-[1.5px] bg-border/60"></div>
 
                     {libraryNav.map((item, idx) => {
                       const active = currentView === item.view && (
@@ -224,13 +220,13 @@ const Sidebar: React.FC = () => {
                         <button
                           key={idx}
                           onClick={() => onChangeView(item.view)}
-                          className={`relative w-full flex items-center gap-3 p-2 rounded-lg pl-8 transition-all duration-200 group ${active ? 'bg-muted/50 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                          className={`relative w-full flex items-center gap-4 p-2.5 rounded-xl pl-10 transition-all duration-200 group cursor-pointer ${active ? 'bg-primary/5 text-foreground font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
                             }`}
                         >
                           {/* Connector Dot */}
-                          <div className="absolute left-[17px] top-1/2 -translate-y-1/2 w-1.5 h-[1px] bg-border"></div>
+                          <div className="absolute left-[21px] top-1/2 -translate-y-1/2 w-2 h-[1.5px] bg-border/60"></div>
 
-                          <span className={`text-[13px] font-medium transition-colors ${active ? 'text-foreground' : 'group-hover:text-foreground'}`}>
+                          <span className={`text-sm font-medium transition-colors ${active ? 'text-primary' : 'group-hover:text-foreground'}`}>
                             {item.label}
                           </span>
                         </button>
@@ -245,14 +241,14 @@ const Sidebar: React.FC = () => {
             <div className="flex flex-col gap-4 items-center mt-2">
               <button
                 onClick={() => { setIsCollapsed(false); setIsLibraryOpen(true); }}
-                className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-foreground bg-muted/30 rounded-xl transition-colors cursor-pointer group relative"
+                className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-foreground bg-muted/30 rounded-xl transition-colors cursor-pointer group relative"
               >
-                <Folder className="w-5 h-5" />
+                <Folder className="w-6 h-6" />
                 <div className="absolute left-full ml-4 px-3 py-1.5 bg-popover border border-border text-popover-foreground text-xs font-medium rounded-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl">
                   Library
                 </div>
               </button>
-              <div className="w-[1px] h-8 bg-border"></div>
+              <div className="w-[1px] h-10 bg-border"></div>
             </div>
           )}
         </div>
@@ -260,9 +256,9 @@ const Sidebar: React.FC = () => {
         {/* Support Section */}
         <div>
           {!isCollapsed && (
-            <h3 className="px-3 mb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Support</h3>
+            <h3 className="px-4 mb-3 text-[11px] font-black text-muted-foreground uppercase tracking-[0.2em] opacity-60">Support</h3>
           )}
-          <div className="space-y-0.5">
+          <div className="space-y-1.5">
             {supportNav.map((item, idx) => (
               <NavItem
                 key={idx}
@@ -311,7 +307,7 @@ const Sidebar: React.FC = () => {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
                 >
                   <Avatar className="h-8 w-8 rounded-lg shadow-sm">
                     <AvatarImage src={authUser?.oauth_avatar_url || "/avatars/user.jpg"} alt={authUser?.full_name || "User"} />
@@ -402,24 +398,24 @@ const Sidebar: React.FC = () => {
 const NavItem = ({ item, isActive, isCollapsed, onClick }: any) => (
   <button
     onClick={onClick}
-    className={`group relative flex items-center w-full p-2.5 rounded-lg transition-all duration-200 ${isActive
-      ? 'bg-primary/10 text-primary'
+    className={`group relative flex items-center w-full p-3.5 rounded-xl transition-all duration-200 cursor-pointer ${isActive
+      ? 'bg-primary/10 text-primary font-black shadow-sm'
       : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
       } ${isCollapsed ? 'justify-center' : ''}`}
   >
     <item.icon
-      className={`w-5 h-5 transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}
-      strokeWidth={2}
+      className={`w-6 h-6 transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}
+      strokeWidth={2.5}
     />
 
     {!isCollapsed && (
-      <span className="ml-3 text-[13px] font-medium tracking-wide">
+      <span className="ml-4 text-base font-bold tracking-tight">
         {item.label}
       </span>
     )}
 
     {isCollapsed && (
-      <div className="absolute left-full ml-4 px-3 py-1.5 bg-popover border border-border text-popover-foreground text-xs font-medium rounded-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl">
+      <div className="absolute left-full ml-4 px-4 py-2 bg-popover border border-border text-popover-foreground text-sm font-bold rounded-xl opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-2xl">
         {item.label}
       </div>
     )}
