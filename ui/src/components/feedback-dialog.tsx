@@ -8,12 +8,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
+import { MessageSquareText } from "lucide-react"
 
 export function FeedbackDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="rounded-full">Feedback</Button>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <MessageSquareText className="h-5 w-5" />
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
