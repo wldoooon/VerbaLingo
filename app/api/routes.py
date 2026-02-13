@@ -17,18 +17,20 @@ router = APIRouter(
 
 class CompletionRequest(BaseModel):
     prompt: str
+    context: Optional[dict] = None
 
 @router.post("/completion")
+@feature_rate_limit("ai_chat")
 async def completion(
     request: CompletionRequest,
     groq: GroqService = Depends(get_groq_service)
 ):
     """
-    Direct link to the AI Brain.
+    Direct link to the AI Brain with optional context.
     Streams tokens directly to the UI.
     """
     return StreamingResponse(
-        groq.get_completion_stream(request.prompt),
+        groq.get_completion_stream(request.prompt, context=request.context),
         media_type="text/event-stream"
     )
 
@@ -100,7 +102,6 @@ async def search(
 
 
 @router.get("/videos/{video_id}/transcript", response_model=TranscriptResponse)
-@feature_rate_limit("search")
 async def get_transcript(
     request: Request,
     response: Response,
