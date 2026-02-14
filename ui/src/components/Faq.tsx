@@ -34,60 +34,62 @@ const faqData = [
 
 export function Faq() {
   return (
-    <section className="py-24 bg-transparent border-t border-slate-100 dark:border-zinc-900/50">
-      <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+    <section className="py-32 bg-transparent">
+      <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
+        <div className="flex flex-col gap-20">
           
-          {/* Left Side: Hook & CTA */}
-          <div className="space-y-8 lg:sticky lg:top-24">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50">
-                <Sparkles className="w-3 h-3 text-orange-500" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">FAQ</span>
-              </div>
-              
-              <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-slate-100 tracking-tighter leading-tight">
-                Have more questions?
-              </h2>
-              
-              <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-md">
-                VerbaLingo is built to make mastering native fluency easy and stress-free. Explore our most common inquiries below.
-              </p>
+          {/* Header Hook */}
+          <div className="text-center space-y-6 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 mx-auto">
+              <Sparkles className="w-3 h-3 text-orange-500" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">FAQ</span>
             </div>
-
-            {/* Support Card */}
-            <div className="p-8 rounded-[2rem] border border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/30 space-y-6 max-w-sm shadow-sm hover:shadow-md transition-shadow">
-              <div className="space-y-2">
-                <h3 className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Can't find answers?</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                  We're here to help you out whenever you need! Get in touch with our dedicated support team for personalized assistance.
-                </p>
-              </div>
-              <Button className="rounded-full bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-6 py-6 font-bold gap-2 group text-sm">
-                Contact us
-                <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-              </Button>
-            </div>
+            
+            <h2 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-slate-100 tracking-tighter leading-tight">
+              Have more questions?
+            </h2>
+            
+            <p className="text-xl text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+              VerbaLingo is built to make mastering native fluency easy and stress-free. Explore our most common inquiries below.
+            </p>
           </div>
 
-          {/* Right Side: Accordion */}
+          {/* Ultra-Wide Accordion */}
           <div className="w-full">
-            <Accordion type="single" collapsible className="w-full space-y-3">
+            <Accordion type="single" collapsible className="w-full space-y-4">
               {faqData.map((item, index) => (
                 <AccordionItem 
                   key={index} 
                   value={`item-${index}`}
-                  className="border-none bg-slate-50 dark:bg-zinc-900/50 rounded-2xl overflow-hidden group data-[state=open]:bg-slate-100/50 dark:data-[state=open]:bg-zinc-900 transition-colors"
+                  className="border-none bg-slate-50 dark:bg-zinc-900/50 rounded-3xl overflow-hidden group data-[state=open]:bg-slate-100/50 dark:data-[state=open]:bg-zinc-900 transition-colors shadow-sm"
                 >
-                  <AccordionTrigger className="hover:no-underline px-6 py-6 text-sm md:text-base font-bold text-slate-900 dark:text-slate-100 text-left">
+                  <AccordionTrigger className="hover:no-underline px-8 py-8 text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100 text-left">
                     {item.question}
                   </AccordionTrigger>
-                  <AccordionContent className="px-6 pb-6 text-sm md:text-base text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                  <AccordionContent className="px-8 pb-8 text-base md:text-lg text-slate-500 dark:text-slate-400 leading-relaxed font-medium max-w-4xl">
                     {item.answer}
                   </AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
+          </div>
+
+          {/* Support CTA Card (Centered at bottom) */}
+          <div className="flex justify-center">
+            <div className="p-10 rounded-[2.5rem] border border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/30 space-y-8 w-full max-w-2xl text-center shadow-sm hover:shadow-md transition-shadow">
+              <div className="space-y-3">
+                <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Can't find answers?</h3>
+                <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                  We're here to help you out whenever you need! Get in touch with our dedicated support team for personalized assistance.
+                </p>
+              </div>
+              <div className="flex justify-center">
+                <Button className="rounded-full bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 px-10 py-7 text-lg font-bold gap-3 group shadow-xl transition-all hover:scale-105 active:scale-95">
+                  Contact us
+                  <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </Button>
+              </div>
+            </div>
           </div>
 
         </div>

@@ -363,24 +363,23 @@ export function SearchBar() {
                                 </div>
                             )}
 
-                            <Input
-                                ref={inputRef}
-                                type="text"
-                                value={hasAccess ? query : ''}
-                                disabled={!hasAccess}
-                                onChange={(e) => {
-                                    setQuery(e.target.value);
-                                    setShowRecent(true);
-                                }}
-                                onFocus={() => setShowRecent(true)}
-                                onKeyDown={handleKeyDown}
-                                className={cn(
-                                    "border-0 shadow-none focus-visible:ring-0 px-3 h-9 text-base font-medium placeholder:text-transparent min-w-0",
-                                    !hasAccess && "placeholder:text-muted-foreground/60 cursor-not-allowed opacity-60"
-                                )}
-                            />
-
-                            {query && hasAccess && (
+                                                    <Input
+                                                        ref={inputRef}
+                                                        type="text"
+                                                        value={hasAccess ? query : ''}
+                                                        disabled={!hasAccess}
+                                                        onChange={(e) => {
+                                                            setQuery(e.target.value);
+                                                            setShowRecent(true);
+                                                        }}
+                                                        onFocus={() => setShowRecent(true)}
+                                                        onKeyDown={handleKeyDown}
+                                                        className={cn(
+                                                            "border-0 bg-transparent shadow-none focus-visible:ring-0 px-3 h-9 text-base font-medium placeholder:text-transparent min-w-0",
+                                                            !hasAccess && "placeholder:text-muted-foreground/60 cursor-not-allowed opacity-60"
+                                                        )}
+                                                    />
+                                                        {query && hasAccess && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
