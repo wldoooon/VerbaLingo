@@ -34,7 +34,7 @@ const faqData = [
 
 export function Faq() {
   return (
-    <section className="py-24 bg-white dark:bg-zinc-950">
+    <section className="py-24 bg-transparent border-t border-slate-100 dark:border-zinc-900/50">
       <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           
