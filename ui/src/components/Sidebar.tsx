@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { AuthDialog } from "@/components/auth-dialog";
 
 // New Sidebar Primitives (Localized from the new sidebar.tsx)
 const SidebarMenu = ({ children, className }: { children: React.ReactNode, className?: string }) => (
@@ -277,9 +278,11 @@ const Sidebar: React.FC = () => {
               </div>
 
               <div className="w-full flex justify-center mt-2">
-                <span className="text-primary text-sm font-bold cursor-pointer hover:text-primary/80 transition-colors flex items-center gap-2">
-                  Get Started
-                </span>
+                <AuthDialog defaultTab="signup">
+                  <span className="text-primary text-sm font-bold cursor-pointer hover:text-primary/80 transition-colors flex items-center gap-2">
+                    Get Started
+                  </span>
+                </AuthDialog>
               </div>
             </div>
           </div>
