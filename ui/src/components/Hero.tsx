@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Search, Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Play, Activity, Bot, MessageSquare, Layers, Database, TrendingUp, Quote } from 'lucide-react';
+import { Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Activity, MessageSquare, Layers, Database, TrendingUp, Quote } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "framer-motion";
+
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/animate-ui/components/radix/tooltip";
 import { useTheme } from "next-themes";
+import { Features } from "./Features";
 
 const categories = [
   {
@@ -375,149 +375,8 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Feature Grid (The Bento Grid) */}
-        <div className="py-20 relative">
-          <div className="text-center mb-16 max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Everything you need to fluency</h2>
-            <p className="text-muted-foreground">Our engine combines four powerful technologies to create the ultimate immersion experience.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-
-            {/* Large Block - Search Context */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="md:col-span-2 row-span-2 bg-card/50 border border-border/50 rounded-3xl p-8 relative overflow-hidden group hover:border-primary/30 transition-all"
-            >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Search className="w-64 h-64 text-primary transform rotate-12 translate-x-12 -translate-y-12" />
-              </div>
-              <div className="relative z-10 flex flex-col h-full justify-between">
-                <div className="mb-8">
-                  <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
-                    <Search className="w-6 h-6 text-primary-foreground" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-foreground mb-2">Context Engine™</h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed max-w-md">
-                    Don't just find definitions. Find moments. Our engine scans millions of videos to find the exact millisecond a word is spoken, giving you 360° understanding of tone, body language, and situation.
-                  </p>
-                </div>
-                {/* Visual simulation of search results */}
-                <div className="space-y-3">
-                  <Skeleton className="h-2 w-3/4 rounded-full bg-muted/50" />
-                  <Skeleton className="h-2 w-1/2 rounded-full bg-muted/50" />
-                  <Skeleton className="h-2 w-5/6 rounded-full bg-muted/50" />
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Tall Block - AI Tutor (UPDATED) */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="md:col-span-1 row-span-2 bg-primary text-primary-foreground border border-primary rounded-3xl p-8 relative overflow-hidden group shadow-2xl shadow-primary/20"
-            >
-
-              {/* Fancy Tech Background: Dot Grid Pattern */}
-              <div className="absolute inset-0 opacity-20"
-                style={{
-                  backgroundImage: 'radial-gradient(circle, currentColor 2px, transparent 2px)',
-                  backgroundSize: '24px 24px'
-                }}>
-              </div>
-
-              {/* Geometric Decorations */}
-              <div className="absolute -top-12 -right-12 w-48 h-48 border-[24px] border-white/20 rounded-full group-hover:scale-110 transition-transform duration-700 ease-out"></div>
-              <div className="absolute top-32 -right-6 w-16 h-16 bg-white/10 rounded-full"></div>
-
-              <div className="relative z-10 h-full flex flex-col">
-
-                {/* ANIMATED AI ICON */}
-                <div className="relative w-16 h-16 mb-8 group-hover:scale-105 transition-transform duration-500">
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 bg-white/20 blur-xl rounded-full animate-pulse"></div>
-
-                  {/* Tech Ring 1 (Fast Spin) */}
-                  <div className="absolute inset-0 rounded-full border-2 border-white/20 border-t-white animate-[spin_3s_linear_infinite]"></div>
-
-                  {/* Tech Ring 2 (Slow Reverse Spin) */}
-                  <div className="absolute inset-2 rounded-full border border-white/30 border-dashed animate-[spin_10s_linear_infinite_reverse]"></div>
-
-                  {/* Center Core */}
-                  <div className="absolute inset-3 bg-white rounded-xl flex items-center justify-center shadow-lg z-10">
-                    <Bot className="w-6 h-6 text-primary animate-[bounce_3s_infinite]" />
-                  </div>
-
-                  {/* Orbiting Badge */}
-                  <div className="absolute -top-1 -right-1 z-20 bg-primary-foreground rounded-full p-1 border-2 border-primary animate-bounce">
-                    <Sparkles className="w-3 h-3 text-primary" />
-                  </div>
-                </div>
-
-                <h3 className="text-xl font-bold mb-2">AI Companion</h3>
-                <p className="text-primary-foreground/80 text-sm mb-8 font-medium leading-relaxed">
-                  "Why did they laugh?" <br />
-                  "Is this formal?" <br />
-                  Ask the AI anything.
-                </p>
-
-                {/* Chat Bubble Visual */}
-                <div className="mt-auto space-y-3">
-                  <div className="bg-white/10 border border-white/20 p-3 rounded-xl rounded-tl-none backdrop-blur-none animate-[pulse_6s_ease-in-out_infinite]">
-                    <div className="text-[10px] uppercase font-bold text-white/70 mb-1 tracking-wider">User</div>
-                    <div className="text-xs font-mono">What does "break a leg" mean?</div>
-                  </div>
-                  <div className="bg-white text-primary p-3 rounded-xl rounded-tr-none shadow-xl transform transition-transform hover:-translate-y-1 duration-300">
-                    <div className="text-[10px] uppercase font-bold text-primary/70 mb-1 tracking-wider">AI Tutor</div>
-                    <div className="text-xs font-semibold">It's a theater idiom for "Good luck"!</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Medium Block - Pronunciation */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-              className="md:col-span-1 bg-card/50 border border-border/50 rounded-3xl p-8 hover:bg-muted/50 transition-all group"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <Mic className="w-5 h-5 text-primary group-hover:text-primary-foreground" />
-                </div>
-                <Activity className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-1">Pronunciation</h3>
-              <p className="text-muted-foreground text-sm">Compare your voice with native speakers.</p>
-            </motion.div>
-
-            {/* Medium Block - Global */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-              className="md:col-span-1 bg-card/50 border border-border/50 rounded-3xl p-8 hover:bg-muted/50 transition-all group"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <Globe className="w-5 h-5 text-primary group-hover:text-primary-foreground" />
-                </div>
-                <Play className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-1">Global Library</h3>
-              <p className="text-muted-foreground text-sm">Content from 50+ countries and cultures.</p>
-            </motion.div>
-
-          </div>
-        </div>
+        {/* Feature Grid */}
+        <Features />
 
       </div>
     </div>
