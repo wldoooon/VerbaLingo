@@ -251,6 +251,19 @@
   .animate-border-flow {
     animation: border-flow 3s ease-in-out infinite;
   }
+
+  @keyframes shiny-text {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: var(--shiny-width) 0;
+    }
+  }
+
+  .animate-shiny-text {
+    animation: shiny-text 8s infinite linear;
+  }
 }
 
 @layer base {
