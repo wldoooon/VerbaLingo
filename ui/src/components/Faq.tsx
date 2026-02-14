@@ -48,8 +48,8 @@ export function Faq() {
                   text="Have more questions?"
                   speed={2}
                   delay={0}
-                  color="#b5b5b5"
-                  shineColor="#f97316"
+                  color="#4b5563" // Deep Steel Gray
+                  shineColor="#ffffff" // Brilliant White Shine
                   spread={120}
                   direction="left"
                   className="inline-block"
