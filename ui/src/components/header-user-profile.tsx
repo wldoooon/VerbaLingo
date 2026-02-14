@@ -6,13 +6,13 @@ import {
 
   Bell,
 
-  ChevronsUpDown,
-
   CreditCard,
 
   LogOut,
 
   Sparkles,
+
+
 
   Zap,
 
@@ -32,7 +32,7 @@ import { useTheme } from "next-themes"
 
 import { ThemeSwitcher } from "@/components/ui/shadcn-io/theme-switcher"
 
-import { useEntitlements } from "@/hooks/use-entitlements"
+import { useUsageStore } from "@/stores/usage-store"
 
 import { cn } from "@/lib/utils"
 
@@ -42,169 +42,93 @@ import Link from "next/link"
 
 import {
 
-
-
   Avatar,
-
-
 
   AvatarFallback,
 
-
-
   AvatarImage,
-
-
 
 } from "@/components/ui/avatar"
 
-
-
 import {
-
-
 
   DropdownMenu,
 
-
-
   DropdownMenuContent,
-
-
 
   DropdownMenuGroup,
 
-
-
   DropdownMenuItem,
-
-
 
   DropdownMenuLabel,
 
-
-
   DropdownMenuSeparator,
-
-
 
   DropdownMenuTrigger,
 
-
-
 } from "@/components/ui/dropdown-menu"
 
-
-
 import { Button } from "@/components/ui/button"
-
-
 
 import { Progress } from "@/components/ui/progress"
 
 
 
-
-
-
-
 export function HeaderUserProfile({
-
-
-
-
-
-
 
   user,
 
-
-
   onLogout,
-
-
 
 }: {
 
-
-
   user: {
-
-
 
     name: string
 
-
-
     email: string
-
-
 
     avatar: string
 
-
-
   }
-
-
 
   onLogout?: () => void
 
-
-
 }) {
-
-
 
   const { theme, setTheme } = useTheme()
 
-
-
-  const { remaining, limit, isLoaded } = useEntitlements('credits')
-
-
+  const usageMap = useUsageStore((s) => s.usage)
 
   
 
+  // Use 'search' stats as the driver for the main 'Credit' UI
 
+  const stats = usageMap['search'] || { current: 0, limit: 50, remaining: 50 }
+
+  
 
   const MULTIPLIER = 100000
 
-
-
   
-
-
 
   // Calculate percentage USED for the ring
 
-
-
-  const percentageUsed = isLoaded && limit > 0 ? ((limit - remaining) / limit) * 100 : 0
-
-
+  const percentageUsed = stats.limit > 0 ? (stats.current / stats.limit) * 100 : 0
 
   const circumference = 2 * Math.PI * 18 // r=18
-
-
 
   const offset = circumference - (percentageUsed / 100) * circumference
 
 
 
-
-
-
-
   // Scaled values for display
 
+  const displayLimit = stats.limit === -1 ? "Unlimited" : (stats.limit * MULTIPLIER).toLocaleString()
+
+  const displayRemaining = stats.limit === -1 ? "âˆž" : (stats.remaining * MULTIPLIER).toLocaleString()
 
 
-  const displayLimit = limit === -1 ? "Unlimited" : (limit * MULTIPLIER).toLocaleString()
-
-
-
-  const displayRemaining = limit === -1 ? "âˆž" : (remaining * MULTIPLIER).toLocaleString()
 
 
 
@@ -322,23 +246,65 @@ export function HeaderUserProfile({
 
       >
 
-        {/* Balance Card */}
+                {/* Balance Card */}
 
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/50 border border-slate-100 dark:border-zinc-800/50 mb-2">
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/50 border border-slate-100 dark:border-zinc-800/50 mb-2">
 
-          <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-4">
 
-            <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
 
-              <div className="w-5 h-5 rounded-full border border-orange-500/30 flex items-center justify-center">
+                                    {/* Miniature Progress Ring */}
 
-                <div className="w-2 h-2 rounded-full bg-orange-500" />
+                                    <div className="relative w-5 h-5 flex items-center justify-center">
 
-              </div>
+                                      <svg className="absolute inset-0 -rotate-90" viewBox="0 0 40 40">
 
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100">Balance</span>
+                                        <circle
 
-            </div>
+                                          cx="20" cy="20" r="18"
+
+                                          fill="none"
+
+                                          stroke="currentColor"
+
+                                          strokeWidth="4"
+
+                                          className="text-slate-300 dark:text-slate-700"
+
+                                        />
+
+                                        <circle
+
+                                          cx="20" cy="20" r="18"
+
+                                          fill="none"
+
+                                          stroke="currentColor"
+
+                                          strokeWidth="4"
+
+                                          strokeDasharray={circumference}
+
+                                          strokeDashoffset={offset}
+
+                                          strokeLinecap="round"
+
+                                          className="text-orange-500"
+
+                                        />
+
+                                      </svg>
+
+                                    </div>
+
+                                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100">Balance</span>
+
+                      
+
+                    </div>
+
+        
 
             <Link href="/pricing">
 
@@ -394,55 +360,19 @@ export function HeaderUserProfile({
 
           
 
-                                          </div>
+                                                  </div>
 
           
 
-                                  
+                                          
 
           
 
-                      
+                                                  <DropdownMenuGroup className="pt-2">
 
           
 
-                                
-
-          
-
-                      
-
-
-
-        {/* Workspace Label */}
-
-        <div className="px-4 py-3 border-b border-slate-100 dark:border-zinc-800/50">
-
-          <div className="flex items-center justify-between">
-
-            <div>
-
-              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Current workspace</p>
-
-              <p className="text-sm font-black text-slate-900 dark:text-slate-100">{user.name}'s Workspace</p>
-
-              <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 capitalize">Free subscription</p>
-
-            </div>
-
-            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center cursor-pointer hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors">
-
-              <ChevronsUpDown className="w-4 h-4 text-slate-500" />
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-
-        <DropdownMenuGroup className="pt-2">
+                                          
 
           <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
 

@@ -131,65 +131,29 @@ const Sidebar: React.FC = () => {
         </div>
       )}
 
-      {/* 1. Top Section: Team Switcher */}
+      {/* 1. Top Section: User Identity Badge */}
       <div className="p-4 border-b border-border/60">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="h-12 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                    <activeTeam.logo className="size-5" />
-                  </div>
-                  {!isCollapsed && (
-                    <>
-                      <div className="grid flex-1 text-left text-sm leading-tight ml-2">
-                        <span className="truncate font-bold text-base">
-                          {activeTeam.name}
-                        </span>
-                        <span className="truncate text-xs text-muted-foreground">{activeTeam.plan}</span>
-                      </div>
-                      <ChevronsUpDown className="ml-auto size-4 opacity-50" />
-                    </>
-                  )}
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-64 rounded-xl"
-                align="start"
-                side="right"
-                sideOffset={4}
-              >
-                <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-widest p-3">
-                  Contexts
-                </DropdownMenuLabel>
-                {teams.map((team, index) => (
-                  <DropdownMenuItem
-                    key={team.name}
-                    onClick={() => setActiveTeam(team)}
-                    className="gap-3 p-3 cursor-pointer rounded-lg"
-                  >
-                    <div className="flex size-8 items-center justify-center rounded-md border bg-muted/50">
-                      <team.logo className="size-4 shrink-0" />
-                    </div>
-                    <span className="font-medium">{team.name}</span>
-                    <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="gap-3 p-3 cursor-pointer rounded-lg">
-                  <div className="flex size-8 items-center justify-center rounded-md border bg-background">
-                    <Plus className="size-4" />
-                  </div>
-                  <div className="font-medium text-muted-foreground">Add context</div>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div
+          className="h-14 flex items-center w-full border border-zinc-950/10 dark:border-zinc-50/10 rounded-full bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-2 transition-all duration-200"
+        >
+          <div className="flex aspect-square h-10 w-10 items-center justify-center rounded-full bg-primary overflow-hidden shadow-sm">
+            {authUser?.oauth_avatar_url ? (
+              <img src={authUser.oauth_avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+            ) : (
+              <User className="size-5 text-primary-foreground" />
+            )}
+          </div>
+          {!isCollapsed && (
+            <div className="grid flex-1 text-left text-sm leading-tight ml-3">
+              <span className="truncate font-black text-sm tracking-tight text-foreground">
+                {authUser?.full_name || (authUser?.email?.split('@')[0] || "Guest")}
+              </span>
+              <span className="truncate text-[10px] font-bold uppercase tracking-widest text-orange-500">
+                {authStatus === 'authenticated' ? (authUser?.tier || "Free") : "Guest"} Plan
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 2. Navigation */}
@@ -291,8 +255,8 @@ const Sidebar: React.FC = () => {
           </div>
         </div>
 
-        {/* Cat Image & Promo */}
-        {!isCollapsed && (
+        {/* Cat Image & Promo - ONLY show for guests */}
+        {!isCollapsed && authStatus !== 'authenticated' && (
           <div className="mt-6 mx-1 flex flex-col items-center justify-center text-center space-y-3 animate-fade-in">
             {/* Cat Image */}
             <div className="w-48 h-48 relative sm:w-52 sm:h-52 hover:scale-105 transition-transform duration-500 ease-out cursor-pointer -my-4">
@@ -321,89 +285,6 @@ const Sidebar: React.FC = () => {
           </div>
         )}
 
-      </div>
-
-      {/* 3. Bottom Section: User Profile */}
-      <div className="p-3 bg-transparent border-t border-border/60">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
-                >
-                  <Avatar className="h-8 w-8 rounded-lg shadow-sm">
-                    <AvatarImage src={authUser?.oauth_avatar_url || "/avatars/user.jpg"} alt={authUser?.full_name || "User"} />
-                    <AvatarFallback className="rounded-lg bg-primary/10 text-primary font-bold">
-                        {(authUser?.email?.[0] || "U").toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {!isCollapsed && (
-                    <>
-                      <div className="grid flex-1 text-left text-sm leading-tight ml-1">
-                        <span className="truncate font-semibold">
-                          {authUser?.full_name || (authUser?.email?.split('@')[0] || "Guest")}
-                        </span>
-                        <span className="truncate text-xs">{authUser?.email || "No account"}</span>
-                      </div>
-                      <ChevronsUpDown className="ml-auto size-4" />
-                    </>
-                  )}
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="right"
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuLabel className="p-0 font-normal">
-                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                    <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarImage src={authUser?.oauth_avatar_url || "/avatars/user.jpg"} alt={authUser?.full_name || "User"} />
-                      <AvatarFallback className="rounded-lg">{(authUser?.email?.[0] || "U").toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">{authUser?.full_name || "Guest"}</span>
-                      <span className="truncate text-xs">{authUser?.email || ""}</span>
-                    </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => router.push('/pricing')}>
-                    <Sparkles className="size-4" />
-                    Upgrade to Pro
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem className="cursor-pointer gap-2" onClick={() => router.push('/profile')}>
-                    <BadgeCheck className="size-4" />
-                    Account
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer gap-2">
-                    <CreditCard className="size-4" />
-                    Billing
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer gap-2">
-                    <Bell className="size-4" />
-                    Notifications
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                    className="cursor-pointer gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
-                    onClick={() => logoutMutation.mutate()}
-                >
-                  <LogOut className="size-4" />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
       </div>
 
       {/* Sidebar Toggle */}
