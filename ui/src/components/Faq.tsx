@@ -41,7 +41,7 @@ export function Faq() {
         <div className="flex flex-col gap-20">
           
           {/* Header Hook */}
-          <AnimatedContent distance={40} direction="vertical" duration={0.8} threshold={0.2}>
+          <AnimatedContent distance={40} direction="vertical" duration={1.8} threshold={0.2} scale={2}>
             <div className="text-center space-y-6 max-w-3xl mx-auto">
               <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-tight">
                 <ShinyText
