@@ -198,24 +198,31 @@ async def get_user_usage_stats(
     today = date.today().isoformat()
     identifier = f"user:{user.id}"
     
-    # Get current counts from Redis
-    search_key = f"usage:{identifier}:search:{today}"
-    ai_chat_key = f"usage:{identifier}:ai_chat:{today}"
-    export_key = f"usage:{identifier}:export:{today}"
+    # Get current counts from Redis in a single batch (MGET)
+    keys = [
+        f"usage:{identifier}:search:{today}",
+        f"usage:{identifier}:ai_chat:{today}",
+        f"usage:{identifier}:export:{today}"
+    ]
     
-    search_count = await redis.get(search_key) or 0
-    ai_chat_count = await redis.get(ai_chat_key) or 0
-    export_count = await redis.get(export_key) or 0
+    redis_counts = await redis.mget(keys)
+    search_count = int(redis_counts[0] or 0)
+    ai_chat_count = int(redis_counts[1] or 0)
+    export_count = int(redis_counts[2] or 0)
     
-    # Get lifetime stats from PostgreSQL
-    usage = await db.get(UserUsage, user.id)
+    # Get lifetime stats from PostgreSQL (optional, don't block if missing)
+    try:
+        usage = await db.get(UserUsage, user.id)
+    except Exception as e:
+        logger.error(f"Error fetching UserUsage for user {user.id}: {e}")
+        usage = None
     
     return {
         "tier": tier.value,
         "daily": {
-            "searches": {"used": int(search_count), "limit": _get_limit(tier, "search")},
-            "ai_chats": {"used": int(ai_chat_count), "limit": _get_limit(tier, "ai_chat")},
-            "exports": {"used": int(export_count), "limit": _get_limit(tier, "export")},
+            "search": {"current": search_count, "limit": _get_limit(tier, "search"), "remaining": max(0, _get_limit(tier, "search") - search_count) if _get_limit(tier, "search") != -1 else -1},
+            "ai_chat": {"current": ai_chat_count, "limit": _get_limit(tier, "ai_chat"), "remaining": max(0, _get_limit(tier, "ai_chat") - ai_chat_count) if _get_limit(tier, "ai_chat") != -1 else -1},
+            "export": {"current": export_count, "limit": _get_limit(tier, "export"), "remaining": max(0, _get_limit(tier, "export") - export_count) if _get_limit(tier, "export") != -1 else -1},
         },
         "lifetime": {
             "total_searches": usage.total_searches if usage else 0,

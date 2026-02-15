@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchStore } from "@/stores/use-search-store";
 import { Button } from "@/components/ui/button";
 import { Response } from "@/components/ui/shadcn-io/ai/response";
-import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight, Bot } from "lucide-react";
+import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight, Bot, Lock, MessageSquare, Zap, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
@@ -21,6 +21,8 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Check } from "lucide-react";
+import { useAuthStore } from "@/stores/auth-store";
+import { AuthDialog } from "@/components/auth-dialog";
 
 interface SmartSuggestion {
     title: string;
@@ -82,6 +84,8 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     const { query } = useSearchStore();
     const router = useRouter();
     const nextSearchParams = useNextSearchParams();
+    const authStatus = useAuthStore((s) => s.status);
+    const isGuest = authStatus !== "authenticated";
 
     // Replacement for useCompletion
     const [completion, setCompletion] = useState("");
@@ -283,6 +287,85 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
             setInputValue("");
         }
     }, [isLoading]);
+
+    // ── Guest Gate ──────────────────────────────────────────────
+    if (isGuest) {
+        const features = [
+            { icon: <MessageSquare className="h-5 w-5" />, title: "Smart Conversations", desc: "Ask anything about pronunciation, grammar, or vocabulary" },
+            { icon: <Zap className="h-5 w-5" />, title: "Context-Aware", desc: "Get answers tailored to the word you're exploring" },
+            { icon: <BookText className="h-5 w-5" />, title: "Examples & Usage", desc: "Real-world sentences and nuanced explanations" },
+            { icon: <Repeat className="h-5 w-5" />, title: "Session History", desc: "Pick up where you left off across learning sessions" },
+        ];
+
+        return (
+            <div className="w-full h-full flex flex-col">
+                <div className="relative w-full h-full flex flex-col bg-card p-6 items-center justify-start pt-[15%] overflow-hidden">
+                    {/* Ambient glow */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px]" />
+                    </div>
+
+                    <motion.div
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                        className="relative z-10 flex flex-col items-center text-center max-w-md mx-auto"
+                    >
+                        {/* Heading */}
+                        <h2 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+                            Unlock AI Assistant
+                        </h2>
+                        <p className="text-muted-foreground mt-3 text-sm md:text-base leading-relaxed max-w-sm">
+                            Sign in to access your personal AI language coach — ask questions, get explanations, and level up your learning.
+                        </p>
+
+                        {/* Feature pills */}
+                        <div className="grid grid-cols-2 gap-3 mt-8 w-full">
+                            {features.map((f, i) => (
+                                <motion.div
+                                    key={f.title}
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3 + i * 0.08 }}
+                                    className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/40 p-3 text-left"
+                                >
+                                    <div className="text-primary mt-0.5 shrink-0">{f.icon}</div>
+                                    <div>
+                                        <p className="text-xs font-semibold text-foreground">{f.title}</p>
+                                        <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{f.desc}</p>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        {/* CTA buttons */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.65 }}
+                            className="flex flex-col items-center gap-3 mt-8"
+                        >
+                            <AuthDialog defaultTab="signup">
+                                <Button size="lg" className="rounded-full gap-2 px-8 font-semibold">
+                                    Get Started Free <ArrowRight className="h-4 w-4" />
+                                </Button>
+                            </AuthDialog>
+
+                            <AuthDialog defaultTab="login">
+                                <Button variant="outline" size="lg" className="rounded-full px-8 font-semibold">
+                                    Sign In
+                                </Button>
+                            </AuthDialog>
+                        </motion.div>
+
+                        <p className="text-[11px] text-muted-foreground/60 mt-4">
+                            Free account · No credit card required
+                        </p>
+                    </motion.div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full h-full flex flex-col">

@@ -1,0 +1,52 @@
+# ─── Python cache ───
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+
+# ─── Virtual environment ───
+venv
+.venv
+
+# ─── Git ───
+.git
+.gitignore
+.gitattributes
+.github
+
+# ─── Environment files (secrets!) ───
+.env*
+!.env.example
+
+# ─── IDE ───
+.vscode
+.idea
+
+# ─── Documentation ───
+*.md
+
+# ─── Tests (not needed in production image) ───
+tests
+
+# ─── Docker files (don't recursively include ourselves) ───
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# ─── Dataset files (huge, not needed for the app) ───
+dataset
+dataset.rar
+scraping_test
+logs
+
+# ─── Frontend (we build that separately) ───
+ui
+
+# ─── Other unnecessary directories ───
+extension
+verbaLingo_agent
+.taskmaster
+.kilocode
+.playwright-mcp
+.agent
+manticore

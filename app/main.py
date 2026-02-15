@@ -79,6 +79,11 @@ async def lifespan(app: FastAPI):
     if app.state.api_client:
         await app.state.api_client.close()
         logger.info("Manticore client closed")
+
+    # Close Redis connection pool
+    await redis_client.close()
+    logger.info("Redis connection closed")
+
     logger.info("Application shutdown complete")
 
 
@@ -100,6 +105,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=[
+        "RateLimit-Limit",
+        "RateLimit-Remaining",
+        "RateLimit-Reset",
+        "RateLimit-Policy",
+    ],
 )
 
 # 2. Session Middleware - Required for OAuth state management

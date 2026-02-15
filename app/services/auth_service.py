@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 from ..models.user import User, UserCreate
 from ..models.user_usage import UserUsage
 from ..core.security import hash_password, verify_password
+from ..core.logging import logger
 
 
 async def create_new_user(db: AsyncSession, user_data: UserCreate) -> User:
@@ -42,7 +43,6 @@ async def create_new_user(db: AsyncSession, user_data: UserCreate) -> User:
     
     # 5. Commit BOTH in one transaction
     await db.commit()
-    await db.refresh(new_user)
     return new_user
 
 
@@ -74,18 +74,57 @@ async def authenticate_user(db: AsyncSession, email: str, password: str) -> User
     return user
 
 
+async def get_oauth_user_only(
+    db: AsyncSession,
+    email: str,
+    oauth_provider: str,
+    oauth_id: str,
+    avatar_url: str | None = None,
+    full_name: str | None = None
+) -> User:
+    """
+    STRICT: Get existing user for OAuth login.
+    Fails if the user does not exist.
+    """
+    statement = select(User).where(User.email == email)
+    result = await db.exec(statement)
+    user = result.first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Account not found. Please sign up first."
+        )
+    
+    # Update avatar/name/last_login logic (same as get_or_create)
+    if not user.oauth_provider:
+        user.oauth_provider = oauth_provider
+        user.oauth_id = oauth_id
+    
+    if avatar_url:
+        user.oauth_avatar_url = avatar_url
+    if full_name and not user.full_name:
+        user.full_name = full_name
+    
+    user.last_login_at = datetime.now(timezone.utc)
+    db.add(user)
+    await db.commit()
+    return user
+
+
 async def get_or_create_oauth_user(
     db: AsyncSession,
     email: str,
     oauth_provider: str,
     oauth_id: str,
-    avatar_url: str | None = None
+    avatar_url: str | None = None,
+    full_name: str | None = None
 ) -> User:
     """
     Get existing user or create new one for OAuth login.
     
     Handles three cases:
-    1. User exists with same OAuth provider → update last_login, return
+    1. User exists with same OAuth provider → update avatar/name, return
     2. User exists with password (no OAuth) → link OAuth to existing account
     3. User doesn't exist → create new OAuth user
     
@@ -98,24 +137,35 @@ async def get_or_create_oauth_user(
     
     if user:
         # Case 1 & 2: User exists
+        logger.info(f"DEBUG: Found existing OAuth user: {email}")
         if not user.oauth_provider:
             # Link OAuth to existing password account
             user.oauth_provider = oauth_provider
             user.oauth_id = oauth_id
-            if avatar_url:
-                user.oauth_avatar_url = avatar_url
+        
+        # Always update avatar (may change) and fill in full_name if missing
+        if avatar_url:
+            user.oauth_avatar_url = avatar_url
+        if full_name and not user.full_name:
+            user.full_name = full_name
         
         # Update last login
         user.last_login_at = datetime.now(timezone.utc)
         db.add(user)
-        await db.commit()
-        await db.refresh(user)
+        try:
+            await db.commit()
+            logger.info("DEBUG: OAuth user update committed")
+        except Exception as e:
+            logger.error(f"DEBUG: OAuth commit failed: {e}")
+            await db.rollback()
+            raise
         return user
     
     # Case 3: Create new OAuth user
     new_user = User(
         email=email,
         hashed_password=None,  # OAuth users don't have passwords
+        full_name=full_name,
         oauth_provider=oauth_provider,
         oauth_id=oauth_id,
         oauth_avatar_url=avatar_url,

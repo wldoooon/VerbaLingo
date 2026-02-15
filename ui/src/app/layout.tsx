@@ -8,6 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import NavigationWrapper from "@/components/NavigationWrapper";
 import TechnicalLattice from "@/components/TechnicalLattice";
 import AuthSync from "@/components/AuthSync";
+import { BetaBanner } from "@/components/BetaBanner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <QueryProvider>
             <AuthSync />
             <ToastProvider position="bottom-right">
+            <BetaBanner />
             {/* Main App Layout with Sidebar + Content */}
             <div className="flex min-h-screen relative z-10">
               <Sidebar />

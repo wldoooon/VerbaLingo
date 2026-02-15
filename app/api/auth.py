@@ -4,7 +4,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from redis.asyncio import Redis
 
 from ..db.session import get_session
-from ..models.user import UserCreate, UserRead, User
+from ..models.user import UserCreate, User
 from ..services import usage_service
 from ..services.auth_service import create_new_user, authenticate_user, get_or_create_oauth_user
 from ..services import verification_service
@@ -120,35 +120,34 @@ async def login(
     }
 
 
-@router.get("/me", response_model=UserRead)
+@router.get("/me")
 async def me(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis)
 ):
     """Get current authenticated user with real-time usage stats."""
-    # Inject usage stats for all relevant features
-    features = ["search", "ai_chat", "export"]
-    usage_data = {}
-    
-    for feature in features:
-        # We use check_usage_limit just to get the 'current' and 'limit' values
-        # without actually incrementing or blocking anything.
-        _, _, current, limit = await usage_service.check_usage_limit(
-            redis=redis,
-            db=db,
-            user=current_user,
-            feature=feature
-        )
-        usage_data[feature] = {
-            "current": current,
-            "limit": limit,
-            "remaining": max(0, limit - current) if limit != -1 else -1
-        }
-    
-    current_user.usage = usage_data
-    return current_user
+    usage_data = await usage_service.get_user_usage_stats(
+        redis=redis,
+        db=db,
+        user=current_user
+    )
 
+    # Return a plain dict — DON'T assign to current_user.usage
+    # because that's a SQLAlchemy Relationship field (expects UserUsage model, not dict)
+    return {
+        "id": str(current_user.id),
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "is_active": current_user.is_active,
+        "tier": current_user.tier.value,
+        "is_email_verified": current_user.is_email_verified,
+        "oauth_provider": current_user.oauth_provider,
+        "oauth_avatar_url": current_user.oauth_avatar_url,
+        "last_login_at": current_user.last_login_at.isoformat() if current_user.last_login_at else None,
+        "created_at": current_user.created_at.isoformat() if current_user.created_at else None,
+        "usage": usage_data["daily"]  # We only need the daily stats for the frontend store
+    }
 
 @router.post("/logout")
 async def logout(response: Response):
@@ -204,8 +203,12 @@ async def reset_password(
 
 
 @router.get("/google/login")
-async def google_login(request: Request):
+async def google_login(request: Request, mode: str = "login"):
     """Redirect to Google OAuth."""
+    # Store mode in session because Google won't return it to us
+    request.session["oauth_mode"] = mode
+    logger.info(f"DEBUG: Starting OAuth flow in mode: {mode}")
+    
     redirect_uri = request.url_for('google_callback')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
@@ -216,32 +219,54 @@ async def google_callback(
     db: AsyncSession = Depends(get_session)
 ):
     """Handle Google OAuth callback."""
+    import time
+    start_time = time.time()
+    logger.info("DEBUG: Google callback started")
     try:
         token = await oauth.google.authorize_access_token(request)
-        user_info = token.get('userinfo')
+        logger.info(f"DEBUG: Token exchanged in {time.time() - start_time:.4f}s")
         
+        user_info = token.get('userinfo')
         if not user_info:
             raise HTTPException(status_code=400, detail="Failed to get user info from Google")
-        
+
         email = user_info.get('email')
         google_id = user_info.get('sub')
         avatar = user_info.get('picture')
+        full_name = user_info.get('name')
+
+        # Read mode from session (defaults to login if missing)
+        mode = request.session.pop("oauth_mode", "login")
+        logger.info(f"DEBUG: Handling OAuth callback in mode: {mode}")
+
+        logger.info(f"DEBUG: Processing user: {email}")
+        user_start = time.time()
         
-        if not email:
-            raise HTTPException(status_code=400, detail="Email not provided by Google")
+        if mode == "signup":
+            user = await get_or_create_oauth_user(
+                db=db,
+                email=email,
+                oauth_provider="google",
+                oauth_id=google_id,
+                avatar_url=avatar,
+                full_name=full_name
+            )
+        else:
+            from ..services.auth_service import get_oauth_user_only
+            user = await get_oauth_user_only(
+                db=db,
+                email=email,
+                oauth_provider="google",
+                oauth_id=google_id,
+                avatar_url=avatar,
+                full_name=full_name
+            )
         
-        # Get or create user via service
-        user = await get_or_create_oauth_user(
-            db=db,
-            email=email,
-            oauth_provider="google",
-            oauth_id=google_id,
-            avatar_url=avatar
-        )
-        
+        logger.info(f"DEBUG: User handled in {time.time() - user_start:.4f}s")
+
         access_token = create_access_token(data={"sub": str(user.id)})
-        
-        # Return HTML that posts message to opener and closes
+        logger.info("DEBUG: Access token created")
+
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -249,6 +274,7 @@ async def google_callback(
         <body>
             <p>Authentication successful! This window will close automatically.</p>
             <script>
+                console.log('DEBUG: Sending postMessage to opener');
                 if (window.opener) {{
                     window.opener.postMessage({{
                         type: 'oauth-success',
@@ -257,32 +283,46 @@ async def google_callback(
                             email: '{user.email}',
                             tier: '{user.tier.value}'
                         }}
-                    }}, '{settings.FRONTEND_URL}');
+                    }}, '*');
                 }}
                 window.close();
             </script>
         </body>
         </html>
         """
-        
+
         response = HTMLResponse(content=html_content)
         _set_auth_cookie(response, access_token)
+        logger.info(f"DEBUG: Google callback finished total: {time.time() - start_time:.4f}s")
         return response
-        
     except Exception as e:
         logger.error(f"Google OAuth error: {e}")
+        # Sanitize error message to prevent XSS injection
+        import html
+        
+        # Expert Move: Extract detail from HTTPException to avoid "404: ..." prefixes
+        error_msg = str(e)
+        if hasattr(e, 'detail'):
+            error_msg = e.detail
+        elif hasattr(e, 'message'):
+            error_msg = e.message
+            
+        safe_error = html.escape(error_msg)
+        # Also escape single quotes for JS string context
+        safe_error_js = safe_error.replace("'", "\\'")
+        
         error_html = f"""
         <!DOCTYPE html>
         <html>
         <head><title>Authentication Failed</title></head>
         <body>
-            <p>Authentication failed: {str(e)}</p>
+            <p>Authentication failed. This window will close shortly.</p>
             <script>
                 if (window.opener) {{
                     window.opener.postMessage({{
                         type: 'oauth-error',
-                        error: '{str(e)}'
-                    }}, '{settings.FRONTEND_URL}');
+                        error: '{safe_error_js}'
+                    }}, '*');
                 }}
                 setTimeout(() => window.close(), 3000);
             </script>
@@ -290,3 +330,4 @@ async def google_callback(
         </html>
         """
         return HTMLResponse(content=error_html, status_code=400)
+

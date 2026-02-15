@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    #Groq 
+    GROQ_API_KEY: str
+
     # OTP Settings (Password Reset)
     OTP_LENGTH: int = 6
     OTP_EXPIRE_SECONDS: int = 600  # 10 minutes
@@ -41,7 +44,7 @@ class Settings(BaseSettings):
     VERIFY_MAX_RESENDS_PER_HOUR: int = 5      # Anti-spam per email
 
     COOKIE_NAME: str = "access_token"
-    COOKIE_SECURE: bool = False
+    COOKIE_SECURE: bool = False  # Set to True in production (.env: COOKIE_SECURE=true)
     COOKIE_SAMESITE: str = "lax"
 
     # Google OAuth

@@ -5,6 +5,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from ..core.config import get_settings
 from ..db.session import get_session
 from ..models.user import User
+from ..core.logging import logger
 
 if TYPE_CHECKING:
     import manticoresearch
@@ -51,8 +52,18 @@ async def get_current_user(
         )
     
     # 3. Fulfillment
-    user = await db.get(User, user_id)
+    import time
+    db_start = time.time()
+    logger.info(f"DEBUG: get_current_user - fetching user {user_id}")
+    try:
+        user = await db.get(User, user_id)
+        logger.info(f"DEBUG: get_current_user - DB fetch took {time.time() - db_start:.4f}s")
+    except Exception as e:
+        logger.error(f"DEBUG: get_current_user - DB fetch failed: {e}")
+        raise
+    
     if not user:
+        logger.warning(f"DEBUG: get_current_user - user {user_id} not found")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User no longer exists.",
@@ -124,3 +135,10 @@ def get_search_service(
 ) -> "SearchService":
     from ..services.search_service import SearchService
     return SearchService(search_api=search_api)
+
+def get_groq_service():
+    """
+    Dependency to provide the Groq Service singleton.
+    """
+    from ..services.groq_service import get_groq_service as get_service
+    return get_service()

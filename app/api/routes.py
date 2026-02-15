@@ -1,8 +1,11 @@
-﻿from fastapi import APIRouter, Query, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Query, Depends, HTTPException, Request, Response
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 from typing import Optional, List
 
-from .deps import get_search_service, get_current_user_optional
+from .deps import get_search_service, get_current_user_optional, get_groq_service
 from ..services.search_service import SearchService
+from ..services.groq_service import GroqService
 from ..schemas.search import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word, Category
 from ..core.limiter import feature_rate_limit
 from ..models.user import User
@@ -11,6 +14,25 @@ router = APIRouter(
     prefix="/api/v1",
     tags=["Search"]
 )
+
+class CompletionRequest(BaseModel):
+    prompt: str
+    context: Optional[dict] = None
+
+@router.post("/completion")
+@feature_rate_limit("ai_chat")
+async def completion(
+    request: CompletionRequest,
+    groq: GroqService = Depends(get_groq_service)
+):
+    """
+    Direct link to the AI Brain with optional context.
+    Streams tokens directly to the UI.
+    """
+    return StreamingResponse(
+        groq.get_completion_stream(request.prompt, context=request.context),
+        media_type="text/event-stream"
+    )
 
 
 @router.get("/search", response_model=SearchResponse)
@@ -80,7 +102,6 @@ async def search(
 
 
 @router.get("/videos/{video_id}/transcript", response_model=TranscriptResponse)
-@feature_rate_limit("search")
 async def get_transcript(
     request: Request,
     response: Response,

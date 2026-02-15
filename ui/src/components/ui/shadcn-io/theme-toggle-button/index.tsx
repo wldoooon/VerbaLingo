@@ -38,70 +38,95 @@ export const ThemeToggleButton = ({
   onClick,
 }: ThemeToggleButtonProps) => {
   
-  const handleClick = useCallback(() => {
-    // Inject animation styles for this specific transition
-    const styleId = `theme-transition-${Date.now()}`;
-    const style = document.createElement('style');
-    style.id = styleId;
-    
-    // Generate animation CSS based on variant
-    let css = '';
-    const positions = {
-      center: 'center',
-      'top-left': 'top left',
-      'top-right': 'top right',
-      'bottom-left': 'bottom left',
-      'bottom-right': 'bottom right',
-    };
-    
-    if (variant === 'circle') {
-      const cx = start === 'center' ? '50' : start.includes('left') ? '0' : '100';
-      const cy = start === 'center' ? '50' : start.includes('top') ? '0' : '100';
-      css = `
-        @supports (view-transition-name: root) {
-          ::view-transition-old(root) { 
-            animation: none;
-          }
-          ::view-transition-new(root) {
-            animation: circle-expand 0.4s ease-out;
-            transform-origin: ${positions[start]};
-          }
-          @keyframes circle-expand {
-            from {
-              clip-path: circle(0% at ${cx}% ${cy}%);
+    const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  
+      // Expert Move: Capture the exact epicenter of the button
+  
+      const rect = event.currentTarget.getBoundingClientRect();
+  
+      const x = rect.left + rect.width / 2;
+  
+      const y = rect.top + rect.height / 2;
+  
+  
+  
+      // Inject animation styles for this specific transition
+  
+      const styleId = `theme-transition-${Date.now()}`;
+  
+      const style = document.createElement('style');
+  
+      style.id = styleId;
+  
+  
+  
+      // Generate animation CSS based on variant
+  
+      let css = '';
+  
+  
+  
+      if (variant === 'circle' || variant === 'circle-blur') {
+  
+        const isBlur = variant === 'circle-blur';
+  
+        css = `
+  
+          @supports (view-transition-name: root) {
+  
+            ::view-transition-old(root) {
+  
+              animation: none;
+  
+              z-index: 1;
+  
             }
-            to {
-              clip-path: circle(150% at ${cx}% ${cy}%);
+  
+                                          ::view-transition-new(root) {
+  
+                                            animation: circle-expand 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  
+                                            z-index: 2147483647;
+  
+                                            clip-path: circle(150% at ${x}px ${y}px);
+  
+                                            ${isBlur ? 'filter: blur(0);' : ''}
+  
+                                          }
+  
+                                
+  
+                      
+  
+            
+  
+            @keyframes circle-expand {
+  
+              from {
+  
+                clip-path: circle(0% at ${x}px ${y}px);
+  
+                ${isBlur ? 'filter: blur(8px);' : ''}
+  
+              }
+  
+              to {
+  
+                clip-path: circle(150% at ${x}px ${y}px);
+  
+                ${isBlur ? 'filter: blur(0);' : ''}
+  
+              }
+  
             }
+  
           }
-        }
-      `;
-    } else if (variant === 'circle-blur') {
-      const cx = start === 'center' ? '50' : start.includes('left') ? '0' : '100';
-      const cy = start === 'center' ? '50' : start.includes('top') ? '0' : '100';
-      css = `
-        @supports (view-transition-name: root) {
-          ::view-transition-old(root) { 
-            animation: none;
-          }
-          ::view-transition-new(root) {
-            animation: circle-blur-expand 0.5s ease-out;
-            transform-origin: ${positions[start]};
-            filter: blur(0);
-          }
-          @keyframes circle-blur-expand {
-            from {
-              clip-path: circle(0% at ${cx}% ${cy}%);
-              filter: blur(4px);
-            }
-            to {
-              clip-path: circle(150% at ${cx}% ${cy}%);
-              filter: blur(0);
-            }
-          }
-        }
-      `;
-    } else if (variant === 'gif' && url) {
+  
+        `;
+  
+      } else if (variant === 'gif' && url) {
+  
+  
       css = `
         @supports (view-transition-name: root) {
           ::view-transition-old(root) {
@@ -174,7 +199,7 @@ export const ThemeToggleButton = ({
         if (styleEl) {
           styleEl.remove();
         }
-      }, 3000);
+      }, 5000);
     }
     
     // Call the onClick handler if provided
@@ -183,9 +208,13 @@ export const ThemeToggleButton = ({
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size={showLabel ? 'default' : 'icon'}
-      onClick={handleClick}
+      onClick={(e) => {
+        // Prevent default button behavior
+        e.preventDefault();
+        handleClick(e);
+      }}
       className={cn(
         'relative overflow-hidden transition-all',
         showLabel && 'gap-2',

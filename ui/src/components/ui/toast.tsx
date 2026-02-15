@@ -56,7 +56,7 @@ function Toasts({ position = "bottom-right" }: { position: ToastPosition }) {
     <Toast.Portal data-slot="toast-portal">
       <Toast.Viewport
         className={cn(
-          "fixed z-50 mx-auto flex w-[calc(100%-var(--toast-inset)*2)] max-w-90 [--toast-inset:--spacing(4)] sm:[--toast-inset:--spacing(8)]",
+          "fixed z-50 mx-auto flex w-[calc(100%-var(--toast-inset)*2)] max-w-[420px] [--toast-inset:--spacing(4)] sm:[--toast-inset:--spacing(8)]",
           // Vertical positioning
           "data-[position*=top]:top-(--toast-inset)",
           "data-[position*=bottom]:bottom-(--toast-inset)",
@@ -76,7 +76,7 @@ function Toasts({ position = "bottom-right" }: { position: ToastPosition }) {
           return (
             <Toast.Root
               className={cn(
-                "absolute z-[calc(9999-var(--toast-index))] h-(--toast-calc-height) w-full select-none rounded-lg border bg-popover bg-clip-padding text-popover-foreground shadow-lg [transition:transform_.5s_cubic-bezier(.22,1,.36,1),opacity_.5s,height_.15s] before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-lg)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] dark:bg-clip-border dark:before:shadow-[0_-1px_--theme(--color-white/8%)]",
+                "absolute z-[calc(9999-var(--toast-index))] h-(--toast-calc-height) w-full select-none rounded-xl border bg-popover bg-clip-padding text-popover-foreground shadow-2xl [transition:transform_.5s_cubic-bezier(.22,1,.36,1),opacity_.5s,height_.15s] before:pointer-events-none before:absolute before:inset-0 before:rounded-[calc(var(--radius-xl)-1px)] before:shadow-[0_1px_--theme(--color-black/4%)] dark:bg-clip-border dark:before:shadow-[0_-1px_--theme(--color-white/8%)] in-data-[type=warning]:border-l-4 in-data-[type=warning]:border-l-orange-500 in-data-[type=error]:border-l-4 in-data-[type=error]:border-l-red-500 in-data-[type=info]:border-l-4 in-data-[type=info]:border-l-blue-500 in-data-[type=success]:border-l-4 in-data-[type=success]:border-l-green-500",
                 // Base positioning using data-position
                 "data-[position*=right]:right-0 data-[position*=right]:left-auto",
                 "data-[position*=left]:right-auto data-[position*=left]:left-0",
@@ -127,31 +127,31 @@ function Toasts({ position = "bottom-right" }: { position: ToastPosition }) {
               }
               toast={toast}
             >
-              <Toast.Content className="pointer-events-auto flex items-center justify-between gap-1.5 overflow-hidden px-3.5 py-3 text-sm transition-opacity duration-250 data-behind:pointer-events-none data-behind:opacity-0 data-expanded:opacity-100">
-                <div className="flex gap-2">
+              <Toast.Content className="pointer-events-auto flex items-center justify-between gap-3 overflow-hidden px-5 py-4 text-sm transition-opacity duration-250 data-behind:pointer-events-none data-behind:opacity-0 data-expanded:opacity-100">
+                <div className="flex gap-3 items-start">
                   {Icon && (
                     <div
-                      className="[&>svg]:h-lh [&>svg]:w-4 [&_svg]:pointer-events-none [&_svg]:shrink-0"
+                      className="mt-0.5 [&>svg]:h-5 [&>svg]:w-5 [&_svg]:pointer-events-none [&_svg]:shrink-0"
                       data-slot="toast-icon"
                     >
                       <Icon className="in-data-[type=loading]:animate-spin in-data-[type=error]:text-destructive in-data-[type=info]:text-info in-data-[type=success]:text-success in-data-[type=warning]:text-warning in-data-[type=loading]:opacity-80" />
                     </div>
                   )}
 
-                  <div className="flex flex-col gap-0.5">
+                  <div className="flex flex-col gap-1">
                     <Toast.Title
-                      className="font-medium"
+                      className="font-semibold text-[15px] leading-tight"
                       data-slot="toast-title"
                     />
                     <Toast.Description
-                      className="text-muted-foreground"
+                      className="text-muted-foreground text-[13px] leading-snug"
                       data-slot="toast-description"
                     />
                   </div>
                 </div>
                 {toast.actionProps && (
                   <Toast.Action
-                    className={buttonVariants({ size: "xs" })}
+                    className={buttonVariants({ size: "sm" })}
                     data-slot="toast-action"
                   >
                     {toast.actionProps.children}

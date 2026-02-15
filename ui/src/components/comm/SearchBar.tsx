@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, X, ArrowRight, ChevronDown, Check, Clock, Lock, Sparkles, UserPlus } from 'lucide-react';
+import { Search, X, ArrowRight, ChevronDown, Check, Clock, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSearchStore } from '@/stores/use-search-store';
@@ -58,8 +58,8 @@ export function SearchBar() {
     const { hasAccess, remaining, limit, current, isUnlimited, isLoaded } = useEntitlements('search');
     const isAnonymous = useAuthStore((s) => s.status) !== 'authenticated';
 
-    // Track if we already showed the "limit hit" toast this session
-    const limitToastShown = useRef(false);
+    // Cooldown for limit toast (prevent spam, allow re-showing after 5s)
+    const lastLimitToast = useRef(0);
 
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -180,8 +180,9 @@ export function SearchBar() {
     };
 
     const showLimitToast = useCallback(() => {
-        if (limitToastShown.current) return;
-        limitToastShown.current = true;
+        const now = Date.now();
+        if (now - lastLimitToast.current < 5000) return;
+        lastLimitToast.current = now;
 
         if (isAnonymous) {
             toastManager.add({
@@ -269,232 +270,211 @@ export function SearchBar() {
     };
 
     return (
-        <div className="w-full max-w-3xl relative z-30" ref={containerRef}>
-            <div className={cn(
-                "group relative rounded-xl transition-all duration-300 ease-in-out border border-primary/40 overflow-hidden",
-                showRecent && recentSearches.length > 0
-                    ? "rounded-b-none"
-                    : "hover:-translate-y-0.5"
-            )}>
-                {/* Inner Content */}
-                <div className="relative z-10 bg-muted/20 backdrop-blur-md flex flex-row items-center p-1 w-full h-full">
+        <div className="w-full max-w-4xl flex items-center gap-4 relative z-30" ref={containerRef}>
+            <div className="flex-1">
+                <div className={cn(
+                    "group relative rounded-xl transition-all duration-300 ease-in-out border border-primary/40 overflow-hidden",
+                    showRecent && recentSearches.length > 0
+                        ? "rounded-b-none"
+                        : "hover:-translate-y-0.5"
+                )}>
+                    {/* Inner Content */}
+                    <div className="relative z-10 bg-muted/20 backdrop-blur-md flex flex-row items-center p-1 w-full h-full">
 
-                    {/* Category Dropdown */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className={cn(
-                                    "h-9 px-3 rounded-lg gap-2 font-semibold text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground",
-                                )}
-                            >
-                                <div className="flex items-center gap-2">
-                                    {/* Animated Filter Icon Replacement */}
-                                    <svg
-                                        className={cn("w-4 h-4 transition-colors")}
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <line x1="4" y1="6" x2="20" y2="6" />
-                                        <line x1="4" y1="18" x2="12" y2="18" />
-                                    </svg>
-                                    <span className="hidden md:inline">{getCategoryLabel()}</span>
-                                    <ChevronDown className="w-4 h-4 opacity-50" />
-                                </div>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-[200px] p-2 rounded-xl" sideOffset={8}>
-                            <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
-                                Search Context
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                                {CATEGORIES.map((cat) => (
-                                    <DropdownMenuCheckboxItem
-                                        key={cat.value}
-                                        checked={isCategorySelected(cat.value)}
-                                        onCheckedChange={() => toggleCategory(cat.value)}
-                                        className="rounded-lg py-2.5 cursor-pointer"
-                                    >
-                                        {cat.label}
-                                    </DropdownMenuCheckboxItem>
-                                ))}
-                            </DropdownMenuGroup>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-
-                    {/* Divider */}
-                    <div className="w-px h-6 bg-border mx-2 hidden sm:block" />
-
-                    {/* Unified Input Area */}
-                    <div className="flex-1 relative flex items-center min-w-0">
-                        {/* Animated placeholder */}
-                        {!query && (
-                            <div className="pointer-events-none absolute left-3 right-12 flex items-center top-1/2 -translate-y-1/2 overflow-hidden">
-                                <TextType
-                                    text={[
-                                        "hello, how are you today?",
-                                        "مرحبا، أين يمكنني أن أجد محطة المترو؟",
-                                        "guten Tag, ich hätte gerne ein Stück Kuchen",
-                                        "bonjour, pouvez-vous m'aider?",
-                                        "你好，我想学习如何做这道菜",
-                                    ]}
-                                    typingSpeed={75}
-                                    pauseDuration={1500}
-                                    showCursor={true}
-                                    cursorCharacter="|"
-                                    className="text-sm text-muted-foreground/50 font-normal whitespace-nowrap"
-                                />
-                            </div>
-                        )}
-
-                        <Input
-                            ref={inputRef}
-                            type="text"
-                            value={hasAccess ? query : ''}
-                            placeholder={!hasAccess
-                                ? (isAnonymous ? "Sign up for more searches..." : "Daily limit reached — resets tomorrow")
-                                : ""
-                            }
-                            disabled={!hasAccess}
-                            onChange={(e) => {
-                                setQuery(e.target.value);
-                                setShowRecent(true);
-                            }}
-                            onFocus={() => setShowRecent(true)}
-                            onKeyDown={handleKeyDown}
-                            className={cn(
-                                "border-0 shadow-none focus-visible:ring-0 px-3 h-9 text-base font-medium placeholder:text-transparent min-w-0",
-                                !hasAccess && "placeholder:text-muted-foreground/60 cursor-not-allowed opacity-60"
-                            )}
-                        />
-
-                        {query && hasAccess && (
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                    setQuery('');
-                                    inputRef.current?.focus();
-                                }}
-                                className="h-7 w-7 rounded-full absolute right-2 text-muted-foreground hover:bg-muted"
-                            >
-                                <X className="w-3.5 h-3.5" />
-                            </Button>
-                        )}
-                        
-                        {!hasAccess && isLoaded && (
-                            <Link
-                                href={isAnonymous ? "/signup" : "/pricing"}
-                                className="absolute right-2 text-[10px] font-bold text-primary hover:underline uppercase tracking-tighter bg-primary/10 px-1.5 py-0.5 rounded flex items-center gap-1"
-                            >
-                                {isAnonymous ? (
-                                    <><UserPlus className="w-3 h-3" /> Sign Up</>
-                                ) : (
-                                    <><Sparkles className="w-3 h-3" /> Upgrade</>
-                                )}
-                            </Link>
-                        )}
-                    </div>
-
-                    {/* Language Dropdown */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className={cn(
-                                    "h-9 px-2 sm:px-3 rounded-lg gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground mr-1"
-                                )}
-                            >
-                                <div className="w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border flex-shrink-0">
-                                    <img
-                                        src={LANGUAGES.find(l => l.value === selectedLanguage)?.flag || LANGUAGES[0].flag}
-                                        alt={selectedLanguage}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <span className="hidden md:inline">{selectedLanguage}</span>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[180px] p-2 rounded-xl" sideOffset={8}>
-                            <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
-                                Language
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            {LANGUAGES.map((lang) => (
-                                <DropdownMenuItem
-                                    key={lang.value}
-                                    onClick={() => {
-                                        setSelectedLanguage(lang.value);
-                                        setStoreLanguage(lang.value.toLowerCase());
-
-                                        // Auto-search logic for language
-                                        if (pathname.startsWith('/search/')) {
-                                            const pathParts = pathname.split('/');
-                                            if (pathParts.length >= 4) {
-                                                const searchQ = pathParts[2];
-                                                const newLang = lang.value.toLowerCase();
-                                                router.push(`/search/${searchQ}/${newLang}${window.location.search}`);
-                                            }
-                                        }
-                                    }}
+                        {/* Category Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
                                     className={cn(
-                                        "rounded-lg py-2.5 cursor-pointer flex items-center justify-between",
-                                        selectedLanguage === lang.value && "bg-accent text-accent-foreground"
+                                        "h-9 px-3 rounded-lg gap-2 font-semibold text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground",
                                     )}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border/50">
-                                            <img src={lang.flag} alt={lang.value} className="w-full h-full object-cover" />
-                                        </div>
-                                        <span className="text-sm font-medium">{lang.label}</span>
+                                    <div className="flex items-center gap-2">
+                                        {/* Animated Filter Icon Replacement */}
+                                        <svg
+                                            className={cn("w-4 h-4 transition-colors")}
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <line x1="4" y1="6" x2="20" y2="6" />
+                                            <line x1="4" y1="18" x2="12" y2="18" />
+                                        </svg>
+                                        <span className="hidden md:inline">{getCategoryLabel()}</span>
+                                        <ChevronDown className="w-4 h-4 opacity-50" />
                                     </div>
-                                    {selectedLanguage === lang.value && <Check className="w-4 h-4 ml-2" />}
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" className="w-[200px] p-2 rounded-xl" sideOffset={8}>
+                                <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
+                                    Search Context
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuGroup>
+                                    {CATEGORIES.map((cat) => (
+                                        <DropdownMenuCheckboxItem
+                                            key={cat.value}
+                                            checked={isCategorySelected(cat.value)}
+                                            onCheckedChange={() => toggleCategory(cat.value)}
+                                            className="rounded-lg py-2.5 cursor-pointer"
+                                        >
+                                            {cat.label}
+                                        </DropdownMenuCheckboxItem>
+                                    ))}
+                                </DropdownMenuGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
-                    {/* Remaining counter badge (when getting close) */}
-                    {hasAccess && isLoaded && !isUnlimited && remaining <= 5 && (
-                        <span className={cn(
-                            "text-[10px] font-bold tabular-nums px-1.5 py-0.5 rounded-md mr-1 shrink-0 transition-colors",
-                            remaining <= 2
-                                ? "bg-red-500/15 text-red-500"
-                                : "bg-orange-500/15 text-orange-500"
-                        )}>
-                            {remaining}
-                        </span>
-                    )}
+                        {/* Divider */}
+                        <div className="w-px h-6 bg-border mx-2 hidden sm:block" />
 
-                    {/* Search Action Button */}
-                    <Button
-                        size="icon"
-                        onClick={() => hasAccess ? handleSearch() : router.push(isAnonymous ? '/signup' : '/pricing')}
-                        disabled={(!query.trim() && hasAccess) || isSearching || !isLoaded}
-                        className={cn(
-                            "h-9 w-9 rounded-lg shadow-lg transition-all duration-300 shrink-0",
-                            !hasAccess 
-                                ? "bg-orange-500/20 text-orange-500 hover:bg-orange-500/30 shadow-none cursor-pointer"
-                                : query.trim()
-                                    ? 'bg-primary text-primary-foreground hover:scale-105 hover:bg-primary/90'
-                                    : 'bg-muted text-muted-foreground shadow-none'
-                        )}
-                    >
-                        {isSearching ? (
-                            <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
-                        ) : !hasAccess && isLoaded ? (
-                            <Lock className="w-4 h-4" />
-                        ) : (
-                            <ArrowRight className="w-4 h-4" />
-                        )}
-                    </Button>
+                        {/* Unified Input Area */}
+                        <div
+                            className="flex-1 relative flex items-center min-w-0"
+                            onClick={() => {
+                                if (!hasAccess && isLoaded) {
+                                    showLimitToast();
+                                }
+                            }}
+                        >
+                            {/* Animated placeholder */}
+                            {!query && (
+                                <div className="pointer-events-none absolute left-3 right-12 flex items-center top-1/2 -translate-y-1/2 overflow-hidden">
+                                    <TextType
+                                        text={[
+                                            "hello, how are you today?",
+                                            "مرحبا، أين يمكنني أن أجد محطة المترو؟",
+                                            "guten Tag, ich hätte gerne ein Stück Kuchen",
+                                            "bonjour, pouvez-vous m'aider?",
+                                            "你好，我想学习如何做这道菜",
+                                        ]}
+                                        typingSpeed={75}
+                                        pauseDuration={1500}
+                                        showCursor={true}
+                                        cursorCharacter="|"
+                                        className="text-sm text-muted-foreground/50 font-normal whitespace-nowrap"
+                                    />
+                                </div>
+                            )}
+
+                                                    <Input
+                                                        ref={inputRef}
+                                                        type="text"
+                                                        value={hasAccess ? query : ''}
+                                                        disabled={!hasAccess}
+                                                        onChange={(e) => {
+                                                            setQuery(e.target.value);
+                                                            setShowRecent(true);
+                                                        }}
+                                                        onFocus={() => setShowRecent(true)}
+                                                        onKeyDown={handleKeyDown}
+                                                        className={cn(
+                                                            "border-0 bg-transparent shadow-none focus-visible:ring-0 px-3 h-9 text-base font-medium placeholder:text-transparent min-w-0",
+                                                            !hasAccess && "placeholder:text-muted-foreground/60 cursor-not-allowed opacity-60"
+                                                        )}
+                                                    />
+                                                        {query && hasAccess && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                        setQuery('');
+                                        inputRef.current?.focus();
+                                    }}
+                                    className="h-7 w-7 rounded-full absolute right-2 text-muted-foreground hover:bg-muted"
+                                >
+                                    <X className="w-3.5 h-3.5" />
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Language Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className={cn(
+                                        "h-9 px-2 sm:px-3 rounded-lg gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground mr-1"
+                                    )}
+                                >
+                                    <div className="w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border flex-shrink-0">
+                                        <img
+                                            src={LANGUAGES.find(l => l.value === selectedLanguage)?.flag || LANGUAGES[0].flag}
+                                            alt={selectedLanguage}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <span className="hidden md:inline">{selectedLanguage}</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-[180px] p-2 rounded-xl" sideOffset={8}>
+                                <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
+                                    Language
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                {LANGUAGES.map((lang) => (
+                                    <DropdownMenuItem
+                                        key={lang.value}
+                                        onClick={() => {
+                                            setSelectedLanguage(lang.value);
+                                            setStoreLanguage(lang.value.toLowerCase());
+
+                                            // Auto-search logic for language
+                                            if (pathname.startsWith('/search/')) {
+                                                const pathParts = pathname.split('/');
+                                                if (pathParts.length >= 4) {
+                                                    const searchQ = pathParts[2];
+                                                    const newLang = lang.value.toLowerCase();
+                                                    router.push(`/search/${searchQ}/${newLang}${window.location.search}`);
+                                                }
+                                            }
+                                        }}
+                                        className={cn(
+                                            "rounded-lg py-2.5 cursor-pointer flex items-center justify-between",
+                                            selectedLanguage === lang.value && "bg-accent text-accent-foreground"
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border/50">
+                                                <img src={lang.flag} alt={lang.value} className="w-full h-full object-cover" />
+                                            </div>
+                                            <span className="text-sm font-medium">{lang.label}</span>
+                                        </div>
+                                        {selectedLanguage === lang.value && <Check className="w-4 h-4 ml-2" />}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        {/* Search Action Button */}
+                        <Button
+                            size="icon"
+                            onClick={() => hasAccess ? handleSearch() : router.push(isAnonymous ? '/signup' : '/pricing')}
+                            disabled={(!query.trim() && hasAccess) || isSearching || !isLoaded}
+                            className={cn(
+                                "h-9 w-9 rounded-lg shadow-lg transition-all duration-300 shrink-0",
+                                !hasAccess
+                                    ? "bg-orange-500/20 text-orange-500 hover:bg-orange-500/30 shadow-none cursor-pointer"
+                                    : query.trim()
+                                        ? 'bg-primary text-primary-foreground hover:scale-105 hover:bg-primary/90'
+                                        : 'bg-muted text-muted-foreground shadow-none'
+                            )}
+                        >
+                            {isSearching ? (
+                                <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                            ) : !hasAccess && isLoaded ? (
+                                <Lock className="w-4 h-4" />
+                            ) : (
+                                <ArrowRight className="w-4 h-4" />
+                            )}
+                        </Button>
+                    </div>
                 </div>
             </div>
 
