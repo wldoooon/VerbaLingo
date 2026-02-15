@@ -11,7 +11,6 @@ import { toastManager } from '@/components/ui/toast';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { UsageCircle } from '@/components/comm/UsageCircle';
 import Link from 'next/link';
 import {
     DropdownMenu,
@@ -478,21 +477,6 @@ export function SearchBar() {
                     </div>
                 </div>
             </div>
-
-            {/* Outside Usage Circle */}
-            {isLoaded && !isUnlimited && (
-                <div className="flex-shrink-0 animate-in fade-in zoom-in duration-500 flex items-center h-full">
-                    <UsageCircle
-                        current={current}
-                        limit={limit}
-                        remaining={remaining}
-                        hasAccess={hasAccess}
-                        isAnonymous={isAnonymous}
-                        size="sm"
-                        className="hover:scale-110 transition-transform"
-                    />
-                </div>
-            )}
 
             {/* Unified Suggestions & Recents Panel */}
             {showRecent && !isSearching && (recentSearches.length > 0 || (query.length >= 2 && (suggestions.length > 0 || isLoading))) && (
