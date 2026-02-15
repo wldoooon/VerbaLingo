@@ -6,11 +6,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowUpRight, HelpCircle, MessageCircle, Sparkles } from "lucide-react"
+import { MorphSurface } from "@/components/ui/morph-surface"
+import { HelpCircle, MessageCircle } from "lucide-react"
 import ShinyText from "./ShinyText"
 import AnimatedContent from "./AnimatedContent"
 
@@ -19,6 +19,11 @@ const faqData = [
     question: "What is VerbaLingo, and how can it help me?",
     answer: "VerbaLingo is a context-first language learning engine. We index millions of real-world video frames to show you exactly how native speakers use words in context, helping you master fluency faster than traditional methods.",
     tag: "Getting Started",
+  },
+  {
+    question: "Which languages are supported?",
+    answer: "We currently support English, French, German, Spanish, and Arabic with more languages being added regularly. Each language has a curated library of real-world video content from movies, podcasts, and speeches.",
+    tag: "Languages",
   },
   {
     question: "Is there a free tier available?",
@@ -31,9 +36,29 @@ const faqData = [
     tag: "Credits",
   },
   {
+    question: "What makes VerbaLingo different from other language apps?",
+    answer: "Unlike traditional apps that use scripted examples, VerbaLingo shows you real clips from movies, podcasts, and speeches. You learn how words are actually used by native speakers, with full context, tone, and emotion.",
+    tag: "Features",
+  },
+  {
+    question: "Can I use VerbaLingo on mobile?",
+    answer: "VerbaLingo is fully responsive and works in any modern browser on mobile, tablet, and desktop. We also offer a browser extension for quick lookups while browsing the web.",
+    tag: "Platform",
+  },
+  {
+    question: "How does the AI Assistant work?",
+    answer: "Our AI Assistant uses your search context to provide personalized explanations, grammar breakdowns, and usage examples. It understands the video clip you're watching and can answer questions about vocabulary, pronunciation, and cultural nuances.",
+    tag: "AI",
+  },
+  {
     question: "Is my learning data secure?",
     answer: "Absolutely. We use high-level encryption for all user data and your search history is private to your account. We never share your data with third parties.",
     tag: "Security",
+  },
+  {
+    question: "Can I save clips and create collections?",
+    answer: "Yes! You can save any clip to your library, organize them into custom collections, and revisit them anytime. Your saved clips sync across all your devices.",
+    tag: "Features",
   },
   {
     question: "How can I contact support?",
@@ -44,11 +69,11 @@ const faqData = [
 
 export function Faq() {
   return (
-    <section className="py-24 md:py-32 bg-background overflow-hidden">
-      <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
+    <section id="faq" className="py-24 md:py-32 bg-background overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-9 max-w-8xl">
 
         {/* Two-column layout: Left (header + CTA) | Right (accordion) */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.8fr_1.6fr] gap-12 lg:gap-20 items-start">
 
           {/* Left Column — Sticky header + Contact CTA */}
           <AnimatedContent distance={40} direction="vertical" duration={1.2} threshold={0.2}>
@@ -79,36 +104,43 @@ export function Faq() {
               </div>
 
               {/* Contact CTA */}
-              <Card className="border border-border/60 shadow-sm bg-card/80 backdrop-blur-sm rounded-2xl overflow-hidden">
-                <CardContent className="p-6 space-y-5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <MessageCircle className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="space-y-0.5">
-                      <h3 className="text-sm font-bold text-foreground tracking-tight">Still have questions?</h3>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        Get personalized help from our team.
-                      </p>
-                    </div>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <MessageCircle className="w-5 h-5 text-primary" />
                   </div>
-                  <Button className="w-full rounded-full h-10 font-semibold gap-2 group shadow-md hover:shadow-lg transition-all">
-                    Contact us
-                    <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-bold text-foreground tracking-tight">Still have questions?</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Get personalized help from our team.
+                    </p>
+                  </div>
+                </div>
+                <MorphSurface
+                  triggerLabel="Contact us"
+                  triggerIcon={<MessageCircle className="w-4 h-4" />}
+                  placeholder="Describe your question or issue..."
+                  submitLabel="Send message"
+                  animationSpeed={1}
+                />
+              </div>
             </div>
           </AnimatedContent>
 
           {/* Right Column — Accordion */}
-          <AnimatedContent distance={50} direction="vertical" delay={0.2} duration={1} threshold={0.1}>
-            <Card className="border border-border/60 shadow-sm bg-card/80 backdrop-blur-sm rounded-2xl overflow-hidden">
-              <CardContent className="p-0">
-                <Accordion type="single" collapsible className="w-full">
-                  {faqData.map((item, index) => (
+          <Card className="border border-border/60 shadow-sm bg-card/80 backdrop-blur-sm rounded-2xl overflow-hidden">
+            <CardContent className="p-0">
+              <Accordion type="single" collapsible className="w-full">
+                {faqData.map((item, index) => (
+                  <AnimatedContent
+                    key={index}
+                    distance={40}
+                    direction="vertical"
+                    delay={0.15 * index}
+                    duration={0.7}
+                    threshold={0.05}
+                  >
                     <AccordionItem
-                      key={index}
                       value={`item-${index}`}
                       className="border-b border-border/40 last:border-b-0 px-6 md:px-8 transition-colors data-[state=open]:bg-muted/30"
                     >
@@ -133,11 +165,11 @@ export function Faq() {
                         </div>
                       </AccordionContent>
                     </AccordionItem>
-                  ))}
-                </Accordion>
-              </CardContent>
-            </Card>
-          </AnimatedContent>
+                  </AnimatedContent>
+                ))}
+              </Accordion>
+            </CardContent>
+          </Card>
 
         </div>
       </div>
