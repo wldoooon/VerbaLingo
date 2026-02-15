@@ -9,8 +9,8 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { MorphSurface } from "@/components/ui/morph-surface"
-import { HelpCircle, MessageCircle } from "lucide-react"
+import { ContactMorphSurface } from "@/components/ui/contact-morph-surface"
+import { HelpCircle } from "lucide-react"
 import ShinyText from "./ShinyText"
 import AnimatedContent from "./AnimatedContent"
 
@@ -104,23 +104,9 @@ export function Faq() {
               </div>
 
               {/* Contact CTA */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <MessageCircle className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <h3 className="text-sm font-bold text-foreground tracking-tight">Still have questions?</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Get personalized help from our team.
-                    </p>
-                  </div>
-                </div>
-                <MorphSurface
+              <div>
+                <ContactMorphSurface
                   triggerLabel="Contact us"
-                  triggerIcon={<MessageCircle className="w-4 h-4" />}
-                  placeholder="Describe your question or issue..."
-                  submitLabel="Send message"
                   animationSpeed={1}
                 />
               </div>
