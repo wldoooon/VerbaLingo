@@ -8,14 +8,14 @@ import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/stores/auth-store';
 import { useLogoutMutation } from '@/lib/authHooks';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-    DropdownMenuGroup,
-    DropdownMenuShortcut,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuGroup,
+  DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -23,20 +23,20 @@ import { AuthDialog } from "@/components/auth-dialog";
 
 // New Sidebar Primitives (Localized from the new sidebar.tsx)
 const SidebarMenu = ({ children, className }: { children: React.ReactNode, className?: string }) => (
-    <ul className={`flex w-full min-w-0 flex-col gap-1 ${className}`}>{children}</ul>
+  <ul className={`flex w-full min-w-0 flex-col gap-1 ${className}`}>{children}</ul>
 );
 
 const SidebarMenuItem = ({ children, className }: { children: React.ReactNode, className?: string }) => (
-    <li className={`group/menu-item relative ${className}`}>{children}</li>
+  <li className={`group/menu-item relative ${className}`}>{children}</li>
 );
 
 const SidebarMenuButton = ({ children, className, isActive, size = "default", ...props }: any) => (
-    <button
-        className={`flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm transition-all hover:bg-muted/50 active:bg-muted cursor-pointer ${isActive ? 'bg-muted/50 font-medium' : ''} ${className}`}
-        {...props}
-    >
-        {children}
-    </button>
+  <button
+    className={`flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm transition-all hover:bg-muted/50 active:bg-muted cursor-pointer ${isActive ? 'bg-muted/50 font-medium' : ''} ${className}`}
+    {...props}
+  >
+    {children}
+  </button>
 );
 
 // Enum for mapping routes to views
@@ -146,12 +146,22 @@ const Sidebar: React.FC = () => {
           </div>
           {!isCollapsed && (
             <div className="grid flex-1 text-left text-sm leading-tight ml-3">
-              <span className="truncate font-black text-sm tracking-tight text-foreground">
-                {authUser?.full_name || (authUser?.email?.split('@')[0] || "Guest")}
-              </span>
-              <span className="truncate text-[10px] font-bold uppercase tracking-widest text-orange-500">
-                {authStatus === 'authenticated' ? (authUser?.tier || "Free") : "Guest"} Plan
-              </span>
+              {authStatus === "unknown" ? (
+                /* Skeleton while auth loads — prevents flash of "Guest" */
+                <>
+                  <div className="h-3.5 w-24 rounded bg-muted animate-pulse mb-1" />
+                  <div className="h-2.5 w-16 rounded bg-muted animate-pulse" />
+                </>
+              ) : (
+                <>
+                  <span className="truncate font-black text-sm tracking-tight text-foreground">
+                    {authUser?.full_name || (authUser?.email?.split('@')[0] || "Guest")}
+                  </span>
+                  <span className="truncate text-[10px] font-bold uppercase tracking-widest text-orange-500">
+                    {authStatus === 'authenticated' ? (authUser?.tier || "Free") : "Guest"} Plan
+                  </span>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -257,14 +267,14 @@ const Sidebar: React.FC = () => {
         </div>
 
         {/* Cat Image & Promo - ONLY show for guests */}
-        {!isCollapsed && authStatus !== 'authenticated' && (
+        {!isCollapsed && authStatus === 'guest' && (
           <div className="mt-6 mx-1 flex flex-col items-center justify-center text-center space-y-3 animate-fade-in">
             {/* Cat Image */}
             <div className="w-48 h-48 relative sm:w-52 sm:h-52 hover:scale-105 transition-transform duration-500 ease-out cursor-pointer -my-4">
-              <img 
-                src={mounted && resolvedTheme === 'dark' ? "/sleeping_cat2.png" : "/cat_logo1.png"} 
-                alt="Get Started" 
-                className="w-full h-full object-contain drop-shadow-2xl" 
+              <img
+                src={mounted && resolvedTheme === 'dark' ? "/sleeping_cat2.png" : "/cat_logo1.png"}
+                alt="Get Started"
+                className="w-full h-full object-contain drop-shadow-2xl"
               />
             </div>
 

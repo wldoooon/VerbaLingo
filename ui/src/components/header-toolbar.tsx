@@ -106,19 +106,103 @@ export function HeaderToolbar({
 
 
 
-    return (
+  return (
 
 
 
-      <div className="flex items-center gap-1 sm:gap-2">
+    <div className="flex items-center gap-1 sm:gap-2">
 
 
 
-          
 
 
 
-        {/* Changelog */}
+
+      {/* Changelog */}
+
+
+
+      <Tooltip delayDuration={200}>
+
+
+
+        <TooltipTrigger asChild>
+
+
+
+          <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 cursor-pointer">
+
+
+
+            <FileClock className="h-5 w-5" />
+
+
+
+          </Button>
+
+
+
+        </TooltipTrigger>
+
+
+
+        <TooltipContent side="bottom">Changelog</TooltipContent>
+
+
+
+      </Tooltip>
+
+
+
+
+
+
+
+      {/* Feedback */}
+
+
+
+      <Tooltip delayDuration={200}>
+
+
+
+        <TooltipTrigger asChild>
+
+
+
+          <div className="cursor-pointer">
+
+
+
+            <FeedbackDialog />
+
+
+
+          </div>
+
+
+
+        </TooltipTrigger>
+
+
+
+        <TooltipContent side="bottom">Send Feedback</TooltipContent>
+
+
+
+      </Tooltip>
+
+
+
+
+
+
+
+      {/* Theme Toggle */}
+
+
+
+      {mounted && (
 
 
 
@@ -130,51 +214,35 @@ export function HeaderToolbar({
 
 
 
-            <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 cursor-pointer">
+            <div className="flex items-center justify-center cursor-pointer">
 
 
 
-              <FileClock className="h-5 w-5" />
+              <ThemeToggleButton
 
 
 
-            </Button>
+                theme={theme as 'light' | 'dark'}
 
 
 
-          </TooltipTrigger>
+                onClick={handleThemeToggle}
 
 
 
-          <TooltipContent side="bottom">Changelog</TooltipContent>
+                variant="circle-blur"
 
 
 
-        </Tooltip>
+                start="top-right"
 
 
 
-  
+                className="h-9 w-9"
 
 
 
-        {/* Feedback */}
-
-
-
-        <Tooltip delayDuration={200}>
-
-
-
-          <TooltipTrigger asChild>
-
-
-
-            <div className="cursor-pointer">
-
-
-
-              <FeedbackDialog />
+              />
 
 
 
@@ -186,7 +254,15 @@ export function HeaderToolbar({
 
 
 
-          <TooltipContent side="bottom">Send Feedback</TooltipContent>
+          <TooltipContent side="bottom">
+
+
+
+            Toggle {theme === 'light' ? 'Dark' : 'Light'} Mode
+
+
+
+          </TooltipContent>
 
 
 
@@ -194,132 +270,45 @@ export function HeaderToolbar({
 
 
 
-  
+      )}
 
 
 
-        {/* Theme Toggle */}
 
 
 
-        {mounted && (
 
+      <div className="ml-2">
 
 
-          <Tooltip delayDuration={200}>
 
 
 
-            <TooltipTrigger asChild>
-
-
-
-              <div className="flex items-center justify-center cursor-pointer">
-
-
-
-                <ThemeToggleButton
-
-
-
-                  theme={theme as 'light' | 'dark'}
-
-
-
-                  onClick={handleThemeToggle}
-
-
-
-                  variant="circle-blur"
-
-
-
-                  start="top-right"
-
-
-
-                  className="h-9 w-9"
-
-
-
-                />
-
-
-
-              </div>
-
-
-
-            </TooltipTrigger>
-
-
-
-            <TooltipContent side="bottom">
-
-
-
-              Toggle {theme === 'light' ? 'Dark' : 'Light'} Mode
-
-
-
-            </TooltipContent>
-
-
-
-          </Tooltip>
-
-
-
-        )}
-
-
-
-  
-
-
-
-        <div className="ml-2">
-
-
-
-  
-
-        {status === "authenticated" && authUser ? (
-
-          <HeaderUserProfile
-
-            user={displayUser}
-
-            onLogout={() => logoutMutation.mutate()}
-
-          />
-
-        ) : (
-
+        {status === "unknown" ? (
+          /* Auth is still loading — show a neutral skeleton to prevent
+             the flash of login/signup buttons for authenticated users */
           <div className="flex items-center gap-2">
-
-            <AuthDialog defaultTab="login">
-
-              <Button variant="outline" size="sm" className="rounded-full">
-
-                Log in
-
-              </Button>
-
-            </AuthDialog>
-
-            <AuthDialog defaultTab="signup">
-
-              <Button size="sm" className="rounded-full">
-
-                Sign up
-
-              </Button>
-
-            </AuthDialog>
-
+            <div className="h-8 w-16 rounded-full bg-muted animate-pulse" />
+            <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
           </div>
-
+        ) : status === "authenticated" && authUser ? (
+          <HeaderUserProfile
+            user={displayUser}
+            onLogout={() => logoutMutation.mutate()}
+          />
+        ) : (
+          <div className="flex items-center gap-2">
+            <AuthDialog defaultTab="login">
+              <Button variant="outline" size="sm" className="rounded-full">
+                Log in
+              </Button>
+            </AuthDialog>
+            <AuthDialog defaultTab="signup">
+              <Button size="sm" className="rounded-full">
+                Sign up
+              </Button>
+            </AuthDialog>
+          </div>
         )}
 
       </div>
