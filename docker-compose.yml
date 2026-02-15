@@ -1,29 +1,100 @@
-services:
-  manticore:
-    image: manticoresearch/manticore:latest
-    container_name: manticore01
-    ports:
-      - "9306:9306"
-      - "9308:9308"
-    volumes:
-      - manticore_data:/var/lib/manticore
-    ulimits:
-      nproc: 65535
-      nofile:
-        soft: 65535
-        hard: 65535
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9308 || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+# ═══════════════════════════════════════════════════════════
+# VerbaLingo — Production Docker Compose
+# ═══════════════════════════════════════════════════════════
+#
+# This file defines ALL services needed to run VerbaLingo:
+#   1. backend  — FastAPI API server
+#   2. frontend — Next.js web app (optional: we can deploy to Vercel)
+#   3. db       — PostgreSQL database
+#   4. redis    — Cache + rate limiting + sessions
+#   5. manticore — Full-text search engine
+#
+# HOW TO USE:
+#   Development:  docker compose up -d
+#   Production:   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#   Rebuild:      docker compose up -d --build
+#   Logs:         docker compose logs -f backend
+#   Stop:         docker compose down
+#   Clean:        docker compose down -v  (WARNING: deletes all data!)
 
+services:
+  # ─── Backend API Server ───────────────────────────────
+  backend:
+    build:
+      # The build context is the project ROOT (.)
+      # This is important because our Python imports use
+      # "from app.core.config import ..." — the "app" package
+      # needs to be at the root level of the build context.
+      context: .
+      dockerfile: app/Dockerfile
+    container_name: verbalingo-backend
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      # Database connection — points to the 'db' service by hostname
+      # Inside Docker's network, services can find each other by name.
+      # "db" here is resolved to the PostgreSQL container's IP automatically.
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379/0
+      - MANTICORE_HOST=manticore
+      - MANTICORE_PORT=9308
+      - SECRET_KEY=${SECRET_KEY}
+      - ENVIRONMENT=production
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      manticore:
+        condition: service_healthy
+    # Resource limits prevent one service from eating all RAM
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    networks:
+      - verbalingo-net
+
+  # ─── Frontend Web App ─────────────────────────────────
+  # NOTE: In production, you might deploy this to Vercel's free tier
+  # instead. This service is here for self-hosted deployments.
+  frontend:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: verbalingo-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      backend:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - verbalingo-net
+
+  # ─── PostgreSQL Database ──────────────────────────────
   db:
-    image: postgres:18.1-alpine
+    image: postgres:16-alpine
+    # Why postgres:16-alpine instead of 18.1-alpine?
+    # postgres:16 is the current LTS (Long Term Support) version.
+    # Version 18 is very new and hasn't received as many patches.
+    # In production, stability > newest features.
     container_name: verbalingo-db
     restart: always
     shm_size: "256mb"
+    # shm_size: Shared memory for PostgreSQL.
+    # Postgres uses shared memory for sorting and hash operations.
+    # Default 64MB is too small — 256MB prevents "out of shared memory" errors
+    # for complex queries with JOINs.
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -41,16 +112,43 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - verbalingo-net
 
-  cloudbeaver:
-    image: dbeaver/cloudbeaver:latest
-    container_name: cloudbeaver01
-    ports:
-      - "8978:8978"
-    volumes:
-      - cloudbeaver_data:/opt/cloudbeaver/workspace
+  # ─── ManticoreSearch Engine ───────────────────────────
+  manticore:
+    image: manticoresearch/manticore:latest
+    container_name: manticore01
     restart: unless-stopped
+    ports:
+      - "9306:9306" # MySQL protocol (for CLI tools)
+      - "9308:9308" # HTTP API (for our FastAPI backend)
+    volumes:
+      - manticore_data:/var/lib/manticore
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 65535
+        hard: 65535
+    # ulimits: ManticoreSearch opens many files simultaneously
+    # (one per index segment). Default Linux limits (~1024) are
+    # too low for large indexes. 65535 gives plenty of headroom.
+    deploy:
+      resources:
+        limits:
+          memory: 1536M
+    # Manticore gets the most RAM because it holds the inverted index
+    # in memory. With 3M+ docs, it needs ~300MB. With all languages
+    # indexed (14M docs), it could need ~1.2GB.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9308 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - verbalingo-net
 
+  # ─── Redis Cache ──────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: verbalingo-redis
@@ -59,19 +157,39 @@ services:
       - "6000:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --save 60 1 --loglevel warning
+    command: redis-server --save 60 1 --loglevel warning --maxmemory 128mb --maxmemory-policy allkeys-lru
+    # Redis memory management:
+    #   --save 60 1: Snapshot to disk every 60s if at least 1 key changed
+    #   --maxmemory 128mb: Cap RAM usage at 128MB
+    #   --maxmemory-policy allkeys-lru: When full, evict Least Recently Used keys
+    #   This prevents Redis from growing unbounded and OOM-killing the server
+    deploy:
+      resources:
+        limits:
+          memory: 192M
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
+    networks:
+      - verbalingo-net
 
+# ─── Named Volumes ─────────────────────────────────────
+# Named volumes persist data between container restarts.
+# Even if you `docker compose down`, volumes survive.
+# Only `docker compose down -v` deletes them.
 volumes:
   manticore_data:
     driver: local
   postgres_data:
     driver: local
-  cloudbeaver_data:
-    driver: local
   redis_data:
     driver: local
+
+# ─── Network ───────────────────────────────────────────
+# A custom bridge network so containers can find each other
+# by service name (e.g., the backend calls "db:5432" to reach Postgres)
+networks:
+  verbalingo-net:
+    driver: bridge

@@ -112,7 +112,10 @@ const Sidebar: React.FC = () => {
 
   const supportNav = [
     { icon: LifeBuoy, label: 'Support', view: ViewState.LANDING },
-    { icon: Settings, label: 'Settings', view: ViewState.PROFILE },
+    // Settings only makes sense for logged-in users
+    ...(authStatus === 'authenticated'
+      ? [{ icon: Settings, label: 'Settings', view: ViewState.PROFILE }]
+      : []),
   ];
 
   return (

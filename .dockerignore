@@ -1,0 +1,58 @@
+# ═══════════════════════════════════════════
+# Root .dockerignore — shared by all builds
+# ═══════════════════════════════════════════
+# Docker sends the "build context" (all files in the directory) to
+# the Docker daemon before building. This file excludes heavy,
+# sensitive, or irrelevant files from that context.
+#
+# Without this, Docker would try to send your 800MB dataset.rar
+# and 500MB node_modules to the daemon. With it: ~10 seconds → ~1 second.
+
+# ─── Version control ───
+.git
+.gitignore
+.gitattributes
+.github
+
+# ─── Python artifacts ───
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+venv
+.venv
+
+# ─── Node.js artifacts ───
+ui/node_modules
+ui/.next
+
+# ─── Environment files (contain secrets!) ───
+.env
+.env.*
+!.env.example
+
+# ─── Heavy data files ───
+dataset
+dataset.rar
+scraping_test
+logs
+
+# ─── IDE / editor config ───
+.vscode
+.idea
+
+# ─── Documentation ───
+*.md
+
+# ─── Docker meta (don't include in build context) ───
+docker-compose*
+.dockerignore
+
+# ─── Other ───
+extension
+verbaLingo_agent
+.taskmaster
+.kilocode
+.playwright-mcp
+.agent
+manticore
