@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
         app.state.search_api = manticoresearch.SearchApi(api_client)
         app.state.utils_api = manticoresearch.UtilsApi(api_client)
         try:
-            await app.state.utils_api.sql("SHOW STATUS LIKE 'uptime'")
+            app.state.utils_api.sql("SHOW STATUS LIKE 'uptime'")
             logger.success(f"Connected to Manticore at {settings.manticore_url}")
         except Exception as health_err:
             logger.warning(f"Manticore health check failed: {health_err}")
