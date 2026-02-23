@@ -2,12 +2,15 @@
 # VerbaLingo — Production Docker Compose
 # ═══════════════════════════════════════════════════════════
 #
-# This file defines ALL services needed to run VerbaLingo:
-#   1. backend  — FastAPI API server
-#   2. frontend — Next.js web app (optional: we can deploy to Vercel)
-#   3. db       — PostgreSQL database
-#   4. redis    — Cache + rate limiting + sessions
-#   5. manticore — Full-text search engine
+# ARCHITECTURE:
+#   Frontend (Next.js) → Deployed to Vercel (free tier, auto-deploys)
+#   Backend  (FastAPI) → Deployed to VPS via this Docker Compose
+#
+# This file defines the BACKEND services:
+#   1. backend   — FastAPI API server
+#   2. db        — PostgreSQL database
+#   3. redis     — Cache + rate limiting + sessions
+#   4. manticore — Full-text search engine
 #
 # HOW TO USE:
 #   Development:  docker compose up -d
@@ -32,11 +35,14 @@ services:
     ports:
       - "5001:5001"
     environment:
-      # Database connection — points to the 'db' service by hostname
-      # Inside Docker's network, services can find each other by name.
-      # "db" here is resolved to the PostgreSQL container's IP automatically.
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      - REDIS_URL=redis://redis:6379/0
+      # Override connection hosts for Docker's internal network.
+      # Your config.py reads POSTGRES_HOST, REDIS_HOST etc. individually
+      # and builds the URL itself. In Docker, other services are reached
+      # by their service name (db, redis, manticore) — NOT localhost.
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - MANTICORE_HOST=manticore
       - MANTICORE_PORT=9308
       - SECRET_KEY=${SECRET_KEY}
@@ -55,29 +61,6 @@ services:
       resources:
         limits:
           memory: 512M
-    networks:
-      - verbalingo-net
-
-  # ─── Frontend Web App ─────────────────────────────────
-  # NOTE: In production, you might deploy this to Vercel's free tier
-  # instead. This service is here for self-hosted deployments.
-  frontend:
-    build:
-      context: ./ui
-      dockerfile: Dockerfile
-    container_name: verbalingo-frontend
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-    depends_on:
-      backend:
-        condition: service_started
-    deploy:
-      resources:
-        limits:
-          memory: 256M
     networks:
       - verbalingo-net
 

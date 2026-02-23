@@ -6,6 +6,8 @@ import dynamic from "next/dynamic"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
 import { useSearch } from "@/lib/useApi"
+import { useEntitlements } from "@/hooks/use-entitlements"
+import { useAuthStore } from "@/stores/auth-store"
 import { Loader2, PanelRightClose, PanelRightOpen } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -22,6 +24,9 @@ const AiCompletion = dynamic(() => import("@/components/ai-completion").then(mod
   ssr: false
 })
 
+// Lightweight — no need to lazy-load
+import { SearchLimitWall } from "@/components/features/search-limit-wall"
+
 export default function RoutedSearchPage() {
   const params = useParams<{ q: string; language: string }>()
   const searchParams = useSearchParams()
@@ -35,13 +40,47 @@ export default function RoutedSearchPage() {
   const { setQuery, setCategory, setLanguage, subCategory } = useSearchStore()
   const { currentVideoIndex, resetIndex } = usePlayerStore()
 
+  // Entitlements: check if the user still has search access
+  const { hasAccess, isLoaded } = useEntitlements("search")
+  const authStatus = useAuthStore((s) => s.status)
+  const isAnonymous = authStatus !== "authenticated"
+
   const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
   const [hasRequested, setHasRequested] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [isAiCollapsed, setIsAiCollapsed] = useState(false)
 
-  const { data, refetch, isLoading, isFetching } = useSearch(q, languageParam, categoryForContext, subCategory)
+  // Track if the search was blocked by a 429 response
+  const [searchBlocked, setSearchBlocked] = useState(false)
+
+  const { data, refetch, isLoading, isFetching, error } = useSearch(q, languageParam, categoryForContext, subCategory)
   const playlist = useMemo(() => data?.hits || [], [data])
+
+  // Detect 429 from the search error (Axios wraps it in error.response)
+  useEffect(() => {
+    if (error) {
+      const axiosErr = error as any
+      if (axiosErr?.response?.status === 429) {
+        setSearchBlocked(true)
+      }
+    }
+  }, [error])
+
+  // If user logs in while the wall is showing, un-block and retry
+  useEffect(() => {
+    if (!isAnonymous && searchBlocked) {
+      setSearchBlocked(false)
+      refetch()
+    }
+  }, [isAnonymous, searchBlocked, refetch])
+
+  // Also un-block if entitlements restore access (e.g. after login)
+  useEffect(() => {
+    if (isLoaded && hasAccess && searchBlocked) {
+      setSearchBlocked(false)
+      refetch()
+    }
+  }, [isLoaded, hasAccess, searchBlocked, refetch])
 
   useEffect(() => {
     if (!q || !q.trim()) return
@@ -66,10 +105,18 @@ export default function RoutedSearchPage() {
     }
   }, [data, resetIndex])
 
+  // Show the signup wall if:
+  // 1. We got a 429 from the backend (searchBlocked), OR
+  // 2. Entitlements say no access AND user is anonymous (already blocked before search)
+  const showWall = searchBlocked || (isLoaded && !hasAccess && isAnonymous)
+
   return (
     <>
       <div className="flex-1 bg-transparent text-card-foreground">
-        {(!hasRequested || isLoading || isFetching) ? (
+        {showWall ? (
+          /* ── Signup Wall ── */
+          <SearchLimitWall />
+        ) : (!hasRequested || isLoading || isFetching) ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
@@ -94,9 +141,8 @@ export default function RoutedSearchPage() {
               {/* Collapsed strip */}
               <button
                 onClick={() => setIsAiCollapsed(!isAiCollapsed)}
-                className={`flex flex-col items-center gap-2 w-full pt-5 transition-opacity duration-200 ${
-                  isAiCollapsed ? 'opacity-100 cursor-pointer' : 'opacity-0 pointer-events-none absolute'
-                }`}
+                className={`flex flex-col items-center gap-2 w-full pt-5 transition-opacity duration-200 ${isAiCollapsed ? 'opacity-100 cursor-pointer' : 'opacity-0 pointer-events-none absolute'
+                  }`}
                 title="Open AI Assistant"
               >
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">

@@ -115,6 +115,15 @@ RUN pip install --no-cache-dir --upgrade pip \
 # This way, "app" is a proper Python package and relative imports work.
 COPY app/ /code/app/
 
+# Create writable directories for the non-root user
+# ──────────────────────────────────────────────────
+# The app creates a logs/ folder at runtime to write log files.
+# Since COPY runs as root, everything in /code/ is owned by root.
+# We must create any directories the app needs to WRITE to and
+# chown them to appuser BEFORE switching to non-root.
+RUN mkdir -p /code/logs \
+    && chown -R appuser:appgroup /code/logs
+
 # Switch to non-root user BEFORE exposing ports
 USER appuser
 

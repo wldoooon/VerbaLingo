@@ -1,12 +1,11 @@
 # ═══════════════════════════════════════════
-# Root .dockerignore — shared by all builds
+# Root .dockerignore — Backend builds only
 # ═══════════════════════════════════════════
-# Docker sends the "build context" (all files in the directory) to
-# the Docker daemon before building. This file excludes heavy,
-# sensitive, or irrelevant files from that context.
+# Only the FastAPI backend uses Docker now.
+# Frontend (Next.js) is deployed to Vercel separately.
 #
-# Without this, Docker would try to send your 800MB dataset.rar
-# and 500MB node_modules to the daemon. With it: ~10 seconds → ~1 second.
+# This file excludes everything the backend doesn't need,
+# keeping the build context small and fast (~1MB instead of 800MB+).
 
 # ─── Version control ───
 .git
@@ -22,9 +21,8 @@ __pycache__
 venv
 .venv
 
-# ─── Node.js artifacts ───
-ui/node_modules
-ui/.next
+# ─── Frontend (deployed to Vercel, not needed here) ───
+ui
 
 # ─── Environment files (contain secrets!) ───
 .env
@@ -41,14 +39,15 @@ logs
 .vscode
 .idea
 
-# ─── Documentation ───
+# ─── Documentation & notes ───
 *.md
+notes
 
 # ─── Docker meta (don't include in build context) ───
 docker-compose*
 .dockerignore
 
-# ─── Other ───
+# ─── Other project dirs not needed for backend ───
 extension
 verbaLingo_agent
 .taskmaster

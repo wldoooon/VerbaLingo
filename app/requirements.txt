@@ -9,7 +9,7 @@ sqlmodel>=0.0.22
 asyncpg>=0.29.0
 
 # ─── Search Engine ───
-manticoresearch-async>=4.0.0
+manticoresearch>=4.0.0
 
 # ─── Auth & Security ───
 passlib[argon2]>=1.7.4
