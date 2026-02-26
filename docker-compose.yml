@@ -100,7 +100,13 @@ services:
 
   # ─── ManticoreSearch Engine ───────────────────────────
   manticore:
-    image: manticoresearch/manticore:latest
+    image: manticoresearch/manticore:6.3.6
+    # WHY NOT :latest?
+    # Manticore's "latest" tag tracks the development version (v17.x).
+    # v17 introduced a new columnar engine that has known OOM (Out Of Memory)
+    # issues when starting on VPS servers, even with 12GB+ RAM.
+    # v6.3.6 is the last proven-stable production release.
+    # Always pin search engines to specific versions in production!
     container_name: manticore01
     restart: unless-stopped
     ports:
@@ -113,6 +119,15 @@ services:
       nofile:
         soft: 65535
         hard: 65535
+      memlock:
+        soft: -1
+        hard: -1
+      # ulimits:
+      #   nofile: ManticoreSearch opens many files simultaneously.
+      #     Default Linux limits (~1024) are too low for large indexes.
+      #   memlock: -1 means unlimited. Required by Manticore to
+      #     lock index data in RAM for best search performance.
+      #     Without this, Manticore may fail silently on VPS.
     # ulimits: ManticoreSearch opens many files simultaneously
     # (one per index segment). Default Linux limits (~1024) are
     # too low for large indexes. 65535 gives plenty of headroom.
@@ -124,10 +139,19 @@ services:
     # in memory. With 3M+ docs, it needs ~300MB. With all languages
     # indexed (14M docs), it could need ~1.2GB.
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9308 || exit 1"]
+      # bash /dev/tcp: pure bash TCP connection check — zero tools needed!
+      # bash is ALWAYS in every Linux container.
+      # This opens a TCP socket to port 9306. If Manticore is listening → exit 0 ✅
+      # No curl, no nc, no mysqladmin required. The most portable solution.
+      test:
+        [
+          "CMD-SHELL",
+          "bash -c 'echo > /dev/tcp/localhost/9306' 2>/dev/null || exit 1",
+        ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 60s
     networks:
       - verbalingo-net
 

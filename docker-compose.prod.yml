@@ -1,0 +1,41 @@
+# ═══════════════════════════════════════════════════════════
+# VerbaLingo — Production Override
+# ═══════════════════════════════════════════════════════════
+#
+# HOW THIS WORKS:
+#   This file is NOT standalone. It is a "diff" on top of docker-compose.yml.
+#   Run it like this:
+#     docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+#   Docker Compose merges the two files. Any key defined here
+#   WINS over the same key in docker-compose.yml.
+#
+#   We only define what is DIFFERENT in production:
+#     1. backend: use pre-built Docker Hub image instead of building from source
+#     2. db:      remove exposed port 5432 (security — DB must not be public)
+
+services:
+  # ─── Backend API Server ───────────────────────────────
+  backend:
+    # In production, we pull the pre-built image from Docker Hub.
+    # We DO NOT build from source code on the server — that is slow,
+    # requires all dev dependencies, and is error-prone.
+    image: wldooon/verbalingo-backend:latest
+
+    # pull_policy: always → every time you run `docker compose up`,
+    # Docker checks Docker Hub for a newer version of the image.
+    # This means deployments are as simple as: push image → run up.
+    pull_policy: always
+
+    # Explicitly clear the build section from the base file.
+    # Without this, Docker Compose might try to build AND pull.
+    build: !reset null
+
+  # ─── PostgreSQL Database ──────────────────────────────
+  db:
+    # SECURITY: Remove the public port exposure from the base file.
+    # In the base docker-compose.yml, port 5432 is mapped to the host.
+    # In production, the DB should ONLY be reachable inside Docker's
+    # internal network (verbalingo-net), never from the public internet.
+    # The backend can still reach it via "db:5432" on the internal network.
+    ports: !reset []
