@@ -48,7 +48,7 @@ enum ViewState {
   UNKNOWN = 'UNKNOWN'
 }
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<{ isMobile?: boolean }> = ({ isMobile = false }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
   const { resolvedTheme } = useTheme();
@@ -120,8 +120,11 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`hidden md:flex flex-col h-screen sticky top-0 border-r border-border bg-transparent transition-[width] duration-300 ease-in-out relative z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[300px]'
-        }`}
+      className={
+        isMobile
+          ? "flex flex-col h-full w-full bg-background relative z-50 select-none overflow-y-auto"
+          : `hidden md:flex flex-col h-screen sticky top-0 border-r border-border bg-transparent transition-[width] duration-300 ease-in-out relative z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[300px]'}`
+      }
     >
       {/* 0. Brand Header */}
       {!isCollapsed && (
