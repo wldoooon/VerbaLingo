@@ -21,9 +21,10 @@ export default function NavigationWrapper() {
         }
       : {
           name: "Guest",
-          email: "guest@verbalingo.com",
+          email: "guest@Pokispokey.com",
           avatar: "/avatars/user.jpg",
         }
 
   return <Navigation user={displayUser} />
 }
+

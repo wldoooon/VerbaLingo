@@ -20,6 +20,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { AuthDialog } from "@/components/auth-dialog";
+import { HeaderToolbar } from "@/components/header-toolbar";
 
 // New Sidebar Primitives (Localized from the new sidebar.tsx)
 const SidebarMenu = ({ children, className }: { children: React.ReactNode, className?: string }) => (
@@ -48,7 +49,12 @@ enum ViewState {
   UNKNOWN = 'UNKNOWN'
 }
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isMobile?: boolean;
+  user?: any;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLibraryOpen, setIsLibraryOpen] = useState(true);
   const { resolvedTheme } = useTheme();
@@ -66,7 +72,7 @@ const Sidebar: React.FC = () => {
 
   // Mock data for Team Switcher
   const teams = [
-    { name: "VerbaLingo", logo: Compass, plan: "Enterprise" },
+    { name: "Pokispokey", logo: Compass, plan: "Enterprise" },
     { name: "Personal", logo: User, plan: "Free" },
   ];
   const [activeTeam, setActiveTeam] = useState(teams[0]);
@@ -120,8 +126,11 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`hidden md:flex flex-col h-screen sticky top-0 border-r border-border bg-transparent transition-[width] duration-300 ease-in-out relative z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[300px]'
-        }`}
+      className={
+        isMobile
+          ? "flex flex-col h-full w-full bg-background relative z-50 select-none overflow-y-auto"
+          : `hidden md:flex flex-col h-screen sticky top-0 border-r border-border bg-transparent transition-[width] duration-300 ease-in-out relative z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[300px]'}`
+      }
     >
       {/* 0. Brand Header */}
       {!isCollapsed && (
@@ -303,6 +312,12 @@ const Sidebar: React.FC = () => {
 
       </div>
 
+      {isMobile && user && (
+        <div className="mt-auto p-4 border-t border-border/60 flex justify-center w-full">
+          <HeaderToolbar user={user} />
+        </div>
+      )}
+
       {/* Sidebar Toggle */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
@@ -344,3 +359,4 @@ const NavItem = ({ item, isActive, isCollapsed, onClick }: any) => (
 );
 
 export default Sidebar;
+

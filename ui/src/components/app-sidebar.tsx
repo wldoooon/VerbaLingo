@@ -42,7 +42,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Compass className="size-5" />
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold text-base">VerbaLingo</span>
+                  <span className="font-semibold text-base">Pokispokey</span>
                   <span className="text-sm">v1.0.0</span>
                 </div>
               </a>
@@ -114,3 +114,4 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     </Sidebar>
   )
 }
+

@@ -77,7 +77,7 @@ export function BottomStickyBar({ className }: BottomStickyBarProps) {
       id: "search",
       label: "Search Engine",
       icon: Database,
-      info: "VerbaLingo search active"
+      info: "Pokispokey search active"
     },
     {
       id: "ai",

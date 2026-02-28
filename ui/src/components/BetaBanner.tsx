@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 
 const BANNER_VERSION = "beta-3.0"
-const STORAGE_KEY = `verbalingo-banner-dismissed-${BANNER_VERSION}`
+const STORAGE_KEY = `Pokispokey-banner-dismissed-${BANNER_VERSION}`
 
 export function BetaBanner() {
   const [isVisible, setIsVisible] = useState(false)
@@ -112,3 +112,4 @@ export function BetaBanner() {
     </div>
   )
 }
+

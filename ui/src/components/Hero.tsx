@@ -169,13 +169,21 @@ export function Hero() {
 
 
 
-            <h1 className="text-5xl lg:text-7xl font-black text-foreground tracking-tighter leading-[0.85] mb-6 relative">
-              {/* Mascot Behind Text */}
-              <div className="absolute -top-40 left-[85%] w-48 h-48 md:w-[350px] md:h-[350px] md:-top-36 md:left-[35%] -z-10 opacity-80 pointer-events-none transition-transform duration-1000 group-hover:scale-105">
-                <img 
-                  src={mounted && resolvedTheme === 'dark' ? "/sleeping_cat.png" : "/cat_logo3.png"} 
-                  alt="Mascot" 
-                  className="w-full h-full object-contain" 
+            <h1 className="text-[clamp(3.5rem,8vw,4.5rem)] lg:text-7xl font-black text-foreground tracking-tighter leading-[0.85] mb-6 relative inline-block w-fit">
+              {/* Mascot Behind Text - Anchored together using 'em' scaling */}
+              <div
+                className="absolute -z-10 opacity-80 pointer-events-none transition-transform duration-1000 group-hover:scale-105"
+                style={{
+                  width: '6em',
+                  height: '6em',
+                  top: '-1.8em',
+                  right: '-4em'
+                }}
+              >
+                <img
+                  src={mounted && resolvedTheme === 'dark' ? "/sleeping_cat.png" : "/cat_logo3.png"}
+                  alt="Mascot"
+                  className="w-full h-full object-contain"
                 />
               </div>
 
