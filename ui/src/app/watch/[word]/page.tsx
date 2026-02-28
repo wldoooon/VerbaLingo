@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const decodedWord = decodeURIComponent(word)
 
     return {
-        title: `Watch "${decodedWord}" - VerbaLingo`,
+        title: `Watch "${decodedWord}" - Pokispokey`,
         description: `Learn how to pronounce and use "${decodedWord}" in real-world context with video examples.`,
     }
 }

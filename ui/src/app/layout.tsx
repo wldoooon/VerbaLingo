@@ -13,7 +13,7 @@ import { BetaBanner } from "@/components/BetaBanner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VerbaLingo - Learn Languages from Real Content",
+  title: "Pokispokey - Learn Languages from Real Content",
   description: "Master languages with real-world video clips from movies, podcasts, and more.",
 };
 
@@ -64,3 +64,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
