@@ -279,7 +279,7 @@ export function SearchBar() {
                         : "hover:-translate-y-0.5"
                 )}>
                     {/* Inner Content */}
-                    <div className="relative z-10 bg-muted/20 backdrop-blur-md flex flex-row items-center p-1 w-full h-full">
+                    <div className="relative z-10 bg-muted/20 backdrop-blur-md flex flex-row items-center p-1 sm:p-1 w-full h-full">
 
                         {/* Category Dropdown */}
                         <DropdownMenu>
@@ -288,10 +288,10 @@ export function SearchBar() {
                                     variant="ghost"
                                     size="sm"
                                     className={cn(
-                                        "h-9 px-3 rounded-lg gap-2 font-semibold text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground",
+                                        "h-8 sm:h-9 px-2 sm:px-3 rounded-lg gap-1 sm:gap-2 font-semibold text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground",
                                     )}
                                 >
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-1 sm:gap-2">
                                         {/* Animated Filter Icon Replacement */}
                                         <svg
                                             className={cn("w-4 h-4 transition-colors")}
@@ -357,28 +357,28 @@ export function SearchBar() {
                                         pauseDuration={1500}
                                         showCursor={true}
                                         cursorCharacter="|"
-                                        className="text-sm text-muted-foreground/50 font-normal whitespace-nowrap"
+                                        className="text-[11px] sm:text-sm text-muted-foreground/50 font-normal whitespace-nowrap"
                                     />
                                 </div>
                             )}
 
-                                                    <Input
-                                                        ref={inputRef}
-                                                        type="text"
-                                                        value={hasAccess ? query : ''}
-                                                        disabled={!hasAccess}
-                                                        onChange={(e) => {
-                                                            setQuery(e.target.value);
-                                                            setShowRecent(true);
-                                                        }}
-                                                        onFocus={() => setShowRecent(true)}
-                                                        onKeyDown={handleKeyDown}
-                                                        className={cn(
-                                                            "border-0 bg-transparent shadow-none focus-visible:ring-0 px-3 h-9 text-base font-medium placeholder:text-transparent min-w-0",
-                                                            !hasAccess && "placeholder:text-muted-foreground/60 cursor-not-allowed opacity-60"
-                                                        )}
-                                                    />
-                                                        {query && hasAccess && (
+                            <Input
+                                ref={inputRef}
+                                type="text"
+                                value={hasAccess ? query : ''}
+                                disabled={!hasAccess}
+                                onChange={(e) => {
+                                    setQuery(e.target.value);
+                                    setShowRecent(true);
+                                }}
+                                onFocus={() => setShowRecent(true)}
+                                onKeyDown={handleKeyDown}
+                                className={cn(
+                                    "border-0 bg-transparent shadow-none focus-visible:ring-0 px-2 sm:px-3 h-8 sm:h-9 text-sm sm:text-base font-medium placeholder:text-transparent min-w-0",
+                                    !hasAccess && "placeholder:text-muted-foreground/60 cursor-not-allowed opacity-60"
+                                )}
+                            />
+                            {query && hasAccess && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
@@ -400,10 +400,10 @@ export function SearchBar() {
                                     variant="ghost"
                                     size="sm"
                                     className={cn(
-                                        "h-9 px-2 sm:px-3 rounded-lg gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground mr-1"
+                                        "h-8 sm:h-9 px-1.5 sm:px-3 rounded-lg gap-1 sm:gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground mr-1"
                                     )}
                                 >
-                                    <div className="w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border flex-shrink-0">
+                                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full overflow-hidden shadow-sm border border-border flex-shrink-0">
                                         <img
                                             src={LANGUAGES.find(l => l.value === selectedLanguage)?.flag || LANGUAGES[0].flag}
                                             alt={selectedLanguage}
@@ -458,7 +458,7 @@ export function SearchBar() {
                             onClick={() => hasAccess ? handleSearch() : router.push(isAnonymous ? '/signup' : '/pricing')}
                             disabled={(!query.trim() && hasAccess) || isSearching || !isLoaded}
                             className={cn(
-                                "h-9 w-9 rounded-lg shadow-lg transition-all duration-300 shrink-0",
+                                "h-8 w-8 sm:h-9 sm:w-9 rounded-lg shadow-lg transition-all duration-300 shrink-0 ml-0.5",
                                 !hasAccess
                                     ? "bg-orange-500/20 text-orange-500 hover:bg-orange-500/30 shadow-none cursor-pointer"
                                     : query.trim()

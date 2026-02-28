@@ -25,7 +25,11 @@ export const useUsageStore = create<UsageState>()(
           usage: {
             ...state.usage,
             [feature]: {
-              ...(state.usage[feature] || { current: 0, limit: 0, remaining: 0 }),
+              ...(state.usage[feature] || {
+                current: 0,
+                limit: 0,
+                remaining: 0,
+              }),
               ...newUsage,
             },
           },
@@ -34,6 +38,6 @@ export const useUsageStore = create<UsageState>()(
     }),
     {
       name: "verbalingo-usage",
-    }
-  )
+    },
+  ),
 );
