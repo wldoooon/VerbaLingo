@@ -26,7 +26,7 @@ export function FeedbackDialog() {
             <a className="text-foreground hover:underline" href="#">
               tutorials
             </a>
-            , read VerbaLingo&lsquo;s{" "}
+            , read Pokispokey&lsquo;s{" "}
             <a className="text-foreground hover:underline" href="#">
               documentation
             </a>
@@ -40,7 +40,7 @@ export function FeedbackDialog() {
         <form className="space-y-5">
           <Textarea
             id="feedback"
-            placeholder="How can we improve VerbaLingo?"
+            placeholder="How can we improve Pokispokey?"
             aria-label="Send feedback"
           />
           <div className="flex flex-col sm:flex-row sm:justify-end">

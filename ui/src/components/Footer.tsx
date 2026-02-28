@@ -57,7 +57,7 @@ export function Footer() {
         {/* Bottom: Copyright + icons */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-10">
           <p className="text-sm text-muted-foreground tracking-wide">
-            &copy; {new Date().getFullYear()} VerbaLingo. All rights reserved.
+            &copy; {new Date().getFullYear()} Pokispokey. All rights reserved.
           </p>
 
           <div className="flex items-center gap-5">
@@ -80,3 +80,4 @@ export function Footer() {
     </footer>
   )
 }
+

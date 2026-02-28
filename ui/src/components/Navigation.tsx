@@ -30,7 +30,7 @@ export function Navigation({ user, showNavMenu = true }: NavigationProps) {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-[280px]">
-                <Sidebar isMobile />
+                <Sidebar isMobile user={user} />
               </SheetContent>
             </Sheet>
           </div>
@@ -40,8 +40,8 @@ export function Navigation({ user, showNavMenu = true }: NavigationProps) {
             <SearchBar />
           </div>
 
-          {/* Right Side - User Tools */}
-          <div className="flex-shrink-0">
+          {/* Right Side - User Tools (Hidden on mobile) */}
+          <div className="hidden md:block flex-shrink-0">
             <HeaderToolbar user={user} />
           </div>
         </div>

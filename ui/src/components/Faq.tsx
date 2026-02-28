@@ -16,8 +16,8 @@ import AnimatedContent from "./AnimatedContent"
 
 const faqData = [
   {
-    question: "What is VerbaLingo, and how can it help me?",
-    answer: "VerbaLingo is a context-first language learning engine. We index millions of real-world video frames to show you exactly how native speakers use words in context, helping you master fluency faster than traditional methods.",
+    question: "What is Pokispokey, and how can it help me?",
+    answer: "Pokispokey is a context-first language learning engine. We index millions of real-world video frames to show you exactly how native speakers use words in context, helping you master fluency faster than traditional methods.",
     tag: "Getting Started",
   },
   {
@@ -36,13 +36,13 @@ const faqData = [
     tag: "Credits",
   },
   {
-    question: "What makes VerbaLingo different from other language apps?",
-    answer: "Unlike traditional apps that use scripted examples, VerbaLingo shows you real clips from movies, podcasts, and speeches. You learn how words are actually used by native speakers, with full context, tone, and emotion.",
+    question: "What makes Pokispokey different from other language apps?",
+    answer: "Unlike traditional apps that use scripted examples, Pokispokey shows you real clips from movies, podcasts, and speeches. You learn how words are actually used by native speakers, with full context, tone, and emotion.",
     tag: "Features",
   },
   {
-    question: "Can I use VerbaLingo on mobile?",
-    answer: "VerbaLingo is fully responsive and works in any modern browser on mobile, tablet, and desktop. We also offer a browser extension for quick lookups while browsing the web.",
+    question: "Can I use Pokispokey on mobile?",
+    answer: "Pokispokey is fully responsive and works in any modern browser on mobile, tablet, and desktop. We also offer a browser extension for quick lookups while browsing the web.",
     tag: "Platform",
   },
   {
@@ -99,7 +99,7 @@ export function Faq() {
                 </h2>
 
                 <p className="text-base text-muted-foreground leading-relaxed max-w-sm">
-                  Everything you need to know about VerbaLingo. Can't find what you're looking for? Reach out below.
+                  Everything you need to know about Pokispokey. Can't find what you're looking for? Reach out below.
                 </p>
               </div>
 
@@ -162,3 +162,4 @@ export function Faq() {
     </section>
   )
 }
+

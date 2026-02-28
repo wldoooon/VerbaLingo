@@ -23,7 +23,7 @@ interface CategoryItem {
   children?: string[]
 }
 
-// VerbaLingo video categories and channels
+// Pokispokey video categories and channels
 const categories: Record<string, CategoryItem> = {
   root: {
     name: "Filters",
@@ -185,3 +185,4 @@ export function FilterTree() {
     </div>
   )
 }
+
