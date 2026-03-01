@@ -45,7 +45,7 @@ export function CookieBanner() {
                     transition={{ type: "spring", damping: 20, stiffness: 300 }}
                     className="fixed bottom-4 left-4 right-4 sm:bottom-6 sm:right-6 sm:left-auto z-[100] sm:max-w-[400px]"
                 >
-                    <div className="bg-card/80 backdrop-blur-xl border border-border/50 shadow-2xl rounded-2xl p-5 relative overflow-hidden">
+                    <div className="bg-card/80 backdrop-blur-xl border border-border/50 shadow-2xl rounded-2xl p-4 sm:p-5 relative overflow-hidden">
 
                         <div className="relative z-10">
                             <div className="flex items-start justify-between mb-3">
@@ -70,16 +70,16 @@ export function CookieBanner() {
                                 By clicking accept, you agree to our <Link href="/privacy" className="text-primary hover:underline font-medium">Privacy Policy</Link>.
                             </p>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
                                 <Button
                                     variant="outline"
-                                    className="flex-1 rounded-xl h-10 border-border/50 font-medium hover:bg-muted"
+                                    className="w-full sm:flex-1 rounded-xl h-10 border-border/50 font-medium hover:bg-muted"
                                     onClick={handleDecline}
                                 >
                                     Decline Optional
                                 </Button>
                                 <Button
-                                    className="flex-1 rounded-xl h-10 bg-orange-500 hover:bg-orange-600 text-white font-bold border-0 shadow-sm"
+                                    className="w-full sm:flex-1 rounded-xl h-10 bg-orange-500 hover:bg-orange-600 text-white font-bold border-0 shadow-sm"
                                     onClick={handleAccept}
                                 >
                                     Accept All
