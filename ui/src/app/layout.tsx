@@ -40,9 +40,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          {/* Technical Dynamic Background */}
-          <TechnicalLattice gridSize={80} opacity={0.6} />
-
           <QueryProvider>
             <AuthSync />
             <ToastProvider position="bottom-right">

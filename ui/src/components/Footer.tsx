@@ -29,6 +29,16 @@ export function Footer() {
     <footer className="border-t border-border/40 bg-background">
       <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
 
+        {/* Top left: Logo + domain */}
+        <div className="flex justify-start pt-8 pb-2">
+          <Link href="/" className="flex items-center gap-3.5 group">
+            <Image src="/main_logo.png" alt="PokiSpokey" width={52} height={52} />
+            <span className="text-2xl font-black text-muted-foreground group-hover:text-foreground transition-colors">
+              pokispokey.com
+            </span>
+          </Link>
+        </div>
+
         {/* Main nav links */}
         <div className="flex flex-wrap justify-center gap-x-10 gap-y-4 pt-16 pb-8">
           {mainLinks.map((link) => (
