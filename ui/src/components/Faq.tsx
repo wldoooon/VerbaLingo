@@ -114,7 +114,7 @@ export function Faq() {
           </AnimatedContent>
 
           {/* Right Column — Accordion */}
-          <Card className="border border-border/60 shadow-sm bg-card/80 backdrop-blur-sm rounded-2xl overflow-hidden">
+          <Card className="border-none shadow-none bg-transparent rounded-2xl overflow-hidden">
             <CardContent className="p-0">
               <Accordion type="single" collapsible className="w-full">
                 {faqData.map((item, index) => (
@@ -130,11 +130,12 @@ export function Faq() {
                       value={`item-${index}`}
                       className="border-b border-border/40 last:border-b-0 px-6 md:px-8 transition-colors data-[state=open]:bg-muted/30"
                     >
-                      <AccordionTrigger className="hover:no-underline py-6 gap-4 text-left [&>svg]:shrink-0 [&>svg]:text-muted-foreground">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <span className="text-base md:text-lg font-semibold text-foreground leading-snug">
+                      <AccordionTrigger className="hover:no-underline py-6 gap-4 [&>svg]:shrink-0 [&>svg]:text-muted-foreground">
+                        <div className="flex flex-col items-center justify-center flex-1 w-full gap-4 text-center">
+                          <span className="text-base md:text-lg font-semibold text-foreground leading-snug w-full">
                             {item.question}
                           </span>
+                          <Separator className="w-3/4 bg-border/50 h-[1px]" />
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="pb-6 pt-0">
