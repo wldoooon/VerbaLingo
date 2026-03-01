@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ToastProvider } from "@/components/ui/toast";
 import Sidebar from "@/components/Sidebar";
 import NavigationWrapper from "@/components/NavigationWrapper";
+import { MobileNavWrapper } from "@/components/MobileNavWrapper";
 import TechnicalLattice from "@/components/TechnicalLattice";
 import AuthSync from "@/components/AuthSync";
 import { BetaBanner } from "@/components/BetaBanner";
@@ -58,6 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <FooterWrapper />
                 </div>
               </div>
+              <MobileNavWrapper />
             </ToastProvider>
           </QueryProvider>
         </ThemeProvider>
