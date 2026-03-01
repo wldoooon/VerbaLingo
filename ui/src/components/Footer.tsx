@@ -13,12 +13,12 @@ const mainLinks = [
   { label: "FAQs", href: "/#faq" },
   { label: "Docs", href: "#" },
   { label: "Blog", href: "#" },
-  { label: "Changelog", href: "#" },
+  { label: "Changelog", href: "/changelog" },
 ]
 
 const legalLinks = [
-  { label: "Terms of service", href: "#" },
-  { label: "Privacy policy", href: "#" },
+  { label: "Terms of service", href: "/terms" },
+  { label: "Privacy policy", href: "/privacy" },
   { label: "Copyright policy", href: "#" },
   { label: "Cookie policy", href: "#" },
   { label: "Cookie preferences", href: "#" },
