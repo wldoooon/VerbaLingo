@@ -15,7 +15,7 @@ const categories = [
     count: '142k',
     description: 'Blockbuster contexts',
     icon: Film,
-    image: 'https://image.tmdb.org/t/p/w500/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg', // Shawshank
+    image: '/Kentucky Theater Summer Classics.png',
   },
   {
     id: 'cartoons',
@@ -23,15 +23,7 @@ const categories = [
     count: '85k',
     description: 'Animated learning',
     icon: Tv,
-    image: 'https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg', // Inception
-  },
-  {
-    id: 'podcasts',
-    label: 'Podcasts',
-    count: '210k',
-    description: 'Natural conversations',
-    icon: Mic,
-    image: 'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg', // Dark Knight
+    image: '/we bare bears.png',
   },
   {
     id: 'interviews',
@@ -39,7 +31,7 @@ const categories = [
     count: '98k',
     description: 'Q&A mastery',
     icon: Users,
-    image: 'https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg', // Parasite
+    image: '/PodcastCollection.png',
   },
   {
     id: 'talks',
@@ -47,24 +39,16 @@ const categories = [
     count: '120k',
     description: 'Inspiring speeches',
     icon: MonitorPlay,
-    image: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', // Interstellar
+    image: '/These Abstract Paper Profiles Have Something to Say about the World.png',
   },
   {
-    id: 'vlogs',
-    label: 'Vlogs',
+    id: 'moves2',
+    label: 'Movies',
     count: '65k',
-    description: 'Daily life & travel',
+    description: 'All Movies Genres',
     icon: Video,
-    image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&q=80',
+    image: '/moviesPosters.png',
   },
-  {
-    id: 'news',
-    label: 'News',
-    count: '110k',
-    description: 'Current events',
-    icon: Newspaper,
-    image: 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&q=80',
-  }
 ];
 
 export function Hero() {

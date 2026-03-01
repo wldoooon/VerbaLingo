@@ -12,7 +12,7 @@ import { ThemeToggleButton, useThemeTransition } from '@/components/ui/shadcn-io
 
 import { Button } from '@/components/ui/button'
 
-import { Crown, FileClock } from 'lucide-react'
+import { Crown, Megaphone } from 'lucide-react'
 
 import Link from "next/link"
 
@@ -130,15 +130,11 @@ export function HeaderToolbar({
 
 
 
-          <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 cursor-pointer">
-
-
-
-            <FileClock className="h-5 w-5" />
-
-
-
-          </Button>
+          <Link href="/changelog" className="cursor-pointer">
+            <Button variant="ghost" size="icon" className="rounded-full h-9 w-9 cursor-pointer">
+              <Megaphone className="h-5 w-5" />
+            </Button>
+          </Link>
 
 
 
@@ -299,12 +295,12 @@ export function HeaderToolbar({
         ) : (
           <div className="flex items-center gap-2">
             <AuthDialog defaultTab="login">
-              <Button variant="outline" size="sm" className="rounded-full">
+              <Button variant="outline" size="sm" className="rounded-full cursor-pointer">
                 Log in
               </Button>
             </AuthDialog>
             <AuthDialog defaultTab="signup">
-              <Button size="sm" className="rounded-full">
+              <Button size="sm" className="rounded-full cursor-pointer">
                 Sign up
               </Button>
             </AuthDialog>

@@ -16,7 +16,7 @@ export function FeedbackDialog({ children }: { children?: React.ReactNode }) {
     <Dialog>
       <DialogTrigger asChild>
         {children || (
-          <Button variant="ghost" size="icon" className="rounded-full">
+          <Button variant="ghost" size="icon" className="rounded-full cursor-pointer">
             <MessageSquareText className="h-5 w-5" />
           </Button>
         )}
