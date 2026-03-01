@@ -70,9 +70,9 @@ export default function WatchClientPage({ word }: { word: string }) {
 
             {/* Main Content */}
             <div className="flex-1">
-                <div className={`mt-0 max-w-full lg:grid lg:items-start transition-[grid-template-columns] duration-300 ease-in-out ${isAiCollapsed ? 'lg:grid-cols-[1fr_48px]' : 'lg:grid-cols-[1fr_560px]'}`}>
+                <div className={`mt-0 max-w-full xl:grid xl:items-start transition-[grid-template-columns] duration-300 ease-in-out ${isAiCollapsed ? 'xl:grid-cols-[1fr_48px]' : 'xl:grid-cols-[1fr_560px]'}`}>
                     {/* Left: Player + Audio */}
-                    <div className="space-y-4 p-4 sm:p-6 pb-12 lg:pb-6">
+                    <div className="space-y-4 p-4 sm:p-6 pb-12 xl:pb-6">
                         <Suspense fallback={<VideoPlayerSkeleton />}>
                             <VideoPlayerCard
                                 playlist={playlist}
@@ -92,7 +92,7 @@ export default function WatchClientPage({ word }: { word: string }) {
                     </div>
 
                     {/* Right: AI */}
-                    <div className="hidden lg:flex lg:flex-col lg:ml-0 lg:mr-0 sticky top-0 h-[calc(100vh-5rem)] overflow-hidden border-l bg-card">
+                    <div className="hidden xl:flex xl:flex-col xl:ml-0 xl:mr-0 sticky top-0 h-[calc(100vh-5rem)] overflow-hidden border-l bg-card">
                         {/* Collapsed strip */}
                         <button
                             onClick={() => setIsAiCollapsed(!isAiCollapsed)}

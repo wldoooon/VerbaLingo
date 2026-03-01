@@ -73,19 +73,19 @@ export function Faq() {
       <div className="container mx-auto px-4 sm:px-9 max-w-8xl">
 
         {/* Two-column layout: Left (header + CTA) | Right (accordion) */}
-        <div className="grid grid-cols-1 lg:grid-cols-[0.8fr_1.6fr] gap-12 lg:gap-20 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.8fr_1.6fr] gap-8 lg:gap-20 items-start">
 
           {/* Left Column — Sticky header + Contact CTA */}
           <AnimatedContent distance={40} direction="vertical" duration={1.2} threshold={0.2}>
             <div className="lg:sticky lg:top-28 space-y-10">
               {/* Header */}
-              <div className="space-y-4">
+              <div className="space-y-4 flex flex-col items-center text-center lg:items-start lg:text-left">
                 <Badge variant="secondary" className="rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide gap-1.5">
                   <HelpCircle className="w-3.5 h-3.5" />
                   FAQ
                 </Badge>
 
-                <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-tight">
+                <h2 className="text-[clamp(2.5rem,7vw,3.5rem)] font-black tracking-tighter leading-tight">
                   <ShinyText
                     text="Got questions?"
                     speed={2}
@@ -104,7 +104,7 @@ export function Faq() {
               </div>
 
               {/* Contact CTA */}
-              <div>
+              <div className="hidden lg:block">
                 <ContactMorphSurface
                   triggerLabel="Contact us"
                   animationSpeed={1}
@@ -114,7 +114,7 @@ export function Faq() {
           </AnimatedContent>
 
           {/* Right Column — Accordion */}
-          <Card className="border border-border/60 shadow-sm bg-card/80 backdrop-blur-sm rounded-2xl overflow-hidden">
+          <Card className="border-none shadow-none bg-transparent rounded-2xl overflow-hidden">
             <CardContent className="p-0">
               <Accordion type="single" collapsible className="w-full">
                 {faqData.map((item, index) => (
@@ -128,13 +128,14 @@ export function Faq() {
                   >
                     <AccordionItem
                       value={`item-${index}`}
-                      className="border-b border-border/40 last:border-b-0 px-6 md:px-8 transition-colors data-[state=open]:bg-muted/30"
+                      className="border-b border-border/40 last:border-b-0 px-6 md:px-8 transition-colors"
                     >
-                      <AccordionTrigger className="hover:no-underline py-6 gap-4 text-left [&>svg]:shrink-0 [&>svg]:text-muted-foreground">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <span className="text-base md:text-lg font-semibold text-foreground leading-snug">
+                      <AccordionTrigger className="hover:no-underline py-6 gap-4 cursor-pointer [&>svg]:shrink-0 [&>svg]:text-muted-foreground">
+                        <div className="flex flex-col items-center justify-center flex-1 w-full gap-4 text-center">
+                          <span className="text-base md:text-lg font-semibold text-foreground leading-snug w-full">
                             {item.question}
                           </span>
+                          <Separator className="w-3/4 bg-border/50 h-[1px]" />
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="pb-6 pt-0">
@@ -156,6 +157,14 @@ export function Faq() {
               </Accordion>
             </CardContent>
           </Card>
+
+          {/* Mobile Contact CTA (Shown under Accordion) */}
+          <div className="lg:hidden flex justify-center w-full mt-2">
+            <ContactMorphSurface
+              triggerLabel="Contact us"
+              animationSpeed={1}
+            />
+          </div>
 
         </div>
       </div>

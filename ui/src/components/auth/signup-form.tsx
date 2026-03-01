@@ -23,9 +23,6 @@ const signupSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string(),
-    terms: z.boolean().refine((val) => val === true, {
-        message: "You must agree to the terms",
-    }),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
@@ -50,7 +47,7 @@ export function SignupForm({ onSuccess, externalError }: { onSuccess: () => void
 
     const form = useForm<SignupValues>({
         resolver: zodResolver(signupSchema),
-        defaultValues: { email: "", password: "", confirmPassword: "", terms: false },
+        defaultValues: { email: "", password: "", confirmPassword: "" },
     })
 
     async function onSubmit(values: SignupValues) {
@@ -148,31 +145,15 @@ export function SignupForm({ onSuccess, externalError }: { onSuccess: () => void
                     )}
                 />
 
-                <FormField
-                    control={form.control}
-                    name="terms"
-                    render={({ field }) => (
-                        <FormItem className="py-2">
-                            <div className="flex items-start gap-2">
-                                <FormControl>
-                                    <div className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center cursor-pointer transition-colors ${field.value ? 'bg-orange-500 border-orange-500 text-white' : 'bg-slate-50 border-slate-300'}`} onClick={() => field.onChange(!field.value)}>
-                                        {field.value && <Check className="w-3 h-3" />}
-                                    </div>
-                                </FormControl>
-                                <div className="text-xs text-slate-500 leading-snug">
-                                    I agree to the <Link href="/terms" className="text-orange-500 hover:text-orange-600 font-bold relative cursor-pointer after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300">Terms of Service</Link> and <Link href="/privacy" className="text-orange-500 hover:text-orange-600 font-bold relative cursor-pointer after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[1px] after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300">Privacy Policy</Link>.
-                                </div>
-                            </div>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
                 {(signupMutation.isError || loginMutation.isError || externalError) && (
                     <div className="text-sm text-destructive font-bold ml-1 mt-1">
                         {externalError || getErrorMessage(error)}
                     </div>
                 )}
+
+                <div className="text-xs text-slate-500 dark:text-slate-400 text-center leading-relaxed mt-2 pb-2">
+                    By creating an account, you agree to our <Link href="/terms" className="text-slate-700 dark:text-slate-300 hover:text-orange-500 font-bold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2 transition-colors">Terms of Service</Link> and <Link href="/privacy" className="text-slate-700 dark:text-slate-300 hover:text-orange-500 font-bold underline decoration-slate-300 dark:decoration-slate-700 underline-offset-2 transition-colors">Privacy Policy</Link>.
+                </div>
 
                 <Button
                     type="submit"

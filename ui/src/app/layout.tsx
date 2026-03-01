@@ -9,17 +9,19 @@ import NavigationWrapper from "@/components/NavigationWrapper";
 import TechnicalLattice from "@/components/TechnicalLattice";
 import AuthSync from "@/components/AuthSync";
 import { BetaBanner } from "@/components/BetaBanner";
+import { CookieBanner } from "@/components/CookieBanner";
+import FooterWrapper from "@/components/FooterWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Pokispokey - Learn Languages from Real Content",
+  title: "VerbaLingo - Learn Languages from Real Content",
   description: "Master languages with real-world video clips from movies, podcasts, and more.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning style={{ fontSize: '80%' }}>
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning style={{ fontSize: '80%' }}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=0.80, maximum-scale=1.0, user-scalable=yes" />
         <link rel="preconnect" href="https://www.youtube.com" />
@@ -36,15 +38,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
-          {/* Technical Dynamic Background */}
-          {/* <TechnicalLattice gridSize={80} opacity={0.6} /> */}
-
           <QueryProvider>
             <AuthSync />
+            <CookieBanner />
             <ToastProvider position="bottom-right">
               <BetaBanner />
               {/* Main App Layout with Sidebar + Content */}
@@ -55,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <main className="flex-1 flex flex-col min-w-0">
                     {children}
                   </main>
+                  <FooterWrapper />
                 </div>
               </div>
             </ToastProvider>
@@ -64,4 +65,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
-

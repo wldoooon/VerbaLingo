@@ -15,7 +15,7 @@ const categories = [
     count: '142k',
     description: 'Blockbuster contexts',
     icon: Film,
-    image: 'https://image.tmdb.org/t/p/w500/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg', // Shawshank
+    image: '/Kentucky Theater Summer Classics.png',
   },
   {
     id: 'cartoons',
@@ -23,15 +23,7 @@ const categories = [
     count: '85k',
     description: 'Animated learning',
     icon: Tv,
-    image: 'https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg', // Inception
-  },
-  {
-    id: 'podcasts',
-    label: 'Podcasts',
-    count: '210k',
-    description: 'Natural conversations',
-    icon: Mic,
-    image: 'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg', // Dark Knight
+    image: '/we bare bears.png',
   },
   {
     id: 'interviews',
@@ -39,7 +31,7 @@ const categories = [
     count: '98k',
     description: 'Q&A mastery',
     icon: Users,
-    image: 'https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg', // Parasite
+    image: '/PodcastCollection.png',
   },
   {
     id: 'talks',
@@ -47,24 +39,16 @@ const categories = [
     count: '120k',
     description: 'Inspiring speeches',
     icon: MonitorPlay,
-    image: 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', // Interstellar
+    image: '/These Abstract Paper Profiles Have Something to Say about the World.png',
   },
   {
-    id: 'vlogs',
-    label: 'Vlogs',
+    id: 'moves2',
+    label: 'Movies',
     count: '65k',
-    description: 'Daily life & travel',
+    description: 'All Movies Genres',
     icon: Video,
-    image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&q=80',
+    image: '/moviesPosters.png',
   },
-  {
-    id: 'news',
-    label: 'News',
-    count: '110k',
-    description: 'Current events',
-    icon: Newspaper,
-    image: 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=800&q=80',
-  }
 ];
 
 export function Hero() {
@@ -162,7 +146,7 @@ export function Hero() {
 
       <div className="max-w-[1300px] mx-auto pt-8 pb-20 px-6 lg:px-12 relative z-10">
         {/* Split Hero Section */}
-        <div className="grid lg:grid-cols-2 gap-50 lg:gap-12 items-center mb-24 min-h-[600px]">
+        <div className="grid xl:grid-cols-2 gap-20 xl:gap-12 items-center mb-20 xl:mb-24 min-h-[600px]">
 
           {/* Left Column: Context Content & Insights */}
           <div className="flex flex-col justify-center relative z-20">
@@ -268,8 +252,8 @@ export function Hero() {
                 <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
               </div>
 
-              <div className="grid grid-cols-3 gap-8 px-4">
-                <div className="flex flex-col gap-2 group cursor-default">
+              <div className="flex flex-wrap sm:flex-nowrap justify-between gap-6 sm:gap-4 px-2">
+                <div className="flex flex-col gap-2 group cursor-default w-full sm:w-1/3">
                   <div className="flex items-center gap-2 text-primary">
                     <Globe className="w-4 h-4" />
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Global Languages</span>
@@ -283,7 +267,7 @@ export function Hero() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2 group cursor-default border-x border-border/50 px-8">
+                <div className="flex flex-col gap-2 group cursor-default sm:border-x border-border/50 sm:px-6 w-full sm:w-1/3">
                   <div className="flex items-center gap-2 text-primary">
                     <Layers className="w-4 h-4" />
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Active Categories</span>
@@ -297,7 +281,7 @@ export function Hero() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2 group cursor-default text-right">
+                <div className="flex flex-col gap-2 group cursor-default sm:text-right w-full sm:w-1/3">
                   <div className="flex items-center justify-end gap-2 text-primary">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Contextual Clips</span>
                     <Database className="w-4 h-4" />

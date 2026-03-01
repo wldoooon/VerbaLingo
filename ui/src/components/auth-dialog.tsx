@@ -97,11 +97,10 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                         {tab !== "forgot_password" && (
                             <>
                                 {/* Header */}
-                                <div className="mb-6 scale-90"></div>
                                 <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight mb-2">
                                     {tab === "login" ? "Welcome Back" : "Create an account"}
                                 </h2>
-                                <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mb-8 text-center px-4">
+                                <p className="text-slate-500 dark:text-slate-400 font-medium text-base mb-8 text-center px-4">
                                     {tab === "login"
                                         ? "Log in to continue your language mastery."
                                         : "Join 10,000+ language learners mastering fluency."}
@@ -131,7 +130,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                                     <div className="absolute inset-0 flex items-center">
                                         <div className="w-full border-t border-slate-100 dark:border-zinc-800"></div>
                                     </div>
-                                    <div className="relative flex justify-center text-[10px] uppercase">
+                                    <div className="relative flex justify-center text-xs uppercase">
                                         <span className="bg-white dark:bg-zinc-950 px-3 text-slate-400 font-bold tracking-widest">
                                             or {tab === "login" ? "log in" : "sign up"} with email
                                         </span>
@@ -143,14 +142,14 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                         {/* Forms Container */}
                         <div className="w-full">
                             {tab === "login" ? (
-                                <LoginForm 
-                                    onSuccess={() => setIsOpen(false)} 
-                                    onForgot={() => setTab("forgot_password")} 
+                                <LoginForm
+                                    onSuccess={() => setIsOpen(false)}
+                                    onForgot={() => setTab("forgot_password")}
                                     externalError={error}
                                 />
                             ) : tab === "signup" ? (
-                                <SignupForm 
-                                    onSuccess={() => setIsOpen(false)} 
+                                <SignupForm
+                                    onSuccess={() => setIsOpen(false)}
                                     externalError={error}
                                 />
                             ) : (

@@ -2,7 +2,7 @@
 
 import { SearchBar } from "@/components/comm/SearchBar"
 import { HeaderToolbar } from "@/components/header-toolbar"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Sidebar from "@/components/Sidebar"
@@ -21,15 +21,19 @@ export function Navigation({ user, showNavMenu = true }: NavigationProps) {
     <header className="w-full bg-transparent">
       <div className="relative border-b border-border">
         <div className="flex h-20 items-center px-4 sm:px-6 gap-2 sm:gap-4">
-          {/* Mobile Sidebar Trigger - only visible md:hidden */}
-          <div className="md:hidden flex-shrink-0">
+          {/* Mobile Sidebar Trigger - only visible xl:hidden */}
+          <div className="xl:hidden flex-shrink-0">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden -ml-2">
+                <Button variant="ghost" size="icon" className="xl:hidden -ml-2">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-[280px]">
+                <SheetHeader className="sr-only">
+                  <SheetTitle>Navigation</SheetTitle>
+                  <SheetDescription>Main navigation sidebar</SheetDescription>
+                </SheetHeader>
                 <Sidebar isMobile user={user} />
               </SheetContent>
             </Sheet>
@@ -40,8 +44,8 @@ export function Navigation({ user, showNavMenu = true }: NavigationProps) {
             <SearchBar />
           </div>
 
-          {/* Right Side - User Tools (Hidden on mobile) */}
-          <div className="hidden md:block flex-shrink-0">
+          {/* Right Side - User Tools (Hidden on mobile/tablet) */}
+          <div className="hidden xl:block flex-shrink-0">
             <HeaderToolbar user={user} />
           </div>
         </div>
