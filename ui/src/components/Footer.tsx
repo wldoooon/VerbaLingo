@@ -11,17 +11,12 @@ const mainLinks = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/pricing" },
   { label: "FAQs", href: "/#faq" },
-  { label: "Docs", href: "#" },
-  { label: "Blog", href: "#" },
   { label: "Changelog", href: "/changelog" },
 ]
 
 const legalLinks = [
   { label: "Terms of service", href: "/terms" },
   { label: "Privacy policy", href: "/privacy" },
-  { label: "Copyright policy", href: "#" },
-  { label: "Cookie policy", href: "#" },
-  { label: "Cookie preferences", href: "#" },
 ]
 
 export function Footer() {

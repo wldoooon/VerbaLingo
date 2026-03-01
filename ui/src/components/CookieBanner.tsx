@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Cookie, X } from "lucide-react"
+import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import Image from "next/image"
 
 export function CookieBanner() {
     const [isVisible, setIsVisible] = useState(false)
@@ -42,17 +43,15 @@ export function CookieBanner() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
                     transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                    className="fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-auto z-[100] sm:max-w-[400px]"
+                    className="fixed bottom-4 left-4 right-4 sm:bottom-6 sm:right-6 sm:left-auto z-[100] sm:max-w-[400px]"
                 >
                     <div className="bg-card/80 backdrop-blur-xl border border-border/50 shadow-2xl rounded-2xl p-5 relative overflow-hidden">
-                        {/* Soft glow effect behind the icon */}
-                        <div className="absolute top-0 left-0 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl -ml-10 -mt-10 pointer-events-none" />
 
                         <div className="relative z-10">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-2">
-                                    <div className="p-2 bg-orange-500/10 rounded-xl text-orange-500">
-                                        <Cookie className="w-5 h-5" />
+                                    <div className="p-1.5 flex items-center justify-center">
+                                        <Image src="/cookie.png" alt="Cookie" width={24} height={24} />
                                     </div>
                                     <h3 className="font-bold text-foreground text-base tracking-tight">
                                         We value your privacy

@@ -10,6 +10,7 @@ import TechnicalLattice from "@/components/TechnicalLattice";
 import AuthSync from "@/components/AuthSync";
 import { BetaBanner } from "@/components/BetaBanner";
 import { CookieBanner } from "@/components/CookieBanner";
+import FooterWrapper from "@/components/FooterWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <main className="flex-1 flex flex-col min-w-0">
                     {children}
                   </main>
+                  <FooterWrapper />
                 </div>
               </div>
             </ToastProvider>

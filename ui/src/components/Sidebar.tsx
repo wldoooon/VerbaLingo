@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Compass, User, Bookmark, Settings, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, Star, ChevronsUpDown, Plus, Sparkles, CreditCard, Bell, BadgeCheck } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import FoxLogo from './FoxLogo';
 import { useTheme } from 'next-themes';
@@ -112,23 +113,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
   };
 
   const mainNav = [
-    { icon: Compass, label: 'Discover', view: ViewState.LANDING },
-    { icon: LayoutGrid, label: 'Categories', view: ViewState.LANDING, action: 'categories' },
+    { icon: Compass, label: 'Discover', view: ViewState.LANDING, href: '/' },
   ];
 
   const libraryNav = [
-    { icon: History, label: 'Recent', view: ViewState.PROFILE },
-    { icon: Bookmark, label: 'Saved', view: ViewState.SAVED },
-    { icon: Star, label: 'Favorites', view: ViewState.SAVED },
+    { icon: History, label: 'Recent', view: ViewState.PROFILE, href: '/profile' },
+    { icon: Bookmark, label: 'Saved', view: ViewState.SAVED, href: '/saved' },
+    { icon: Star, label: 'Favorites', view: ViewState.SAVED, href: '/saved' },
   ];
 
   const supportNav = [
-    { icon: Sparkles, label: 'Changelog', view: ViewState.CHANGELOG },
-    { icon: CreditCard, label: 'Pricing', view: ViewState.PRICING },
-    { icon: LifeBuoy, label: 'Support', view: ViewState.LANDING },
+    { icon: Sparkles, label: 'Changelog', view: ViewState.CHANGELOG, href: '/changelog' },
+    { icon: CreditCard, label: 'Pricing', view: ViewState.PRICING, href: '/pricing' },
+    { icon: LifeBuoy, label: 'Support', view: ViewState.LANDING, href: '/support' },
     // Settings only makes sense for logged-in users
     ...(authStatus === 'authenticated'
-      ? [{ icon: Settings, label: 'Settings', view: ViewState.PROFILE }]
+      ? [{ icon: Settings, label: 'Settings', view: ViewState.PROFILE, href: '/profile' }]
       : []),
   ];
 
@@ -141,43 +141,45 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
       }
     >
       {/* 0. Brand Header */}
-      {!isCollapsed && (
-        <div className="px-6 pt-5 pb-0 flex items-center gap-2.5">
-          <Image src="/main_logo.png" alt="PokiSpokey Logo" width={52} height={52} className="shrink-0" />
-          <h1 className="text-2xl font-black text-foreground tracking-tight leading-none">
-            Poki<span className="text-primary">Spokey</span>
-          </h1>
-          <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-[18px] font-bold uppercase tracking-widest bg-primary/10 text-primary border-primary/20 rounded-full leading-none ml-auto">
-            Beta
-          </Badge>
-        </div>
-      )}
+      <div className={`pt-5 pb-0 flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-6 gap-0.2'}`}>
+        <Image src="/main_logo.png" alt="PokiSpokey Logo" width={isCollapsed ? 44 : 52} height={isCollapsed ? 44 : 52} className="shrink-0" />
+        {!isCollapsed && (
+          <div className="flex items-start">
+            <h1 className="text-2xl font-black text-foreground tracking-tight leading-none">
+              Poki<span className="text-primary">Spokey</span>
+            </h1>
+            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-[15px] font-bold uppercase tracking-widest bg-primary/10 text-primary border-primary/20 rounded-full flex items-center justify-center leading-none ml-1 -mt-1.5">
+              Beta
+            </Badge>
+          </div>
+        )}
+      </div>
 
       {/* 1. Top Section: User Identity Badge */}
       {authStatus === 'authenticated' && (
-      <div className="p-4 border-b border-border/60">
-        <div
-          className="h-14 flex items-center w-full border border-zinc-950/10 dark:border-zinc-50/10 rounded-full bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-2 transition-all duration-200"
-        >
-          <div className="flex aspect-square h-10 w-10 items-center justify-center rounded-full bg-primary overflow-hidden shadow-sm">
-            {authUser?.oauth_avatar_url ? (
-              <img src={authUser.oauth_avatar_url} alt="Avatar" className="h-full w-full object-cover" />
-            ) : (
-              <User className="size-5 text-primary-foreground" />
+        <div className="p-4 border-b border-border/60">
+          <div
+            className="h-14 flex items-center w-full border border-zinc-950/10 dark:border-zinc-50/10 rounded-full bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-2 transition-all duration-200"
+          >
+            <div className="flex aspect-square h-10 w-10 items-center justify-center rounded-full bg-primary overflow-hidden shadow-sm">
+              {authUser?.oauth_avatar_url ? (
+                <img src={authUser.oauth_avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+              ) : (
+                <User className="size-5 text-primary-foreground" />
+              )}
+            </div>
+            {!isCollapsed && (
+              <div className="grid flex-1 text-left text-sm leading-tight ml-3">
+                <span className="truncate font-black text-sm tracking-tight text-foreground">
+                  {authUser?.full_name || (authUser?.email?.split('@')[0] || "User")}
+                </span>
+                <span className="truncate text-[10px] font-bold uppercase tracking-widest text-orange-500">
+                  {authUser?.tier || "Free"} Plan
+                </span>
+              </div>
             )}
           </div>
-          {!isCollapsed && (
-            <div className="grid flex-1 text-left text-sm leading-tight ml-3">
-              <span className="truncate font-black text-sm tracking-tight text-foreground">
-                {authUser?.full_name || (authUser?.email?.split('@')[0] || "User")}
-              </span>
-              <span className="truncate text-[10px] font-bold uppercase tracking-widest text-orange-500">
-                {authUser?.tier || "Free"} Plan
-              </span>
-            </div>
-          )}
         </div>
-      </div>
       )}
 
       {/* 2. Navigation */}
@@ -332,31 +334,46 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
 
 
 
-const NavItem = ({ item, isActive, isCollapsed, onClick }: any) => (
-  <button
-    onClick={onClick}
-    className={`group relative flex items-center w-full p-3.5 rounded-xl transition-all duration-200 cursor-pointer ${isActive
-      ? 'bg-primary/10 text-primary font-medium shadow-sm'
-      : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-      } ${isCollapsed ? 'justify-center' : ''}`}
-  >
-    <item.icon
-      className={`w-6 h-6 transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}
-    />
+const NavItem = ({ item, isActive, isCollapsed, onClick }: any) => {
+  const content = (
+    <>
+      <item.icon
+        className={`w-6 h-6 transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}
+      />
 
-    {!isCollapsed && (
-      <span className="ml-4 text-base font-medium tracking-tight">
-        {item.label}
-      </span>
-    )}
+      {!isCollapsed && (
+        <span className="ml-4 text-base font-medium tracking-tight">
+          {item.label}
+        </span>
+      )}
 
-    {isCollapsed && (
-      <div className="absolute left-full ml-4 px-4 py-2 bg-popover border border-border text-popover-foreground text-sm font-medium rounded-xl opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-2xl">
-        {item.label}
-      </div>
-    )}
-  </button>
-);
+      {isCollapsed && (
+        <div className="absolute left-full ml-4 px-4 py-2 bg-popover border border-border text-popover-foreground text-sm font-medium rounded-xl opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-2xl">
+          {item.label}
+        </div>
+      )}
+    </>
+  );
+
+  const className = `group relative flex items-center w-full p-3.5 rounded-xl transition-all duration-200 cursor-pointer ${isActive
+    ? 'bg-primary/10 text-primary font-medium shadow-sm'
+    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+    } ${isCollapsed ? 'justify-center' : ''}`;
+
+  if (item.href) {
+    return (
+      <Link href={item.href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button onClick={onClick} className={className}>
+      {content}
+    </button>
+  );
+};
 
 export default Sidebar;
 

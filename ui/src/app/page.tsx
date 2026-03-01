@@ -2,7 +2,6 @@
 
 import { Hero } from "@/components/Hero";
 import { Faq } from "@/components/Faq";
-import { Footer } from "@/components/Footer";
 import { TooltipProvider } from "@/components/animate-ui/components/radix/tooltip";
 
 export default function LandingPage() {
@@ -13,9 +12,6 @@ export default function LandingPage() {
 
       {/* FAQ Section */}
       <Faq />
-
-      {/* Footer */}
-      <Footer />
     </TooltipProvider>
   );
 }
