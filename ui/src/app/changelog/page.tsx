@@ -7,76 +7,38 @@ import { ArrowRight, Tag, Calendar } from 'lucide-react';
 // Data structure for your releases
 const releases = [
     {
-        version: "v1.2.0",
-        date: "Current",
-        title: "Mobile Performance Optimization",
-        description: "A major update focusing on bringing buttery smooth 60fps animations to all mobile devices and iPads.",
+        version: "v1.4.0",
+        date: "Today",
+        title: "Bonjour! French Language Support",
+        description: "Mais oui! We have officially added full support for the French language.",
         changes: [
-            { type: "update", description: "Replaced CPU-heavy CSS blur filters with GPU-accelerated opacity overlays in the 3D Carousel." },
-            { type: "fix", description: "Resolved iPad grid squishing bugs by adjusting Tailwind breakpoints from lg to xl." },
-            { type: "feat", description: "Made 'Everything you need to fluency' typography fully fluid using clamp()." },
-            { type: "update", description: "Gracefully disabled the canvas TechnicalLattice background on small screens." }
+            { type: "feat", description: "Added entirely new French language catalog with hundreds of thousands of indexed videos." },
+            { type: "feat", description: "Configured the AI Tutor companion to understand and explain French grammar and nuance." }
         ]
     },
     {
-        version: "v1.1.0",
+        version: "v1.3.5",
         date: "Yesterday",
-        title: "Domain & Vercel Deployment",
-        description: "PokiSpokey is now officially live on the internet.",
+        title: "Sub-Category Deep Search",
+        description: "Finding exactly what you need is now faster and more intuitive with specific sub-category filtering.",
         changes: [
-            { type: "feat", description: "Successfully configured and deployed frontend to Vercel." },
-            { type: "feat", description: "Attached custom domain pokispokey.com via Porkbun." },
-            { type: "feat", description: "Updated sidebar branding from VerbaLingo to PokiSpokey." }
+            { type: "feat", description: "Added the ability to filter search results by highly specific sub-categories." },
+            { type: "update", description: "Improved search indexing speeds for complex layered queries." }
         ]
     },
     {
-        version: "v1.0.5",
-        date: "February 14, 2026",
-        title: "Authentication & User Profiles",
-        description: "Launched our full authentication suite allowing users to save their progress.",
+        version: "v1.3.1",
+        date: "February 28, 2026",
+        title: "AI Companion Mobile Fixes",
+        description: "We've tightened up our mobile layouts, taking special care of how the AI Companion renders on small screens.",
         changes: [
-            { type: "feat", description: "Implemented secure sign-up and login workflows using Supabase." },
-            { type: "feat", description: "Added editable user profiles with custom avatar uploads." },
-            { type: "fix", description: "Fixed a routing issue where guests could bypass the 'Saved' library wall." }
-        ]
-    },
-    {
-        version: "v0.9.2",
-        date: "January 28, 2026",
-        title: "The Context Engine Beta",
-        description: "Introduced our core video indexing engine to help learners find real-world examples.",
-        changes: [
-            { type: "feat", description: "Launched the initial version of the Context Engine™ with 14.2M indexed frames." },
-            { type: "feat", description: "Integrated the AI Tutor companion for contextual explanations and grammar help." },
-            { type: "update", description: "Optimized video retrieval queries to ensure sub-100ms response times globally." }
-        ]
-    },
-    {
-        version: "v0.8.0",
-        date: "December 10, 2025",
-        title: "Dark Mode & Design System",
-        description: "A modern language learning app needs a modern UI. We delivered a complete brand overhaul.",
-        changes: [
-            { type: "feat", description: "Added full system-aware Light and Dark mode toggling." },
-            { type: "feat", description: "Implemented the new PokiSpokey design system with semantic Tailwind colors." },
-            { type: "fix", description: "Resolved several color contrast accessibility issues in the sidebar navigation." }
+            { type: "fix", description: "Resolved an issue where the AI Companion feature card layout broke or overflowed text on iPads." },
+            { type: "fix", description: "Removed CPU-heavy robot icon animations in the AI Companion card to ensure buttery smooth performance on older phones." }
         ]
     }
 ];
 
-// Helper to determine badge colors based on the change type
-const getTypeColor = (type: string) => {
-    return 'border-foreground/20 bg-foreground text-background';
-};
 
-// Helper to determine what text to show on the badge
-const getTypeLabel = (type: string) => {
-    switch (type) {
-        case 'feat': return 'Feature';
-        case 'fix': return 'Fix';
-        default: return 'Update';
-    }
-};
 
 export default function ChangelogPage() {
     return (
@@ -158,10 +120,8 @@ export default function ChangelogPage() {
                                         <div className="space-y-4">
                                             {release.changes.map((change, changeIndex) => (
                                                 <div key={changeIndex} className="flex items-start gap-4">
-                                                    <div className="mt-1">
-                                                        <span className={`inline-flex items-center justify-center w-24 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ${getTypeColor(change.type)}`}>
-                                                            {getTypeLabel(change.type)}
-                                                        </span>
+                                                    <div className="mt-2.5 flex-shrink-0">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-foreground/40"></div>
                                                     </div>
                                                     <p className="text-foreground/80 leading-relaxed flex-1">
                                                         {change.description}

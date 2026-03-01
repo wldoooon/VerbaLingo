@@ -46,6 +46,7 @@ enum ViewState {
   PROFILE = 'PROFILE',
   SAVED = 'SAVED',
   PRICING = 'PRICING',
+  CHANGELOG = 'CHANGELOG',
   UNKNOWN = 'UNKNOWN'
 }
 
@@ -83,6 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
     if (pathname?.startsWith('/profile')) return ViewState.PROFILE;
     if (pathname?.startsWith('/saved')) return ViewState.SAVED;
     if (pathname?.startsWith('/pricing')) return ViewState.PRICING;
+    if (pathname?.startsWith('/changelog')) return ViewState.CHANGELOG;
     return ViewState.UNKNOWN;
   }, [pathname]);
 
@@ -99,6 +101,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
         break;
       case ViewState.PRICING:
         router.push('/pricing');
+        break;
+      case ViewState.CHANGELOG:
+        router.push('/changelog');
         break;
       default:
         break;
@@ -117,6 +122,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
   ];
 
   const supportNav = [
+    { icon: Sparkles, label: 'Changelog', view: ViewState.CHANGELOG },
+    { icon: CreditCard, label: 'Pricing', view: ViewState.PRICING },
     { icon: LifeBuoy, label: 'Support', view: ViewState.LANDING },
     // Settings only makes sense for logged-in users
     ...(authStatus === 'authenticated'
@@ -270,9 +277,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
               <NavItem
                 key={idx}
                 item={item}
-                isActive={false}
+                isActive={currentView === item.view}
                 isCollapsed={isCollapsed}
-                onClick={() => { }}
+                onClick={() => onChangeView(item.view)}
               />
             ))}
           </div>
@@ -321,7 +328,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
       {/* Sidebar Toggle */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-8 w-6 h-6 bg-popover border border-border rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
+        className="absolute -right-3 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
       >
         {isCollapsed ? <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" /> : <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />}
       </button>
