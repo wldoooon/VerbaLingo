@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 
 const mainLinks = [
@@ -56,9 +57,12 @@ export function Footer() {
 
         {/* Bottom: Copyright + icons */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-10">
-          <p className="text-sm text-muted-foreground tracking-wide">
-            &copy; {new Date().getFullYear()} Pokispokey. All rights reserved.
-          </p>
+          <div className="flex items-center gap-3">
+            <Image src="/main_logo.png" alt="PokiSpokey Logo" width={24} height={24} />
+            <p className="text-sm text-muted-foreground tracking-wide">
+              &copy; {new Date().getFullYear()} PokiSpokey. All rights reserved.
+            </p>
+          </div>
 
           <div className="flex items-center gap-5">
             {/* Flag / locale placeholder */}

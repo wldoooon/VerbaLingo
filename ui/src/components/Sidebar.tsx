@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Compass, User, Bookmark, Settings, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, Star, ChevronsUpDown, Plus, Sparkles, CreditCard, Bell, BadgeCheck } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import FoxLogo from './FoxLogo';
 import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/stores/auth-store';
@@ -141,11 +142,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
     >
       {/* 0. Brand Header */}
       {!isCollapsed && (
-        <div className="px-6 pt-8 pb-2 flex items-center gap-3">
-          <h1 className="text-xl font-black text-foreground tracking-tighter">
+        <div className="px-6 pt-5 pb-0 flex items-center gap-2.5">
+          <Image src="/main_logo.png" alt="PokiSpokey Logo" width={52} height={52} className="shrink-0" />
+          <h1 className="text-2xl font-black text-foreground tracking-tight leading-none">
             Poki<span className="text-primary">Spokey</span>
           </h1>
-          <Badge variant="secondary" className="text-[10px] px-2 h-5 font-bold uppercase tracking-widest bg-primary/10 text-primary border-primary/20 rounded-full">
+          <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-[18px] font-bold uppercase tracking-widest bg-primary/10 text-primary border-primary/20 rounded-full leading-none ml-auto">
             Beta
           </Badge>
         </div>
