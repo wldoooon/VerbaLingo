@@ -22,10 +22,10 @@ export function Features() {
           </div>
         </AnimatedContent>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
 
           {/* Large Block - Search Context */}
-          <AnimatedContent distance={60} delay={0.1} className="md:col-span-2 row-span-2">
+          <AnimatedContent distance={60} delay={0.1} className="lg:col-span-2 lg:row-span-2">
             <div className="bg-card/50 border border-border/50 rounded-[2.5rem] p-10 h-full relative overflow-hidden group hover:border-primary/30 transition-all shadow-sm">
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Search className="w-64 h-64 text-primary transform rotate-12 translate-x-12 -translate-y-12" />
@@ -50,7 +50,7 @@ export function Features() {
           </AnimatedContent>
 
           {/* Tall Block - AI Tutor */}
-          <AnimatedContent distance={60} delay={1.2} className="md:col-span-1 row-span-2">
+          <AnimatedContent distance={60} delay={1.2} className="lg:col-span-1 lg:row-span-2">
             <div className="bg-primary text-primary-foreground border border-primary rounded-[2.5rem] p-10 h-full shadow-2xl relative overflow-hidden group">
               <div className="absolute inset-0 opacity-20"
                 style={{

@@ -162,7 +162,7 @@ export function Hero() {
 
       <div className="max-w-[1300px] mx-auto pt-8 pb-20 px-6 lg:px-12 relative z-10">
         {/* Split Hero Section */}
-        <div className="grid lg:grid-cols-2 gap-50 lg:gap-12 items-center mb-24 min-h-[600px]">
+        <div className="grid xl:grid-cols-2 gap-20 xl:gap-12 items-center mb-20 xl:mb-24 min-h-[600px]">
 
           {/* Left Column: Context Content & Insights */}
           <div className="flex flex-col justify-center relative z-20">
@@ -268,8 +268,8 @@ export function Hero() {
                 <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
               </div>
 
-              <div className="grid grid-cols-3 gap-8 px-4">
-                <div className="flex flex-col gap-2 group cursor-default">
+              <div className="flex flex-wrap sm:flex-nowrap justify-between gap-6 sm:gap-4 px-2">
+                <div className="flex flex-col gap-2 group cursor-default w-full sm:w-1/3">
                   <div className="flex items-center gap-2 text-primary">
                     <Globe className="w-4 h-4" />
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Global Languages</span>
@@ -283,7 +283,7 @@ export function Hero() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2 group cursor-default border-x border-border/50 px-8">
+                <div className="flex flex-col gap-2 group cursor-default sm:border-x border-border/50 sm:px-6 w-full sm:w-1/3">
                   <div className="flex items-center gap-2 text-primary">
                     <Layers className="w-4 h-4" />
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Active Categories</span>
@@ -297,7 +297,7 @@ export function Hero() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2 group cursor-default text-right">
+                <div className="flex flex-col gap-2 group cursor-default sm:text-right w-full sm:w-1/3">
                   <div className="flex items-center justify-end gap-2 text-primary">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Contextual Clips</span>
                     <Database className="w-4 h-4" />
