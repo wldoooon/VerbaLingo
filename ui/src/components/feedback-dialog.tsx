@@ -1,3 +1,4 @@
+import React from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -10,13 +11,15 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { MessageSquareText } from "lucide-react"
 
-export function FeedbackDialog() {
+export function FeedbackDialog({ children }: { children?: React.ReactNode }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <MessageSquareText className="h-5 w-5" />
-        </Button>
+        {children || (
+          <Button variant="ghost" size="icon" className="rounded-full">
+            <MessageSquareText className="h-5 w-5" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

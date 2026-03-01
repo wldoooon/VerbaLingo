@@ -7,7 +7,7 @@ import AnimatedContent from "./AnimatedContent";
 
 export function Features() {
   return (
-    <div className="py-20 relative overflow-hidden">
+    <div id="features" className="py-20 relative overflow-hidden">
       <div className="max-w-[1300px] mx-auto px-6 lg:px-12">
 
         {/* Animated Header */}

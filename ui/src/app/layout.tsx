@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning style={{ fontSize: '80%' }}>
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning style={{ fontSize: '80%' }}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=0.80, maximum-scale=1.0, user-scalable=yes" />
         <link rel="preconnect" href="https://www.youtube.com" />
