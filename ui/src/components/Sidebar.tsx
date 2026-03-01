@@ -137,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
       className={
         isMobile
           ? "flex flex-col h-full w-full bg-background relative z-50 select-none overflow-y-auto"
-          : `hidden md:flex flex-col h-screen sticky top-0 border-r border-border bg-transparent transition-[width] duration-300 ease-in-out relative z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[300px]'}`
+          : `hidden md:flex flex-col h-screen sticky top-0 border-r border-border bg-transparent transition-[width] duration-300 ease-in-out z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[300px]'}`
       }
     >
       {/* 0. Brand Header */}
@@ -154,6 +154,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
       )}
 
       {/* 1. Top Section: User Identity Badge */}
+      {authStatus === 'authenticated' && (
       <div className="p-4 border-b border-border/60">
         <div
           className="h-14 flex items-center w-full border border-zinc-950/10 dark:border-zinc-50/10 rounded-full bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-2 transition-all duration-200"
@@ -167,26 +168,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
           </div>
           {!isCollapsed && (
             <div className="grid flex-1 text-left text-sm leading-tight ml-3">
-              {authStatus === "unknown" ? (
-                /* Skeleton while auth loads — prevents flash of "Guest" */
-                <>
-                  <div className="h-3.5 w-24 rounded bg-muted animate-pulse mb-1" />
-                  <div className="h-2.5 w-16 rounded bg-muted animate-pulse" />
-                </>
-              ) : (
-                <>
-                  <span className="truncate font-black text-sm tracking-tight text-foreground">
-                    {authUser?.full_name || (authUser?.email?.split('@')[0] || "Guest")}
-                  </span>
-                  <span className="truncate text-[10px] font-bold uppercase tracking-widest text-orange-500">
-                    {authStatus === 'authenticated' ? (authUser?.tier || "Free") : "Guest"} Plan
-                  </span>
-                </>
-              )}
+              <span className="truncate font-black text-sm tracking-tight text-foreground">
+                {authUser?.full_name || (authUser?.email?.split('@')[0] || "User")}
+              </span>
+              <span className="truncate text-[10px] font-bold uppercase tracking-widest text-orange-500">
+                {authUser?.tier || "Free"} Plan
+              </span>
             </div>
           )}
         </div>
       </div>
+      )}
 
       {/* 2. Navigation */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8 custom-scrollbar">
