@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           disableTransitionOnChange
         >
           {/* Technical Dynamic Background */}
-          <TechnicalLattice gridSize={80} opacity={0.6} />
+          {/* <TechnicalLattice gridSize={80} opacity={0.6} /> */}
 
           <QueryProvider>
             <AuthSync />
