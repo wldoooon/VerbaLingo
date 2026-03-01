@@ -37,12 +37,12 @@ const CATEGORIES = [
 
 // Languages with flags
 const LANGUAGES = [
-    { value: 'English', label: 'English', flag: 'https://flagcdn.com/us.svg' },
-    { value: 'Spanish', label: 'Español', flag: 'https://flagcdn.com/es.svg' },
-    { value: 'French', label: 'Français', flag: 'https://flagcdn.com/fr.svg' },
-    { value: 'Germany', label: 'Deutsch', flag: 'https://flagcdn.com/de.svg' },
-    { value: 'Japanese', label: '日本語', flag: 'https://flagcdn.com/jp.svg' },
-    { value: 'Chinese', label: '中文', flag: 'https://flagcdn.com/cn.svg' },
+    { value: 'English', label: 'English', flag: 'https://flagcdn.com/us.svg', available: true },
+    { value: 'Germany', label: 'Deutsch', flag: 'https://flagcdn.com/de.svg', available: true },
+    { value: 'French', label: 'Français', flag: 'https://flagcdn.com/fr.svg', available: true },
+    { value: 'Spanish', label: 'Español', flag: 'https://flagcdn.com/es.svg', available: false },
+    { value: 'Japanese', label: '日本語', flag: 'https://flagcdn.com/jp.svg', available: false },
+    { value: 'Chinese', label: '中文', flag: 'https://flagcdn.com/cn.svg', available: false },
 ];
 
 export function SearchBar() {
@@ -421,7 +421,9 @@ export function SearchBar() {
                                 {LANGUAGES.map((lang) => (
                                     <DropdownMenuItem
                                         key={lang.value}
+                                        disabled={!lang.available}
                                         onClick={() => {
+                                            if (!lang.available) return;
                                             setSelectedLanguage(lang.value);
                                             setStoreLanguage(lang.value.toLowerCase());
 
@@ -436,12 +438,13 @@ export function SearchBar() {
                                             }
                                         }}
                                         className={cn(
-                                            "rounded-lg py-2.5 cursor-pointer flex items-center justify-between",
+                                            "rounded-lg py-2.5 flex items-center justify-between",
+                                            lang.available ? "cursor-pointer" : "cursor-not-allowed opacity-50 text-muted-foreground",
                                             selectedLanguage === lang.value && "bg-accent text-accent-foreground"
                                         )}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border/50">
+                                            <div className={cn("w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border/50", !lang.available && "grayscale")}>
                                                 <img src={lang.flag} alt={lang.value} className="w-full h-full object-cover" />
                                             </div>
                                             <span className="text-sm font-medium">{lang.label}</span>
