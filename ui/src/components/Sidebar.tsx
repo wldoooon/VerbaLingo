@@ -60,7 +60,6 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isLibraryOpen, setIsLibraryOpen] = useState(true);
   const [isDiscoverOpen, setIsDiscoverOpen] = useState(true);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -119,11 +118,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
     { label: 'FAQ', href: '/#faq' },
   ];
 
-  const libraryNav = [
-    { icon: History, label: 'Recent', view: ViewState.PROFILE, href: '/profile' },
-    { icon: Bookmark, label: 'Saved', view: ViewState.SAVED, href: '/saved' },
-    { icon: Star, label: 'Favorites', view: ViewState.SAVED, href: '/saved' },
-  ];
+
 
   const supportNav = [
     { icon: Megaphone, label: 'Changelog', view: ViewState.CHANGELOG, href: '/changelog' },
@@ -254,67 +249,31 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
           )}
         </div>
 
-        {/* Library Section */}
+        {/* Saved Section */}
         <div>
           {!isCollapsed ? (
-            <>
-              <button
-                onClick={() => setIsLibraryOpen(!isLibraryOpen)}
-                className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 group mb-1 cursor-pointer ${isLibraryOpen ? 'text-foreground' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                  }`}
-              >
-                <div className="flex items-center gap-4 px-1">
-                  <Folder className={`w-5 h-5 ${isLibraryOpen ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <span className="text-sm font-medium tracking-wide">Library</span>
-                </div>
-                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isLibraryOpen ? 'rotate-0 text-muted-foreground' : '-rotate-90 text-muted-foreground'}`} />
-              </button>
-
-              <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${isLibraryOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
-                <div className="overflow-hidden">
-                  <div className="relative space-y-1 mt-1">
-                    {/* Vertical Tree Line */}
-                    <div className="absolute left-[23px] top-0 bottom-4 w-[1.5px] bg-border/60"></div>
-
-                    {libraryNav.map((item, idx) => {
-                      const active = currentView === item.view && (
-                        (item.label === 'Saved' && currentView === ViewState.SAVED) ||
-                        (item.label === 'Recent' && currentView === ViewState.PROFILE)
-                      );
-
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => onChangeView(item.view)}
-                          className={`relative w-full flex items-center gap-4 p-2.5 rounded-xl pl-10 transition-all duration-200 group cursor-pointer ${active ? 'bg-primary/5 text-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-                            }`}
-                        >
-                          {/* Connector Dot */}
-                          <div className="absolute left-[21px] top-1/2 -translate-y-1/2 w-2 h-[1.5px] bg-border/60"></div>
-
-                          <span className={`text-sm font-medium transition-colors ${active ? 'text-primary' : 'group-hover:text-foreground'}`}>
-                            {item.label}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+            <div className="w-full flex items-center justify-between p-3.5 rounded-xl text-muted-foreground opacity-50 cursor-not-allowed border border-transparent">
+              <div className="flex items-center gap-4 px-1">
+                <Bookmark className="w-6 h-6" />
+                <span className="text-base tracking-tight">Saved</span>
+              </div>
+              <Badge variant="secondary" className="px-1.5 py-0 h-[18px] text-[9px] font-bold uppercase tracking-widest bg-muted text-foreground mr-1">
+                Soon
+              </Badge>
+            </div>
+          ) : (
+            /* Collapsed Saved Logic */
+            <div className="flex flex-col gap-4 items-center mt-2">
+              <div className="w-12 h-12 flex items-center justify-center text-muted-foreground opacity-50 bg-transparent rounded-xl cursor-not-allowed group relative">
+                <Bookmark className="w-6 h-6" />
+                <div className="absolute left-full ml-4 px-3 py-1.5 bg-popover border border-border text-popover-foreground text-xs font-medium rounded-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl flex items-center gap-2">
+                  Saved
+                  <Badge variant="secondary" className="px-1 py-0 h-[14px] text-[8px] font-bold uppercase tracking-widest bg-muted text-foreground">
+                    Soon
+                  </Badge>
                 </div>
               </div>
-            </>
-          ) : (
-            /* Collapsed Library Logic */
-            <div className="flex flex-col gap-4 items-center mt-2">
-              <button
-                onClick={() => { setIsCollapsed(false); setIsLibraryOpen(true); }}
-                className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-foreground bg-muted/30 rounded-xl transition-colors cursor-pointer group relative"
-              >
-                <Folder className="w-6 h-6" />
-                <div className="absolute left-full ml-4 px-3 py-1.5 bg-popover border border-border text-popover-foreground text-xs font-medium rounded-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl">
-                  Library
-                </div>
-              </button>
-              <div className="w-[1px] h-10 bg-border"></div>
+              <div className="w-[1px] h-10 bg-border mt-2"></div>
             </div>
           )}
         </div>
