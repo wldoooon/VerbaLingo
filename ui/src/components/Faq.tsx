@@ -128,9 +128,9 @@ export function Faq() {
                   >
                     <AccordionItem
                       value={`item-${index}`}
-                      className="border-b border-border/40 last:border-b-0 px-6 md:px-8 transition-colors data-[state=open]:bg-muted/30"
+                      className="border-b border-border/40 last:border-b-0 px-6 md:px-8 transition-colors"
                     >
-                      <AccordionTrigger className="hover:no-underline py-6 gap-4 [&>svg]:shrink-0 [&>svg]:text-muted-foreground">
+                      <AccordionTrigger className="hover:no-underline py-6 gap-4 cursor-pointer [&>svg]:shrink-0 [&>svg]:text-muted-foreground">
                         <div className="flex flex-col items-center justify-center flex-1 w-full gap-4 text-center">
                           <span className="text-base md:text-lg font-semibold text-foreground leading-snug w-full">
                             {item.question}
