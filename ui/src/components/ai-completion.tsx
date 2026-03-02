@@ -300,11 +300,6 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         return (
             <div className="w-full h-full flex flex-col">
                 <div className="relative w-full h-full flex flex-col bg-card p-6 items-center justify-start pt-[15%] overflow-hidden">
-                    {/* Ambient glow */}
-                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px]" />
-                    </div>
-
                     <motion.div
                         initial={{ opacity: 0, y: 24 }}
                         animate={{ opacity: 1, y: 0 }}

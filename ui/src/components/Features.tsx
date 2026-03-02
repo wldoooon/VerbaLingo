@@ -50,7 +50,7 @@ export function Features() {
           </AnimatedContent>
 
           {/* Tall Block - AI Tutor */}
-          <AnimatedContent distance={60} delay={1.2} className="lg:col-span-1 lg:row-span-2">
+          <AnimatedContent distance={60} delay={0.2} className="lg:col-span-1 lg:row-span-2">
             <div className="bg-primary text-primary-foreground border border-primary rounded-[2.5rem] p-10 h-full shadow-2xl relative overflow-hidden group">
               <div className="absolute inset-0 opacity-20"
                 style={{
