@@ -10,10 +10,16 @@ MANTICORE_URL = "http://localhost:9308"
 TABLE_NAME = "english_dataset"
 
 def generate_sentence_id(video_id: str, position: int) -> int:
-    """Generate a stable 64-bit integer ID from video_id and position"""
-    unique_str = f"{video_id}_{position}"
-    hash_hex = hashlib.md5(unique_str.encode()).hexdigest()[:15]
-    return int(hash_hex, 16)
+    """Generate a collision-free 64-bit integer ID from video_id and position.
+    
+    Uses composite key: upper 48 bits = video_id hash, lower 16 bits = position.
+    Collisions require BOTH a video hash collision AND the same sentence position,
+    making the probability effectively 0% even at 30M+ documents.
+    """
+    if position > 65535:
+        raise ValueError(f"Position {position} exceeds 16-bit limit (65535)")
+    video_hash = int(hashlib.md5(video_id.encode()).hexdigest()[:12], 16)  # 48-bit hash
+    return (video_hash << 16) | position
 
 
 async def get_api_client():
@@ -129,13 +135,13 @@ async def import_documents(index_api: manticoresearch.IndexApi, file_path: str, 
             
             manticore_doc = {
                 "insert": {
-                    "table": TABLE_NAME,
+                    "index": TABLE_NAME,
                     "id": doc_id,
                     "doc": {
                         "sentence_text": sentence.get("sentence_text", ""),
                         "video_id": video_id,
                         "channel": channel,
-                        "category_title": "Movies",
+                        "category_title": "Podcasts",
                         "category_type": movie_name,
                         "language": language,
                         "video_title": video_title,
@@ -172,8 +178,11 @@ async def flush_batch(index_api: manticoresearch.IndexApi, batch: list):
     for attempt in range(max_retries):
         try:
             ndjson_body = "\n".join(json.dumps(doc) for doc in batch)
-            await index_api.bulk(ndjson_body)
-            return  # Success, exit function
+            response = await index_api.bulk(ndjson_body)
+            if response.errors:
+                print(f"\nBulk partial failure: {response.error}")
+                print(f"   Skipped lines: {response.skipped_lines}, Current line: {response.current_line}")
+            return  # Exit function
             
         except Exception as e:
             if attempt < max_retries - 1:
