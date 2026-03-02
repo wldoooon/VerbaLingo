@@ -22,9 +22,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning style={{ fontSize: '80%' }}>
+    <html lang="en" className="scroll-smooth overflow-x-hidden w-full" suppressHydrationWarning style={{ fontSize: '80%' }}>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=0.80, maximum-scale=1.0, user-scalable=yes" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <link rel="preconnect" href="https://www.youtube.com" />
         <link rel="preconnect" href="https://i.ytimg.com" />
         <link rel="preconnect" href="https://s.ytimg.com" />
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://s.ytimg.com" />
       </head>
       <body
-        className={`${inter.className} white overflow-x-hidden min-h-screen bg-background`}
+        className={`${inter.className} white w-full min-h-screen bg-background`}
         style={{ fontSize: '85%' }}
         suppressHydrationWarning
       >
@@ -51,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {/* Main App Layout with Sidebar + Content */}
               <div className="flex min-h-screen relative z-10">
                 <Sidebar />
-                <div className="flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col overflow-x-hidden">
                   <NavigationWrapper />
                   <main className="flex-1 flex flex-col min-w-0">
                     {children}

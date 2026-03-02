@@ -302,7 +302,7 @@ export function Hero() {
 
           {/* Right Column: Curved Carousel (Preserved & Merged) */}
           <div
-            className="relative h-[650px] w-full flex items-center justify-center perspective-[1000px]"
+            className="relative h-[650px] w-full flex items-center justify-center perspective-[1000px] overflow-hidden"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
@@ -324,7 +324,7 @@ export function Hero() {
                 <div
                   key={cat.id}
                   onClick={() => setActiveCategory(index)}
-                  className={`absolute w-[400px] h-[540px] transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}
+                  className={`absolute w-[min(400px,85vw)] h-[540px] transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}
                   style={{
                     transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
                     opacity: opacity,

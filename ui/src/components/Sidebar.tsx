@@ -135,7 +135,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
       className={
         isMobile
           ? "flex flex-col h-full w-full bg-background relative z-50 select-none overflow-y-auto"
-          : `hidden xl:flex flex-col h-screen sticky top-0 border-r border-border bg-transparent transition-[width] duration-300 ease-in-out z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[300px]'}`
+          : `hidden xl:flex flex-col h-screen sticky top-0 border-r border-border bg-background transition-[width] duration-300 ease-in-out z-50 select-none ${isCollapsed ? 'w-[80px]' : 'w-[300px]'}`
       }
     >
       {/* 0. Brand Header */}
