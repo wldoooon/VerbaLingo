@@ -5,7 +5,7 @@ import dynamic from "next/dynamic"
 import { useSearchStore } from "@/stores/use-search-store"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { VideoPlayerSkeleton, TranscriptSkeleton, AiCompletionSkeleton } from "./WatchSkeletons"
-import { PanelRightClose, PanelRightOpen } from "lucide-react"
+import { PanelRightClose, PanelRightOpen, Bot, Play } from "lucide-react"
 
 // Dynamic imports for heavy components
 const VideoPlayerCard = dynamic(
@@ -63,6 +63,7 @@ export default function WatchClientPage({ word }: { word: string }) {
 
     const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
     const [isAiCollapsed, setIsAiCollapsed] = useState(false)
+    const [mobileTab, setMobileTab] = useState<"player" | "ai">("player")
 
     return (
         <>
@@ -71,8 +72,35 @@ export default function WatchClientPage({ word }: { word: string }) {
             {/* Main Content */}
             <div className="flex-1">
                 <div className={`mt-0 max-w-full xl:grid xl:items-start transition-[grid-template-columns] duration-300 ease-in-out ${isAiCollapsed ? 'xl:grid-cols-[1fr_48px]' : 'xl:grid-cols-[1fr_560px]'}`}>
-                    {/* Left: Player + Audio */}
-                    <div className="space-y-4 p-4 sm:p-6 pb-12 xl:pb-6">
+
+                    {/* ── Mobile/Tablet Tab Bar (below xl) ── */}
+                    <div className="xl:hidden flex items-center gap-1 px-4 pt-3 sm:px-6">
+                        <button
+                            onClick={() => setMobileTab("player")}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                mobileTab === "player"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            <Play className="h-3.5 w-3.5" />
+                            Player
+                        </button>
+                        <button
+                            onClick={() => setMobileTab("ai")}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                mobileTab === "ai"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted text-muted-foreground hover:text-foreground"
+                            }`}
+                        >
+                            <Bot className="h-3.5 w-3.5" />
+                            AI Assistant
+                        </button>
+                    </div>
+
+                    {/* ── Player content ── */}
+                    <div className={`space-y-4 p-4 sm:p-6 pb-12 xl:pb-6 ${mobileTab !== "player" ? "hidden xl:block" : ""}`}>
                         <Suspense fallback={<VideoPlayerSkeleton />}>
                             <VideoPlayerCard
                                 playlist={playlist}
@@ -91,7 +119,16 @@ export default function WatchClientPage({ word }: { word: string }) {
                         </Suspense>
                     </div>
 
-                    {/* Right: AI */}
+                    {/* ── Mobile/Tablet AI Panel (below xl) ── */}
+                    <div className={`xl:hidden ${mobileTab !== "ai" ? "hidden" : ""}`}>
+                        <div className="h-[calc(100vh-10rem)] overflow-hidden bg-card">
+                            <Suspense fallback={<AiCompletionSkeleton />}>
+                                <AiCompletion externalPrompt={externalPrompt} />
+                            </Suspense>
+                        </div>
+                    </div>
+
+                    {/* ── Desktop AI Panel (xl+) ── */}
                     <div className="hidden xl:flex xl:flex-col xl:ml-0 xl:mr-0 sticky top-0 h-[calc(100vh-5rem)] overflow-hidden border-l bg-card">
                         {/* Collapsed strip */}
                         <button
