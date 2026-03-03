@@ -100,7 +100,7 @@ services:
 
   # ─── ManticoreSearch Engine ───────────────────────────
   manticore:
-    image: manticoresearch/manticore:6.3.6
+    image: manticoresearch/manticore:17.5.1
     # WHY NOT :latest?
     # Manticore's "latest" tag tracks the development version (v17.x).
     # v17 introduced a new columnar engine that has known OOM (Out Of Memory)
