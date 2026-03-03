@@ -29,6 +29,7 @@ def _set_auth_cookie(response: Response, access_token: str):
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         samesite=settings.COOKIE_SAMESITE,
         secure=settings.COOKIE_SECURE,
+        domain=settings.COOKIE_DOMAIN if settings.COOKIE_DOMAIN else None,
     )
 
 
@@ -156,6 +157,7 @@ async def logout(response: Response):
         key=settings.COOKIE_NAME,
         samesite=settings.COOKIE_SAMESITE,
         secure=settings.COOKIE_SECURE,
+        domain=settings.COOKIE_DOMAIN if settings.COOKIE_DOMAIN else None,
     )
     return {"message": "Logged out"}
 
@@ -209,7 +211,7 @@ async def google_login(request: Request, mode: str = "login"):
     request.session["oauth_mode"] = mode
     logger.info(f"DEBUG: Starting OAuth flow in mode: {mode}")
     
-    redirect_uri = request.url_for('google_callback')
+    redirect_uri = settings.GOOGLE_REDIRECT_URI
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 

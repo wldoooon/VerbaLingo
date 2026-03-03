@@ -15,11 +15,10 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
-import { useLoginMutation, useSignupMutation } from "@/lib/authHooks"
+import { useSignupMutation } from "@/lib/authHooks"
 import axios from "axios"
 
 const signupSchema = z.object({
-    // full_name: z.string().min(2, "Name must be at least 2 characters"), // REMOVED as per request
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string(),
@@ -39,9 +38,8 @@ function getErrorMessage(err: unknown) {
     return "Authentication failed"
 }
 
-export function SignupForm({ onSuccess, externalError }: { onSuccess: () => void, externalError?: string | null }) {
+export function SignupForm({ onVerify, externalError }: { onVerify: (email: string, password: string) => void, externalError?: string | null }) {
     const signupMutation = useSignupMutation()
-    const loginMutation = useLoginMutation()
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
@@ -55,16 +53,16 @@ export function SignupForm({ onSuccess, externalError }: { onSuccess: () => void
             await signupMutation.mutateAsync({
                 email: values.email,
                 password: values.password,
-                // full_name: values.full_name // REMOVED 
-                full_name: "User" // Default for now since backend might expect it? Or backend generates it.
+                full_name: "User"
             })
-            await loginMutation.mutateAsync({ email: values.email, password: values.password })
-            onSuccess()
+            // Signup OK → OTP sent → parent switches to verify step
+            onVerify(values.email, values.password)
         } catch { }
     }
 
-    const isBusy = signupMutation.isPending || loginMutation.isPending
-    const error = signupMutation.error || loginMutation.error
+    const isBusy = signupMutation.isPending
+    const error = signupMutation.error
+
 
     return (
         <Form {...form}>
@@ -145,7 +143,7 @@ export function SignupForm({ onSuccess, externalError }: { onSuccess: () => void
                     )}
                 />
 
-                {(signupMutation.isError || loginMutation.isError || externalError) && (
+                {(signupMutation.isError || externalError) && (
                     <div className="text-sm text-destructive font-bold ml-1 mt-1">
                         {externalError || getErrorMessage(error)}
                     </div>

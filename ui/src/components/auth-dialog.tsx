@@ -8,12 +8,17 @@ import { useQueryClient } from "@tanstack/react-query"
 
 import { LoginForm } from "./auth/login-form"
 import { SignupForm } from "./auth/signup-form"
+import { VerifyEmailForm } from "./auth/verify-email-form"
 import { PasswordResetWizard } from "./auth/password-reset-wizard"
 import { useGoogleOAuth } from "@/lib/useGoogleOAuth"
 
+type Tab = "login" | "signup" | "verify_email" | "forgot_password"
+
 export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "login" | "signup", children?: React.ReactNode }) {
     const [isOpen, setIsOpen] = useState(false)
-    const [tab, setTab] = useState<"login" | "signup" | "forgot_password">(defaultTab)
+    const [tab, setTab] = useState<Tab>(defaultTab)
+    const [pendingEmail, setPendingEmail] = useState("")
+    const [pendingPassword, setPendingPassword] = useState("")
     const [isGoogleLoading, setIsGoogleLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const { openGoogleOAuth } = useGoogleOAuth()
@@ -24,6 +29,8 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
         setTimeout(() => {
             setTab("login")
             setError(null)
+            setPendingEmail("")
+            setPendingPassword("")
         }, 300)
     }
 
@@ -31,12 +38,9 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
         setIsGoogleLoading(true)
         setError(null)
         try {
-            // Pass 'signup' mode if we are on the signup tab
             const mode = tab === 'signup' ? 'signup' : 'login'
             const result = await openGoogleOAuth(mode)
             if (result.success) {
-                // OAuth message received - close dialog immediately
-                // The global AuthSync component and useMeQuery will handle the background refetch
                 handleClose()
             } else if (result.error) {
                 setError(result.error)
@@ -47,10 +51,21 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
         }
     }
 
-    const switchTab = (newTab: "login" | "signup" | "forgot_password") => {
+    const switchTab = (newTab: Tab) => {
         setTab(newTab)
         setError(null)
     }
+
+    // Called by SignupForm after successful signup
+    const handleSignupVerify = (email: string, password: string) => {
+        setPendingEmail(email)
+        setPendingPassword(password)
+        setTab("verify_email")
+    }
+
+    const isVerifyStep = tab === "verify_email"
+    const isForgotStep = tab === "forgot_password"
+    const showHeader = !isVerifyStep && !isForgotStep
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -83,7 +98,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                         </div>
                     )}
 
-                    {/* Explicit Close Button */}
+                    {/* Close Button */}
                     <button
                         onClick={handleClose}
                         className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors cursor-pointer z-50"
@@ -93,10 +108,9 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
 
                     <div className="flex flex-col items-center">
 
-                        {/* Only show Header/Social if NOT in wizard mode (optional, but cleaner) */}
-                        {tab !== "forgot_password" && (
+                        {/* Header + Google button — hidden on verify/forgot steps */}
+                        {showHeader && (
                             <>
-                                {/* Header */}
                                 <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight mb-2">
                                     {tab === "login" ? "Welcome Back" : "Create an account"}
                                 </h2>
@@ -139,7 +153,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                             </>
                         )}
 
-                        {/* Forms Container */}
+                        {/* Forms */}
                         <div className="w-full">
                             {tab === "login" ? (
                                 <LoginForm
@@ -149,16 +163,26 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                                 />
                             ) : tab === "signup" ? (
                                 <SignupForm
-                                    onSuccess={() => setIsOpen(false)}
+                                    onVerify={handleSignupVerify}
                                     externalError={error}
+                                />
+                            ) : tab === "verify_email" ? (
+                                <VerifyEmailForm
+                                    email={pendingEmail}
+                                    password={pendingPassword}
+                                    onSuccess={() => {
+                                        queryClient.invalidateQueries({ queryKey: ["me"] })
+                                        handleClose()
+                                    }}
+                                    onBack={() => switchTab("signup")}
                                 />
                             ) : (
                                 <PasswordResetWizard onBack={() => setTab("login")} />
                             )}
                         </div>
 
-                        {/* Footer / Toggle (Hidden on reset) */}
-                        {tab !== "forgot_password" && (
+                        {/* Footer toggle */}
+                        {showHeader && (
                             <div className="mt-8 text-center border-t border-slate-100 dark:border-zinc-800 pt-6 w-full">
                                 <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">
                                     {tab === "login" ? "Don't have an account?" : "Already have an account?"}{' '}

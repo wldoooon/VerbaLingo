@@ -46,6 +46,7 @@ class Settings(BaseSettings):
     COOKIE_NAME: str = "access_token"
     COOKIE_SECURE: bool = False  # Set to True in production (.env: COOKIE_SECURE=true)
     COOKIE_SAMESITE: str = "lax"
+    COOKIE_DOMAIN: str = ""  # Set to ".pokispokey.com" in production to share across subdomains
 
     # Google OAuth
     GOOGLE_CLIENT_ID: str = ""
