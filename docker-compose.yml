@@ -32,8 +32,6 @@ services:
       dockerfile: app/Dockerfile
     container_name: verbalingo-backend
     restart: unless-stopped
-    ports:
-      - "5001:5001"
     environment:
       # Override connection hosts for Docker's internal network.
       # Your config.py reads POSTGRES_HOST, REDIS_HOST etc. individually
@@ -100,7 +98,7 @@ services:
 
   # ─── ManticoreSearch Engine ───────────────────────────
   manticore:
-    image: manticoresearch/manticore:6.3.6
+    image: manticoresearch/manticore:17.5.1
     # WHY NOT :latest?
     # Manticore's "latest" tag tracks the development version (v17.x).
     # v17 introduced a new columnar engine that has known OOM (Out Of Memory)
@@ -182,6 +180,23 @@ services:
     networks:
       - verbalingo-net
 
+  # ─── Caddy Reverse Proxy & SSL ─────────────────────────
+  caddy:
+    image: caddy:2.7-alpine
+    container_name: verbalingo-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - verbalingo-net
+    depends_on:
+      - backend
+
 # ─── Named Volumes ─────────────────────────────────────
 # Named volumes persist data between container restarts.
 # Even if you `docker compose down`, volumes survive.
@@ -192,6 +207,10 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
     driver: local
 
 # ─── Network ───────────────────────────────────────────

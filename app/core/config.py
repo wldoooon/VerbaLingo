@@ -55,8 +55,7 @@ class Settings(BaseSettings):
     # Frontend URL (for redirects and postMessage origin)
     FRONTEND_URL: str = "http://localhost:3000"
 
-    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000"] 
-
+    BACKEND_CORS_ORIGINS: str = "http://localhost:3000"
 
     model_config = {
         "env_file": ".env",

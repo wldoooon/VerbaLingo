@@ -6,8 +6,9 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Forward the request to your Ollama FastAPI server
-    const response = await fetch("http://localhost:5001/api/v1/completion", {
+    // Forward the request to your FastAPI server
+    const backendBase = process.env.BACKEND_URL || "http://127.0.0.1:5001";
+    const response = await fetch(`${backendBase}/api/v1/completion`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       throw new Error(
-        `FastAPI server responded with status: ${response.status}`
+        `FastAPI server responded with status: ${response.status}`,
       );
     }
 
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
     console.error("Chat API route error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to communicate with AI server" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
 }

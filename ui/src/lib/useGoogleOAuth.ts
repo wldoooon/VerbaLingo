@@ -60,42 +60,35 @@ export function useGoogleOAuth() {
     const handleMessage = (event: MessageEvent) => {
       // Security: Only accept messages from our backend
       // In development, allow some flexibility for localhost vs 127.0.0.1
-      const isAllowedOrigin = 
-        event.origin === BACKEND_URL || 
-        event.origin.includes('localhost:5001') || 
-        event.origin.includes('127.0.0.1:5001');
+      const isAllowedOrigin =
+        event.origin === BACKEND_URL ||
+        event.origin.includes("localhost:5001") ||
+        event.origin.includes("127.0.0.1:5001");
 
       if (!isAllowedOrigin) {
-        console.warn('DEBUG: Ignored message from unknown origin:', event.origin);
+        console.warn(
+          "DEBUG: Ignored message from unknown origin:",
+          event.origin,
+        );
         return;
       }
 
-      console.log('DEBUG: Received auth message:', event.data);
+      console.log("DEBUG: Received auth message:", event.data);
       const { type, user, error } = event.data;
 
-                  if (type === "oauth-success") {
+      if (type === "oauth-success") {
+        // Trigger background refetch immediately (don't await)
 
-                    // Trigger background refetch immediately (don't await)
+        // This is the ONLY way to get into 'authenticated' status
 
-                    // This is the ONLY way to get into 'authenticated' status
+        queryClient.invalidateQueries({ queryKey: ["me"] });
 
-                    queryClient.invalidateQueries({ queryKey: ["me"] });
+        if (resolveRef.current) {
+          resolveRef.current({ success: true });
 
-            
-
-                    if (resolveRef.current) {
-
-                      resolveRef.current({ success: true });
-
-                      resolveRef.current = null;
-
-                    }
-
-                  }
-
-            
-
-       else if (type === "oauth-error") {
+          resolveRef.current = null;
+        }
+      } else if (type === "oauth-error") {
         if (resolveRef.current) {
           resolveRef.current({ success: false, error });
           resolveRef.current = null;
@@ -118,64 +111,68 @@ export function useGoogleOAuth() {
   }, [setUser, setStatus, queryClient, cleanup]);
 
   // Open the OAuth popup
-  const openGoogleOAuth = useCallback((mode: 'login' | 'signup' = 'login'): Promise<OAuthResult> => {
-    return new Promise((resolve) => {
-      // Store resolver for when popup responds
-      resolveRef.current = resolve;
+  const openGoogleOAuth = useCallback(
+    (mode: "login" | "signup" = "login"): Promise<OAuthResult> => {
+      return new Promise((resolve) => {
+        // Store resolver for when popup responds
+        resolveRef.current = resolve;
 
-      // Calculate popup position (center of screen)
-      const left = window.screenX + (window.innerWidth - OAUTH_POPUP_WIDTH) / 2;
-      const top =
-        window.screenY + (window.innerHeight - OAUTH_POPUP_HEIGHT) / 2;
+        // Calculate popup position (center of screen)
+        const left =
+          window.screenX + (window.innerWidth - OAUTH_POPUP_WIDTH) / 2;
+        const top =
+          window.screenY + (window.innerHeight - OAUTH_POPUP_HEIGHT) / 2;
 
-      // Open popup with mode parameter
-      const popup = window.open(
-        `${BACKEND_URL}/auth/google/login?mode=${mode}`,
-        "google-oauth",
-        `width=${OAUTH_POPUP_WIDTH},height=${OAUTH_POPUP_HEIGHT},left=${left},top=${top},scrollbars=yes`,
-      );
+        // Open popup with mode parameter
+        const popup = window.open(
+          `${BACKEND_URL}/auth/google/login?mode=${mode}`,
+          "google-oauth",
+          `width=${OAUTH_POPUP_WIDTH},height=${OAUTH_POPUP_HEIGHT},left=${left},top=${top},scrollbars=yes`,
+        );
 
-      if (!popup) {
-        resolve({
-          success: false,
-          error: "Popup blocked. Please allow popups for this site.",
-        });
-        return;
-      }
+        if (!popup) {
+          resolve({
+            success: false,
+            error: "Popup blocked. Please allow popups for this site.",
+          });
+          return;
+        }
 
-      popupRef.current = popup;
+        popupRef.current = popup;
 
-      // Poll to check if popup was closed without completing
-      pollTimerRef.current = setInterval(() => {
-        if (popup.closed) {
+        // Poll to check if popup was closed without completing
+        pollTimerRef.current = setInterval(() => {
+          if (popup.closed) {
+            cleanup();
+            // If we haven't received a message, user closed the popup
+            if (resolveRef.current) {
+              resolveRef.current({
+                success: false,
+                error: "Authentication cancelled",
+              });
+              resolveRef.current = null;
+            }
+          }
+        }, 500);
+
+        // Safety: max timeout so the promise doesn't hang forever
+        timeoutRef.current = setTimeout(() => {
           cleanup();
-          // If we haven't received a message, user closed the popup
+          if (popupRef.current && !popupRef.current.closed) {
+            popupRef.current.close();
+          }
           if (resolveRef.current) {
             resolveRef.current({
               success: false,
-              error: "Authentication cancelled",
+              error: "Authentication timed out. Please try again.",
             });
             resolveRef.current = null;
           }
-        }
-      }, 500);
-
-      // Safety: max timeout so the promise doesn't hang forever
-      timeoutRef.current = setTimeout(() => {
-        cleanup();
-        if (popupRef.current && !popupRef.current.closed) {
-          popupRef.current.close();
-        }
-        if (resolveRef.current) {
-          resolveRef.current({
-            success: false,
-            error: "Authentication timed out. Please try again.",
-          });
-          resolveRef.current = null;
-        }
-      }, OAUTH_TIMEOUT_MS);
-    });
-  }, [cleanup]);
+        }, OAUTH_TIMEOUT_MS);
+      });
+    },
+    [cleanup],
+  );
 
   return { openGoogleOAuth };
 }
