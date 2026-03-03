@@ -1,3 +1,4 @@
+import os
 import json
 import asyncio
 import argparse
@@ -6,7 +7,7 @@ import hashlib
 import manticoresearch
 from jsonl_reader import read_jsonl_lines
 
-MANTICORE_URL = "http://localhost:9308"
+MANTICORE_URL = os.getenv("MANTICORE_URL", "http://localhost:9308")
 TABLE_NAME = "english_dataset"
 
 def generate_sentence_id(video_id: str, position: int) -> int:
@@ -134,8 +135,8 @@ async def import_documents(index_api: manticoresearch.IndexApi, file_path: str, 
             doc_id = generate_sentence_id(video_id, position)
             
             manticore_doc = {
-                "insert": {
-                    "index": TABLE_NAME,
+                "replace": {
+                    "table": TABLE_NAME,
                     "id": doc_id,
                     "doc": {
                         "sentence_text": sentence.get("sentence_text", ""),
@@ -195,9 +196,10 @@ async def flush_batch(index_api: manticoresearch.IndexApi, batch: list):
                 print("Falling back to single inserts...")
                 for doc in batch:
                     try:
-                        await index_api.insert(doc["insert"])
+                        doc_data = doc.get("replace") or doc.get("insert")
+                        await index_api.insert(doc_data)
                     except Exception as single_err:
-                        print(f"   Failed document: {doc['insert']['doc'].get('video_id')}: {single_err}")
+                        print(f"   Failed document: {doc_data['doc'].get('video_id')}: {single_err}")
 
 
 async def main():
