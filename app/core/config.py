@@ -1,7 +1,6 @@
 from functools import lru_cache
 from urllib.parse import quote_plus
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -56,16 +55,7 @@ class Settings(BaseSettings):
     # Frontend URL (for redirects and postMessage origin)
     FRONTEND_URL: str = "http://localhost:3000"
 
-    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000"] 
-
-    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    @classmethod
-    def assemble_cors_origins(cls, v: str | list[str]) -> list[str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",") if i.strip()]
-        elif isinstance(v, (list, str)):
-            return v
-        raise ValueError(v)
+    BACKEND_CORS_ORIGINS: str = "http://localhost:3000"
 
     model_config = {
         "env_file": ".env",

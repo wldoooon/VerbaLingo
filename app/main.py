@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
         app.state.search_api = manticoresearch.SearchApi(api_client)
         app.state.utils_api = manticoresearch.UtilsApi(api_client)
         try:
-            app.state.utils_api.sql("SHOW STATUS LIKE 'uptime'")
+            await app.state.utils_api.sql("SHOW STATUS LIKE 'uptime'")
             logger.success(f"Connected to Manticore at {settings.manticore_url}")
         except Exception as health_err:
             logger.warning(f"Manticore health check failed: {health_err}")
@@ -101,7 +101,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # 1. CORS Middleware - Required for Next.js to talk to the API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=[o.strip() for o in settings.BACKEND_CORS_ORIGINS.split(",") if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

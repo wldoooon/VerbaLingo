@@ -1,0 +1,10 @@
+services:
+  # We bring Port 5001 BACK for the Python backend on your laptop only!
+  backend:
+    ports:
+      - "5001:5001"
+
+  # We tell Docker to completely ignore the Caddy container on your laptop
+  caddy:
+    profiles:
+      - donotstart
