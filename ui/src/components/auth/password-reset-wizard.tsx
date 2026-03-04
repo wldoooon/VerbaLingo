@@ -78,7 +78,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
 
     if (step === "email") {
         return (
-            <Card className="border-0 shadow-none">
+            <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader className="px-0 pt-0 pb-4">
                     <CardTitle className="text-xl font-bold">Reset your password</CardTitle>
                     <CardDescription className="text-sm">
@@ -147,7 +147,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
 
     if (step === "otp") {
         return (
-            <Card className="border-0 shadow-none">
+            <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader className="px-0 pt-0 pb-4">
                     <CardTitle className="text-xl font-bold">Verify your login</CardTitle>
                     <CardDescription className="text-sm">
@@ -182,15 +182,15 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                             }}
                         >
                             <InputOTPGroup className="gap-1">
-                                <InputOTPSlot index={0} className="w-12 h-14 text-xl rounded-lg border-2" />
-                                <InputOTPSlot index={1} className="w-12 h-14 text-xl rounded-lg border-2" />
-                                <InputOTPSlot index={2} className="w-12 h-14 text-xl rounded-lg border-2" />
+                                <InputOTPSlot index={0} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                                <InputOTPSlot index={1} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                                <InputOTPSlot index={2} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
                             </InputOTPGroup>
                             <InputOTPSeparator className="mx-2 text-muted-foreground">—</InputOTPSeparator>
                             <InputOTPGroup className="gap-1">
-                                <InputOTPSlot index={3} className="w-12 h-14 text-xl rounded-lg border-2" />
-                                <InputOTPSlot index={4} className="w-12 h-14 text-xl rounded-lg border-2" />
-                                <InputOTPSlot index={5} className="w-12 h-14 text-xl rounded-lg border-2" />
+                                <InputOTPSlot index={3} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                                <InputOTPSlot index={4} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                                <InputOTPSlot index={5} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
                             </InputOTPGroup>
                         </InputOTP>
                     </div>
@@ -243,7 +243,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
     }
 
     return (
-        <Card className="border-0 shadow-none">
+        <Card className="border-0 shadow-none bg-transparent">
             <CardHeader className="px-0 pt-0 pb-4">
                 <CardTitle className="text-xl font-bold">Set new password</CardTitle>
                 <CardDescription className="text-sm">

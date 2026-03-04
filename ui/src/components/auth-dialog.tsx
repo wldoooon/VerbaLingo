@@ -80,11 +80,11 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
             >
                 <DialogTitle className="sr-only">Authentication</DialogTitle>
                 <DialogDescription className="sr-only">Login, sign up, or recover password</DialogDescription>
-                <div className="relative bg-white dark:bg-zinc-950 rounded-3xl shadow-2xl border border-slate-100 dark:border-zinc-800 p-8 overflow-hidden">
+                <div className="relative bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-zinc-800 p-8 overflow-hidden">
 
                     {/* Google OAuth Loading Overlay */}
                     {isGoogleLoading && (
-                        <div className="absolute inset-0 z-40 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm flex flex-col items-center justify-center rounded-3xl">
+                        <div className="absolute inset-0 z-40 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm flex flex-col items-center justify-center rounded-3xl">
                             <div className="relative mb-4">
                                 <div className="w-12 h-12 border-4 border-slate-200 dark:border-zinc-700 rounded-full" />
                                 <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-orange-500 rounded-full animate-spin" />
@@ -117,7 +117,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                                 <p className="text-slate-500 dark:text-slate-400 font-medium text-base mb-8 text-center px-4">
                                     {tab === "login"
                                         ? "Log in to continue your language mastery."
-                                        : "Join 10,000+ language learners mastering fluency."}
+                                        : "Join and master fluency."}
                                 </p>
 
                                 <button
@@ -145,7 +145,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                                         <div className="w-full border-t border-slate-100 dark:border-zinc-800"></div>
                                     </div>
                                     <div className="relative flex justify-center text-xs uppercase">
-                                        <span className="bg-white dark:bg-zinc-950 px-3 text-slate-400 font-bold tracking-widest">
+                                        <span className="bg-white dark:bg-zinc-900 px-3 text-slate-400 font-bold tracking-widest">
                                             or {tab === "login" ? "log in" : "sign up"} with email
                                         </span>
                                     </div>
