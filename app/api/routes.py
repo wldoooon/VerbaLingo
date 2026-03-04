@@ -22,15 +22,18 @@ class CompletionRequest(BaseModel):
 @router.post("/completion")
 @feature_rate_limit("ai_chat")
 async def completion(
-    request: CompletionRequest,
-    groq: GroqService = Depends(get_groq_service)
+    request: Request,
+    response: Response,
+    body: CompletionRequest,
+    groq: GroqService = Depends(get_groq_service),
+    current_user: Optional[User] = Depends(get_current_user_optional),
 ):
     """
     Direct link to the AI Brain with optional context.
     Streams tokens directly to the UI.
     """
     return StreamingResponse(
-        groq.get_completion_stream(request.prompt, context=request.context),
+        groq.get_completion_stream(body.prompt),
         media_type="text/event-stream"
     )
 

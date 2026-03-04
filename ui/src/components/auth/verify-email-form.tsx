@@ -18,6 +18,7 @@ import {
     InputOTPSlot,
 } from "@/components/ui/input-otp"
 import { useVerifyEmailMutation, useSignupMutation } from "@/lib/authHooks"
+import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown"
 import axios from "axios"
 
 function getErrorMessage(err: unknown) {
@@ -41,6 +42,7 @@ export function VerifyEmailForm({ email, password, onSuccess, onBack }: VerifyEm
     // /auth/verify-email sets the auth cookie directly — no separate login step needed!
     const verifyMutation = useVerifyEmailMutation()
     const signupMutation = useSignupMutation()
+    const verifyRateLimit = useRateLimitCountdown(verifyMutation.error)
 
     const handleResend = () => {
         signupMutation.mutate({ email, password, full_name: "User" })
@@ -97,7 +99,11 @@ export function VerifyEmailForm({ email, password, onSuccess, onBack }: VerifyEm
                 </div>
 
                 {otpError && <p className="text-sm text-red-500 text-center">{otpError}</p>}
-                {verifyMutation.isError && <p className="text-sm text-red-500 text-center">{getErrorMessage(verifyMutation.error)}</p>}
+                {verifyMutation.isError && (
+                    <p className="text-sm text-red-500 text-center">
+                        {verifyRateLimit ?? getErrorMessage(verifyMutation.error)}
+                    </p>
+                )}
             </CardContent>
 
             {/* Divider + Verify Button */}

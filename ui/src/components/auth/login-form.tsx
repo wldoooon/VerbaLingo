@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { useLoginMutation } from "@/lib/authHooks"
+import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown"
 import axios from "axios"
 
 const loginSchema = z.object({
@@ -37,6 +38,7 @@ function getErrorMessage(err: unknown) {
 
 export function LoginForm({ onSuccess, onForgot, externalError }: { onSuccess: () => void, onForgot: () => void, externalError?: string | null }) {
     const loginMutation = useLoginMutation()
+    const loginRateLimit = useRateLimitCountdown(loginMutation.error)
     const form = useForm<LoginValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: { email: "", password: "" },
@@ -110,7 +112,7 @@ export function LoginForm({ onSuccess, onForgot, externalError }: { onSuccess: (
 
                 {(loginMutation.isError || externalError) && (
                     <div className="text-sm text-destructive font-bold ml-1 mt-1">
-                        {externalError || getErrorMessage(loginMutation.error)}
+                        {externalError || loginRateLimit || getErrorMessage(loginMutation.error)}
                     </div>
                 )}
 

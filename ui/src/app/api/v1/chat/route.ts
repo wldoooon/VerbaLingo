@@ -8,10 +8,15 @@ export async function POST(req: NextRequest) {
 
     // Forward the request to your FastAPI server
     const backendBase = process.env.BACKEND_URL || "http://127.0.0.1:5001";
+
+    // Forward the auth cookie so the backend can identify the user
+    const cookieHeader = req.headers.get("cookie") ?? "";
+
     const response = await fetch(`${backendBase}/api/v1/completion`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(cookieHeader ? { Cookie: cookieHeader } : {}),
       },
       body: JSON.stringify(body),
     });

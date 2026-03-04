@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { useSignupMutation } from "@/lib/authHooks"
+import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown"
 import axios from "axios"
 
 const signupSchema = z.object({
@@ -62,6 +63,7 @@ export function SignupForm({ onVerify, externalError }: { onVerify: (email: stri
 
     const isBusy = signupMutation.isPending
     const error = signupMutation.error
+    const signupRateLimit = useRateLimitCountdown(error)
 
 
     return (
@@ -145,7 +147,7 @@ export function SignupForm({ onVerify, externalError }: { onVerify: (email: stri
 
                 {(signupMutation.isError || externalError) && (
                     <div className="text-sm text-destructive font-bold ml-1 mt-1">
-                        {externalError || getErrorMessage(error)}
+                        {externalError || signupRateLimit || getErrorMessage(error)}
                     </div>
                 )}
 

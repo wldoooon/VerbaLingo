@@ -185,8 +185,10 @@ async def send_password_reset_otp(
     user = result.first()
     
     if not user:
-        # Don't reveal if email exists
-        return True, "If that email exists, we sent a code."
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with this email address."
+        )
     
     # Generate and store OTP
     otp = generate_otp(settings.OTP_LENGTH)
@@ -196,7 +198,7 @@ async def send_password_reset_otp(
     await email_service.send_otp([email], otp)
     logger.info(f"Password reset OTP sent to {email}")
     
-    return True, "If that email exists, we sent a code."
+    return True, "Code sent successfully."
 
 
 async def verify_reset_otp(redis: Redis, email: str, otp: str) -> bool:
