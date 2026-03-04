@@ -55,8 +55,9 @@ export function useLogoutMutation() {
       const res = await apiClient.post<{ message: string }>("/auth/logout");
       return res.data;
     },
-    onSuccess: async () => {
-      queryClient.removeQueries({ queryKey: ["me"] });
+    onSuccess: () => {
+      // setQueryData immediately marks user as null — no refetch triggered
+      queryClient.setQueryData(["me"], null);
     },
   });
 }
