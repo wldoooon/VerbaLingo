@@ -4,102 +4,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VerbaLingo - Password Reset</title>
+    <title>Password Reset — PokiSpokey</title>
 </head>
 
 <body
-    style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    style="margin:0; padding:0; background-color:#f5f5f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+    <table role="presentation" style="width:100%; border-collapse:collapse;">
         <tr>
-            <td align="center" style="padding: 40px 20px;">
-                <table role="presentation" style="max-width: 440px; width: 100%; border-collapse: collapse;">
-                    <!-- Card Container -->
+            <td align="center" style="padding: 48px 20px;">
+                <table role="presentation" style="max-width:480px; width:100%; border-collapse:collapse;">
+
+                    <!-- Card -->
                     <tr>
                         <td
-                            style="background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%); border-radius: 24px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08); overflow: hidden; border: 1px solid #e2e8f0;">
+                            style="background-color:#ffffff; border-radius:8px; padding: 40px 48px 40px 48px; border: 1px solid #e8e8e8;">
 
-                            <!-- Header with Orange Accent -->
-                            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                            <!-- Logo — top-left inside the card -->
+                            <table role="presentation"
+                                style="width:100%; border-collapse:collapse; margin-bottom:32px;">
                                 <tr>
-                                    <td
-                                        style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 32px 40px; text-align: center;">
-                                        <h1
-                                            style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">
-                                            VerbaLingo
-                                        </h1>
-                                        <p
-                                            style="margin: 8px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 14px; font-weight: 500;">
-                                            Master Languages, Master Life
-                                        </p>
+                                    <td align="left">
+                                        <img src="https://pokispokey.com/main_logo.png" alt="PokiSpokey" width="80"
+                                            height="80" style="display:block; border-radius:16px;" />
                                     </td>
                                 </tr>
                             </table>
 
-                            <!-- Main Content -->
-                            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                            <!-- Title -->
+                            <h1
+                                style="margin:0 0 24px 0; font-size:22px; font-weight:700; color:#111111; text-align:center; letter-spacing:-0.3px;">
+                                Password reset request
+                            </h1>
+
+                            <!-- Greeting text -->
+                            <p
+                                style="margin:0 0 16px 0; font-size:15px; color:#444444; text-align:left; line-height:1.7;">
+                                We received a request to reset the password for your PokiSpokey account. If this was
+                                you, no worries — it happens to the best of us.
+                            </p>
+                            <p
+                                style="margin:0 0 32px 0; font-size:15px; color:#444444; text-align:left; line-height:1.7;">
+                                Use the verification code below to proceed with your password reset. For your security,
+                                this code is valid for a limited time only, so please use it promptly.
+                            </p>
+
+                            <!-- OTP Code -->
+                            <table role="presentation" style="width:100%; border-collapse:collapse;">
                                 <tr>
-                                    <td style="padding: 40px;">
-                                        <h2
-                                            style="margin: 0 0 16px 0; color: #0f172a; font-size: 20px; font-weight: 700; text-align: center;">
-                                            Reset Your Password
-                                        </h2>
-                                        <p
-                                            style="margin: 0 0 32px 0; color: #64748b; font-size: 15px; line-height: 1.6; text-align: center;">
-                                            You requested a password reset for your VerbaLingo account. Use the
-                                            verification code below to continue:
-                                        </p>
-
-                                        <!-- OTP Box -->
-                                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
-                                            <tr>
-                                                <td align="center">
-                                                    <div
-                                                        style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border: 2px solid #f97316; border-radius: 16px; padding: 24px 32px; display: inline-block;">
-                                                        <span
-                                                            style="font-size: 36px; font-weight: 800; letter-spacing: 12px; color: #ea580c; font-family: 'Courier New', monospace;">
-                                                            {{ otp }}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        </table>
-
-                                        <!-- Timer Info -->
-                                        <p
-                                            style="margin: 24px 0 0 0; color: #94a3b8; font-size: 13px; text-align: center;">
-                                            This code expires in <strong style="color: #64748b;">5 minutes</strong>
-                                        </p>
-
-                                        <!-- Divider -->
-                                        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;">
-
-                                        <!-- Security Notice -->
-                                        <p
-                                            style="margin: 0; color: #94a3b8; font-size: 12px; text-align: center; line-height: 1.5;">
-                                            If you didn't request this password reset, you can safely ignore this email.
-                                            Your account remains secure.
-                                        </p>
+                                    <td align="center" style="padding-bottom: 8px;">
+                                        <div
+                                            style="border: 2px dashed #dddddd; border-radius:8px; padding: 20px 40px; display:inline-block;">
+                                            <span
+                                                style="font-size:36px; font-weight:700; letter-spacing:12px; color:#111111; font-family: 'Courier New', Courier, monospace;">
+                                                {{ otp }}
+                                            </span>
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
 
-                            <!-- Footer -->
-                            <table role="presentation" style="width: 100%; border-collapse: collapse;">
-                                <tr>
-                                    <td
-                                        style="background-color: #f8fafc; padding: 24px 40px; border-top: 1px solid #e2e8f0; text-align: center;">
-                                        <p style="margin: 0; color: #64748b; font-size: 13px; font-weight: 500;">
-                                            The VerbaLingo Team
-                                        </p>
-                                        <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 11px;">
-                                            © {{ year }} VerbaLingo. All rights reserved.
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
+                            <p style="margin: 16px 0 0 0; font-size:13px; color:#999999; text-align:center;">
+                                This code expires in <strong style="color:#555555;">5 minutes</strong>.
+                            </p>
+
+                            <!-- Divider -->
+                            <div style="height:1px; background-color:#eeeeee; margin: 36px 0;"></div>
+
+                            <p style="margin:0; font-size:13px; color:#888888; text-align:left; line-height:1.6;">
+                                If you didn't request a password reset, please ignore this email. Your account is safe
+                                and no changes have been made. If you're concerned about unauthorized access, consider
+                                updating your password as a precaution.
+                            </p>
 
                         </td>
                     </tr>
+
+                    <!-- Bottom footer -->
+                    <tr>
+                        <td align="center" style="padding-top: 32px;">
+                            <p style="margin:0 0 6px 0; font-size:13px; color:#888888; font-weight:600;">
+                                — The PokiSpokey Team
+                            </p>
+                            <p style="margin:0; font-size:11px; color:#bbbbbb;">
+                                © {{ year }} PokiSpokey. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+
                 </table>
             </td>
         </tr>
