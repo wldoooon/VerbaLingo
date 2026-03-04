@@ -56,7 +56,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
     const resetPasswordMutation = useResetPasswordMutation()
 
     // Step 1: Email Form
-    const emailForm = useForm<{ email: string }>({ resolver: zodResolver(emailSchema) })
+    const emailForm = useForm<{ email: string }>({ resolver: zodResolver(emailSchema), defaultValues: { email: "" } })
     const onEmailSubmit = async (data: { email: string }) => {
         setEmail(data.email)
         try {
@@ -66,7 +66,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
     }
 
     // Step 3: Reset Form
-    const resetForm = useForm<{ password: string; confirmPassword: string }>({ resolver: zodResolver(resetSchema) })
+    const resetForm = useForm<{ password: string; confirmPassword: string }>({ resolver: zodResolver(resetSchema), defaultValues: { password: "", confirmPassword: "" } })
     const onResetSubmit = async (data: { password: string; confirmPassword: string }) => {
         try {
             // Using the otp from state
