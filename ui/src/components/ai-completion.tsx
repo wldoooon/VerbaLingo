@@ -517,7 +517,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                         <div
                                             ref={scrollContentRef}
                                             style={{ maxHeight: `${maxResponseHeight}px` }}
-                                            className="overflow-y-auto text-card-foreground pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
+                                            className="overflow-y-auto text-card-foreground pl-1 pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
                                             onScroll={(e) => {
                                                 const element = e.currentTarget;
                                                 const topBlur = document.getElementById('top-blur');
