@@ -27,7 +27,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
     const handleClose = () => {
         setIsOpen(false)
         setTimeout(() => {
-            setTab("login")
+            setTab(defaultTab)
             setError(null)
             setPendingEmail("")
             setPendingPassword("")
@@ -68,7 +68,20 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
     const showHeader = !isVerifyStep && !isForgotStep
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={(open) => {
+            setIsOpen(open)
+            if (!open) {
+                setTimeout(() => {
+                    setTab(defaultTab)
+                    setError(null)
+                    setPendingEmail("")
+                    setPendingPassword("")
+                }, 300)
+            } else {
+                setTab(defaultTab)
+                setError(null)
+            }
+        }}>
             <DialogTrigger asChild>
                 {children || <Button>Log in</Button>}
             </DialogTrigger>
