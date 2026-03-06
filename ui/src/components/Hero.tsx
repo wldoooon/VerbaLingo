@@ -361,6 +361,6 @@ export function Hero() {
         <Features />
 
       </div>
-    </div>
+    </div >
   );
 }
