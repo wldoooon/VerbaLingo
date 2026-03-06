@@ -120,14 +120,6 @@ export function Footer() {
             {/* Separator dot */}
             <span className="text-muted-foreground/40">·</span>
 
-            {/* Flag / locale placeholder */}
-            <div className="w-5 h-5 rounded-full overflow-hidden shadow-sm border border-border/50 flex-shrink-0 cursor-pointer" aria-label="English">
-              <img
-                src="https://flagcdn.com/gb.svg"
-                alt="English"
-                className="w-full h-full object-cover"
-              />
-            </div>
           </div>
         </div>
       </div>

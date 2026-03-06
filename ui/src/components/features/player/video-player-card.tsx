@@ -32,14 +32,14 @@ export default function VideoPlayerCard({
   aggregations,
   className
 }: VideoPlayerCardProps) {
-  const { 
-    currentVideoIndex, 
-    isMuted, 
-    setCurrentTime, 
-    setPlayerState, 
+  const {
+    currentVideoIndex,
+    isMuted,
+    setCurrentTime,
+    setPlayerState,
     setPlayer,
     player: activePlayer,
-    resetIndex 
+    resetIndex
   } = usePlayerStore()
   const router = useRouter()
 
@@ -71,6 +71,23 @@ export default function VideoPlayerCard({
   const playerCRef = useRef<YouTubePlayer | null>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  /**
+   * Safe wrapper for all YouTube player calls.
+   * When next is clicked fast, react-youtube destroys the old iframe and
+   * creates a new one. The ref still holds the OLD destroyed player.
+   * Calling any method on it throws: "Cannot read properties of null".
+   * try/catch absorbs those transient errors instead of crashing the page.
+   */
+  const safeCall = (player: YouTubePlayer | null, fn: string, ...args: any[]) => {
+    try {
+      if (player && typeof (player as any)[fn] === 'function') {
+        (player as any)[fn](...args)
+      }
+    } catch {
+      // Player not ready or already destroyed — ignore
+    }
+  }
+
   // Sync global playerRef & JIT Seek
   useEffect(() => {
     let newActivePlayer: YouTubePlayer | null = null
@@ -80,23 +97,17 @@ export default function VideoPlayerCard({
 
     setPlayer(newActivePlayer)
 
-    if (newActivePlayer && typeof newActivePlayer.playVideo === 'function') {
-      // JIT Seek: Ensure the transition lands on the exact frame
+    if (newActivePlayer) {
       const activeClip = activeKey === 'A' ? clipA : activeKey === 'B' ? clipB : clipC
       if (activeClip) {
-        const start = getClipStart(activeClip)
-        newActivePlayer.seekTo(start, true)
+        safeCall(newActivePlayer, 'seekTo', getClipStart(activeClip), true)
       }
-
-      newActivePlayer.playVideo()
-
+      safeCall(newActivePlayer, 'playVideo')
       if (isMuted) {
-        if (typeof newActivePlayer.mute === 'function') newActivePlayer.mute()
+        safeCall(newActivePlayer, 'mute')
       } else {
-        if (typeof newActivePlayer.unMute === 'function') {
-          newActivePlayer.unMute()
-          try { newActivePlayer.setVolume(100) } catch { }
-        }
+        safeCall(newActivePlayer, 'unMute')
+        safeCall(newActivePlayer, 'setVolume', 100)
       }
     }
   }, [activeKey, isMuted, clipA, clipB, clipC, setPlayer])
@@ -135,27 +146,32 @@ export default function VideoPlayerCard({
     else stopPolling()
   }
 
-  // Effect: Recycled players must be manually seeked when their video changes
+  // Effect: Recycled players must be manually seeked when their video changes.
+  // Reset the ref first — react-youtube is re-creating the iframe, old player is destroyed.
   useEffect(() => {
-    if (playerARef.current && clipA) {
-      playerARef.current.seekTo(getClipStart(clipA), true)
-      if (activeKey !== 'A') playerARef.current.playVideo()
+    playerARef.current = null          // clear stale ref while iframe rebuilds
+    if (clipA) {
+      // onReady will re-populate the ref; safeCall guards if it fires early
+      safeCall(playerARef.current, 'seekTo', getClipStart(clipA), true)
+      if (activeKey !== 'A') safeCall(playerARef.current, 'playVideo')
     }
-  }, [clipA?.video_id, activeKey, clipA])
+  }, [clipA?.video_id])
 
   useEffect(() => {
-    if (playerBRef.current && clipB) {
-      playerBRef.current.seekTo(getClipStart(clipB), true)
-      if (activeKey !== 'B') playerBRef.current.playVideo()
+    playerBRef.current = null
+    if (clipB) {
+      safeCall(playerBRef.current, 'seekTo', getClipStart(clipB), true)
+      if (activeKey !== 'B') safeCall(playerBRef.current, 'playVideo')
     }
-  }, [clipB?.video_id, activeKey, clipB])
+  }, [clipB?.video_id])
 
   useEffect(() => {
-    if (playerCRef.current && clipC) {
-      playerCRef.current.seekTo(getClipStart(clipC), true)
-      if (activeKey !== 'C') playerCRef.current.playVideo()
+    playerCRef.current = null
+    if (clipC) {
+      safeCall(playerCRef.current, 'seekTo', getClipStart(clipC), true)
+      if (activeKey !== 'C') safeCall(playerCRef.current, 'playVideo')
     }
-  }, [clipC?.video_id, activeKey, clipC])
+  }, [clipC?.video_id])
 
 
   const onReady = (event: { target: YouTubePlayer }, key: 'A' | 'B' | 'C') => {
@@ -169,16 +185,16 @@ export default function VideoPlayerCard({
     if (key === 'C') clip = clipC
 
     if (clip) {
-      const start = getClipStart(clip)
-      event.target.seekTo(start, true)
+      safeCall(event.target, 'seekTo', getClipStart(clip), true)
     }
 
     if (key === activeKey) {
       setPlayer(event.target)
-      setPlayerState({ duration: event.target.getDuration() })
-      if (!isMuted) event.target.unMute()
+      safeCall(event.target, 'getDuration') // warm up
+      try { setPlayerState({ duration: event.target.getDuration() }) } catch { }
+      if (!isMuted) safeCall(event.target, 'unMute')
     } else {
-      event.target.mute()
+      safeCall(event.target, 'mute')
     }
   }
 

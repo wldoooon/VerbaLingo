@@ -13,7 +13,7 @@ class SearchService:
         self.search_api = search_api
         self.table_name = settings.TABLE_NAME
 
-    async def search(self, q: str, language: str, category: Optional[str] = None, sub_category: Optional[str] = None) -> dict:
+    async def search(self, q: str, language: str, category: Optional[str] = None, sub_category: Optional[str] = None, page: int = 1, limit: int = 30) -> dict:
         # Default categories to mix
         MIX_CATEGORIES = ["Movies", "Podcasts", "Talks", "Cartoons"]
         
@@ -23,12 +23,18 @@ class SearchService:
 
         # 1. If user selected a specific category, just search that one normally
         if category:
-            return await self._search_single_category(q, category, table_name, limit=20, sub_category=sub_category)
+            offset = (page - 1) * limit
+            return await self._search_single_category(q, category, table_name, limit=limit, offset=offset, sub_category=sub_category)
 
         # 2. General Search: Run parallel queries for each category to ensure diversity
+        # Instead of dividing the limit by 4, we ask each category for the FULL limit.
+        # This acts as a massive buffer so if Cartoons has 0 hits, Movies can provide up to 30.
+        limit_per_cat = limit  
+        offset_per_cat = (page - 1) * limit_per_cat
+
         tasks = []
         for cat in MIX_CATEGORIES:
-            tasks.append(self._search_single_category(q, cat, table_name, limit=10))
+            tasks.append(self._search_single_category(q, cat, table_name, limit=limit_per_cat, offset=offset_per_cat))
         
         # Run all DB queries in parallel
         results_list = await asyncio.gather(*tasks)
@@ -74,6 +80,11 @@ class SearchService:
                     if video_id:
                         seen_video_ids.add(video_id)
                     mixed_hits.append(queue.pop(0))
+                    
+                    # Stop interleaving immediately if we hit our requested limit
+                    if len(mixed_hits) >= limit:
+                        category_hit_queues = [] # break outer loop
+                        break
         
         return {
             "hits": {
@@ -95,7 +106,7 @@ class SearchService:
             
         return f"{lang}_dataset"
 
-    async def _search_single_category(self, q: str, category: str, table_name: str, limit: int, sub_category: Optional[str] = None) -> dict:
+    async def _search_single_category(self, q: str, category: str, table_name: str, limit: int, offset: int = 0, sub_category: Optional[str] = None) -> dict:
         """Helper to run a search for one specific category"""
         query_string = f"@sentence_text {q}"
         
@@ -115,7 +126,8 @@ class SearchService:
                     "must": must_conditions
                 }
             },
-            "limit": 20 # User requested to limit results to 20
+            "limit": limit,
+            "offset": offset
         }
 
         if category:

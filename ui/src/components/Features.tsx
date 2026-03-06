@@ -32,9 +32,6 @@ export function Features() {
               </div>
               <div className="relative z-10 flex flex-col h-full justify-between">
                 <div className="mb-8">
-                  <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-primary/20">
-                    <Search className="w-6 h-6 text-primary-foreground" />
-                  </div>
                   <h3 className="text-2xl font-bold text-foreground mb-2">Context Engine™</h3>
                   <p className="text-muted-foreground text-lg leading-relaxed max-w-md">
                     Don't just find definitions. Find moments. Our engine scans millions of videos to find the exact millisecond a word is spoken, giving you 360° understanding of tone, body language, and situation.
@@ -83,7 +80,7 @@ export function Features() {
           <AnimatedContent distance={60} delay={0.3}>
             <div className="bg-card/50 border border-border/50 rounded-[2.5rem] p-10 hover:bg-muted/50 transition-all group h-full">
               <div className="flex items-start justify-between mb-4">
-                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   <Mic className="w-5 h-5 text-primary group-hover:text-primary-foreground" />
                 </div>
               </div>
@@ -96,7 +93,7 @@ export function Features() {
           <AnimatedContent distance={60} delay={0.4}>
             <div className="bg-card/50 border border-border/50 rounded-[2.5rem] p-10 hover:bg-muted/50 transition-all group h-full">
               <div className="flex items-start justify-between mb-4">
-                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   <Globe className="w-5 h-5 text-primary group-hover:text-primary-foreground" />
                 </div>
               </div>

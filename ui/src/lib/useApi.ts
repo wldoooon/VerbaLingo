@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { Clips, TranscriptResponse, SearchResponse } from "@/lib/types";
 import { apiClient } from "@/lib/apiClient";
 
@@ -15,11 +15,13 @@ const fetchSearchResults = async (
   query: string,
   language: string,
   category: string | null,
-  subCategory: string | null
+  subCategory: string | null,
+  pageParam: number = 1,
 ) => {
   const params = new URLSearchParams();
   params.append("q", query);
   params.append("language", language);
+  params.append("page", pageParam.toString());
   if (category) {
     params.append("category", category);
   }
@@ -27,7 +29,9 @@ const fetchSearchResults = async (
     params.append("sub_category", subCategory);
   }
 
-  const response = await apiClient.get<SearchResponse>(`/search?${params.toString()}`);
+  const response = await apiClient.get<SearchResponse>(
+    `/search?${params.toString()}`,
+  );
   return response.data;
 };
 
@@ -35,35 +39,68 @@ export const useSearch = (
   query: string,
   language: string = "english",
   category: string | null = null,
-  subCategory: string | null = null
+  subCategory: string | null = null,
 ) => {
   return useQuery<SearchResponse, Error>({
     queryKey: ["search", query, language, category, subCategory],
-    queryFn: () => fetchSearchResults(query, language, category, subCategory),
+    queryFn: () =>
+      fetchSearchResults(query, language, category, subCategory, 1),
     enabled: !!query && query.trim().length > 0, // Auto-fetch if query exists
     staleTime: 1000 * 60 * 5, // Cache results for 5 minutes
     refetchOnWindowFocus: false, // Don't refetch just because I clicked the window
   });
 };
 
+export const useInfiniteSearch = (
+  query: string,
+  language: string = "english",
+  category: string | null = null,
+  subCategory: string | null = null,
+) => {
+  return useInfiniteQuery<SearchResponse, Error>({
+    queryKey: ["searchInfinite", query, language, category, subCategory],
+    queryFn: ({ pageParam = 1 }) =>
+      fetchSearchResults(
+        query,
+        language,
+        category,
+        subCategory,
+        pageParam as number,
+      ),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      // If we received fewer than 30 hits, we reached the end
+      if (!lastPage || !lastPage.hits || lastPage.hits.length < 30) {
+        return undefined;
+      }
+      return allPages.length + 1;
+    },
+    enabled: !!query && query.trim().length > 0,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+};
+
 const fetchTranscript = async (
   videoId: string,
   language: string,
-  centerPosition?: number
+  centerPosition?: number,
 ) => {
   const params = new URLSearchParams();
   params.append("language", language);
   if (centerPosition !== undefined) {
     params.append("center_position", centerPosition.toString());
   }
-  const response = await apiClient.get<TranscriptResponse>(`/videos/${videoId}/transcript?${params.toString()}`);
+  const response = await apiClient.get<TranscriptResponse>(
+    `/videos/${videoId}/transcript?${params.toString()}`,
+  );
   return response.data;
 };
 
 export const useTranscript = (
   videoId: string,
   language: string = "english",
-  centerPosition?: number
+  centerPosition?: number,
 ) => {
   return useQuery<TranscriptResponse, Error>({
     queryKey: ["transcript", videoId, language, centerPosition],
@@ -76,21 +113,23 @@ export const useTranscript = (
 const fetchTranslate = async (
   text: string,
   source: string = "en",
-  target: string = "ar"
+  target: string = "ar",
 ) => {
   const params = new URLSearchParams();
   params.append("text", text);
   params.append("source", source);
   params.append("target", target);
 
-  const response = await apiClient.get<TranslateResponse>(`/translate?${params.toString()}`);
+  const response = await apiClient.get<TranslateResponse>(
+    `/translate?${params.toString()}`,
+  );
   return response.data;
 };
 
 export const useTranslate = (
   text: string,
   source: string = "en",
-  target: string = "ar"
+  target: string = "ar",
 ) => {
   return useQuery<TranslateResponse, Error>({
     queryKey: ["translate", text, source, target],

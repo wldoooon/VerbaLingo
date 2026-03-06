@@ -62,7 +62,7 @@ class EmailService:
         )
 
         message = MessageSchema(
-            subject="VerbaLingo - Password Reset Code",
+            subject="PokiSpokey - Password Reset Code",
             recipients=email,
             body=html,
             subtype=MessageType.html
@@ -84,7 +84,7 @@ class EmailService:
         )
 
         message = MessageSchema(
-            subject="VerbaLingo - Verify Your Email",
+            subject="PokiSpokey - Verify Your Email",
             recipients=email,
             body=html,
             subtype=MessageType.html

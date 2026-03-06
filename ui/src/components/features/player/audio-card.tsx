@@ -27,6 +27,51 @@ import {
 } from "@/components/ui/popover"
 import { TranscriptBox } from "./transcript-box"
 
+function useSpamGuard(clickWindowMs = 2000, clickLimit = 5, cooldownSeconds = 5) {
+  const [isThrottled, setIsThrottled] = useState(false)
+  const [cooldownLeft, setCooldownLeft] = useState(0)
+  const clickTimestampsRef = useRef<number[]>([])
+  const countdownTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const guardedAction = (fn: () => void) => {
+    if (isThrottled) return
+
+    const now = Date.now()
+    clickTimestampsRef.current = clickTimestampsRef.current.filter(ts => now - ts < clickWindowMs)
+    clickTimestampsRef.current.push(now)
+
+    if (clickTimestampsRef.current.length >= clickLimit) {
+      clickTimestampsRef.current = []
+      setIsThrottled(true)
+      setCooldownLeft(cooldownSeconds)
+
+      let remaining = cooldownSeconds
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
+      countdownTimerRef.current = setInterval(() => {
+        remaining -= 1
+        setCooldownLeft(remaining)
+        if (remaining <= 0) {
+          clearInterval(countdownTimerRef.current!)
+          countdownTimerRef.current = null
+          setIsThrottled(false)
+        }
+      }, 1000)
+      return
+    }
+
+    fn()
+  }
+
+  useEffect(() => {
+    return () => {
+      if (countdownTimerRef.current) clearInterval(countdownTimerRef.current)
+    }
+  }, [])
+
+  return { isThrottled, cooldownLeft, guardedAction, cooldownSeconds }
+}
+
+
 type AudioCardProps = {
   currentClip: Clips | undefined
   playlist: Clips[]
@@ -53,22 +98,23 @@ export default function AudioCard({
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const activeSentenceRef = useRef<HTMLDivElement>(null)
 
-  // Start playback slightly before the target sentence for better context
+  const { isThrottled, cooldownLeft, guardedAction, cooldownSeconds } = useSpamGuard()
+
   const PLAYBACK_START_OFFSET = 0.2
 
   // Get player state and controls from Zustand store
-  const { 
-    currentVideoIndex, 
-    currentTime, 
-    isPlaying, 
-    duration, 
-    nextVideo, 
+  const {
+    currentVideoIndex,
+    currentTime,
+    isPlaying,
+    duration,
+    nextVideo,
     prevVideo,
     play,
     pause,
     seekTo,
     setPlaybackRate,
-    setVolume: setPlayerVolume 
+    setVolume: setPlayerVolume
   } = usePlayerStore()
 
   // Read settings from store
@@ -197,10 +243,9 @@ export default function AudioCard({
 
   return (
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-5 shadow-2xl", className)}>
-      {/* Audio Controls - All in one row */}
-      <div className="flex items-center justify-between gap-4 mb-2">
-        {/* Volume control - Left side */}
-        <div className="flex items-center gap-3 flex-1 max-w-[180px]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-4 mb-2">
+        {/* Volume control - Top row left on mobile, Left on desktop */}
+        <div className="order-2 md:order-1 flex items-center gap-3 w-full md:flex-1 md:max-w-[180px]">
           <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
           <Slider
             value={[volume]}
@@ -212,94 +257,124 @@ export default function AudioCard({
         </div>
 
         {/* Transport controls - Center */}
-        <div className="flex items-center justify-center gap-4">
+        <div className="order-1 md:order-2 flex flex-wrap items-center justify-center gap-2 sm:gap-4 relative w-full md:w-auto mt-6 md:mt-0">
+
+          {isThrottled && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-card/95 backdrop-blur-sm border border-border/50 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-300 px-6">
+              <div className="flex flex-col items-center gap-2 text-center">
+                <div className="text-2xl">🐱</div>
+                <p className="text-sm font-bold text-foreground">Whoa, slow down!</p>
+                <p className="text-xs text-muted-foreground leading-snug">
+                  You&apos;re clicking really fast. Give it a second.
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="h-1.5 w-24 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
+                      style={{ width: `${((cooldownSeconds - cooldownLeft) / cooldownSeconds) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-mono font-bold text-primary tabular-nums">{cooldownLeft}s</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 rounded-full hover:bg-muted"
-              onClick={prevVideo}
+              className="h-10 w-10 sm:h-11 sm:w-11 rounded-full hover:bg-muted"
+              onClick={() => guardedAction(prevVideo)}
+              disabled={isThrottled}
               aria-label="Previous clip"
             >
-              <SkipBack size={20} />
+              <SkipBack className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
-            <span className="text-xs text-muted-foreground">Previous</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground">Previous</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 rounded-full hover:bg-muted"
-              onClick={skipBackward}
+              className="h-10 w-10 sm:h-11 sm:w-11 rounded-full hover:bg-muted"
+              onClick={() => guardedAction(skipBackward)}
+              disabled={isThrottled}
               aria-label="Rewind 10 seconds"
             >
-              <RotateCcw size={20} />
+              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
-            <span className="text-xs text-muted-foreground">-10s</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground">-10s</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
             <Button
               size="icon"
-              className="h-16 w-16 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl"
-              onClick={togglePlayPause}
+              className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl"
+              onClick={() => guardedAction(togglePlayPause)}
               aria-label={isPlaying ? "Pause" : "Play"}
             >
-              {isPlaying ? <Pause size={28} /> : <Play size={28} />}
+              {isPlaying ? <Pause className="w-6 h-6 sm:w-7 sm:h-7" /> : <Play className="w-6 h-6 sm:w-7 sm:h-7 ml-1" />}
             </Button>
-            <span className="text-xs text-muted-foreground">{isPlaying ? "Pause" : "Play"}</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground">{isPlaying ? "Pause" : "Play"}</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 rounded-full hover:bg-muted"
-              onClick={skipForward}
+              className="h-10 w-10 sm:h-11 sm:w-11 rounded-full hover:bg-muted"
+              onClick={() => guardedAction(skipForward)}
+              disabled={isThrottled}
               aria-label="Forward 10 seconds"
             >
-              <RotateCcw size={20} className="scale-x-[-1]" />
+              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 scale-x-[-1]" />
             </Button>
-            <span className="text-xs text-muted-foreground">+10s</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground">+10s</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 rounded-full hover:bg-muted disabled:opacity-50"
-              onClick={repeatTargetSentence}
-              disabled={!targetSentence}
+              className="h-10 w-10 sm:h-11 sm:w-11 rounded-full hover:bg-muted disabled:opacity-50"
+              onClick={() => guardedAction(repeatTargetSentence)}
+              disabled={!targetSentence || isThrottled}
               aria-label="Repeat target sentence"
               title="Repeat sentence with search word"
             >
-              <Repeat size={20} />
+              <Repeat className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
-            <span className="text-xs text-muted-foreground">Repeat</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground">Repeat</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-11 w-11 rounded-full hover:bg-muted"
-              onClick={nextVideo}
+              className="h-10 w-10 sm:h-11 sm:w-11 rounded-full hover:bg-muted"
+              onClick={() => guardedAction(nextVideo)}
+              disabled={isThrottled}
               aria-label="Next clip"
             >
-              <SkipForward size={20} />
+              <SkipForward className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
-            <span className="text-xs text-muted-foreground">Next</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground">Next</span>
           </div>
         </div>
 
         {/* Clip Count Indicator - Simple & Clean */}
-        <div className="absolute top-4 right-4 text-xs font-medium text-muted-foreground bg-muted/30 px-2 py-1 rounded-md border border-border/20">
+        <div className="absolute top-4 left-4 md:left-auto md:right-4 text-[10px] sm:text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20 z-10 hidden md:block">
           Clip {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
         </div>
 
-        {/* Speed controls - Right side */}
-        <div className="flex items-center gap-4 flex-1 max-w-[180px] justify-end">
+        {/* Speed controls - Top row right on mobile, Right on desktop */}
+        <div className="order-3 md:order-3 flex items-center gap-4 w-full justify-between md:flex-1 md:max-w-[180px] md:justify-end">
+          <div className="md:hidden text-[10px] sm:text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20">
+            Clip {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
+          </div>
+
           <Popover open={speedPopoverOpen} onOpenChange={setSpeedPopoverOpen}>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2">
@@ -307,23 +382,44 @@ export default function AudioCard({
                 <span className="font-semibold">{rate}x</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-4" align="end">
-              <div className="space-y-4">
+            <PopoverContent className="w-[280px] sm:w-[320px] p-4 sm:p-5 rounded-2xl shadow-xl border-border/50" align="end">
+              <div className="flex flex-col gap-6">
+                {/* Header */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Playback Speed</span>
-                  <span className="text-sm font-semibold text-primary">{rate}x</span>
+                  <span className="text-sm font-semibold">Playback Speed</span>
                 </div>
-                <Slider
-                  value={[speeds.indexOf(rate)]}
-                  max={speeds.length - 1}
-                  step={1}
-                  onValueChange={(val) => setRate(speeds[val[0]])}
-                  className="cursor-pointer"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  {speeds.map((s) => (
-                    <span key={s}>{s}x</span>
-                  ))}
+
+                {/* Slider track area */}
+                <div className="relative px-3 sm:px-4 pb-6">
+                  <div className="relative w-full h-5 flex items-center">
+                    {/* The interactive slider */}
+                    <Slider
+                      value={[speeds.indexOf(rate)]}
+                      max={speeds.length - 1}
+                      step={1}
+                      onValueChange={(val) => setRate(speeds[val[0]])}
+                      className="cursor-pointer relative z-10 w-full hover:opacity-100"
+                    />
+
+                    {/* Clickable labels underneath perfectly aligned to thumb positions */}
+                    {speeds.map((s, i) => {
+                      const percent = (i / (speeds.length - 1)) * 100;
+                      return (
+                        <button
+                          key={`label-${s}`}
+                          onClick={() => setRate(s)}
+                          className={cn(
+                            "absolute top-6 w-8 text-center transition-all hover:text-foreground hover:scale-110 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm transform -translate-x-1/2 text-[11px] sm:text-xs",
+                            rate === s ? "text-primary font-bold scale-110" : "text-muted-foreground font-medium"
+                          )}
+                          style={{ left: `${percent}%` }}
+                          title={`Jump to ${s}x`}
+                        >
+                          {s}x
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </PopoverContent>

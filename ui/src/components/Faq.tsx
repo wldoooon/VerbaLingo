@@ -80,10 +80,6 @@ export function Faq() {
             <div className="lg:sticky lg:top-28 space-y-10">
               {/* Header */}
               <div className="space-y-4 flex flex-col items-center text-center lg:items-start lg:text-left">
-                <Badge variant="secondary" className="rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide gap-1.5">
-                  <HelpCircle className="w-3.5 h-3.5" />
-                  FAQ
-                </Badge>
 
                 <h2 className="text-[clamp(2.5rem,7vw,3.5rem)] font-black tracking-tighter leading-tight">
                   <ShinyText

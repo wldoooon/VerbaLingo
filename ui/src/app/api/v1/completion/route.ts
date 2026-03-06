@@ -14,10 +14,16 @@ export async function POST(request: NextRequest) {
 
     const backendUrl = `${getBackendBaseUrl()}/api/v1/completion`;
 
+    // Forward the auth cookie from the browser so the backend can identify
+    // the authenticated user. Without this, every request looks anonymous
+    // because it comes from the Next.js server IP, not the browser.
+    const cookieHeader = request.headers.get("cookie") ?? "";
+
     const backendResponse = await fetch(backendUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(cookieHeader ? { Cookie: cookieHeader } : {}),
       },
       body: JSON.stringify({
         prompt: prompt,
@@ -51,7 +57,7 @@ export async function POST(request: NextRequest) {
     ) {
       return new Response(
         "Could not connect to the backend service (FastAPI). Please ensure it is running.",
-        { status: 503 }
+        { status: 503 },
       );
     }
     return new Response("An internal server error occurred.", { status: 500 });

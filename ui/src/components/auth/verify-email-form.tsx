@@ -18,6 +18,7 @@ import {
     InputOTPSlot,
 } from "@/components/ui/input-otp"
 import { useVerifyEmailMutation, useSignupMutation } from "@/lib/authHooks"
+import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown"
 import axios from "axios"
 
 function getErrorMessage(err: unknown) {
@@ -41,13 +42,14 @@ export function VerifyEmailForm({ email, password, onSuccess, onBack }: VerifyEm
     // /auth/verify-email sets the auth cookie directly — no separate login step needed!
     const verifyMutation = useVerifyEmailMutation()
     const signupMutation = useSignupMutation()
+    const verifyRateLimit = useRateLimitCountdown(verifyMutation.error)
 
     const handleResend = () => {
         signupMutation.mutate({ email, password, full_name: "User" })
     }
 
     return (
-        <Card className="border-0 shadow-none">
+        <Card className="border-0 shadow-none bg-transparent">
             <CardHeader className="px-0 pt-0 pb-4">
                 <CardTitle className="text-xl font-bold">Verify your email</CardTitle>
                 <CardDescription className="text-sm">
@@ -83,21 +85,25 @@ export function VerifyEmailForm({ email, password, onSuccess, onBack }: VerifyEm
                         }}
                     >
                         <InputOTPGroup className="gap-1">
-                            <InputOTPSlot index={0} className="w-12 h-14 text-xl rounded-lg border-2" />
-                            <InputOTPSlot index={1} className="w-12 h-14 text-xl rounded-lg border-2" />
-                            <InputOTPSlot index={2} className="w-12 h-14 text-xl rounded-lg border-2" />
+                            <InputOTPSlot index={0} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                            <InputOTPSlot index={1} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                            <InputOTPSlot index={2} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
                         </InputOTPGroup>
                         <InputOTPSeparator className="mx-2 text-muted-foreground">—</InputOTPSeparator>
                         <InputOTPGroup className="gap-1">
-                            <InputOTPSlot index={3} className="w-12 h-14 text-xl rounded-lg border-2" />
-                            <InputOTPSlot index={4} className="w-12 h-14 text-xl rounded-lg border-2" />
-                            <InputOTPSlot index={5} className="w-12 h-14 text-xl rounded-lg border-2" />
+                            <InputOTPSlot index={3} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                            <InputOTPSlot index={4} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                            <InputOTPSlot index={5} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
                         </InputOTPGroup>
                     </InputOTP>
                 </div>
 
                 {otpError && <p className="text-sm text-red-500 text-center">{otpError}</p>}
-                {verifyMutation.isError && <p className="text-sm text-red-500 text-center">{getErrorMessage(verifyMutation.error)}</p>}
+                {verifyMutation.isError && (
+                    <p className="text-sm text-red-500 text-center">
+                        {verifyRateLimit ?? getErrorMessage(verifyMutation.error)}
+                    </p>
+                )}
             </CardContent>
 
             {/* Divider + Verify Button */}

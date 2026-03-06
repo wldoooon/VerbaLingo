@@ -324,7 +324,6 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                     transition={{ delay: 0.3 + i * 0.08 }}
                                     className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/40 p-3 text-left"
                                 >
-                                    <div className="text-primary mt-0.5 shrink-0">{f.icon}</div>
                                     <div>
                                         <p className="text-xs font-semibold text-foreground">{f.title}</p>
                                         <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{f.desc}</p>
@@ -341,13 +340,13 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                             className="flex flex-col items-center gap-3 mt-8"
                         >
                             <AuthDialog defaultTab="signup">
-                                <Button size="lg" className="rounded-full gap-2 px-8 font-semibold">
-                                    Get Started Free <ArrowRight className="h-4 w-4" />
+                                <Button size="lg" className="rounded-full gap-2 px-8 font-semibold cursor-pointer">
+                                    Get Started Free
                                 </Button>
                             </AuthDialog>
 
                             <AuthDialog defaultTab="login">
-                                <Button variant="outline" size="lg" className="rounded-full px-8 font-semibold">
+                                <Button variant="outline" size="lg" className="rounded-full px-8 font-semibold cursor-pointer">
                                     Sign In
                                 </Button>
                             </AuthDialog>
@@ -518,7 +517,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                         <div
                                             ref={scrollContentRef}
                                             style={{ maxHeight: `${maxResponseHeight}px` }}
-                                            className="overflow-y-auto text-card-foreground pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
+                                            className="overflow-y-auto text-card-foreground pl-1 pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
                                             onScroll={(e) => {
                                                 const element = e.currentTarget;
                                                 const topBlur = document.getElementById('top-blur');

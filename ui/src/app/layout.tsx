@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://s.ytimg.com" />
       </head>
       <body
-        className={`${inter.className} white w-full min-h-screen bg-background`}
+        className={`${inter.className} w-full min-h-screen bg-background`}
         style={{ fontSize: '85%' }}
         suppressHydrationWarning
       >

@@ -234,7 +234,7 @@ export function ContactMorphSurface({
           "shadow-[0px_1px_1px_0px_rgba(0,_0,_0,_0.05),_0px_1px_1px_0px_rgba(255,_252,_240,_0.5)_inset,_0px_0px_0px_1px_hsla(0,_0%,_100%,_0.1)_inset,_0px_0px_1px_0px_rgba(28,_27,_26,_0.5)]",
           "dark:shadow-[0px_1px_0px_0px_hsla(0,_0%,_0%,_0.02)_inset,_0px_0px_0px_1px_hsla(0,_0%,_0%,_0.02)_inset,_0px_0px_0px_1px_rgba(255,_255,_255,_0.25)]",
           !showForm &&
-            "cursor-pointer hover:brightness-105 transition-[filter] duration-200"
+          "cursor-pointer hover:brightness-105 transition-[filter] duration-200"
         )}
         initial={false}
         animate={{
@@ -446,7 +446,6 @@ function ContactForm({ onSuccess }: { onSuccess: () => void }) {
                 onClick={closeForm}
                 className="text-muted-foreground hover:text-foreground text-xs px-2 py-1 rounded-md hover:bg-muted transition-colors cursor-pointer"
               >
-                Esc
               </button>
             </div>
 

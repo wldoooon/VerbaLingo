@@ -155,11 +155,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
 
       {/* 1. Top Section: User Identity Badge */}
       {authStatus === 'authenticated' && (
-        <div className="p-4 border-b border-border/60">
+        <div className={`p-4 border-b border-border/60 flex transition-all duration-300 ${isCollapsed ? 'justify-center' : ''}`}>
           <div
-            className="h-14 flex items-center w-full border border-zinc-950/10 dark:border-zinc-50/10 rounded-full bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-2 transition-all duration-200"
+            className={`h-14 flex items-center border border-zinc-950/10 dark:border-zinc-50/10 rounded-full bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm p-2 transition-all duration-300 ${isCollapsed ? 'w-14 justify-center' : 'w-full'}`}
           >
-            <div className="flex aspect-square h-10 w-10 items-center justify-center rounded-full bg-primary overflow-hidden shadow-sm">
+            <div className="flex shrink-0 aspect-square h-10 w-10 items-center justify-center rounded-full bg-primary overflow-hidden shadow-sm">
               {authUser?.oauth_avatar_url ? (
                 <img src={authUser.oauth_avatar_url} alt="Avatar" className="h-full w-full object-cover" />
               ) : (
@@ -167,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
               )}
             </div>
             {!isCollapsed && (
-              <div className="grid flex-1 text-left text-sm leading-tight ml-3">
+              <div className="grid flex-1 text-left text-sm leading-tight ml-3 overflow-hidden">
                 <span className="truncate font-black text-sm tracking-tight text-foreground">
                   {authUser?.full_name || (authUser?.email?.split('@')[0] || "User")}
                 </span>
@@ -181,7 +181,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
       )}
 
       {/* 2. Navigation */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 space-y-8 custom-scrollbar">
 
         {/* Main Section */}
         <div className="space-y-1.5 mb-6">
@@ -197,10 +197,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
                 className={`w-full flex items-center justify-between p-3.5 rounded-xl transition-all duration-200 group mb-1 cursor-pointer ${pathname === '/' ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
               >
                 <div className="flex items-center gap-4 px-1">
-                  <Compass className={`w-6 h-6 transition-colors ${pathname === '/' ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                  <span className="text-base tracking-tight">Discover</span>
+                  <Compass className={`w-6 h-6 shrink-0 transition-colors ${pathname === '/' ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} />
+                  <span className="text-base tracking-tight truncate">Discover</span>
                 </div>
-                <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isDiscoverOpen ? 'rotate-0 text-muted-foreground' : '-rotate-90 text-muted-foreground'}`} />
+                <ChevronDown className={`w-4 h-4 shrink-0 transition-transform duration-300 ${isDiscoverOpen ? 'rotate-0 text-muted-foreground' : '-rotate-90 text-muted-foreground'}`} />
               </button>
 
               <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${isDiscoverOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
@@ -219,7 +219,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
                           {/* Connector Dot */}
                           <div className="absolute left-[24px] top-1/2 -translate-y-1/2 w-2 h-[1.5px] bg-border/60"></div>
 
-                          <span className="text-sm font-medium transition-colors group-hover:text-foreground">
+                          <span className="text-sm font-medium transition-colors group-hover:text-foreground truncate">
                             {item.label}
                           </span>
                         </Link>
@@ -238,12 +238,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
                   setIsDiscoverOpen(true);
                   if (pathname !== '/') router.push('/');
                 }}
+                title="Discover"
                 className={`w-12 h-12 flex items-center justify-center rounded-xl transition-colors cursor-pointer group relative ${pathname === '/' ? 'bg-muted text-foreground font-medium' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
               >
-                <Compass className="w-6 h-6" />
-                <div className="absolute left-full ml-4 px-3 py-1.5 bg-popover border border-border text-popover-foreground text-xs font-medium rounded-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl">
-                  Discover
-                </div>
+                <Compass className="w-6 h-6 shrink-0" />
               </button>
             </div>
           )}
@@ -254,8 +252,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
           {!isCollapsed ? (
             <div className="w-full flex items-center justify-between p-3.5 rounded-xl text-muted-foreground opacity-50 cursor-not-allowed border border-transparent">
               <div className="flex items-center gap-4 px-1">
-                <Bookmark className="w-6 h-6" />
-                <span className="text-base tracking-tight">Saved</span>
+                <Bookmark className="w-6 h-6 shrink-0" />
+                <span className="text-base tracking-tight truncate">Saved</span>
               </div>
               <Badge variant="secondary" className="px-1.5 py-0 h-[18px] text-[9px] font-bold uppercase tracking-widest bg-muted text-foreground mr-1">
                 Soon
@@ -264,14 +262,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
           ) : (
             /* Collapsed Saved Logic */
             <div className="flex flex-col gap-4 items-center mt-2">
-              <div className="w-12 h-12 flex items-center justify-center text-muted-foreground opacity-50 bg-transparent rounded-xl cursor-not-allowed group relative">
-                <Bookmark className="w-6 h-6" />
-                <div className="absolute left-full ml-4 px-3 py-1.5 bg-popover border border-border text-popover-foreground text-xs font-medium rounded-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl flex items-center gap-2">
-                  Saved
-                  <Badge variant="secondary" className="px-1 py-0 h-[14px] text-[8px] font-bold uppercase tracking-widest bg-muted text-foreground">
-                    Soon
-                  </Badge>
-                </div>
+              <div className="w-12 h-12 flex items-center justify-center text-muted-foreground opacity-50 bg-transparent rounded-xl cursor-not-allowed group relative" title="Saved (Soon)">
+                <Bookmark className="w-6 h-6 shrink-0" />
               </div>
               <div className="w-[1px] h-10 bg-border mt-2"></div>
             </div>
@@ -369,19 +361,13 @@ const NavItem = ({ item, isActive, isCollapsed, onClick }: any) => {
   const content = (
     <>
       <item.icon
-        className={`w-6 h-6 transition-colors ${isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}
+        className={`w-6 h-6 shrink-0 transition-colors ${isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}
       />
 
       {!isCollapsed && (
-        <span className="ml-4 text-base font-medium tracking-tight">
+        <span className="ml-4 text-base font-medium tracking-tight truncate">
           {item.label}
         </span>
-      )}
-
-      {isCollapsed && (
-        <div className="absolute left-full ml-4 px-4 py-2 bg-popover border border-border text-popover-foreground text-sm font-medium rounded-xl opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-2xl">
-          {item.label}
-        </div>
       )}
     </>
   );
@@ -389,18 +375,20 @@ const NavItem = ({ item, isActive, isCollapsed, onClick }: any) => {
   const className = `group relative flex items-center w-full p-3.5 rounded-xl transition-all duration-200 cursor-pointer ${isActive
     ? 'bg-muted text-foreground font-medium'
     : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-    } ${isCollapsed ? 'justify-center' : ''}`;
+    } ${isCollapsed ? 'justify-center w-12 h-12 mx-auto' : ''}`;
+
+  const tooltipProps = isCollapsed ? { title: item.label } : {};
 
   if (item.href) {
     return (
-      <Link href={item.href} className={className}>
+      <Link href={item.href} className={className} {...tooltipProps}>
         {content}
       </Link>
     );
   }
 
   return (
-    <button onClick={onClick} className={className}>
+    <button onClick={onClick} className={className} {...tooltipProps}>
       {content}
     </button>
   );

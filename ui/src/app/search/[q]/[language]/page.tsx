@@ -5,10 +5,10 @@ import { useParams, useSearchParams } from "next/navigation"
 import dynamic from "next/dynamic"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
-import { useSearch } from "@/lib/useApi"
+import { useInfiniteSearch } from "@/lib/useApi"
 import { useEntitlements } from "@/hooks/use-entitlements"
 import { useAuthStore } from "@/stores/auth-store"
-import { Loader2, PanelRightClose, PanelRightOpen, Bot, X, Play } from "lucide-react"
+import { Loader2, Bot, X, Play, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 // Dynamic imports for heavy components
@@ -54,8 +54,42 @@ export default function RoutedSearchPage() {
   // Track if the search was blocked by a 429 response
   const [searchBlocked, setSearchBlocked] = useState(false)
 
-  const { data, refetch, isLoading, isFetching, error } = useSearch(q, languageParam, categoryForContext, subCategory)
-  const playlist = useMemo(() => data?.hits || [], [data])
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isFetching,
+    error,
+    refetch
+  } = useInfiniteSearch(q, languageParam, categoryForContext, subCategory)
+
+  const playlist = useMemo(() => {
+    if (!data?.pages) return []
+    return data.pages.flatMap((page) => page.hits || [])
+  }, [data])
+
+  const totalHits = useMemo(() => {
+    if (!data?.pages || data.pages.length === 0) return 0
+    return data.pages[0].total || 0
+  }, [data])
+
+  const aggregations = useMemo(() => {
+    if (!data?.pages || data.pages.length === 0) return {}
+    return data.pages[0].aggregations || {}
+  }, [data])
+
+  // Pre-fetch next page when nearing the end of the playlist
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return
+
+    const clipsRemaining = playlist.length - currentVideoIndex - 1
+    // If we're within 10 clips of the end, fetch the next batch seamlessly
+    if (clipsRemaining <= 10) {
+      fetchNextPage()
+    }
+  }, [currentVideoIndex, playlist.length, hasNextPage, isFetchingNextPage, fetchNextPage])
 
   // Detect 429 from the search error (Axios wraps it in error.response)
   useEffect(() => {
@@ -87,6 +121,7 @@ export default function RoutedSearchPage() {
     if (!q || !q.trim()) return
 
     setHasRequested(true)
+    resetIndex() // Reset index at the start of a new search
     refetch()
 
     setQuery(q)
@@ -100,11 +135,7 @@ export default function RoutedSearchPage() {
     setSearchQuery(q)
   }, [q, languageParam, categoryForContext, subCategory, refetch, setQuery, setCategory, setLanguage])
 
-  useEffect(() => {
-    if (data && data.hits && data.hits.length > 0) {
-      resetIndex()
-    }
-  }, [data, resetIndex])
+  // (Removed effect that resetted index on data change, which broke infinite scroll)
 
   // Show the signup wall if:
   // 1. We got a 429 from the backend (searchBlocked), OR
@@ -117,7 +148,7 @@ export default function RoutedSearchPage() {
         {showWall ? (
           /* ── Signup Wall ── */
           <SearchLimitWall />
-        ) : (!hasRequested || isLoading || isFetching) ? (
+        ) : (!hasRequested || isLoading || (isFetching && playlist.length === 0)) ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
@@ -128,22 +159,20 @@ export default function RoutedSearchPage() {
             <div className="xl:hidden flex items-center gap-1 px-4 pt-3 sm:px-6">
               <button
                 onClick={() => setMobileTab("player")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  mobileTab === "player"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground"
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${mobileTab === "player"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 <Play className="h-3.5 w-3.5" />
                 Player
               </button>
               <button
                 onClick={() => setMobileTab("ai")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  mobileTab === "ai"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground"
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${mobileTab === "ai"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 <Bot className="h-3.5 w-3.5" />
                 AI Assistant
@@ -154,13 +183,13 @@ export default function RoutedSearchPage() {
             <div className={`space-y-4 p-4 sm:p-6 pb-12 xl:pb-6 ${mobileTab !== "player" ? "hidden xl:block" : ""}`}>
               <VideoPlayerCard
                 playlist={playlist}
-                isFetching={isFetching}
-                aggregations={data?.aggregations}
+                isFetching={isFetching || isFetchingNextPage}
+                aggregations={aggregations}
               />
               <AudioCard
                 currentClip={playlist[currentVideoIndex]}
                 playlist={playlist}
-                totalItems={data?.total}
+                totalItems={totalHits}
                 searchQuery={searchQuery}
                 onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
               />
@@ -174,31 +203,24 @@ export default function RoutedSearchPage() {
             </div>
 
             {/* ── Desktop AI Panel (xl+) ── */}
-            <div className="hidden xl:flex xl:flex-col xl:ml-0 xl:mr-0 sticky top-0 h-[calc(100vh-5rem)] overflow-hidden border-l bg-card">
-              {/* Collapsed strip */}
+            <div className="hidden xl:block relative sticky top-0 h-[calc(100vh-5rem)] border-l bg-card">
+
+              {/* Sidebar-style toggle — sits on the left border line, outside overflow-hidden so it's never clipped */}
               <button
                 onClick={() => setIsAiCollapsed(!isAiCollapsed)}
-                className={`flex flex-col items-center gap-2 w-full pt-5 transition-opacity duration-200 ${isAiCollapsed ? 'opacity-100 cursor-pointer' : 'opacity-0 pointer-events-none absolute'
-                  }`}
-                title="Open AI Assistant"
+                className="absolute -left-3 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
+                title={isAiCollapsed ? "Open AI Assistant" : "Close AI Assistant"}
               >
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
-                  <PanelRightOpen className="h-5 w-5 text-primary" />
-                </div>
-                <span className="text-[10px] font-semibold text-muted-foreground tracking-wider uppercase -rotate-180" style={{ writingMode: 'vertical-rl' }}>AI Assistant</span>
+                {isAiCollapsed
+                  ? <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+                  : <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />}
               </button>
 
-              {/* Full panel */}
-              <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
-                {/* Close button inside panel */}
-                <button
-                  onClick={() => setIsAiCollapsed(true)}
-                  className="absolute right-3 top-3 z-30 h-8 w-8 rounded-full border bg-background/80 backdrop-blur-sm shadow-sm flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                  title="Close AI Assistant"
-                >
-                  <PanelRightClose className="h-4 w-4" />
-                </button>
-                <AiCompletion externalPrompt={externalPrompt} />
+              {/* Inner panel — overflow-hidden only here, not on the button's parent */}
+              <div className="h-full overflow-hidden">
+                <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
+                  <AiCompletion externalPrompt={externalPrompt} />
+                </div>
               </div>
             </div>
           </div>

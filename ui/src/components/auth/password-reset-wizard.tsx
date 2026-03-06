@@ -5,7 +5,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Loader2, RefreshCwIcon, ArrowLeft } from "lucide-react"
+import { Loader2, RefreshCwIcon, ArrowLeft, Eye, EyeOff } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -26,6 +26,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
 import { useForgotPasswordMutation, useResetPasswordMutation, useVerifyOtpMutation } from "@/lib/authHooks"
+import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown"
 import axios from "axios"
 
 const emailSchema = z.object({ email: z.string().email() })
@@ -50,13 +51,20 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
     const [email, setEmail] = useState("")
     const [otpValue, setOtpValue] = useState("")
     const [otpError, setOtpError] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
     const forgotPasswordMutation = useForgotPasswordMutation()
     const verifyOtpMutation = useVerifyOtpMutation()
     const resetPasswordMutation = useResetPasswordMutation()
 
+    // Rate-limit countdowns — one per mutation
+    const forgotRateLimit = useRateLimitCountdown(forgotPasswordMutation.error)
+    const verifyRateLimit = useRateLimitCountdown(verifyOtpMutation.error)
+    const resetRateLimit = useRateLimitCountdown(resetPasswordMutation.error)
+
     // Step 1: Email Form
-    const emailForm = useForm<{ email: string }>({ resolver: zodResolver(emailSchema) })
+    const emailForm = useForm<{ email: string }>({ resolver: zodResolver(emailSchema), defaultValues: { email: "" } })
     const onEmailSubmit = async (data: { email: string }) => {
         setEmail(data.email)
         try {
@@ -66,7 +74,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
     }
 
     // Step 3: Reset Form
-    const resetForm = useForm<{ password: string; confirmPassword: string }>({ resolver: zodResolver(resetSchema) })
+    const resetForm = useForm<{ password: string; confirmPassword: string }>({ resolver: zodResolver(resetSchema), defaultValues: { password: "", confirmPassword: "" } })
     const onResetSubmit = async (data: { password: string; confirmPassword: string }) => {
         try {
             // Using the otp from state
@@ -78,7 +86,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
 
     if (step === "email") {
         return (
-            <Card className="border-0 shadow-none">
+            <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader className="px-0 pt-0 pb-4">
                     <CardTitle className="text-xl font-bold">Reset your password</CardTitle>
                     <CardDescription className="text-sm">
@@ -107,7 +115,9 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                             />
 
                             {forgotPasswordMutation.isError && (
-                                <p className="text-sm text-red-500 text-center">{getErrorMessage(forgotPasswordMutation.error)}</p>
+                                <p className="text-sm text-red-500 text-center">
+                                    {forgotRateLimit ?? getErrorMessage(forgotPasswordMutation.error)}
+                                </p>
                             )}
 
                             {/* Help Text */}
@@ -147,7 +157,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
 
     if (step === "otp") {
         return (
-            <Card className="border-0 shadow-none">
+            <Card className="border-0 shadow-none bg-transparent">
                 <CardHeader className="px-0 pt-0 pb-4">
                     <CardTitle className="text-xl font-bold">Verify your login</CardTitle>
                     <CardDescription className="text-sm">
@@ -182,21 +192,25 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                             }}
                         >
                             <InputOTPGroup className="gap-1">
-                                <InputOTPSlot index={0} className="w-12 h-14 text-xl rounded-lg border-2" />
-                                <InputOTPSlot index={1} className="w-12 h-14 text-xl rounded-lg border-2" />
-                                <InputOTPSlot index={2} className="w-12 h-14 text-xl rounded-lg border-2" />
+                                <InputOTPSlot index={0} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                                <InputOTPSlot index={1} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                                <InputOTPSlot index={2} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
                             </InputOTPGroup>
                             <InputOTPSeparator className="mx-2 text-muted-foreground">—</InputOTPSeparator>
                             <InputOTPGroup className="gap-1">
-                                <InputOTPSlot index={3} className="w-12 h-14 text-xl rounded-lg border-2" />
-                                <InputOTPSlot index={4} className="w-12 h-14 text-xl rounded-lg border-2" />
-                                <InputOTPSlot index={5} className="w-12 h-14 text-xl rounded-lg border-2" />
+                                <InputOTPSlot index={3} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                                <InputOTPSlot index={4} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
+                                <InputOTPSlot index={5} className="w-12 h-14 text-xl rounded-lg border-2 dark:bg-zinc-800 dark:border-zinc-700 dark:text-slate-100" />
                             </InputOTPGroup>
                         </InputOTP>
                     </div>
 
                     {otpError && <p className="text-sm text-red-500 text-center">{otpError}</p>}
-                    {verifyOtpMutation.isError && <p className="text-sm text-red-500 text-center">{getErrorMessage(verifyOtpMutation.error)}</p>}
+                    {verifyOtpMutation.isError && (
+                        <p className="text-sm text-red-500 text-center">
+                            {verifyRateLimit ?? getErrorMessage(verifyOtpMutation.error)}
+                        </p>
+                    )}
 
                     {/* Help Link */}
                     <p className="text-xs text-muted-foreground text-center">
@@ -243,7 +257,7 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
     }
 
     return (
-        <Card className="border-0 shadow-none">
+        <Card className="border-0 shadow-none bg-transparent">
             <CardHeader className="px-0 pt-0 pb-4">
                 <CardTitle className="text-xl font-bold">Set new password</CardTitle>
                 <CardDescription className="text-sm">
@@ -260,12 +274,21 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                                 <FormItem>
                                     <FormLabel className="text-sm font-bold text-foreground">New Password</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            type="password"
-                                            placeholder="Enter your new password"
-                                            {...field}
-                                            className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium text-sm h-auto"
-                                        />
+                                        <div className="relative">
+                                            <Input
+                                                type={showPassword ? "text" : "password"}
+                                                placeholder="Enter your new password"
+                                                {...field}
+                                                className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium text-sm h-auto pr-10"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                                            >
+                                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -279,12 +302,21 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                                 <FormItem>
                                     <FormLabel className="text-sm font-bold text-foreground">Confirm Password</FormLabel>
                                     <FormControl>
-                                        <Input
-                                            type="password"
-                                            placeholder="Confirm your new password"
-                                            {...field}
-                                            className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium text-sm h-auto"
-                                        />
+                                        <div className="relative">
+                                            <Input
+                                                type={showConfirmPassword ? "text" : "password"}
+                                                placeholder="Confirm your new password"
+                                                {...field}
+                                                className="block w-full px-4 py-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all font-medium text-sm h-auto pr-10"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                                            >
+                                                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -292,13 +324,11 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                         />
 
                         {resetPasswordMutation.isError && (
-                            <p className="text-sm text-red-500 text-center">{getErrorMessage(resetPasswordMutation.error)}</p>
+                            <p className="text-sm text-red-500 text-center">
+                                {resetRateLimit ?? getErrorMessage(resetPasswordMutation.error)}
+                            </p>
                         )}
 
-                        {/* Help Text */}
-                        <p className="text-xs text-muted-foreground">
-                            Use 6+ characters with a mix of letters, numbers & symbols.
-                        </p>
                     </form>
                 </Form>
             </CardContent>
