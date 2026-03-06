@@ -47,11 +47,13 @@ async def search(
     language: str = Query("english"),
     category: Optional[str] = Query(None),
     sub_category: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(30, ge=1, le=100),
     # Optional auth: sets request.state.user for rate limiter
     current_user: Optional[User] = Depends(get_current_user_optional),
     service: SearchService = Depends(get_search_service)
 ):
-    raw_results = await service.search(q=q, language=language, category=category, sub_category=sub_category)
+    raw_results = await service.search(q=q, language=language, category=category, sub_category=sub_category, page=page, limit=limit)
 
     hits: List[SearchHit] = []
     raw_hits = raw_results.get("hits", {}).get("hits", [])

@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from "next/navigation"
 import dynamic from "next/dynamic"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
-import { useSearch } from "@/lib/useApi"
+import { useInfiniteSearch } from "@/lib/useApi"
 import { useEntitlements } from "@/hooks/use-entitlements"
 import { useAuthStore } from "@/stores/auth-store"
 import { Loader2, Bot, X, Play, ChevronLeft, ChevronRight } from "lucide-react"
@@ -54,8 +54,42 @@ export default function RoutedSearchPage() {
   // Track if the search was blocked by a 429 response
   const [searchBlocked, setSearchBlocked] = useState(false)
 
-  const { data, refetch, isLoading, isFetching, error } = useSearch(q, languageParam, categoryForContext, subCategory)
-  const playlist = useMemo(() => data?.hits || [], [data])
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isFetching,
+    error,
+    refetch
+  } = useInfiniteSearch(q, languageParam, categoryForContext, subCategory)
+
+  const playlist = useMemo(() => {
+    if (!data?.pages) return []
+    return data.pages.flatMap((page) => page.hits || [])
+  }, [data])
+
+  const totalHits = useMemo(() => {
+    if (!data?.pages || data.pages.length === 0) return 0
+    return data.pages[0].total || 0
+  }, [data])
+
+  const aggregations = useMemo(() => {
+    if (!data?.pages || data.pages.length === 0) return {}
+    return data.pages[0].aggregations || {}
+  }, [data])
+
+  // Pre-fetch next page when nearing the end of the playlist
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return
+
+    const clipsRemaining = playlist.length - currentVideoIndex - 1
+    // If we're within 10 clips of the end, fetch the next batch seamlessly
+    if (clipsRemaining <= 10) {
+      fetchNextPage()
+    }
+  }, [currentVideoIndex, playlist.length, hasNextPage, isFetchingNextPage, fetchNextPage])
 
   // Detect 429 from the search error (Axios wraps it in error.response)
   useEffect(() => {
@@ -87,6 +121,7 @@ export default function RoutedSearchPage() {
     if (!q || !q.trim()) return
 
     setHasRequested(true)
+    resetIndex() // Reset index at the start of a new search
     refetch()
 
     setQuery(q)
@@ -100,11 +135,7 @@ export default function RoutedSearchPage() {
     setSearchQuery(q)
   }, [q, languageParam, categoryForContext, subCategory, refetch, setQuery, setCategory, setLanguage])
 
-  useEffect(() => {
-    if (data && data.hits && data.hits.length > 0) {
-      resetIndex()
-    }
-  }, [data, resetIndex])
+  // (Removed effect that resetted index on data change, which broke infinite scroll)
 
   // Show the signup wall if:
   // 1. We got a 429 from the backend (searchBlocked), OR
@@ -117,7 +148,7 @@ export default function RoutedSearchPage() {
         {showWall ? (
           /* ── Signup Wall ── */
           <SearchLimitWall />
-        ) : (!hasRequested || isLoading || isFetching) ? (
+        ) : (!hasRequested || isLoading || (isFetching && playlist.length === 0)) ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
@@ -152,13 +183,13 @@ export default function RoutedSearchPage() {
             <div className={`space-y-4 p-4 sm:p-6 pb-12 xl:pb-6 ${mobileTab !== "player" ? "hidden xl:block" : ""}`}>
               <VideoPlayerCard
                 playlist={playlist}
-                isFetching={isFetching}
-                aggregations={data?.aggregations}
+                isFetching={isFetching || isFetchingNextPage}
+                aggregations={aggregations}
               />
               <AudioCard
                 currentClip={playlist[currentVideoIndex]}
                 playlist={playlist}
-                totalItems={data?.total}
+                totalItems={totalHits}
                 searchQuery={searchQuery}
                 onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
               />
