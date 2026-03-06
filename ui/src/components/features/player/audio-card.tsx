@@ -382,23 +382,44 @@ export default function AudioCard({
                 <span className="font-semibold">{rate}x</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-4" align="end">
-              <div className="space-y-4">
+            <PopoverContent className="w-[280px] sm:w-[320px] p-4 sm:p-5 rounded-2xl shadow-xl border-border/50" align="end">
+              <div className="flex flex-col gap-6">
+                {/* Header */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Playback Speed</span>
-                  <span className="text-sm font-semibold text-primary">{rate}x</span>
+                  <span className="text-sm font-semibold">Playback Speed</span>
                 </div>
-                <Slider
-                  value={[speeds.indexOf(rate)]}
-                  max={speeds.length - 1}
-                  step={1}
-                  onValueChange={(val) => setRate(speeds[val[0]])}
-                  className="cursor-pointer"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  {speeds.map((s) => (
-                    <span key={s}>{s}x</span>
-                  ))}
+
+                {/* Slider track area */}
+                <div className="relative px-3 sm:px-4 pb-6">
+                  <div className="relative w-full h-5 flex items-center">
+                    {/* The interactive slider */}
+                    <Slider
+                      value={[speeds.indexOf(rate)]}
+                      max={speeds.length - 1}
+                      step={1}
+                      onValueChange={(val) => setRate(speeds[val[0]])}
+                      className="cursor-pointer relative z-10 w-full hover:opacity-100"
+                    />
+
+                    {/* Clickable labels underneath perfectly aligned to thumb positions */}
+                    {speeds.map((s, i) => {
+                      const percent = (i / (speeds.length - 1)) * 100;
+                      return (
+                        <button
+                          key={`label-${s}`}
+                          onClick={() => setRate(s)}
+                          className={cn(
+                            "absolute top-6 w-8 text-center transition-all hover:text-foreground hover:scale-110 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm transform -translate-x-1/2 text-[11px] sm:text-xs",
+                            rate === s ? "text-primary font-bold scale-110" : "text-muted-foreground font-medium"
+                          )}
+                          style={{ left: `${percent}%` }}
+                          title={`Jump to ${s}x`}
+                        >
+                          {s}x
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </PopoverContent>
