@@ -42,6 +42,14 @@ const categories = [
     image: '/These Abstract Paper Profiles Have Something to Say about the World.png',
   },
   {
+    id: 'talks2',
+    label: 'Talks',
+    count: '120k',
+    description: 'Inspiring speeches',
+    icon: MonitorPlay,
+    image: '/talk.png',
+  },
+  {
     id: 'moves2',
     label: 'Movies',
     count: '65k',
@@ -182,16 +190,7 @@ export function Hero() {
             {/* Live Context Spotlight Widget */}
             <div className="w-full max-w-md bg-background/60 backdrop-blur-md border border-border rounded-3xl shadow-xl overflow-hidden mb-10 p-1 group/widget transition-all duration-500 hover:shadow-primary/10">
               <div className="bg-card rounded-[1.4rem] overflow-hidden border border-border/50 shadow-sm transition-all duration-500">
-                <div className="flex items-center justify-between px-6 py-3 border-b border-border/30 bg-muted/30">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-3 h-3 text-primary" />
-                    <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Live Context Insight</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">Analyzing Stream</span>
-                  </div>
-                </div>
+
 
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
@@ -204,7 +203,6 @@ export function Hero() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <div className="text-[9px] font-bold text-muted-foreground opacity-50 uppercase mb-0.5">Freq</div>
                       <div className="text-lg font-mono font-black text-primary">{currentHighlight.frequency}</div>
                     </div>
                   </div>
@@ -215,10 +213,6 @@ export function Hero() {
                       "{currentHighlight.context}"
                     </p>
                     <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3">
-                      <div className="flex items-center gap-1.5">
-                        <Activity className="w-3 h-3 text-primary" />
-                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-tight">Density: {currentHighlight.usage}</span>
-                      </div>
                       <button
                         onClick={() => handleSearch(currentHighlight.word)}
                         className="bg-foreground text-background hover:bg-primary hover:text-primary-foreground px-3.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all active:scale-95 group/btn"
@@ -235,10 +229,6 @@ export function Hero() {
                     {trendingHighlights.map((_, i) => (
                       <div key={i} className={`h-1 rounded-full transition-all duration-300 ${i === highlightIdx ? 'w-6 bg-primary' : 'w-1.5 bg-border'}`}></div>
                     ))}
-                  </div>
-                  <div className="flex items-center gap-1.5 text-muted-foreground opacity-60">
-                    <Sparkles className="w-3 h-3 text-primary/60" />
-                    <span className="text-[8px] font-black uppercase tracking-widest">Neural Index</span>
                   </div>
                 </div>
               </div>
@@ -284,7 +274,6 @@ export function Hero() {
                 <div className="flex flex-col gap-2 group cursor-default sm:text-right w-full sm:w-1/3">
                   <div className="flex items-center justify-end gap-2 text-primary">
                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Contextual Clips</span>
-                    <Database className="w-4 h-4" />
                   </div>
                   <div className="flex items-baseline justify-end gap-1.5">
                     <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">14.2M</span>
@@ -302,7 +291,7 @@ export function Hero() {
 
           {/* Right Column: Curved Carousel (Preserved & Merged) */}
           <div
-            className="relative h-[650px] w-full flex items-center justify-center perspective-[1000px] overflow-hidden"
+            className="relative h-[650px] w-full flex items-center justify-center perspective-[1000px]"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
@@ -311,14 +300,15 @@ export function Hero() {
               const absOffset = Math.abs(offset);
               const isActive = offset === 0;
 
-              const translateX = offset * 140;
-              const translateZ = absOffset * -130;
-              const rotateY = offset * -15;
+              const translateX = offset * 110;
+              const translateZ = absOffset * -90;
+              const rotateY = offset * -12;
 
-              const opacity = isActive ? 1 : Math.max(0.2, 1 - absOffset * 0.4);
+              // Gentler fade so all 6 cards are visible (was 0.4 → now 0.28)
+              const opacity = isActive ? 1 : Math.max(0.15, 1 - absOffset * 0.28);
               const zIndex = 10 - absOffset;
-              const scale = isActive ? 1 : 0.9;
-              const blur = isActive ? 0 : absOffset * 2;
+              const scale = isActive ? 1 : Math.max(0.75, 0.92 - absOffset * 0.06);
+              const blur = isActive ? 0 : absOffset * 1;
 
               return (
                 <div

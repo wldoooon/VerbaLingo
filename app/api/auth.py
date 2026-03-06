@@ -9,7 +9,7 @@ from ..services import usage_service
 from ..services.auth_service import create_new_user, authenticate_user, get_or_create_oauth_user
 from ..services import verification_service
 from ..services.oauth_service import oauth
-from ..core.security import create_access_token
+from ..core.security import create_access_token, create_refresh_token
 from ..core.config import get_settings
 from ..core.redis import get_redis
 from ..core.limiter import security_rate_limit
@@ -20,13 +20,48 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 settings = get_settings()
 
 
-def _set_auth_cookie(response: Response, access_token: str):
-    """Helper to set the authentication cookie."""
+REFRESH_COOKIE_NAME = "refresh_token"
+
+
+def _set_access_cookie(response: Response, access_token: str):
+    """Set only the short-lived access token cookie."""
     response.set_cookie(
         key=settings.COOKIE_NAME,
         value=access_token,
         httponly=True,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        samesite=settings.COOKIE_SAMESITE,
+        secure=settings.COOKIE_SECURE,
+        domain=settings.COOKIE_DOMAIN if settings.COOKIE_DOMAIN else None,
+    )
+
+
+async def _set_auth_cookies(response: Response, access_token: str, user_id: str, redis: Redis):
+    """
+    Set BOTH auth cookies and store the refresh token in Redis.
+
+    Access token  → short-lived JWT (30 min)  — used on every request
+    Refresh token → long-lived random secret (7 days) stored in Redis
+                    — used only to get a new access token
+
+    Why a random string instead of a second JWT?
+    JWTs can't be invalidated before their expiry date.
+    A random token stored in Redis can be deleted at any time (logout, password change, etc.)
+    """
+    # 1. Access token cookie
+    _set_access_cookie(response, access_token)
+
+    # 2. Generate refresh token and store in Redis: refresh:{token} -> user_id
+    refresh_token = create_refresh_token()
+    ttl = settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60  # days → seconds
+    await redis.set(f"refresh:{refresh_token}", str(user_id), ex=ttl)
+
+    # 3. Refresh token cookie (same security settings, longer max_age)
+    response.set_cookie(
+        key=REFRESH_COOKIE_NAME,
+        value=refresh_token,
+        httponly=True,
+        max_age=ttl,
         samesite=settings.COOKIE_SAMESITE,
         secure=settings.COOKIE_SECURE,
         domain=settings.COOKIE_DOMAIN if settings.COOKIE_DOMAIN else None,
@@ -66,7 +101,7 @@ async def verify_email(
     user = await verification_service.verify_email_otp(db, redis, email, otp)
     
     access_token = create_access_token(data={"sub": str(user.id)})
-    _set_auth_cookie(response, access_token)
+    await _set_auth_cookies(response, access_token, str(user.id), redis)
     
     logger.info(f"Email verified: {email}")
     return {
@@ -95,7 +130,8 @@ async def login(
     request: Request,
     response: Response,
     login_data: UserCreate,
-    db: AsyncSession = Depends(get_session)
+    db: AsyncSession = Depends(get_session),
+    redis: Redis = Depends(get_redis)
 ):
     """Login with email and password."""
     user = await authenticate_user(db, login_data.email, login_data.password)
@@ -113,7 +149,7 @@ async def login(
         )
     
     access_token = create_access_token(data={"sub": str(user.id)})
-    _set_auth_cookie(response, access_token)
+    await _set_auth_cookies(response, access_token, str(user.id), redis)
     
     return {
         "message": "Login successful",
@@ -151,15 +187,76 @@ async def me(
     }
 
 @router.post("/logout")
-async def logout(response: Response):
-    """Logout and clear cookie."""
+async def logout(
+    request: Request,
+    response: Response,
+    redis: Redis = Depends(get_redis)
+):
+    """Logout: clear both cookies and revoke the refresh token from Redis."""
+    # Revoke refresh token from Redis so it can never be used again
+    refresh_token = request.cookies.get(REFRESH_COOKIE_NAME)
+    if refresh_token:
+        await redis.delete(f"refresh:{refresh_token}")
+
+    # Delete access token cookie
     response.delete_cookie(
         key=settings.COOKIE_NAME,
         samesite=settings.COOKIE_SAMESITE,
         secure=settings.COOKIE_SECURE,
         domain=settings.COOKIE_DOMAIN if settings.COOKIE_DOMAIN else None,
     )
+    # Delete refresh token cookie
+    response.delete_cookie(
+        key=REFRESH_COOKIE_NAME,
+        samesite=settings.COOKIE_SAMESITE,
+        secure=settings.COOKIE_SECURE,
+        domain=settings.COOKIE_DOMAIN if settings.COOKIE_DOMAIN else None,
+    )
     return {"message": "Logged out"}
+
+
+@router.post("/refresh")
+async def refresh(
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_session),
+    redis: Redis = Depends(get_redis)
+):
+
+    refresh_token = request.cookies.get(REFRESH_COOKIE_NAME)
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No refresh token provided. Please log in again."
+        )
+
+    # Look up user_id stored in Redis for this token
+    user_id = await redis.get(f"refresh:{refresh_token}")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token is invalid or has expired. Please log in again."
+        )
+
+    # Fetch the user from DB to make sure they still exist and are active
+    from ..models.user import User
+    user = await db.get(User, user_id)
+    if not user or not user.is_active:
+        await redis.delete(f"refresh:{refresh_token}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found or inactive."
+        )
+
+    # TOKEN ROTATION: invalidate the old refresh token immediately
+    await redis.delete(f"refresh:{refresh_token}")
+
+    # Issue fresh access token + new refresh token
+    new_access_token = create_access_token(data={"sub": str(user.id)})
+    await _set_auth_cookies(response, new_access_token, str(user.id), redis)
+
+    logger.info(f"Token refreshed for user {user.id}")
+    return {"message": "Token refreshed successfully"}
 
 
 
@@ -218,7 +315,8 @@ async def google_login(request: Request, mode: str = "login"):
 @router.get("/google/callback", response_class=HTMLResponse)
 async def google_callback(
     request: Request,
-    db: AsyncSession = Depends(get_session)
+    db: AsyncSession = Depends(get_session),
+    redis: Redis = Depends(get_redis)
 ):
     """Handle Google OAuth callback."""
     import time
@@ -294,7 +392,7 @@ async def google_callback(
         """
 
         response = HTMLResponse(content=html_content)
-        _set_auth_cookie(response, access_token)
+        await _set_auth_cookies(response, access_token, str(user.id), redis)
         logger.info(f"DEBUG: Google callback finished total: {time.time() - start_time:.4f}s")
         return response
     except Exception as e:

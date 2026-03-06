@@ -22,7 +22,7 @@ import { useLogoutMutation } from "@/lib/authHooks"
 
 import { AuthDialog } from "@/components/auth-dialog"
 
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/animate-ui/components/radix/tooltip"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 
 

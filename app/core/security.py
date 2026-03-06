@@ -31,3 +31,7 @@ hash_password = get_password_hash
 def generate_otp(length=6) -> str:
     alphabet = string.digits
     return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+
+def create_refresh_token() -> str:
+    return secrets.token_urlsafe(32)

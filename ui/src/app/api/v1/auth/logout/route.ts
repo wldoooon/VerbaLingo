@@ -9,17 +9,19 @@ export async function POST(request: NextRequest) {
     await proxyJsonToBackend(request, "/auth/logout");
   } catch {}
 
-  // Explicitly overwrite the cookie with max-age=0 + past expiry.
+  // Explicitly overwrite both cookies with max-age=0 + past expiry.
   // cookies.delete() doesn't always include httpOnly/path — browser ignores it.
   const response = NextResponse.json({ message: "Logged out" });
-  response.cookies.set("access_token", "", {
+  const cookieOptions = {
     httpOnly: true,
     path: "/",
     maxAge: 0,
     expires: new Date(0),
-    sameSite: "lax",
+    sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
-  });
+  };
+  response.cookies.set("access_token", "", cookieOptions);
+  response.cookies.set("refresh_token", "", cookieOptions);
 
   return response;
 }
