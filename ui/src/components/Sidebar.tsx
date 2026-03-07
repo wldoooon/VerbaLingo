@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Compass, User, Bookmark, Settings, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, Star, ChevronsUpDown, Plus, Sparkles, CreditCard, Bell, BadgeCheck, Megaphone } from 'lucide-react';
+import { Compass, User, Bookmark, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, Star, ChevronsUpDown, Plus, Sparkles, CreditCard, Bell, BadgeCheck, Megaphone } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -124,10 +124,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
     { icon: Megaphone, label: 'Changelog', view: ViewState.CHANGELOG, href: '/changelog' },
     { icon: CreditCard, label: 'Pricing', view: ViewState.PRICING, href: '/pricing' },
     { icon: LifeBuoy, label: 'Support', view: ViewState.LANDING, href: '/support' },
-    // Settings only makes sense for logged-in users
-    ...(authStatus === 'authenticated'
-      ? [{ icon: Settings, label: 'Settings', view: ViewState.PROFILE, href: '/profile' }]
-      : []),
   ];
 
   return (

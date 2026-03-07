@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Compass, Bookmark, CreditCard, Megaphone, User, Menu, X, Settings, LifeBuoy, ChevronRight, LogOut } from 'lucide-react';
+import { Compass, Bookmark, CreditCard, Megaphone, User, Menu, X, LifeBuoy, ChevronRight, LogOut, Sun, Moon } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { AuthDialog } from '@/components/auth-dialog';
 import { FeedbackDialog } from '@/components/feedback-dialog';
@@ -18,7 +18,8 @@ export function MobileNav() {
   const router = useRouter();
   const authStatus = useAuthStore((s) => s.status);
   const authUser = useAuthStore((s) => s.user);
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const logoutMutation = useLogoutMutation();
   const isAuthenticated = authStatus === 'authenticated';
@@ -38,12 +39,6 @@ export function MobileNav() {
     { icon: CreditCard, label: 'Pricing', href: '/pricing' },
     { icon: Megaphone, label: 'Changelog', href: '/changelog' },
     { icon: Bookmark, label: 'Saved', href: '/saved', disabled: true, badge: 'Soon' },
-  ];
-
-  const supportItems = [
-    ...(authStatus === 'authenticated'
-      ? [{ icon: Settings, label: 'Settings', href: '/profile' }]
-      : []),
   ];
 
   return (
@@ -227,33 +222,23 @@ export function MobileNav() {
                     Support
                   </h3>
                   <div className="space-y-1">
+                    {/* Dark mode toggle */}
+                    <button
+                      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+                      className="flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer w-full"
+                    >
+                      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                      <span className="text-sm font-medium flex-1 text-left">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+                      <div className={`w-9 h-5 rounded-full relative transition-colors duration-200 ${isDark ? 'bg-primary' : 'bg-muted-foreground/30'}`}>
+                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${isDark ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                      </div>
+                    </button>
                     <FeedbackDialog>
                       <div className="flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer w-full">
                         <LifeBuoy className="w-5 h-5" />
                         <span className="text-sm font-medium">Support</span>
                       </div>
                     </FeedbackDialog>
-                    {supportItems.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = pathname?.startsWith(item.href);
-                      return (
-                        <Link
-                          key={item.label}
-                          href={item.href}
-                          onClick={() => setIsMenuOpen(false)}
-                          className={`
-                            flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 cursor-pointer
-                            ${isActive
-                              ? 'bg-muted text-foreground font-medium'
-                              : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                            }
-                          `}
-                        >
-                          <Icon className="w-5 h-5" />
-                          <span className="text-sm font-medium">{item.label}</span>
-                        </Link>
-                      );
-                    })}
                   </div>
                 </div>
               </div>
@@ -274,26 +259,16 @@ export function MobileNav() {
                     </AuthDialog>
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    <Link
-                      href="/profile"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 p-3 rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                    >
-                      <Settings className="w-5 h-5" />
-                      <span className="text-sm font-medium">Account Settings</span>
-                    </Link>
-                    <button
-                      onClick={() => {
-                        logoutMutation.mutate();
-                        setIsMenuOpen(false);
-                      }}
-                      className="flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors w-full cursor-pointer"
-                    >
-                      <LogOut className="w-5 h-5" />
-                      <span className="text-sm font-medium">Sign Out</span>
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => {
+                      logoutMutation.mutate();
+                      setIsMenuOpen(false);
+                    }}
+                    className="flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors w-full cursor-pointer"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span className="text-sm font-medium">Sign Out</span>
+                  </button>
                 )}
               </div>
             </motion.div>
