@@ -24,7 +24,11 @@ import {
 
   TrendingUp,
 
-  CircleDashed
+  CircleDashed,
+
+  Moon,
+
+  Sun
 
 } from "lucide-react"
 
@@ -277,6 +281,23 @@ export function HeaderUserProfile({
           <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
             <TrendingUp className="mr-3 h-4 w-4 text-slate-400" />
             <span className="text-sm font-medium">Usage analytics</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="rounded-xl py-2.5 cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              setTheme(theme === 'dark' ? 'light' : 'dark');
+            }}
+          >
+            {theme === 'dark' ? (
+              <Sun className="mr-3 h-4 w-4 text-slate-400" />
+            ) : (
+              <Moon className="mr-3 h-4 w-4 text-slate-400" />
+            )}
+            <span className="text-sm font-medium">
+              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            </span>
           </DropdownMenuItem>
 
         </DropdownMenuGroup>
