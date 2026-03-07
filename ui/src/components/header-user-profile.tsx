@@ -303,7 +303,7 @@ export function HeaderUserProfile({
         </DropdownMenuGroup>
 
         {/* Balance Card - Moved below main menu items */}
-        <div className="p-3.5 rounded-[1.25rem] border border-slate-200 dark:border-zinc-800/80 my-2 bg-white dark:bg-zinc-950/50 shadow-sm">
+        <div className="p-3.5 rounded-[1.25rem] border border-slate-200 dark:border-zinc-700/50 my-2 bg-white dark:bg-zinc-800/40 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="text-[15px] font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2 tracking-tight">
