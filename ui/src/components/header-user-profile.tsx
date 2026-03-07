@@ -235,12 +235,54 @@ export function HeaderUserProfile({
 
 
       <DropdownMenuContent
-        className="w-72 rounded-[1.5rem] border border-border/50 bg-white dark:bg-zinc-950 p-2 shadow-2xl"
+        className="w-72 rounded-[1.5rem] border border-border/50 bg-white dark:bg-zinc-900 p-2 shadow-2xl"
         align="end"
         sideOffset={12}
       >
-        {/* Balance Card - Moved to top */}
-        <div className="p-3.5 rounded-[1.25rem] border border-slate-200 dark:border-zinc-800/80 mb-2 bg-white dark:bg-zinc-950/50 shadow-sm mt-1">
+        {/* User Info - At Top */}
+        <div className="px-2.5 py-2 mb-2">
+          <div className="flex flex-col space-y-1">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <p className="text-[15px] font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">
+                {user.name}
+              </p>
+              <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-[10px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase shrink-0">
+                {fullUser?.tier || "free"}
+              </span>
+            </div>
+            <p className="text-[13px] text-slate-500 dark:text-slate-400 leading-none truncate overflow-hidden">
+              {user.email}
+            </p>
+          </div>
+        </div>
+
+        <DropdownMenuSeparator className="my-1 mx-2 bg-slate-100 dark:bg-zinc-800/50" />
+
+        <DropdownMenuGroup className="pt-2">
+
+          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+            <Settings className="mr-3 h-4 w-4 text-slate-400" />
+            <span className="text-sm font-medium">Settings</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+            <ShieldCheck className="mr-3 h-4 w-4 text-slate-400" />
+            <span className="text-sm font-medium">Subscription</span>
+          </DropdownMenuItem>
+
+          <div className="relative my-1 px-2">
+            <div className="h-px bg-slate-100 dark:bg-zinc-800/50 w-full" />
+          </div>
+
+          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+            <TrendingUp className="mr-3 h-4 w-4 text-slate-400" />
+            <span className="text-sm font-medium">Usage analytics</span>
+          </DropdownMenuItem>
+
+        </DropdownMenuGroup>
+
+        {/* Balance Card - Moved below main menu items */}
+        <div className="p-3.5 rounded-[1.25rem] border border-slate-200 dark:border-zinc-800/80 my-2 bg-white dark:bg-zinc-950/50 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="text-[15px] font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2 tracking-tight">
@@ -277,67 +319,6 @@ export function HeaderUserProfile({
             </div>
           </div>
         </div>
-
-        {/* User Info - Moved below balance card */}
-        <div className="px-2.5 py-2 mb-2">
-          <div className="flex flex-col space-y-1">
-            <p className="text-[15px] font-bold text-slate-900 dark:text-slate-100 leading-none truncate overflow-hidden">
-              {user.name}
-            </p>
-            <p className="text-[13px] text-slate-500 dark:text-slate-400 leading-none truncate overflow-hidden">
-              {user.email}
-            </p>
-          </div>
-        </div>
-
-
-
-
-
-
-
-        <DropdownMenuGroup className="pt-2">
-
-
-
-
-
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
-
-            <Settings className="mr-3 h-4 w-4 text-slate-400" />
-
-            <span className="text-sm font-medium">Settings</span>
-
-          </DropdownMenuItem>
-
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
-
-            <ShieldCheck className="mr-3 h-4 w-4 text-slate-400" />
-
-            <span className="text-sm font-medium">Subscription</span>
-
-          </DropdownMenuItem>
-
-
-          <div className="relative my-1 px-2">
-
-            <div className="h-px bg-slate-100 dark:bg-zinc-800/50 w-full" />
-
-          </div>
-
-
-
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
-
-            <TrendingUp className="mr-3 h-4 w-4 text-slate-400" />
-
-            <span className="text-sm font-medium">Usage analytics</span>
-
-          </DropdownMenuItem>
-
-        </DropdownMenuGroup>
-
-
 
         <DropdownMenuSeparator className="my-1 bg-slate-100 dark:bg-zinc-800/50" />
 
