@@ -75,6 +75,8 @@ export function SearchBar() {
     const [showRecent, setShowRecent] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
 
+    const MAX_SEARCH_LENGTH = 60;
+
     const { suggestions, isLoading } = useDatamuse(query);
     const { hasAccess, remaining, limit, current, isUnlimited, isLoaded } = useEntitlements('search');
     const isAnonymous = useAuthStore((s) => s.status) !== 'authenticated';
@@ -389,19 +391,31 @@ export function SearchBar() {
                             <Input
                                 ref={inputRef}
                                 type="text"
+                                maxLength={MAX_SEARCH_LENGTH}
                                 value={hasAccess ? query : ''}
                                 disabled={!hasAccess}
                                 onChange={(e) => {
-                                    setQuery(e.target.value);
+                                    const val = e.target.value.slice(0, MAX_SEARCH_LENGTH);
+                                    setQuery(val);
                                     setShowRecent(true);
                                 }}
                                 onFocus={() => setShowRecent(true)}
                                 onKeyDown={handleKeyDown}
                                 className={cn(
-                                    "border-0 bg-transparent shadow-none focus-visible:ring-0 px-2 sm:px-3 h-8 sm:h-9 text-sm sm:text-base font-medium placeholder:text-transparent min-w-0",
+                                    "border-0 bg-transparent shadow-none focus-visible:ring-0 pl-2 sm:pl-3 pr-20 h-8 sm:h-9 text-sm sm:text-base font-medium placeholder:text-transparent min-w-0",
                                     !hasAccess && "placeholder:text-muted-foreground/60 cursor-not-allowed opacity-60"
                                 )}
                             />
+
+                            {/* Character limit indicator */}
+                            <div className={cn(
+                                "absolute text-[10px] font-medium pointer-events-none transition-all duration-200",
+                                query.length >= MAX_SEARCH_LENGTH ? "text-red-500 font-bold" : "text-muted-foreground/40",
+                                query && hasAccess ? "right-11" : "right-4"
+                            )}>
+                                {query.length}/{MAX_SEARCH_LENGTH}
+                            </div>
+
                             {query && hasAccess && (
                                 <Button
                                     variant="ghost"

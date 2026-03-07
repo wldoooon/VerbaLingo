@@ -10,6 +10,7 @@ import { useEntitlements } from "@/hooks/use-entitlements"
 import { useAuthStore } from "@/stores/auth-store"
 import { Loader2, Bot, X, Play, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 // Dynamic imports for heavy components
 const VideoPlayerCard = dynamic(() => import("@/components/features/player/video-player-card"), {
@@ -26,6 +27,7 @@ const AiCompletion = dynamic(() => import("@/components/ai-completion").then(mod
 
 // Lightweight — no need to lazy-load
 import { SearchLimitWall } from "@/components/features/search-limit-wall"
+import { NoResults } from "@/components/features/search/no-results"
 
 export default function RoutedSearchPage() {
   const params = useParams<{ q: string; language: string }>()
@@ -153,76 +155,93 @@ export default function RoutedSearchPage() {
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className={`mt-0 max-w-full xl:grid xl:items-start transition-[grid-template-columns] duration-300 ease-in-out ${isAiCollapsed ? 'xl:grid-cols-[1fr_48px]' : 'xl:grid-cols-[1fr_560px]'}`}>
+          <div className={cn(
+            "mt-0 max-w-full xl:grid xl:items-start transition-[grid-template-columns] duration-300 ease-in-out",
+            playlist.length === 0
+              ? "xl:grid-cols-1"
+              : (isAiCollapsed ? "xl:grid-cols-[1fr_48px]" : "xl:grid-cols-[1fr_560px]")
+          )}>
 
             {/* ── Mobile/Tablet Tab Bar (below xl) ── */}
-            <div className="xl:hidden flex items-center gap-1 px-4 pt-3 sm:px-6">
-              <button
-                onClick={() => setMobileTab("player")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${mobileTab === "player"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
-              >
-                <Play className="h-3.5 w-3.5" />
-                Player
-              </button>
-              <button
-                onClick={() => setMobileTab("ai")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${mobileTab === "ai"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
-              >
-                <Bot className="h-3.5 w-3.5" />
-                AI Assistant
-              </button>
-            </div>
+            {playlist.length > 0 && (
+              <div className="xl:hidden flex items-center gap-1 px-4 pt-3 sm:px-6">
+                <button
+                  onClick={() => setMobileTab("player")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${mobileTab === "player"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                    }`}
+                >
+                  <Play className="h-3.5 w-3.5" />
+                  Player
+                </button>
+                <button
+                  onClick={() => setMobileTab("ai")}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${mobileTab === "ai"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                    }`}
+                >
+                  <Bot className="h-3.5 w-3.5" />
+                  AI Assistant
+                </button>
+              </div>
+            )}
 
-            {/* ── Player content ── */}
+            {/* ── Player content or Empty State ── */}
             <div className={`space-y-4 p-4 sm:p-6 pb-12 xl:pb-6 ${mobileTab !== "player" ? "hidden xl:block" : ""}`}>
-              <VideoPlayerCard
-                playlist={playlist}
-                isFetching={isFetching || isFetchingNextPage}
-                aggregations={aggregations}
-              />
-              <AudioCard
-                currentClip={playlist[currentVideoIndex]}
-                playlist={playlist}
-                totalItems={totalHits}
-                searchQuery={searchQuery}
-                onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
-              />
+              {playlist.length === 0 && !isLoading && !isFetching ? (
+                <NoResults query={q} />
+              ) : (
+                <>
+                  <VideoPlayerCard
+                    playlist={playlist}
+                    isFetching={isFetching || isFetchingNextPage}
+                    aggregations={aggregations}
+                  />
+                  <AudioCard
+                    currentClip={playlist[currentVideoIndex]}
+                    playlist={playlist}
+                    totalItems={totalHits}
+                    searchQuery={searchQuery}
+                    onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
+                  />
+                </>
+              )}
             </div>
 
             {/* ── Mobile/Tablet AI Panel (below xl) ── */}
-            <div className={`xl:hidden ${mobileTab !== "ai" ? "hidden" : ""}`}>
-              <div className="h-[calc(100vh-10rem)] overflow-hidden bg-card">
-                <AiCompletion externalPrompt={externalPrompt} />
-              </div>
-            </div>
-
-            {/* ── Desktop AI Panel (xl+) ── */}
-            <div className="hidden xl:block relative sticky top-0 h-[calc(100vh-5rem)] border-l bg-card">
-
-              {/* Sidebar-style toggle — sits on the left border line, outside overflow-hidden so it's never clipped */}
-              <button
-                onClick={() => setIsAiCollapsed(!isAiCollapsed)}
-                className="absolute -left-3 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
-                title={isAiCollapsed ? "Open AI Assistant" : "Close AI Assistant"}
-              >
-                {isAiCollapsed
-                  ? <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
-                  : <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />}
-              </button>
-
-              {/* Inner panel — overflow-hidden only here, not on the button's parent */}
-              <div className="h-full overflow-hidden">
-                <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
+            {playlist.length > 0 && (
+              <div className={`xl:hidden ${mobileTab !== "ai" ? "hidden" : ""}`}>
+                <div className="h-[calc(100vh-10rem)] overflow-hidden bg-card">
                   <AiCompletion externalPrompt={externalPrompt} />
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* ── Desktop AI Panel (xl+) ── */}
+            {playlist.length > 0 && (
+              <div className="hidden xl:block relative sticky top-0 h-[calc(100vh-5rem)] border-l bg-card">
+
+                {/* Sidebar-style toggle — sits on the left border line, outside overflow-hidden so it's never clipped */}
+                <button
+                  onClick={() => setIsAiCollapsed(!isAiCollapsed)}
+                  className="absolute -left-3 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
+                  title={isAiCollapsed ? "Open AI Assistant" : "Close AI Assistant"}
+                >
+                  {isAiCollapsed
+                    ? <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+                    : <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />}
+                </button>
+
+                {/* Inner panel — overflow-hidden only here, not on the button's parent */}
+                <div className="h-full overflow-hidden">
+                  <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
+                    <AiCompletion externalPrompt={externalPrompt} />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

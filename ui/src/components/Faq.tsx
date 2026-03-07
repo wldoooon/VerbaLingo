@@ -22,8 +22,7 @@ const faqData = [
   },
   {
     question: "Which languages are supported?",
-    answer: "We currently support English, French, German, Spanish, and Arabic with more languages being added regularly. Each language has a curated library of real-world video content from movies, podcasts, and speeches.",
-    tag: "Languages",
+    answer: "We currently support English, French and German with more languages being added regularly. Each language has a curated library of real-world video content from movies, podcasts, and speeches.",
   },
   {
     question: "Is there a free tier available?",
