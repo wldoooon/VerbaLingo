@@ -33,6 +33,7 @@ import { useTheme } from "next-themes"
 import { ThemeSwitcher } from "@/components/ui/shadcn-io/theme-switcher"
 
 import { useUsageStore } from "@/stores/usage-store"
+import { useAuthStore } from "@/stores/auth-store"
 
 import { cn } from "@/lib/utils"
 
@@ -100,33 +101,24 @@ export function HeaderUserProfile({
 
   const usageMap = useUsageStore((s) => s.usage)
 
-  
 
-  // Use 'search' stats as the driver for the main 'Credit' UI
 
-  const stats = usageMap['search'] || { current: 0, limit: 50, remaining: 50 }
+  const fullUser = useAuthStore((s) => s.user)
 
-  
+  // Use 'ai_chat' stats as the driver for the main 'Credit' UI (Sparks)
+  const stats = usageMap['ai_chat'] || { current: 0, balance: 0, limit: -1, remaining: -1 }
 
-  const MULTIPLIER = 100000
+  const maxSparks = fullUser?.tier === "pro" ? 250000 : 30000
+  const currentBalance = stats.balance ?? 0
 
-  
-
-  // Calculate percentage USED for the ring
-
-  const percentageUsed = stats.limit > 0 ? (stats.current / stats.limit) * 100 : 0
-
+  // Calculate percentage REMAINING for the ring
+  const percentageRemaining = Math.max(0, Math.min(100, (currentBalance / maxSparks) * 100))
   const circumference = 2 * Math.PI * 18 // r=18
+  const offset = circumference - (percentageRemaining / 100) * circumference
 
-  const offset = circumference - (percentageUsed / 100) * circumference
-
-
-
-  // Scaled values for display
-
-  const displayLimit = stats.limit === -1 ? "Unlimited" : (stats.limit * MULTIPLIER).toLocaleString()
-
-  const displayRemaining = stats.limit === -1 ? "âˆž" : (stats.remaining * MULTIPLIER).toLocaleString()
+  // Values for display
+  const displayLimit = maxSparks.toLocaleString()
+  const displayRemaining = currentBalance.toLocaleString()
 
 
 
@@ -142,99 +134,99 @@ export function HeaderUserProfile({
 
 
 
-      <DropdownMenu>
+    <DropdownMenu>
 
-        <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild>
 
-          <button className="relative flex items-center justify-center h-10 w-10 rounded-full hover:scale-105 transition-all duration-300 focus:outline-none cursor-pointer group">
+        <button className="relative flex items-center justify-center h-10 w-10 rounded-full hover:scale-105 transition-all duration-300 focus:outline-none cursor-pointer group">
 
-                                          {/* Progress Ring (Background Track) */}
+          {/* Progress Ring (Background Track) */}
 
-                                          <svg className="absolute inset-0 -rotate-90" viewBox="0 0 40 40">
+          <svg className="absolute inset-0 -rotate-90" viewBox="0 0 40 40">
 
-                                            <circle
+            <circle
 
-                                              cx="20" cy="20" r="18"
+              cx="20" cy="20" r="18"
 
-                                              fill="none"
+              fill="none"
 
-                                              stroke="currentColor"
+              stroke="currentColor"
 
-                                              strokeWidth="2.5"
+              strokeWidth="2.5"
 
-                                              className="text-slate-200 dark:text-slate-800"
+              className="text-slate-200 dark:text-slate-800"
 
-                                            />
+            />
 
-                                            {/* Active Progress (Used) */}
+            {/* Active Progress (Used) */}
 
-                                            <circle
+            <circle
 
-                                              cx="20" cy="20" r="18"
+              cx="20" cy="20" r="18"
 
-                                              fill="none"
+              fill="none"
 
-                                              stroke="currentColor"
+              stroke="currentColor"
 
-                                              strokeWidth="2.5"
+              strokeWidth="2.5"
 
-                                              strokeDasharray={circumference}
+              strokeDasharray={circumference}
 
-                                              strokeDashoffset={offset}
+              strokeDashoffset={offset}
 
-                                              strokeLinecap="round"
+              strokeLinecap="round"
 
-                                              className="text-orange-500 transition-all duration-1000 ease-in-out"
+              className="text-orange-500 transition-all duration-1000 ease-in-out"
 
-                                              style={{ filter: "drop-shadow(0 0 1px rgba(249, 115, 22, 0.4))" }}
+              style={{ filter: "drop-shadow(0 0 1px rgba(249, 115, 22, 0.4))" }}
 
-                                            />
+            />
 
-                                          </svg>
+          </svg>
 
-                                          
 
-                                          <div className="relative h-8 w-8 flex items-center justify-center overflow-hidden rounded-full">
 
-                                            {/* Avatar - Fades on hover */}
+          <div className="relative h-8 w-8 flex items-center justify-center overflow-hidden rounded-full">
 
-                                            <Avatar className="h-full w-full transition-all duration-300 group-hover:opacity-10 group-hover:blur-[2px]">
+            {/* Avatar - Fades on hover */}
 
-                                              <AvatarImage src={user.avatar} alt={user.name} />
+            <Avatar className="h-full w-full transition-all duration-300 group-hover:opacity-10 group-hover:blur-[2px]">
 
-                                              <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarImage src={user.avatar} alt={user.name} />
 
-                                            </Avatar>
+              <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
 
-                                
+            </Avatar>
 
-                                                        {/* Percentage Number - Appears on hover */}
 
-                                
 
-                                                        <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-slate-900 dark:text-slate-50 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-50 group-hover:scale-100 tabular-nums">
+            {/* Percentage Number - Appears on hover */}
 
-                                
 
-                                                          {Math.round(percentageUsed)}%
 
-                                
+            <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black text-slate-900 dark:text-slate-50 opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-50 group-hover:scale-100 tabular-nums">
 
-                                                        </span>
 
-                                
 
-                                            
+              {Math.round(percentageRemaining)}%
 
-                                          </div>
 
-                                
 
-          </button>
+            </span>
 
-        </DropdownMenuTrigger>
 
-  
+
+
+
+          </div>
+
+
+
+        </button>
+
+      </DropdownMenuTrigger>
+
+
 
       <DropdownMenuContent
 
@@ -246,65 +238,65 @@ export function HeaderUserProfile({
 
       >
 
-                {/* Balance Card */}
+        {/* Balance Card */}
 
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/50 border border-slate-100 dark:border-zinc-800/50 mb-2">
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/50 border border-slate-100 dark:border-zinc-800/50 mb-2">
 
-                  <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4">
 
-                    <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
 
-                                    {/* Miniature Progress Ring */}
+              {/* Miniature Progress Ring */}
 
-                                    <div className="relative w-5 h-5 flex items-center justify-center">
+              <div className="relative w-5 h-5 flex items-center justify-center">
 
-                                      <svg className="absolute inset-0 -rotate-90" viewBox="0 0 40 40">
+                <svg className="absolute inset-0 -rotate-90" viewBox="0 0 40 40">
 
-                                        <circle
+                  <circle
 
-                                          cx="20" cy="20" r="18"
+                    cx="20" cy="20" r="18"
 
-                                          fill="none"
+                    fill="none"
 
-                                          stroke="currentColor"
+                    stroke="currentColor"
 
-                                          strokeWidth="4"
+                    strokeWidth="4"
 
-                                          className="text-slate-300 dark:text-slate-700"
+                    className="text-slate-300 dark:text-slate-700"
 
-                                        />
+                  />
 
-                                        <circle
+                  <circle
 
-                                          cx="20" cy="20" r="18"
+                    cx="20" cy="20" r="18"
 
-                                          fill="none"
+                    fill="none"
 
-                                          stroke="currentColor"
+                    stroke="currentColor"
 
-                                          strokeWidth="4"
+                    strokeWidth="4"
 
-                                          strokeDasharray={circumference}
+                    strokeDasharray={circumference}
 
-                                          strokeDashoffset={offset}
+                    strokeDashoffset={offset}
 
-                                          strokeLinecap="round"
+                    strokeLinecap="round"
 
-                                          className="text-orange-500"
+                    className="text-orange-500"
 
-                                        />
+                  />
 
-                                      </svg>
+                </svg>
 
-                                    </div>
+              </div>
 
-                                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100">Balance</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1"><Zap className="h-4 w-4 text-orange-500" /> Sparks</span>
 
-                      
 
-                    </div>
 
-        
+            </div>
+
+
 
             <Link href="/pricing">
 
@@ -318,61 +310,61 @@ export function HeaderUserProfile({
 
           </div>
 
-          
 
-                    <div className="space-y-2">
 
-          
+          <div className="space-y-2">
 
-                      <div className="flex justify-between text-xs font-medium">
 
-          
 
-                        <span className="text-slate-400">Total</span>
+            <div className="flex justify-between text-xs font-medium">
 
-          
 
-                        <span className="text-slate-900 dark:text-slate-100">{displayLimit} credits</span>
 
-          
+              <span className="text-slate-400">Total</span>
 
-                      </div>
 
-          
 
-                                              <div className="flex justify-between text-xs font-bold">
+              <span className="text-slate-900 dark:text-slate-100">{displayLimit} Sparks</span>
 
-          
 
-                                                <span className="text-slate-400">Remaining</span>
 
-          
+            </div>
 
-                                                <span className="text-slate-900 dark:text-slate-100">{displayRemaining}</span>
 
-          
 
-                                              </div>
+            <div className="flex justify-between text-xs font-bold">
 
-          
 
-                                            </div>
 
-          
+              <span className="text-slate-400">Remaining</span>
 
-                                                  </div>
 
-          
 
-                                          
+              <span className="text-slate-900 dark:text-slate-100 font-bold text-orange-500">{displayRemaining} Sparks</span>
 
-          
 
-                                                  <DropdownMenuGroup className="pt-2">
 
-          
+            </div>
 
-                                          
+
+
+          </div>
+
+
+
+        </div>
+
+
+
+
+
+
+
+        <DropdownMenuGroup className="pt-2">
+
+
+
+
 
           <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
 
@@ -398,11 +390,11 @@ export function HeaderUserProfile({
 
           </DropdownMenuItem>
 
-          
+
 
           <div className="relative my-1 px-2">
 
-             <div className="h-px bg-slate-100 dark:bg-zinc-800/50 w-full" />
+            <div className="h-px bg-slate-100 dark:bg-zinc-800/50 w-full" />
 
           </div>
 
@@ -422,7 +414,7 @@ export function HeaderUserProfile({
 
         <DropdownMenuSeparator className="my-1 bg-slate-100 dark:bg-zinc-800/50" />
 
-        
+
 
         <DropdownMenuItem
 

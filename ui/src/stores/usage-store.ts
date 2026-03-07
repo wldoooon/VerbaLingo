@@ -7,6 +7,7 @@ export type FeatureUsage = {
   current: number;
   limit: number;
   remaining: number;
+  balance?: number;
   reset_at?: string;
 };
 

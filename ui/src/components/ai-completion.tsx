@@ -2,6 +2,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchStore } from "@/stores/use-search-store";
+import { useUsageStore } from "@/stores/usage-store";
 import { Button } from "@/components/ui/button";
 import { Response } from "@/components/ui/shadcn-io/ai/response";
 import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight, Bot, Lock, MessageSquare, Zap, ArrowRight } from "lucide-react";
@@ -86,6 +87,9 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     const nextSearchParams = useNextSearchParams();
     const authStatus = useAuthStore((s) => s.status);
     const isGuest = authStatus !== "authenticated";
+    const usageMap = useUsageStore((s) => s.usage);
+    const aiStats = usageMap?.['ai_chat'] || { balance: 0, remaining: 0 };
+    const outOfSparks = !isGuest && (aiStats.balance ?? 0) <= 0;
 
     // Replacement for useCompletion
     const [completion, setCompletion] = useState("");
@@ -243,12 +247,14 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     }, [completion, currentBranch, maxResponseHeight, isLoading]);
 
     const handleSuggestionClick = (suggestion: SmartSuggestion) => {
+        if (outOfSparks) return;
         setInputValue(suggestion.prompt);
         currentPromptRef.current = suggestion.prompt;
         complete(suggestion.prompt);
     };
 
     const handleInputSubmit = () => {
+        if (outOfSparks) return;
         if (inputValue.trim()) {
             const prompt = inputValue.trim();
             currentPromptRef.current = prompt;
@@ -641,16 +647,16 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
                         <Input
                             type="text"
-                            placeholder="Ask about pronunciation, definitions, examples..."
+                            placeholder={outOfSparks ? "Out of Sparks! Upgrade to continue." : "Ask about pronunciation, definitions, examples..."}
                             className="w-full rounded-full pl-10 pr-10 py-6 bg-muted shadow-sm border border-primary/40 focus-visible:bg-background transition-colors"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyPress={handleKeyPress}
-                            disabled={isLoading}
+                            disabled={isLoading || outOfSparks}
                         />
                         <button
                             onClick={handleInputSubmit}
-                            disabled={!inputValue.trim() || isLoading}
+                            disabled={!inputValue.trim() || isLoading || outOfSparks}
                             className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />

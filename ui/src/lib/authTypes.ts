@@ -2,6 +2,7 @@ export type UserTier = "free" | "pro";
 
 export type FeatureUsage = {
   current: number;
+  balance?: number;
   limit: number;
   remaining: number;
 };

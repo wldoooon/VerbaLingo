@@ -27,13 +27,13 @@ const faqData = [
   },
   {
     question: "Is there a free tier available?",
-    answer: "Yes! Every new user gets 100,000 free credits to explore the platform. You can search for contexts and use our AI Assistant without spending a dime.",
+    answer: "Yes! Every new user gets 30,000 free Sparks to explore the platform. You can search for contexts and use our AI Assistant to learn languages.",
     tag: "Pricing",
   },
   {
-    question: "How do credits work?",
-    answer: "Credits are spent when you perform searches or chat with the AI. Searches cost 1,000 credits, and AI messages cost 5,000. Your wallet resets daily at midnight based on your plan.",
-    tag: "Credits",
+    question: "How do Sparks work?",
+    answer: "Sparks are used when you chat with the AI Assistant. Each AI response costs Sparks based on the number of tokens generated — longer answers cost more. Searching is free and only limited by daily request quotas to keep things fast for everyone.",
+    tag: "Sparks",
   },
   {
     question: "What makes Pokispokey different from other language apps?",
