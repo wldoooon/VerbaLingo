@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Compass, Bookmark, CreditCard, Megaphone, User, Menu, X, Settings, LifeBuoy, ChevronRight } from 'lucide-react';
+import { Compass, Bookmark, CreditCard, Megaphone, User, Menu, X, Settings, LifeBuoy, ChevronRight, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { AuthDialog } from '@/components/auth-dialog';
 import { FeedbackDialog } from '@/components/feedback-dialog';
+import { useLogoutMutation } from '@/lib/authHooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -19,6 +20,8 @@ export function MobileNav() {
   const authUser = useAuthStore((s) => s.user);
   const { resolvedTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const logoutMutation = useLogoutMutation();
+  const isAuthenticated = authStatus === 'authenticated';
 
   // Don't show on search/watch pages (they have their own layout)
   const isSearchOrWatch = pathname?.startsWith('/search') || pathname?.startsWith('/watch');
@@ -271,14 +274,26 @@ export function MobileNav() {
                     </AuthDialog>
                   </div>
                 ) : (
-                  <Link
-                    href="/profile"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                  >
-                    <Settings className="w-5 h-5" />
-                    <span className="text-sm font-medium">Account Settings</span>
-                  </Link>
+                  <div className="space-y-2">
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-3 p-3 rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+                    >
+                      <Settings className="w-5 h-5" />
+                      <span className="text-sm font-medium">Account Settings</span>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logoutMutation.mutate();
+                        setIsMenuOpen(false);
+                      }}
+                      className="flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors w-full cursor-pointer"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span className="text-sm font-medium">Sign Out</span>
+                    </button>
+                  </div>
                 )}
               </div>
             </motion.div>

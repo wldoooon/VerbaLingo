@@ -163,8 +163,8 @@ export function Hero() {
 
             <h1 className="text-[clamp(3.5rem,8vw,4.5rem)] lg:text-7xl font-black text-foreground tracking-tighter leading-[0.85] mb-6 relative inline-block w-fit">
               {/* Mascot Behind Text - Anchored together using 'em' scaling */}
-              <div
-                className="absolute -z-10 opacity-80 pointer-events-none transition-transform duration-1000 group-hover:scale-105"
+              <span
+                className="absolute -z-10 opacity-80 pointer-events-none transition-transform duration-1000 group-hover:scale-105 inline-block"
                 style={{
                   width: '6em',
                   height: '6em',
@@ -177,7 +177,7 @@ export function Hero() {
                   alt="Mascot"
                   className="w-full h-full object-contain"
                 />
-              </div>
+              </span>
 
               Speak <br />
               The <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Moment.</span>
