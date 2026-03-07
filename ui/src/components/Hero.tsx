@@ -291,7 +291,7 @@ export function Hero() {
 
           {/* Right Column: Curved Carousel (Preserved & Merged) */}
           <div
-            className="relative h-[650px] w-full flex items-center justify-center perspective-[1000px]"
+            className="relative h-[420px] sm:h-[520px] xl:h-[650px] w-full flex items-center justify-center perspective-[800px] xl:perspective-[1000px] mt-8 xl:mt-0"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
@@ -300,8 +300,9 @@ export function Hero() {
               const absOffset = Math.abs(offset);
               const isActive = offset === 0;
 
-              const translateX = offset * 110;
-              const translateZ = absOffset * -90;
+              // Responsive translation: smaller horizontal gap on smaller screens
+              const translateX = `calc(${offset} * clamp(50px, 8vw, 110px))`;
+              const translateZ = absOffset * -80; // slightly less depth push for moble safety
               const rotateY = offset * -12;
 
               // Gentler fade so all 6 cards are visible (was 0.4 → now 0.28)
@@ -314,15 +315,15 @@ export function Hero() {
                 <div
                   key={cat.id}
                   onClick={() => setActiveCategory(index)}
-                  className={`absolute w-[min(400px,85vw)] h-[540px] transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}
+                  className={`absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}
                   style={{
-                    transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+                    transform: `translateX(${translateX}) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
                     opacity: opacity,
                     zIndex: zIndex,
                     filter: `blur(${blur}px)`,
                   }}
                 >
-                  <div className={`relative w-full h-full rounded-[2rem] overflow-hidden border shadow-2xl bg-card group transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'}`}>
+                  <div className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card group transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'}`}>
                     {/* Image Background */}
                     <div className="absolute inset-0">
                       <img
