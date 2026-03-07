@@ -2,10 +2,12 @@ from fastapi import APIRouter, Query, Depends, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from .deps import get_search_service, get_current_user_optional, get_groq_service
+from .deps import get_search_service, get_current_user_optional, get_groq_service, get_session
 from ..services.search_service import SearchService
 from ..services.groq_service import GroqService
+from ..services.usage_service import check_ai_credits, deduct_ai_credits
 from ..schemas.search import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word, Category
 from ..core.limiter import feature_rate_limit
 from ..models.user import User
@@ -27,13 +29,29 @@ async def completion(
     body: CompletionRequest,
     groq: GroqService = Depends(get_groq_service),
     current_user: Optional[User] = Depends(get_current_user_optional),
+    db: AsyncSession = Depends(get_session)
 ):
-    """
-    Direct link to the AI Brain with optional context.
-    Streams tokens directly to the UI.
-    """
+
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Must be logged in to chat.")
+        
+    is_allowed, error_msg, _ = await check_ai_credits(db, current_user)
+    if not is_allowed:
+        raise HTTPException(status_code=403, detail=error_msg)
+
+    async def stream_and_deduct():
+        total_tokens_used = 0
+        async for chunk_data, tokens in groq.get_completion_stream(body.prompt):
+            if tokens is not None:
+                total_tokens_used = tokens
+            if chunk_data:
+                yield chunk_data
+                
+        if total_tokens_used > 0:
+            await deduct_ai_credits(db, current_user, total_tokens_used)
+
     return StreamingResponse(
-        groq.get_completion_stream(body.prompt),
+        stream_and_deduct(),
         media_type="text/event-stream"
     )
 
