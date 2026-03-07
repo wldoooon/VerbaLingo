@@ -64,8 +64,14 @@ class GroqService:
                     if total > 0:
                         logger.info(f"CALCULATOR: Input={input_t} | Output={output_t} | Total={total}")
                         yield "", total
-                        break # Stop looking after we find the first valid receipt
-                    
+                        return
+
+            # Fallback: if Groq never reported usage, estimate from streamed text
+            logger.warning("Ghost Calculator: No usage data received from Groq, using fallback estimation.")
+            # Rough estimate: ~4 chars per token for English text (industry standard)
+            # We don't have access to the full streamed text here, so yield a minimum charge
+            yield "", 150  # Conservative minimum (covers ~600 chars of output + prompt overhead)
+
         except Exception as e:
             logger.error(f"Groq Stream Failure: {type(e).__name__}: {str(e)}")
             yield f"\n[System Error: {str(e)}]", None
