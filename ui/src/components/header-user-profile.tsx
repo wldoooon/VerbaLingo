@@ -28,6 +28,8 @@ import {
 
 } from "lucide-react"
 
+import Image from "next/image"
+
 import { useTheme } from "next-themes"
 
 import { ThemeSwitcher } from "@/components/ui/shadcn-io/theme-switcher"
@@ -120,6 +122,9 @@ export function HeaderUserProfile({
   // Values for display
   const displayLimit = maxSparks.toLocaleString()
   const displayRemaining = currentBalance.toLocaleString()
+
+  // Calculate Sparks (1 Spark = 1000 credits)
+  const remainingSparksDisplay = (currentBalance / 1000).toFixed(2)
 
 
 
@@ -230,113 +235,59 @@ export function HeaderUserProfile({
 
 
       <DropdownMenuContent
-
         className="w-72 rounded-[1.5rem] border border-border/50 bg-white dark:bg-zinc-950 p-2 shadow-2xl"
-
         align="end"
-
         sideOffset={12}
-
       >
-
-        {/* Balance Card */}
-
-        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/50 border border-slate-100 dark:border-zinc-800/50 mb-2">
-
+        {/* Balance Card - Moved to top */}
+        <div className="p-3.5 rounded-[1.25rem] border border-slate-200 dark:border-zinc-800/80 mb-2 bg-white dark:bg-zinc-950/50 shadow-sm mt-1">
           <div className="flex items-center justify-between mb-4">
-
             <div className="flex items-center gap-2">
-
-              {/* Miniature Progress Ring */}
-
-              <div className="relative w-5 h-5 flex items-center justify-center">
-
-                <svg className="absolute inset-0 -rotate-90" viewBox="0 0 40 40">
-
-                  <circle
-
-                    cx="20" cy="20" r="18"
-
-                    fill="none"
-
-                    stroke="currentColor"
-
-                    strokeWidth="4"
-
-                    className="text-slate-300 dark:text-slate-700"
-
-                  />
-
-                  <circle
-                    cx="20" cy="20" r="18"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={offset}
-                    strokeLinecap="round"
-                    className="text-orange-500"
-                  />
-                </svg>
-              </div>
-              <span className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1"><Zap className="h-4 w-4 text-orange-500" /> Sparks</span>
-
-            </div>
-
-            <Link href="/pricing">
-
-              <span className="text-[10px] font-black uppercase tracking-wider bg-zinc-900 text-white px-2.5 py-1 rounded-lg hover:bg-orange-500 transition-colors">
-
-                Upgrade
-
+              <span className="text-[15px] font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2 tracking-tight">
+                <Image src="/sparks.png" alt="Sparks" width={20} height={20} className="object-contain" />
+                Sparks
               </span>
-
+            </div>
+            <Link href="/pricing" className="shrink-0">
+              <span className="relative flex items-center justify-center text-[11px] font-black uppercase tracking-widest text-white px-3 py-1.5 rounded-full overflow-hidden group shadow-md transition-all hover:scale-105 hover:shadow-orange-500/25">
+                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 group-hover:from-orange-500 group-hover:via-pink-600 group-hover:to-purple-600 transition-all duration-300"></span>
+                <span className="relative flex items-center gap-1">
+                  Upgrade
+                  <Zap className="h-3 w-3 fill-current" />
+                </span>
+              </span>
             </Link>
-
           </div>
-
-
 
           <div className="space-y-2">
-
-
-
             <div className="flex justify-between text-xs font-medium">
-
-
-
-              <span className="text-slate-400">Total</span>
-
-
-
-              <span className="text-slate-900 dark:text-slate-100">{displayLimit} Sparks</span>
-
-
-
+              <span className="text-slate-400">Total Credits</span>
+              <span className="text-slate-900 dark:text-slate-100">{displayLimit}</span>
             </div>
-
-
-
-            <div className="flex justify-between text-xs font-bold">
-
-
-
+            <div className="flex justify-between text-xs font-medium">
               <span className="text-slate-400">Remaining</span>
-
-
-
-              <span className="text-slate-900 dark:text-slate-100 font-bold text-orange-500">{displayRemaining} Sparks</span>
-
-
-
+              <span className="text-slate-900 dark:text-slate-100">{displayRemaining}</span>
             </div>
-
-
-
+            <div className="flex justify-between text-xs font-bold pt-1 border-t border-slate-200 dark:border-zinc-800/80 mt-1">
+              <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">Available Sparks</span>
+              <span className="text-orange-500 font-bold flex items-center gap-1.5">
+                {remainingSparksDisplay}
+                <Image src="/sparks.png" alt="Sparks icon" width={14} height={14} className="opacity-80" />
+              </span>
+            </div>
           </div>
+        </div>
 
-
-
+        {/* User Info - Moved below balance card */}
+        <div className="px-2.5 py-2 mb-2">
+          <div className="flex flex-col space-y-1">
+            <p className="text-[15px] font-bold text-slate-900 dark:text-slate-100 leading-none truncate overflow-hidden">
+              {user.name}
+            </p>
+            <p className="text-[13px] text-slate-500 dark:text-slate-400 leading-none truncate overflow-hidden">
+              {user.email}
+            </p>
+          </div>
         </div>
 
 
@@ -366,15 +317,6 @@ export function HeaderUserProfile({
             <span className="text-sm font-medium">Subscription</span>
 
           </DropdownMenuItem>
-
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
-
-            <BookText className="mr-3 h-4 w-4 text-slate-400" />
-
-            <span className="text-sm font-medium">Pronunciation dictionaries</span>
-
-          </DropdownMenuItem>
-
 
 
           <div className="relative my-1 px-2">
