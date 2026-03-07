@@ -30,18 +30,18 @@ export function UsageSection() {
 
           if (feature === "ai_chat") {
             const balance = stats.balance ?? 0;
-            percentage = maxSparks > 0 ? (balance / maxSparks) * 100 : 0;
+            const used = Math.max(0, maxSparks - balance);
+            percentage = maxSparks > 0 ? (used / maxSparks) * 100 : 0;
             displayText = `${balance.toLocaleString()} Sparks`;
             label = "AI Sparks";
           } else {
             if (limit === -1) return null; // Skip unlimited
-            const remaining = Math.max(0, limit - current);
-            percentage = (remaining / limit) * 100;
+            percentage = (current / limit) * 100;
             displayText = `${current} / ${limit}`;
           }
 
-          const isWarning = percentage < 30;
-          const isCritical = percentage < 10;
+          const isWarning = percentage > 70;
+          const isCritical = percentage > 90;
 
           return (
             <div key={feature} className="space-y-1.5">

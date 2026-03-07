@@ -110,11 +110,12 @@ export function HeaderUserProfile({
 
   const maxSparks = fullUser?.tier === "pro" ? 250000 : 30000
   const currentBalance = stats.balance ?? 0
+  const usedSparks = Math.max(0, maxSparks - currentBalance)
 
-  // Calculate percentage REMAINING for the ring
-  const percentageRemaining = Math.max(0, Math.min(100, (currentBalance / maxSparks) * 100))
+  // Calculate percentage USED for the ring (0% when full, 100% when empty)
+  const percentageUsed = maxSparks > 0 ? Math.max(0, Math.min(100, (usedSparks / maxSparks) * 100)) : 0
   const circumference = 2 * Math.PI * 18 // r=18
-  const offset = circumference - (percentageRemaining / 100) * circumference
+  const offset = circumference - (percentageUsed / 100) * circumference
 
   // Values for display
   const displayLimit = maxSparks.toLocaleString()
@@ -208,7 +209,7 @@ export function HeaderUserProfile({
 
 
 
-              {Math.round(percentageRemaining)}%
+              {Math.round(percentageUsed)}%
 
 
 
@@ -267,36 +268,20 @@ export function HeaderUserProfile({
                   />
 
                   <circle
-
                     cx="20" cy="20" r="18"
-
                     fill="none"
-
                     stroke="currentColor"
-
                     strokeWidth="4"
-
                     strokeDasharray={circumference}
-
                     strokeDashoffset={offset}
-
                     strokeLinecap="round"
-
                     className="text-orange-500"
-
                   />
-
                 </svg>
-
               </div>
-
               <span className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1"><Zap className="h-4 w-4 text-orange-500" /> Sparks</span>
 
-
-
             </div>
-
-
 
             <Link href="/pricing">
 
