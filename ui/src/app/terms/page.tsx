@@ -1,4 +1,10 @@
 import React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "PokiSpokey terms of service and usage conditions.",
+};
 
 export default function TermsPage() {
     return (
