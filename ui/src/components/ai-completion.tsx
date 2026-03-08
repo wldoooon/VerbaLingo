@@ -524,12 +524,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                 transition={{ duration: 0.5 }}
                                 className="w-full"
                             >
-                                <div ref={responseContainerRef} className="relative bg-card rounded-xl p-6 text-left border-x">
-                                    {/* Top gradient border */}
-                                    <div className="absolute top-0 left-0 right-0 flex h-px">
-                                        <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                                        <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-                                    </div>
+                                <div ref={responseContainerRef} className="relative bg-card rounded-xl p-6 text-left">
 
                                     <div className="relative">
                                         {/* Top blur gradient */}
@@ -586,12 +581,6 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                         {canScroll && (
                                             <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300" id="bottom-blur" />
                                         )}
-                                    </div>
-
-                                    {/* Bottom gradient border */}
-                                    <div className="absolute -bottom-px left-0 right-0 flex h-px">
-                                        <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                                        <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
                                     </div>
 
                                     {!isLoading && !error && (
