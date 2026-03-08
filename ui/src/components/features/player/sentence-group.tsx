@@ -60,10 +60,10 @@ export const SentenceGroup = memo(({
             : null
       }
       className={cn(
-        "mb-1 transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex items-center justify-center text-center px-4",
+        "mb-1 transition-[opacity,filter,transform] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex items-center justify-center text-center px-4 py-3",
         groupIdx === centerIdx
-          ? "opacity-100 scale-100 blur-none py-5"
-          : "opacity-30 scale-95 blur-[0.5px] py-1 grayscale",
+          ? "opacity-100 scale-100 blur-none"
+          : "opacity-30 scale-[0.98] blur-[0.5px] grayscale",
       )}
     >
       <div className="relative text-base leading-relaxed inline-block">

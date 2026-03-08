@@ -49,9 +49,9 @@ export const TranscriptWord = memo(({
             className={cn(
               "mr-1 px-0.8 py-0.5 border-2 border-transparent rounded-md transition-colors duration-200 ease-in-out text-left inline-flex items-center",
               isSearchMatch && !isCurrentWord &&
-              "bg-primary text-primary-foreground font-semibold",
+              "bg-primary text-primary-foreground",
               isCurrentWord &&
-              "border-primary font-semibold bg-accent/20",
+              "border-primary bg-accent/20",
               !isCurrentWord && !isSearchMatch && "hover:bg-accent/40 hover:text-foreground",
             )}
           >
