@@ -238,7 +238,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
             // Calculate available space
             const availableSpace = containerHeight - headerHeight - footerHeight - suggestionsHeight - extraBuffer;
-            setMaxResponseHeight(Math.max(200, Math.min(availableSpace, 600)));
+            setMaxResponseHeight(Math.max(120, Math.min(availableSpace, 600)));
         };
 
         calculateMaxHeight();
@@ -387,7 +387,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
     return (
         <div className="w-full h-full flex flex-col">
-            <div className="relative w-full h-full flex flex-col bg-card p-6">
+            <div className="relative w-full h-full flex flex-col bg-card p-3 sm:p-6">
 
                 <header className="relative w-full flex-shrink-0">
                     {/* Session Selector (History) - Top Right */}
@@ -401,14 +401,14 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         />
                     </div>
 
-                    <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center pt-2">
+                    <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center pt-2">
                         {query ? (
                             <>
                                 Learning about <span className="text-primary">"{query}"</span>
                             </>
                         ) : "What do you want to learn?"}
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-4 max-w-lg mx-auto text-center">
+                    <p className="text-slate-500 dark:text-slate-400 mt-2 sm:mt-4 max-w-lg mx-auto text-center text-xs sm:text-base">
                         {query
                             ? `Get pronunciations, examples, and detailed explanations for "${query}"`
                             : "Explore topics, get explanations, and improve your understanding—all in one place."
@@ -416,7 +416,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                     </p>
 
                     {/* Header bottom gradient border */}
-                    <div className="relative mt-6">
+                    <div className="relative mt-3 sm:mt-6">
                         <div className="absolute bottom-0 left-0 right-0 flex h-px">
                             <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
                             <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
@@ -424,9 +424,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                     </div>
                 </header>
 
-
-
-                <main className="w-full flex-1 flex flex-col mt-6 space-y-6 min-h-0">
+                <main className="w-full flex-1 flex flex-col mt-3 sm:mt-6 space-y-4 sm:space-y-6 min-h-0 overflow-y-auto">
                     {/* Suggestions */}
                     <AnimatePresence>
                         {!shouldHideSuggestions && (
@@ -475,14 +473,14 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                             transition={{ delay: 0.2 }}
                             className="w-full"
                         >
-                            <div className="relative bg-card rounded-xl p-6 text-left border-x">
+                            <div className="relative bg-card rounded-xl p-4 sm:p-6 text-left border-x">
                                 {/* Top gradient border */}
                                 <div className="absolute top-0 left-0 right-0 flex h-px">
                                     <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
                                     <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
                                 </div>
 
-                                <div className="text-base text-card-foreground/90 leading-relaxed">
+                                <div className="text-sm sm:text-base text-card-foreground/90 leading-relaxed">
                                     Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
                                     <br /><br />
                                     Try tapping a suggestion above or type your own question below!
@@ -647,7 +645,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
                 </main>
 
-                <footer className="relative w-full flex-shrink-0 mt-6 pt-4">
+                <footer className="relative w-full flex-shrink-0 mt-3 sm:mt-6 pt-3 sm:pt-4">
                     {/* Footer top gradient border */}
                     <div className="absolute top-0 left-0 right-0 flex h-px">
                         <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>

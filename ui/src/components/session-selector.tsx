@@ -35,6 +35,7 @@ export function SessionSelector({
     currentQuery,
 }: SessionSelectorProps) {
     const [open, setOpen] = useState(false)
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
     const sessionKeys = Object.keys(sessions).filter(key =>
         sessions[key].branches && sessions[key].branches.length > 0
@@ -51,7 +52,7 @@ export function SessionSelector({
     const isViewingHistory = currentQuery && currentQuery !== activeSessionId;
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirmDeleteId(null); }}>
             <PopoverTrigger asChild>
                 <button
                     className={cn(
@@ -86,6 +87,39 @@ export function SessionSelector({
                     {sortedSessions.map((key) => {
                         const isActive = activeSessionId === key;
                         const branchCount = sessions[key].branches?.length || 0;
+                        const isConfirming = confirmDeleteId === key;
+
+                        if (isConfirming) {
+                            return (
+                                <div
+                                    key={key}
+                                    className="flex items-center gap-2 px-2.5 py-2 rounded-md bg-destructive/5 border border-destructive/20"
+                                >
+                                    <p className="text-[11px] text-destructive font-medium flex-1 truncate">
+                                        Delete "{toTitleCase(key)}"?
+                                    </p>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDeleteSession(key, e);
+                                            setConfirmDeleteId(null);
+                                        }}
+                                        className="text-[10px] font-semibold text-destructive hover:bg-destructive/10 px-2 py-0.5 rounded transition-colors cursor-pointer"
+                                    >
+                                        Delete
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setConfirmDeleteId(null);
+                                        }}
+                                        className="text-[10px] font-medium text-muted-foreground hover:bg-muted px-2 py-0.5 rounded transition-colors cursor-pointer"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            );
+                        }
 
                         return (
                             <div
@@ -107,14 +141,14 @@ export function SessionSelector({
                                 </div>
                                 <div
                                     role="button"
-                                    className="h-5 w-5 flex items-center justify-center rounded opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive text-muted-foreground/40 transition-all"
+                                    className="h-7 w-7 flex items-center justify-center rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground/40 transition-all"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         e.preventDefault();
-                                        onDeleteSession(key, e);
+                                        setConfirmDeleteId(key);
                                     }}
                                 >
-                                    <Trash2 className="h-3 w-3" />
+                                    <Trash2 className="h-3.5 w-3.5" />
                                 </div>
                             </div>
                         );

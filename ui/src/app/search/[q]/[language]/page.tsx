@@ -8,7 +8,7 @@ import { useSearchStore } from "@/stores/use-search-store"
 import { useInfiniteSearch } from "@/lib/useApi"
 import { useEntitlements } from "@/hooks/use-entitlements"
 import { useAuthStore } from "@/stores/auth-store"
-import { Loader2, Bot, X, Play, ChevronLeft, ChevronRight } from "lucide-react"
+import { Loader2, Bot, Play, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 
@@ -52,6 +52,11 @@ export default function RoutedSearchPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isAiCollapsed, setIsAiCollapsed] = useState(false)
   const [mobileTab, setMobileTab] = useState<"player" | "ai">("player")
+
+  // Auto-switch to AI tab when a word meaning is requested (mobile)
+  useEffect(() => {
+    if (externalPrompt) setMobileTab("ai")
+  }, [externalPrompt])
 
   // Track if the search was blocked by a 429 response
   const [searchBlocked, setSearchBlocked] = useState(false)

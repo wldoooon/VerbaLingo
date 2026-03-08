@@ -44,21 +44,21 @@ export function BranchTimeline({
     return (
         <div className="w-full flex flex-col items-center gap-1 py-1 select-none">
 
-            <div className="w-full flex items-center justify-between gap-4">
+            <div className="w-full flex items-center justify-between gap-2 sm:gap-4">
                 {/* Prev Button */}
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={onPrevious}
                     disabled={currentIndex === 0}
-                    className="h-8 w-8 rounded-full flex-shrink-0 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20"
+                    className="h-6 w-6 sm:h-8 sm:w-8 rounded-full flex-shrink-0 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20"
                 >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
 
                 {/* Timeline Container */}
                 {/* Reduced height as badge is removed */}
-                <div className="relative flex-1 h-14 flex items-center justify-center">
+                <div className="relative flex-1 h-10 sm:h-14 flex items-center justify-center">
 
                     {/* Background Line */}
                     <div className="absolute left-0 right-0 h-[2px] bg-slate-200 dark:bg-slate-800 rounded-full top-1/2 -translate-y-1/2" />
@@ -69,7 +69,7 @@ export function BranchTimeline({
                         className="relative w-full h-full overflow-x-auto no-scrollbar scroll-smooth"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                     >
-                        <div className="flex items-center justify-center min-w-full w-max gap-4 sm:gap-8 px-4 h-full">
+                        <div className="flex items-center justify-center min-w-full w-max gap-3 sm:gap-8 px-2 sm:px-4 h-full">
                             {branches.map((branch, i) => {
                                 const isActive = i === currentIndex;
                                 const isPast = i < currentIndex;
@@ -84,9 +84,9 @@ export function BranchTimeline({
                                                 >
                                                     {/* The Dot Node */}
                                                     <div className={cn(
-                                                        "w-4 h-4 rounded-full transition-all duration-300 relative z-10",
+                                                        "w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-all duration-300 relative z-10",
                                                         isActive
-                                                            ? "bg-primary w-6 h-6 shadow-[0_0_0_4px_rgba(59,130,246,0.2)]"
+                                                            ? "bg-primary !w-5 !h-5 sm:!w-6 sm:!h-6 shadow-[0_0_0_3px_rgba(59,130,246,0.2)] sm:shadow-[0_0_0_4px_rgba(59,130,246,0.2)]"
                                                             : "bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 scale-90"
                                                     )}>
                                                         {isActive && (
@@ -112,9 +112,9 @@ export function BranchTimeline({
                     size="icon"
                     onClick={onNext}
                     disabled={currentIndex === branches.length - 1}
-                    className="h-8 w-8 rounded-full flex-shrink-0 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20"
+                    className="h-6 w-6 sm:h-8 sm:w-8 rounded-full flex-shrink-0 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20"
                 >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
             </div>
 
