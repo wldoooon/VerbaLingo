@@ -142,7 +142,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
             <h1 className="text-2xl font-black text-foreground tracking-tight leading-none">
               Poki<span className="text-primary">Spokey</span>
             </h1>
-            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-[15px] font-bold uppercase tracking-widest bg-foreground text-background border-transparent rounded-full flex items-center justify-center leading-none ml-1 -mt-1.5">
+            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-[15px] font-bold uppercase tracking-widest bg-slate-200 dark:bg-zinc-800 text-slate-500 dark:text-slate-400 border-transparent rounded-full flex items-center justify-center leading-none ml-1 -mt-1.5">
               Beta
             </Badge>
           </div>

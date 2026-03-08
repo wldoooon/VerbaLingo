@@ -1,5 +1,5 @@
-"use client";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchStore } from "@/stores/use-search-store";
 import { useUsageStore } from "@/stores/usage-store";
@@ -647,13 +647,26 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
                         <Input
                             type="text"
+                            maxLength={60}
                             placeholder={outOfSparks ? "Out of Sparks! Upgrade to continue." : "Ask about pronunciation, definitions, examples..."}
-                            className="w-full rounded-full pl-10 pr-10 py-6 bg-muted shadow-sm border border-primary/40 focus-visible:bg-background transition-colors"
+                            className="w-full rounded-full pl-10 pr-24 py-6 bg-muted shadow-sm border border-primary/40 focus-visible:bg-background transition-colors"
                             value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value.slice(0, 60);
+                                setInputValue(val);
+                            }}
                             onKeyPress={handleKeyPress}
                             disabled={isLoading || outOfSparks}
                         />
+
+                        {/* Character limit indicator */}
+                        <div className={cn(
+                            "absolute right-12 top-1/2 -translate-y-1/2 text-[10px] font-medium pointer-events-none transition-all duration-200",
+                            inputValue.length >= 60 ? "text-red-500 font-bold" : "text-muted-foreground/40"
+                        )}>
+                            {inputValue.length}/60
+                        </div>
+
                         <button
                             onClick={handleInputSubmit}
                             disabled={!inputValue.trim() || isLoading || outOfSparks}

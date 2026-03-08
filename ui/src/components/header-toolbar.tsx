@@ -11,10 +11,10 @@ import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 
 import Image from "next/image"
-
 import { useUsageStore } from "@/stores/usage-store"
 
 import { Crown, Megaphone } from 'lucide-react'
+import { ThemeToggleButton, useThemeTransition } from '@/components/ui/shadcn-io/theme-toggle-button'
 
 import Link from "next/link"
 
@@ -47,6 +47,14 @@ export function HeaderToolbar({
 }) {
 
   const { theme, setTheme } = useTheme()
+  const { startTransition } = useThemeTransition()
+
+  const handleThemeToggle = useCallback(() => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    startTransition(() => {
+      setTheme(newTheme);
+    });
+  }, [theme, setTheme, startTransition]);
 
   const [mounted, setMounted] = useState(false)
 
@@ -114,6 +122,24 @@ export function HeaderToolbar({
 
 
 
+
+      {/* Theme Toggle */}
+      {mounted && (
+        <Tooltip delayDuration={200}>
+          <TooltipTrigger asChild>
+            <div>
+              <ThemeToggleButton
+                theme={theme as 'light' | 'dark'}
+                onClick={handleThemeToggle}
+                variant="circle"
+                start="top-right"
+                className="h-9 w-9"
+              />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Toggle theme</TooltipContent>
+        </Tooltip>
+      )}
 
       {/* Changelog */}
 
