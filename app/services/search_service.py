@@ -15,7 +15,7 @@ class SearchService:
 
     async def search(self, q: str, language: str, category: Optional[str] = None, sub_category: Optional[str] = None, page: int = 1, limit: int = 30) -> dict:
         # Default categories to mix
-        MIX_CATEGORIES = ["Movies", "Podcasts", "Talks", "Cartoons"]
+        MIX_CATEGORIES = ["Movies", "Podcasts", "Talks", "Cartoons", "Shows"]
         
         # Resolve the table name dynamically based on language
         table_name = self._resolve_table(language)

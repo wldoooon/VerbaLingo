@@ -8,11 +8,13 @@ import { HeaderUserProfile } from "@/components/header-user-profile"
 
 import { useTheme } from 'next-themes'
 
-import { ThemeToggleButton, useThemeTransition } from '@/components/ui/shadcn-io/theme-toggle-button'
-
 import { Button } from '@/components/ui/button'
 
+import Image from "next/image"
+import { useUsageStore } from "@/stores/usage-store"
+
 import { Crown, Megaphone } from 'lucide-react'
+import { ThemeToggleButton, useThemeTransition } from '@/components/ui/shadcn-io/theme-toggle-button'
 
 import Link from "next/link"
 
@@ -45,10 +47,21 @@ export function HeaderToolbar({
 }) {
 
   const { theme, setTheme } = useTheme()
-
   const { startTransition } = useThemeTransition()
 
+  const handleThemeToggle = useCallback(() => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    startTransition(() => {
+      setTheme(newTheme);
+    });
+  }, [theme, setTheme, startTransition]);
+
   const [mounted, setMounted] = useState(false)
+
+  const usageMap = useUsageStore((s) => s.usage)
+  const stats = usageMap['ai_chat'] || { current: 0, balance: 0, limit: -1, remaining: -1 }
+  const currentBalance = stats.balance ?? 0
+  const remainingSparksDisplay = (currentBalance / 1000).toFixed(2)
 
 
 
@@ -88,21 +101,13 @@ export function HeaderToolbar({
 
 
 
-  // Handle theme toggle with animation
+  // Prevent hydration mismatch
 
-  const handleThemeToggle = useCallback(() => {
+  useEffect(() => {
 
-    const newTheme = theme === 'dark' ? 'light' : 'dark'
+    setMounted(true)
 
-
-
-    startTransition(() => {
-
-      setTheme(newTheme)
-
-    })
-
-  }, [theme, setTheme, startTransition])
+  }, [])
 
 
 
@@ -117,6 +122,24 @@ export function HeaderToolbar({
 
 
 
+
+      {/* Theme Toggle */}
+      {mounted && (
+        <Tooltip delayDuration={200}>
+          <TooltipTrigger asChild>
+            <div>
+              <ThemeToggleButton
+                theme={theme as 'light' | 'dark'}
+                onClick={handleThemeToggle}
+                variant="circle"
+                start="top-right"
+                className="h-9 w-9"
+              />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Toggle theme</TooltipContent>
+        </Tooltip>
+      )}
 
       {/* Changelog */}
 
@@ -194,78 +217,19 @@ export function HeaderToolbar({
 
 
 
-      {/* Theme Toggle */}
-
-
-
-      {mounted && (
-
-
-
+      {/* Sparks Display Badge */}
+      {status === "authenticated" && authUser && mounted && (
         <Tooltip delayDuration={200}>
-
-
-
           <TooltipTrigger asChild>
-
-
-
-            <div className="flex items-center justify-center cursor-pointer">
-
-
-
-              <ThemeToggleButton
-
-
-
-                theme={theme as 'light' | 'dark'}
-
-
-
-                onClick={handleThemeToggle}
-
-
-
-                variant="circle-blur"
-
-
-
-                start="top-right"
-
-
-
-                className="h-9 w-9"
-
-
-
-              />
-
-
-
+            <div className="flex items-center justify-center cursor-pointer mr-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800/50 transition-colors">
+              <span className="text-[14px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 tracking-tight">
+                {remainingSparksDisplay}
+                <Image src="/sparks.png" alt="Sparks icon" width={25} height={25} className="object-contain opacity-90" />
+              </span>
             </div>
-
-
-
           </TooltipTrigger>
-
-
-
-          <TooltipContent side="bottom">
-
-
-
-            Toggle {theme === 'light' ? 'Dark' : 'Light'} Mode
-
-
-
-          </TooltipContent>
-
-
-
+          <TooltipContent side="bottom">Available Sparks</TooltipContent>
         </Tooltip>
-
-
-
       )}
 
 

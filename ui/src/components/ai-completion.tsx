@@ -1,10 +1,11 @@
-"use client";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchStore } from "@/stores/use-search-store";
+import { useUsageStore } from "@/stores/usage-store";
 import { Button } from "@/components/ui/button";
 import { Response } from "@/components/ui/shadcn-io/ai/response";
-import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight, Bot, Lock, MessageSquare, Zap, ArrowRight } from "lucide-react";
+import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight, Bot, Lock, MessageSquare, Zap, ArrowRight, CircleCheck, CircleAlert } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
@@ -12,7 +13,7 @@ import { useResponseHistory } from "@/hooks/useResponseHistory";
 import { SessionSelector } from "@/components/session-selector";
 import { BranchTimeline } from "@/components/branch-timeline";
 import { useRouter, useSearchParams as useNextSearchParams } from "next/navigation";
-import { anchoredToastManager } from "@/components/ui/toast";
+import { toastManager, anchoredToastManager } from "@/components/ui/toast";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import {
     Tooltip,
@@ -86,6 +87,9 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     const nextSearchParams = useNextSearchParams();
     const authStatus = useAuthStore((s) => s.status);
     const isGuest = authStatus !== "authenticated";
+    const usageMap = useUsageStore((s) => s.usage);
+    const aiStats = usageMap?.['ai_chat'] || { balance: 0, remaining: 0 };
+    const outOfSparks = !isGuest && (aiStats.balance ?? 0) <= 0;
 
     // Replacement for useCompletion
     const [completion, setCompletion] = useState("");
@@ -176,6 +180,24 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         if (textToCopy) copyToClipboard(textToCopy);
     };
 
+    const handleLike = () => {
+        toastManager.add({
+            title: "Feedback Sent",
+            description: "Thanks! We'll use this to improve future answers.",
+            type: "success",
+            timeout: 3000,
+        });
+    };
+
+    const handleDislike = () => {
+        toastManager.add({
+            title: "Feedback Recorded",
+            description: "Thanks for letting us know! We'll work on doing better.",
+            type: "info",
+            timeout: 3000,
+        });
+    };
+
     const smartSuggestions = useMemo(() => generateSmartSuggestions(query), [query]);
 
     // Auto-Switch Session when search query changes
@@ -216,7 +238,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
             // Calculate available space
             const availableSpace = containerHeight - headerHeight - footerHeight - suggestionsHeight - extraBuffer;
-            setMaxResponseHeight(Math.max(200, Math.min(availableSpace, 600)));
+            setMaxResponseHeight(Math.max(120, Math.min(availableSpace, 600)));
         };
 
         calculateMaxHeight();
@@ -243,12 +265,14 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     }, [completion, currentBranch, maxResponseHeight, isLoading]);
 
     const handleSuggestionClick = (suggestion: SmartSuggestion) => {
+        if (outOfSparks) return;
         setInputValue(suggestion.prompt);
         currentPromptRef.current = suggestion.prompt;
         complete(suggestion.prompt);
     };
 
     const handleInputSubmit = () => {
+        if (outOfSparks) return;
         if (inputValue.trim()) {
             const prompt = inputValue.trim();
             currentPromptRef.current = prompt;
@@ -274,9 +298,9 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         complete(externalPrompt);
     }, [externalPrompt]);
 
-    // Store completed response as a branch
+    // Store completed response as a branch (skip truncated/partial responses < 50 chars)
     useEffect(() => {
-        if (!isLoading && completion && completion.trim() && currentPromptRef.current) {
+        if (!isLoading && completion && completion.trim().length >= 50 && currentPromptRef.current) {
             addBranch(currentPromptRef.current, completion);
         }
     }, [isLoading]); // Removed completion/addBranch from deps to avoid double-add
@@ -363,7 +387,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
     return (
         <div className="w-full h-full flex flex-col">
-            <div className="relative w-full h-full flex flex-col bg-card p-6">
+            <div className="relative w-full h-full flex flex-col bg-card p-3 sm:p-6">
 
                 <header className="relative w-full flex-shrink-0">
                     {/* Session Selector (History) - Top Right */}
@@ -377,14 +401,14 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         />
                     </div>
 
-                    <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center pt-2">
+                    <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center pt-2">
                         {query ? (
                             <>
                                 Learning about <span className="text-primary">"{query}"</span>
                             </>
                         ) : "What do you want to learn?"}
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-4 max-w-lg mx-auto text-center">
+                    <p className="text-slate-500 dark:text-slate-400 mt-2 sm:mt-4 max-w-lg mx-auto text-center text-xs sm:text-base">
                         {query
                             ? `Get pronunciations, examples, and detailed explanations for "${query}"`
                             : "Explore topics, get explanations, and improve your understanding—all in one place."
@@ -392,7 +416,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                     </p>
 
                     {/* Header bottom gradient border */}
-                    <div className="relative mt-6">
+                    <div className="relative mt-3 sm:mt-6">
                         <div className="absolute bottom-0 left-0 right-0 flex h-px">
                             <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
                             <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
@@ -400,14 +424,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                     </div>
                 </header>
 
-
-
-                <main className="w-full flex-1 flex flex-col mt-6 space-y-6 min-h-0">
-                    <div className="flex items-center gap-4 px-8 opacity-60 mb-2">
-                        <div className="h-px bg-border flex-1" />
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Today</span>
-                        <div className="h-px bg-border flex-1" />
-                    </div>
+                <main className="w-full flex-1 flex flex-col mt-3 sm:mt-6 space-y-4 sm:space-y-6 min-h-0 overflow-y-auto">
                     {/* Suggestions */}
                     <AnimatePresence>
                         {!shouldHideSuggestions && (
@@ -456,14 +473,14 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                             transition={{ delay: 0.2 }}
                             className="w-full"
                         >
-                            <div className="relative bg-card rounded-xl p-6 text-left border-x">
+                            <div className="relative bg-card rounded-xl p-4 sm:p-6 text-left border-x">
                                 {/* Top gradient border */}
                                 <div className="absolute top-0 left-0 right-0 flex h-px">
                                     <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
                                     <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
                                 </div>
 
-                                <div className="text-base text-card-foreground/90 leading-relaxed">
+                                <div className="text-sm sm:text-base text-card-foreground/90 leading-relaxed">
                                     Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
                                     <br /><br />
                                     Try tapping a suggestion above or type your own question below!
@@ -500,12 +517,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                 transition={{ duration: 0.5 }}
                                 className="w-full"
                             >
-                                <div ref={responseContainerRef} className="relative bg-card rounded-xl p-6 text-left border-x">
-                                    {/* Top gradient border */}
-                                    <div className="absolute top-0 left-0 right-0 flex h-px">
-                                        <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                                        <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-                                    </div>
+                                <div ref={responseContainerRef} className="relative bg-card rounded-xl p-6 text-left">
 
                                     <div className="relative">
                                         {/* Top blur gradient */}
@@ -564,12 +576,6 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                         )}
                                     </div>
 
-                                    {/* Bottom gradient border */}
-                                    <div className="absolute -bottom-px left-0 right-0 flex h-px">
-                                        <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                                        <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-                                    </div>
-
                                     {!isLoading && !error && (
                                         <div className="flex flex-col items-center gap-4 mt-4 pt-4 border-t">
                                             {/* Branch Navigation - Timeline Component */}
@@ -601,7 +607,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                                                 ref={copyButtonRef}
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="h-8 w-8 hover:text-primary transition-colors"
+                                                                className="h-8 w-8 hover:text-primary transition-colors cursor-pointer"
                                                                 onClick={handleCopy}
                                                                 disabled={isCopied}
                                                             >
@@ -613,10 +619,20 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                                         </TooltipContent>
                                                     </Tooltip>
                                                 </TooltipProvider>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-green-500 transition-colors">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 hover:text-green-500 transition-colors cursor-pointer"
+                                                    onClick={handleLike}
+                                                >
                                                     <ThumbsUp size={16} />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-red-500 transition-colors">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 hover:text-red-500 transition-colors cursor-pointer"
+                                                    onClick={handleDislike}
+                                                >
                                                     <ThumbsDown size={16} />
                                                 </Button>
                                             </div>
@@ -629,7 +645,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
                 </main>
 
-                <footer className="relative w-full flex-shrink-0 mt-6 pt-4">
+                <footer className="relative w-full flex-shrink-0 mt-1 sm:mt-2 pt-2 sm:pt-3">
                     {/* Footer top gradient border */}
                     <div className="absolute top-0 left-0 right-0 flex h-px">
                         <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
@@ -641,16 +657,29 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
                         <Input
                             type="text"
-                            placeholder="Ask about pronunciation, definitions, examples..."
-                            className="w-full rounded-full pl-10 pr-10 py-6 bg-muted shadow-sm border border-primary/40 focus-visible:bg-background transition-colors"
+                            maxLength={150}
+                            placeholder={outOfSparks ? "Out of Sparks! Upgrade to continue." : "Ask about pronunciation, definitions, examples..."}
+                            className="w-full rounded-full pl-10 pr-24 py-6 bg-muted shadow-sm border border-primary/40 focus-visible:bg-background transition-colors"
                             value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value.slice(0, 150);
+                                setInputValue(val);
+                            }}
                             onKeyPress={handleKeyPress}
-                            disabled={isLoading}
+                            disabled={isLoading || outOfSparks}
                         />
+
+                        {/* Character limit indicator */}
+                        <div className={cn(
+                            "absolute right-12 top-1/2 -translate-y-1/2 text-[10px] font-medium pointer-events-none transition-all duration-200",
+                            inputValue.length >= 150 ? "text-red-500 font-bold" : "text-muted-foreground/40"
+                        )}>
+                            {inputValue.length}/150
+                        </div>
+
                         <button
                             onClick={handleInputSubmit}
-                            disabled={!inputValue.trim() || isLoading}
+                            disabled={!inputValue.trim() || isLoading || outOfSparks}
                             className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
@@ -658,7 +687,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                     </div>
                     <div className="text-center mt-3 px-4">
                         <p className="text-[10px] text-muted-foreground/50 font-medium tracking-wide">
-                            AI can make mistakes. Please verify important information.
+                            AI can make mistakes. Double-check important info.
                         </p>
                     </div>
                 </footer>

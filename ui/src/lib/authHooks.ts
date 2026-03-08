@@ -27,7 +27,8 @@ export function useMeQuery() {
         throw err;
       }
     },
-    retry: false,
+    retry: 1,
+    retryDelay: 1000,
     refetchOnWindowFocus: true,
     staleTime: 1000 * 30,
   });

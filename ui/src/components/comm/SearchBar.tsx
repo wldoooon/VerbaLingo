@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, X, ArrowRight, ChevronDown, Check, Clock, Lock } from 'lucide-react';
+import { Search, X, ArrowRight, ChevronDown, Check, Clock, Lock, Video, Tv, Mic, Music, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSearchStore } from '@/stores/use-search-store';
@@ -27,12 +27,33 @@ import TextType from '@/components/TextType';
 import { useDatamuse } from '@/hooks/useDatamuse';
 
 // Categories for filtering
-const CATEGORIES = [
-    { value: 'All', label: 'All' },
-    { value: 'Movies', label: 'Movies' },
-    { value: 'Cartoons', label: 'TV Shows' },
-    { value: 'Podcasts', label: 'Podcasts' },
-    { value: 'Talks', label: 'Music' },
+const DEFAULT_CATEGORIES = [
+    { value: 'All', label: 'All', icon: <LayoutGrid className="w-4 h-4 mr-2 opacity-70" /> },
+    { value: 'Movies', label: 'Movies', icon: <Video className="w-4 h-4 mr-2 opacity-70" /> },
+    { value: 'Cartoons', label: 'TV Shows', icon: <Tv className="w-4 h-4 mr-2 opacity-70" /> },
+    { value: 'Podcasts', label: 'Podcasts', icon: <Mic className="w-4 h-4 mr-2 opacity-70" /> },
+    { value: 'Talks', label: 'Music', icon: <Music className="w-4 h-4 mr-2 opacity-70" /> },
+];
+
+const PodcastIcon = ({ className }: { className?: string }) => (
+    <svg className={className} role="img" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <title>Podcast Index</title>
+        <path d="M5.0056.0056c-.2362.0208-.4667.1034-.6462.2366C1.7274 2.2537.1728 4.9759.2924 8.289c.1197 3.1949 1.6743 6.2709 4.067 8.0458.2393.1183.4795.2366.7188.2366.3589 0 .7172-.1182.9564-.4732.4786-.5917.3594-1.3013-.2388-1.6563-1.9142-1.3016-3.1105-3.7863-3.1105-6.1529 0-2.4848 1.0767-4.6157 3.1105-6.154.5982-.355.5977-1.183.2388-1.6562-.2243-.3698-.6353-.508-1.029-.4732Zm13.7533 0c-.314.0295-.613.1774-.7924.4732-.3589.4733-.3593 1.3012.2389 1.6562 2.0338 1.5383 3.1105 3.6692 3.1105 6.154 0 2.3666-1.1964 4.8513-3.1105 6.153-.5982.355-.7174 1.0645-.2389 1.6562.2393.355.5987.4732.9576.4732.2393 0 .4784-.1183.7176-.2366 2.5124-1.775 4.067-4.851 4.067-8.0458.1077-3.3131-1.435-6.0353-4.067-8.0468-.2392-.1775-.5687-.2662-.8828-.2366ZM16.4944 3.558c-.3065.0118-.609.1395-.8303.3761-.4546.4733-.4183 1.2307.0602 1.6686 1.5314 1.408 1.6627 3.7978-.0122 5.3716-.4666.4615-.4904 1.2075-.0357 1.6808.4546.4733 1.2078.4965 1.6863.0469 2.7158-2.5559 2.4881-6.5196-.0122-8.827-.2393-.2248-.5495-.3288-.856-.317zm-8.9933.0067c-.305-.0118-.6167.0914-.856.3103-2.5004 2.3074-2.7269 6.2711-.0111 8.827.4785.4496 1.2317.4264 1.6863-.0469.4547-.4733.4306-1.2189-.048-1.6685-1.6749-1.5738-1.5316-3.9647-.0122-5.3728.4785-.4496.5148-1.194.0602-1.6674-.2153-.2426-.514-.3699-.8192-.3817Zm4.499 2.1496a2.5714 2.5714 0 0 0-2.5715 2.5714 2.5714 2.5714 0 0 0 1.193 2.1696L7.7144 24h2.5246l2.8772-13.4018a2.5714 2.5714 0 0 0 1.4553-2.3125A2.5714 2.5714 0 0 0 12 5.7143Z" />
+    </svg>
+);
+
+const MoviesIcon = ({ className }: { className?: string }) => (
+    <svg className={className} role="img" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <title>Movies</title>
+        <path d="m5.398 0 8.348 23.602c2.346.059 4.856.398 4.856.398L10.113 0H5.398zm8.489 0v9.172l4.715 13.33V0h-4.715zM5.398 1.5V24c1.873-.225 2.81-.312 4.715-.398V14.83L5.398 1.5z" />
+    </svg>
+);
+
+const ENGLISH_CATEGORIES = [
+    { value: 'All', label: 'All', icon: <LayoutGrid className="w-4 h-4 mr-2 opacity-70" /> },
+    { value: 'Movies', label: 'Movies & TV Shows', icon: <MoviesIcon className="w-4 h-4 mr-2 opacity-70" /> },
+    { value: 'Shows', label: 'Shows', icon: <Tv className="w-4 h-4 mr-2 opacity-70" /> },
+    { value: 'Podcasts & Talks', label: 'Podcast & Talks', icon: <PodcastIcon className="w-4 h-4 mr-2 opacity-70" /> },
 ];
 
 // Languages with flags
@@ -53,6 +74,8 @@ export function SearchBar() {
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
     const [showRecent, setShowRecent] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
+
+    const MAX_SEARCH_LENGTH = 60;
 
     const { suggestions, isLoading } = useDatamuse(query);
     const { hasAccess, remaining, limit, current, isUnlimited, isLoaded } = useEntitlements('search');
@@ -288,7 +311,7 @@ export function SearchBar() {
                                     variant="ghost"
                                     size="sm"
                                     className={cn(
-                                        "h-8 sm:h-9 px-2 sm:px-3 rounded-lg gap-1 sm:gap-2 font-semibold text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground",
+                                        "h-8 sm:h-9 px-2 sm:px-3 rounded-lg gap-1 sm:gap-2 font-semibold text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0 cursor-pointer",
                                     )}
                                 >
                                     <div className="flex items-center gap-1 sm:gap-2">
@@ -316,14 +339,17 @@ export function SearchBar() {
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuGroup>
-                                    {CATEGORIES.map((cat) => (
+                                    {(selectedLanguage === 'English' ? ENGLISH_CATEGORIES : DEFAULT_CATEGORIES).map((cat) => (
                                         <DropdownMenuCheckboxItem
                                             key={cat.value}
                                             checked={isCategorySelected(cat.value)}
                                             onCheckedChange={() => toggleCategory(cat.value)}
-                                            className="rounded-lg py-2.5 cursor-pointer"
+                                            className="rounded-lg py-2.5 cursor-pointer flex items-center pr-8"
                                         >
-                                            {cat.label}
+                                            <div className="flex items-center">
+                                                {cat.icon}
+                                                <span>{cat.label}</span>
+                                            </div>
                                         </DropdownMenuCheckboxItem>
                                     ))}
                                 </DropdownMenuGroup>
@@ -365,19 +391,31 @@ export function SearchBar() {
                             <Input
                                 ref={inputRef}
                                 type="text"
+                                maxLength={MAX_SEARCH_LENGTH}
                                 value={hasAccess ? query : ''}
                                 disabled={!hasAccess}
                                 onChange={(e) => {
-                                    setQuery(e.target.value);
+                                    const val = e.target.value.slice(0, MAX_SEARCH_LENGTH);
+                                    setQuery(val);
                                     setShowRecent(true);
                                 }}
                                 onFocus={() => setShowRecent(true)}
                                 onKeyDown={handleKeyDown}
                                 className={cn(
-                                    "border-0 bg-transparent shadow-none focus-visible:ring-0 px-2 sm:px-3 h-8 sm:h-9 text-sm sm:text-base font-medium placeholder:text-transparent min-w-0",
+                                    "border-0 bg-transparent shadow-none focus-visible:ring-0 pl-2 sm:pl-3 pr-20 h-8 sm:h-9 text-sm sm:text-base font-medium placeholder:text-transparent min-w-0",
                                     !hasAccess && "placeholder:text-muted-foreground/60 cursor-not-allowed opacity-60"
                                 )}
                             />
+
+                            {/* Character limit indicator */}
+                            <div className={cn(
+                                "absolute text-[10px] font-medium pointer-events-none transition-all duration-200",
+                                query.length >= MAX_SEARCH_LENGTH ? "text-red-500 font-bold" : "text-muted-foreground/40",
+                                query && hasAccess ? "right-11" : "right-4"
+                            )}>
+                                {query.length}/{MAX_SEARCH_LENGTH}
+                            </div>
+
                             {query && hasAccess && (
                                 <Button
                                     variant="ghost"
@@ -400,7 +438,7 @@ export function SearchBar() {
                                     variant="ghost"
                                     size="sm"
                                     className={cn(
-                                        "h-8 sm:h-9 px-1.5 sm:px-3 rounded-lg gap-1 sm:gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground mr-1"
+                                        "h-8 sm:h-9 px-1.5 sm:px-3 rounded-lg gap-1 sm:gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground mr-1 focus-visible:ring-0 focus-visible:ring-offset-0 cursor-pointer"
                                     )}
                                 >
                                     <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full overflow-hidden shadow-sm border border-border flex-shrink-0">

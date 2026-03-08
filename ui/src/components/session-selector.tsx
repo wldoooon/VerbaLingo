@@ -1,18 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
 import { cn, timeAgo } from "@/lib/utils"
-import { Check, ChevronsUpDown, History, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command"
+import { History, Trash2, ArrowLeft, MessageSquare } from "lucide-react"
 import {
     Popover,
     PopoverContent,
@@ -20,16 +10,14 @@ import {
 } from "@/components/ui/popover"
 
 interface SessionSelectorProps {
-    sessions: Record<string, any>; // Using any for simplicity as we just need keys and lengths
+    sessions: Record<string, any>;
     activeSessionId: string;
     onSelectSession: (sessionId: string) => void;
     onDeleteSession: (sessionId: string, e: React.MouseEvent) => void;
     className?: string;
-    initialCount?: number;
     currentQuery?: string;
 }
 
-// Helper for Title Case
 function toTitleCase(str: string) {
     if (!str) return "Unknown";
     return str.replace(
@@ -47,103 +35,126 @@ export function SessionSelector({
     currentQuery,
 }: SessionSelectorProps) {
     const [open, setOpen] = useState(false)
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
-    // Filter out empty sessions
     const sessionKeys = Object.keys(sessions).filter(key =>
         sessions[key].branches && sessions[key].branches.length > 0
     );
 
-    if (sessionKeys.length === 0) {
-        return null; // Don't show if no history
-    }
+    if (sessionKeys.length === 0) return null;
 
-    // Sort by lastActive (most recent first)
     const sortedSessions = sessionKeys.sort((a, b) => {
         const timeA = sessions[a].lastActive || 0;
         const timeB = sessions[b].lastActive || 0;
         return timeB - timeA;
     });
 
-    // user request: "default value instead of the current keyword add history"
-    // We strictly show "History" to indicate this is the history menu.
-    const activeLabel = "History";
+    const isViewingHistory = currentQuery && currentQuery !== activeSessionId;
 
     return (
-        <div className={cn("w-full mb-4", className)}>
-            <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        role="combobox"
-                        aria-expanded={open}
-                        className="h-8 w-auto gap-2 px-2 text-muted-foreground hover:text-primary font-medium"
+        <Popover open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirmDeleteId(null); }}>
+            <PopoverTrigger asChild>
+                <button
+                    className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer",
+                        open && "bg-muted/60 text-foreground",
+                        className,
+                    )}
+                >
+                    <History className="h-3.5 w-3.5" />
+                    <span className="text-xs font-medium">History</span>
+                    {sessionKeys.length > 0 && (
+                        <span className="text-[10px] bg-muted text-muted-foreground rounded-full px-1.5 py-px font-medium">
+                            {sessionKeys.length}
+                        </span>
+                    )}
+                </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[220px] p-1.5" align="end" sideOffset={8}>
+                {/* Return to current search */}
+                {isViewingHistory && (
+                    <button
+                        onClick={() => { onSelectSession(currentQuery); setOpen(false); }}
+                        className="w-full flex items-center gap-2 px-2.5 py-2 rounded-md text-primary bg-primary/5 hover:bg-primary/10 transition-colors text-left cursor-pointer mb-1"
                     >
-                        <History className="h-4 w-4" />
-                        <span className="text-xs">History</span>
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[240px] p-0" align="start">
-                    <Command>
-                        <CommandInput placeholder="Search history..." />
-                        <CommandList>
-                            <CommandEmpty>No topic found.</CommandEmpty>
+                        <ArrowLeft className="h-3.5 w-3.5 flex-shrink-0" />
+                        <span className="text-xs font-medium truncate">Back to "{toTitleCase(currentQuery)}"</span>
+                    </button>
+                )}
 
-                            {/* Option to return to current search if we are viewing history */}
-                            {currentQuery && currentQuery !== activeSessionId && (
-                                <CommandGroup heading="Current Search">
-                                    <CommandItem
-                                        value={toTitleCase(currentQuery)}
-                                        onSelect={() => {
-                                            onSelectSession(currentQuery)
-                                            setOpen(false)
-                                        }}
-                                        className="cursor-pointer bg-primary/10 text-primary font-medium"
-                                    >
-                                        <Check className="mr-2 h-4 w-4 opacity-0" /> {/* Spacer */}
-                                        <span className="flex-1 truncate text-sm">Return to: {toTitleCase(currentQuery)}</span>
-                                    </CommandItem>
-                                </CommandGroup>
-                            )}
+                {/* Session list */}
+                <div className="max-h-[240px] overflow-y-auto space-y-px">
+                    {sortedSessions.map((key) => {
+                        const isActive = activeSessionId === key;
+                        const branchCount = sessions[key].branches?.length || 0;
+                        const isConfirming = confirmDeleteId === key;
 
-                            <CommandGroup heading="History">
-                                {sortedSessions.map((key) => (
-                                    <CommandItem
-                                        key={key}
-                                        value={toTitleCase(key)}
-                                        onSelect={() => {
-                                            onSelectSession(key)
-                                            setOpen(false)
+                        if (isConfirming) {
+                            return (
+                                <div
+                                    key={key}
+                                    className="flex items-center gap-2 px-2.5 py-2 rounded-md bg-destructive/5 border border-destructive/20"
+                                >
+                                    <p className="text-[11px] text-destructive font-medium flex-1 truncate">
+                                        Delete "{toTitleCase(key)}"?
+                                    </p>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDeleteSession(key, e);
+                                            setConfirmDeleteId(null);
                                         }}
-                                        className="cursor-pointer"
+                                        className="text-[10px] font-semibold text-destructive hover:bg-destructive/10 px-2 py-0.5 rounded transition-colors cursor-pointer"
                                     >
-                                        <Check
-                                            className={cn(
-                                                "mr-2 h-4 w-4",
-                                                activeSessionId === key ? "opacity-100" : "opacity-0"
-                                            )}
-                                        />
-                                        <span className="flex-1 truncate text-sm">{toTitleCase(key)}</span>
-                                        <span className="ml-auto text-[10px] text-muted-foreground/70 mr-2">
-                                            {timeAgo(sessions[key].lastActive || sessions[key].createdAt)}
-                                        </span>
-                                        <div
-                                            role="button"
-                                            className="h-6 w-6 flex items-center justify-center rounded-sm hover:bg-destructive/10 hover:text-destructive text-muted-foreground/50 transition-colors z-50"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                e.preventDefault();
-                                                onDeleteSession(key, e)
-                                            }}
-                                        >
-                                            <Trash2 className="h-3.5 w-3.5" />
-                                        </div>
-                                    </CommandItem>
-                                ))}
-                            </CommandGroup>
-                        </CommandList>
-                    </Command>
-                </PopoverContent>
-            </Popover>
-        </div>
+                                        Delete
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setConfirmDeleteId(null);
+                                        }}
+                                        className="text-[10px] font-medium text-muted-foreground hover:bg-muted px-2 py-0.5 rounded transition-colors cursor-pointer"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            );
+                        }
+
+                        return (
+                            <div
+                                key={key}
+                                onClick={() => { onSelectSession(key); setOpen(false); }}
+                                className={cn(
+                                    "group flex items-center gap-2 px-2.5 py-2 rounded-md transition-colors cursor-pointer",
+                                    isActive
+                                        ? "bg-accent text-accent-foreground"
+                                        : "hover:bg-muted/60 text-foreground"
+                                )}
+                            >
+                                <MessageSquare className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium truncate">{toTitleCase(key)}</p>
+                                    <p className="text-[10px] text-muted-foreground/70">
+                                        {branchCount} msg · {timeAgo(sessions[key].lastActive || sessions[key].createdAt)}
+                                    </p>
+                                </div>
+                                <div
+                                    role="button"
+                                    className="h-7 w-7 flex items-center justify-center rounded-full hover:bg-destructive/10 hover:text-destructive text-muted-foreground/40 transition-all"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        setConfirmDeleteId(key);
+                                    }}
+                                >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </PopoverContent>
+        </Popover>
     )
 }

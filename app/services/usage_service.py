@@ -30,8 +30,8 @@ FEATURE_LIMITS = {
         UserTier.UNLIMITED: -1,
     },
     "ai_chat": {
-        UserTier.FREE: 15,
-        UserTier.PRO: 100,
+        UserTier.FREE: -1,  # Migrating to Token Wallet (No daily limit)
+        UserTier.PRO: -1,
         UserTier.UNLIMITED: -1,
     },
     "export": {
@@ -161,7 +161,6 @@ async def sync_usage_to_db(
         # Check if we need to reset daily counters
         if usage.usage_reset_date != today:
             usage.daily_searches_count = 0
-            usage.daily_ai_chats_count = 0
             usage.daily_exports_count = 0
             usage.usage_reset_date = today
         
@@ -170,7 +169,6 @@ async def sync_usage_to_db(
             usage.daily_searches_count += 1
             usage.total_searches += 1
         elif feature == "ai_chat":
-            usage.daily_ai_chats_count += 1
             usage.total_ai_chats += 1
         elif feature == "export":
             usage.daily_exports_count += 1
@@ -221,7 +219,12 @@ async def get_user_usage_stats(
         "tier": tier.value,
         "daily": {
             "search": {"current": search_count, "limit": _get_limit(tier, "search"), "remaining": max(0, _get_limit(tier, "search") - search_count) if _get_limit(tier, "search") != -1 else -1},
-            "ai_chat": {"current": ai_chat_count, "limit": _get_limit(tier, "ai_chat"), "remaining": max(0, _get_limit(tier, "ai_chat") - ai_chat_count) if _get_limit(tier, "ai_chat") != -1 else -1},
+            "ai_chat": {
+                "current": ai_chat_count, 
+                "balance": usage.ai_credit_balance if usage else 0, 
+                "limit": _get_limit(tier, "ai_chat"), 
+                "remaining": max(0, _get_limit(tier, "ai_chat") - ai_chat_count) if _get_limit(tier, "ai_chat") != -1 else -1
+            },
             "export": {"current": export_count, "limit": _get_limit(tier, "export"), "remaining": max(0, _get_limit(tier, "export") - export_count) if _get_limit(tier, "export") != -1 else -1},
         },
         "lifetime": {
@@ -259,7 +262,7 @@ async def _restore_from_db(
         if feature == "search":
             count = usage.daily_searches_count
         elif feature == "ai_chat":
-            count = usage.daily_ai_chats_count
+            count = 0 # No daily limit anymore
         elif feature == "export":
             count = usage.daily_exports_count
         else:
@@ -318,7 +321,6 @@ async def sync_all_dirty_users(redis: Redis):
                 if usage.usage_reset_date == date.today():
                     # Same day: add the difference to total
                     usage.total_searches += (search_count - usage.daily_searches_count)
-                    usage.total_ai_chats += (ai_chat_count - usage.daily_ai_chats_count)
                     usage.total_exports += (export_count - usage.daily_exports_count)
                 else:
                     # New day in DB: the Redis count is the new daily, and we add it all to total
@@ -328,7 +330,6 @@ async def sync_all_dirty_users(redis: Redis):
                     usage.usage_reset_date = date.today()
 
                 usage.daily_searches_count = search_count
-                usage.daily_ai_chats_count = ai_chat_count
                 usage.daily_exports_count = export_count
                 usage.updated_at = datetime.now(timezone.utc)
                 
@@ -343,3 +344,39 @@ async def sync_all_dirty_users(redis: Redis):
     
     if synced_count > 0:
         logger.success(f"Usage sync complete: {synced_count} records updated")
+
+
+async def check_ai_credits(db: AsyncSession, user: User) -> Tuple[bool, Optional[str], int]:
+    usage = await db.get(UserUsage, user.id)
+    if not usage:
+         return False, "Wallet not found", 0
+         
+    if usage.ai_credit_balance <= 0:
+         return False, "Out of Sparks! Please upgrade your plan to continue chatting.", 0
+         
+    return True, None, usage.ai_credit_balance
+
+
+async def deduct_ai_credits(db: AsyncSession, user: User, total_tokens_used: int) -> int:
+    """
+    Directly deducts tokens from the user's PostgreSQL wallet after a stream completes.
+    Uses precise token counts from the Ghost Calculator.
+    Bypasses Redis completely for financial data safety.
+    Returns the new balance.
+    """
+    usage = await db.get(UserUsage, user.id)
+    if not usage:
+         return 0
+         
+    # Subtract tokens
+    usage.ai_credit_balance -= total_tokens_used
+    usage.updated_at = datetime.now(timezone.utc)
+    usage.total_ai_chats += 1 # We still track the raw count of conversations for analytics
+    
+    db.add(usage)
+    await db.commit()
+    await db.refresh(usage)
+    
+    logger.info(f"Deducted {total_tokens_used} tokens from user {user.id}. New balance: {usage.ai_credit_balance}")
+    
+    return usage.ai_credit_balance

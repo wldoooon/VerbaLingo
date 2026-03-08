@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { Compass, User, Bookmark, Settings, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, Star, ChevronsUpDown, Plus, Sparkles, CreditCard, Bell, BadgeCheck, Megaphone } from 'lucide-react';
+import { Compass, User, Bookmark, LogOut, ChevronLeft, ChevronRight, LayoutGrid, History, Folder, ChevronDown, LifeBuoy, Star, ChevronsUpDown, Plus, Sparkles, CreditCard, Bell, BadgeCheck, Megaphone } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -124,10 +124,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
     { icon: Megaphone, label: 'Changelog', view: ViewState.CHANGELOG, href: '/changelog' },
     { icon: CreditCard, label: 'Pricing', view: ViewState.PRICING, href: '/pricing' },
     { icon: LifeBuoy, label: 'Support', view: ViewState.LANDING, href: '/support' },
-    // Settings only makes sense for logged-in users
-    ...(authStatus === 'authenticated'
-      ? [{ icon: Settings, label: 'Settings', view: ViewState.PROFILE, href: '/profile' }]
-      : []),
   ];
 
   return (
@@ -146,7 +142,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
             <h1 className="text-2xl font-black text-foreground tracking-tight leading-none">
               Poki<span className="text-primary">Spokey</span>
             </h1>
-            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-[15px] font-bold uppercase tracking-widest bg-primary/10 text-primary border-primary/20 rounded-full flex items-center justify-center leading-none ml-1 -mt-1.5">
+            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-[15px] font-bold uppercase tracking-widest bg-slate-200 dark:bg-zinc-800 text-slate-500 dark:text-slate-400 border-transparent rounded-full flex items-center justify-center leading-none ml-1 -mt-1.5">
               Beta
             </Badge>
           </div>

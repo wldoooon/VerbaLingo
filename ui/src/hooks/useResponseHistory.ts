@@ -1,6 +1,6 @@
 import { useReducer, useEffect, useCallback, useRef } from "react";
 import type { ChatSession } from "@/lib/db";
-
+import { useAuthStore } from "@/stores/auth-store";
 import { nanoid } from "nanoid";
 
 export interface ResponseBranch {
@@ -66,6 +66,15 @@ function historyReducer(
 }
 
 export function useResponseHistory() {
+  const userId = useAuthStore((s) => s.user?.id);
+
+  // Resolve the right DB: user-scoped if logged in, fallback otherwise
+  const getDB = useCallback(async () => {
+    const { getUserDB, db: fallbackDB } = await import("@/lib/db");
+    if (userId) return getUserDB(userId);
+    return fallbackDB;
+  }, [userId]);
+
   const [state, dispatch] = useReducer(historyReducer, {
     sessions: {},
     activeSessionId: "default",
@@ -78,8 +87,7 @@ export function useResponseHistory() {
 
     async function initDB() {
       try {
-        // Dynamic Import (Client-Side Only)
-        const { db } = await import("@/lib/db");
+        const db = await getDB();
         if (!db) return;
 
         // A. CLEANUP (The "Eboueur") - Time To Live (TTL) Strategy
@@ -115,7 +123,7 @@ export function useResponseHistory() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [userId, getDB]);
 
   // --- 2. ACTIONS ---
 
@@ -128,7 +136,7 @@ export function useResponseHistory() {
 
     // Async Background DB Update
     (async () => {
-      const { db } = await import("@/lib/db");
+      const db = await getDB();
       if (!db) return;
 
       try {
@@ -150,7 +158,7 @@ export function useResponseHistory() {
         console.error("Failed to switch session in DB:", err);
       }
     })();
-  }, []);
+  }, [getDB]);
 
   // Add Branch: The Main Action
   const addBranch = useCallback(
@@ -159,7 +167,7 @@ export function useResponseHistory() {
       // to ensure ID consistency. UX improvement: Add optimistic dispatch later if laggy.
 
       (async () => {
-        const { db } = await import("@/lib/db");
+        const db = await getDB();
         if (!db) return;
 
         const sessionId = state.activeSessionId; // Capture current ID
@@ -177,6 +185,11 @@ export function useResponseHistory() {
             const session = await db.sessions.get(sessionId);
 
             const currentBranches = session?.branches || [];
+
+            // Dedup: skip if the last branch has identical prompt+response
+            const last = currentBranches[currentBranches.length - 1];
+            if (last?.prompt === prompt && last?.response === response) return;
+
             const updatedBranches = [...currentBranches, newBranch];
 
             // Limit per session (e.g. 20 messages)
@@ -251,7 +264,7 @@ export function useResponseHistory() {
   const updateDBIndex = useCallback(
     (newIndex: number) => {
       (async () => {
-        const { db } = await import("@/lib/db");
+        const db = await getDB();
         if (!db) return;
         try {
           await db.sessions.update(state.activeSessionId, {
@@ -263,7 +276,7 @@ export function useResponseHistory() {
         }
       })();
     },
-    [state.activeSessionId]
+    [state.activeSessionId, getDB]
   );
 
   const goToPrevious = useCallback(() => {
@@ -286,13 +299,13 @@ export function useResponseHistory() {
 
   const clearHistory = useCallback(() => {
     (async () => {
-      const { db } = await import("@/lib/db");
+      const db = await getDB();
       if (db) {
         await db.sessions.clear();
         dispatch({ type: "CLEAR_ALL" });
       }
     })();
-  }, []);
+  }, [getDB]);
 
   // Helper for Context
   const getThreadContext = useCallback(
@@ -315,7 +328,7 @@ export function useResponseHistory() {
       }
 
       try {
-        const { db } = await import("@/lib/db");
+        const db = await getDB();
         if (db) {
           await db.sessions.delete(sessionId);
           dispatch({ type: "REMOVE_SESSION", payload: sessionId });
@@ -332,7 +345,7 @@ export function useResponseHistory() {
         console.error("Failed to delete session:", error);
       }
     },
-    [state.activeSessionId]
+    [state.activeSessionId, getDB]
   );
 
   return {

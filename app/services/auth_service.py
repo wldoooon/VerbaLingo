@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import HTTPException, status
@@ -7,6 +7,23 @@ from ..models.user import User, UserCreate
 from ..models.user_usage import UserUsage
 from ..core.security import hash_password, verify_password
 from ..core.logging import logger
+
+
+async def check_and_reset_free_tier(db: AsyncSession, user: User) -> None:
+    """
+    Check if the user's free tier has expired and reset it if necessary.
+    Also restores their monthly credit balance.
+    """
+    now_utc = datetime.now(timezone.utc)
+    if not user.tier_expires_at or user.tier_expires_at < now_utc:
+        user.tier_expires_at = now_utc + timedelta(days=30)
+        
+        usage_stmt = select(UserUsage).where(UserUsage.user_id == user.id)
+        usage_result = await db.exec(usage_stmt)
+        usage = usage_result.first()
+        if usage:
+            usage.ai_credit_balance = 30000
+            db.add(usage)
 
 
 async def create_new_user(db: AsyncSession, user_data: UserCreate) -> User:
@@ -32,7 +49,8 @@ async def create_new_user(db: AsyncSession, user_data: UserCreate) -> User:
     new_user = User(
         email=user_data.email,
         hashed_password=hashed_pwd,
-        full_name=user_data.full_name
+        full_name=user_data.full_name,
+        tier_expires_at=datetime.now(timezone.utc) + timedelta(days=30)
     )
     db.add(new_user)
     await db.flush()  # Get user.id without committing
@@ -64,6 +82,8 @@ async def authenticate_user(db: AsyncSession, email: str, password: str) -> User
     
     if not verify_password(password, user.hashed_password):
         return None
+    
+    await check_and_reset_free_tier(db, user)
     
     # Update last login timestamp
     user.last_login_at = datetime.now(timezone.utc)
@@ -106,6 +126,8 @@ async def get_oauth_user_only(
     if full_name and not user.full_name:
         user.full_name = full_name
     
+    await check_and_reset_free_tier(db, user)
+            
     user.last_login_at = datetime.now(timezone.utc)
     db.add(user)
     await db.commit()
@@ -149,6 +171,8 @@ async def get_or_create_oauth_user(
         if full_name and not user.full_name:
             user.full_name = full_name
         
+        await check_and_reset_free_tier(db, user)
+                
         # Update last login
         user.last_login_at = datetime.now(timezone.utc)
         db.add(user)
@@ -170,6 +194,7 @@ async def get_or_create_oauth_user(
         oauth_id=oauth_id,
         oauth_avatar_url=avatar_url,
         is_email_verified=True,  # OAuth emails are pre-verified
+        tier_expires_at=datetime.now(timezone.utc) + timedelta(days=30)
     )
     db.add(new_user)
     await db.flush()

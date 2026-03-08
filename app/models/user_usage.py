@@ -28,8 +28,10 @@ class UserUsage(SQLModel, table=True):
     
     # Daily Counters (reset daily)
     daily_searches_count: int = Field(default=0)
-    daily_ai_chats_count: int = Field(default=0)
     daily_exports_count: int = Field(default=0)
+    
+    # Wallet / Economy (resets on subscription billing cycle)
+    ai_credit_balance: int = Field(default=30000)
     usage_reset_date: date | None = Field(default=None)
     
     # Lifetime Counters (never reset, for analytics)
@@ -54,7 +56,7 @@ class UserUsage(SQLModel, table=True):
 # API Schemas
 class UserUsageRead(SQLModel):
     daily_searches_count: int = 0
-    daily_ai_chats_count: int = 0
     daily_exports_count: int = 0
+    ai_credit_balance: int = 30000
     total_searches: int = 0
     total_ai_chats: int = 0

@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Compass, Bookmark, CreditCard, Megaphone, User, Menu, X, Settings, LifeBuoy, ChevronRight } from 'lucide-react';
+import { Compass, Bookmark, CreditCard, Megaphone, User, Menu, X, LifeBuoy, ChevronRight, LogOut, Sun, Moon, Zap } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
+import { useUsageStore } from '@/stores/usage-store';
 import { AuthDialog } from '@/components/auth-dialog';
 import { FeedbackDialog } from '@/components/feedback-dialog';
+import { useLogoutMutation } from '@/lib/authHooks';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -17,8 +19,18 @@ export function MobileNav() {
   const router = useRouter();
   const authStatus = useAuthStore((s) => s.status);
   const authUser = useAuthStore((s) => s.user);
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const logoutMutation = useLogoutMutation();
+  const isAuthenticated = authStatus === 'authenticated';
+
+  const usageMap = useUsageStore((s) => s.usage);
+  const stats = usageMap['ai_chat'] || { current: 0, balance: 0, limit: -1, remaining: -1 };
+  const currentBalance = stats.balance ?? 0;
+  const displayLimit = stats.limit === -1 ? '∞' : stats.limit;
+  const displayRemaining = stats.remaining === -1 ? '∞' : (stats.remaining > 0 ? stats.remaining : 0);
+  const remainingSparksDisplay = (currentBalance / 1000).toFixed(2);
 
   // Don't show on search/watch pages (they have their own layout)
   const isSearchOrWatch = pathname?.startsWith('/search') || pathname?.startsWith('/watch');
@@ -35,12 +47,6 @@ export function MobileNav() {
     { icon: CreditCard, label: 'Pricing', href: '/pricing' },
     { icon: Megaphone, label: 'Changelog', href: '/changelog' },
     { icon: Bookmark, label: 'Saved', href: '/saved', disabled: true, badge: 'Soon' },
-  ];
-
-  const supportItems = [
-    ...(authStatus === 'authenticated'
-      ? [{ icon: Settings, label: 'Settings', href: '/profile' }]
-      : []),
   ];
 
   return (
@@ -137,7 +143,7 @@ export function MobileNav() {
                     <h1 className="text-xl font-black text-foreground tracking-tight leading-none">
                       Poki<span className="text-primary">Spokey</span>
                     </h1>
-                    <Badge variant="secondary" className="text-[8px] px-1 py-0 h-[14px] font-bold uppercase tracking-widest bg-primary/10 text-primary border-primary/20 rounded-full ml-1 -mt-1">
+                    <Badge variant="secondary" className="text-[8px] px-1 py-0 h-[14px] font-bold uppercase tracking-widest bg-slate-200 dark:bg-zinc-800 text-slate-500 dark:text-slate-400 border-transparent rounded-full ml-1 -mt-1">
                       Beta
                     </Badge>
                   </div>
@@ -224,33 +230,23 @@ export function MobileNav() {
                     Support
                   </h3>
                   <div className="space-y-1">
+                    {/* Dark mode toggle */}
+                    <button
+                      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+                      className="flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer w-full"
+                    >
+                      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                      <span className="text-sm font-medium flex-1 text-left">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+                      <div className={`w-9 h-5 rounded-full relative transition-colors duration-200 ${isDark ? 'bg-primary' : 'bg-muted-foreground/30'}`}>
+                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${isDark ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                      </div>
+                    </button>
                     <FeedbackDialog>
                       <div className="flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer w-full">
                         <LifeBuoy className="w-5 h-5" />
                         <span className="text-sm font-medium">Support</span>
                       </div>
                     </FeedbackDialog>
-                    {supportItems.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = pathname?.startsWith(item.href);
-                      return (
-                        <Link
-                          key={item.label}
-                          href={item.href}
-                          onClick={() => setIsMenuOpen(false)}
-                          className={`
-                            flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 cursor-pointer
-                            ${isActive
-                              ? 'bg-muted text-foreground font-medium'
-                              : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                            }
-                          `}
-                        >
-                          <Icon className="w-5 h-5" />
-                          <span className="text-sm font-medium">{item.label}</span>
-                        </Link>
-                      );
-                    })}
                   </div>
                 </div>
               </div>
@@ -271,14 +267,56 @@ export function MobileNav() {
                     </AuthDialog>
                   </div>
                 ) : (
-                  <Link
-                    href="/profile"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 rounded-xl text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-                  >
-                    <Settings className="w-5 h-5" />
-                    <span className="text-sm font-medium">Account Settings</span>
-                  </Link>
+                  <>
+                    <div className="p-3.5 mb-4 rounded-[1.25rem] border border-slate-200 dark:border-zinc-700/50 bg-white dark:bg-zinc-800/40 shadow-sm">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[15px] font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2 tracking-tight">
+                            <Image src="/sparks.png" alt="Sparks" width={20} height={20} className="object-contain" />
+                            Sparks
+                          </span>
+                        </div>
+                        <Link href="/pricing" onClick={() => setIsMenuOpen(false)} className="shrink-0">
+                          <span className="relative flex items-center justify-center text-[11px] font-black uppercase tracking-widest text-white px-3 py-1.5 rounded-full overflow-hidden group shadow-md transition-all hover:scale-105 hover:shadow-orange-500/25">
+                            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 group-hover:from-orange-500 group-hover:via-pink-600 group-hover:to-purple-600 transition-all duration-300"></span>
+                            <span className="relative flex items-center gap-1">
+                              Upgrade
+                              <Zap className="h-3 w-3 fill-current" />
+                            </span>
+                          </span>
+                        </Link>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs font-medium">
+                          <span className="text-slate-400">Total Credits</span>
+                          <span className="text-slate-900 dark:text-slate-100">{displayLimit}</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-medium">
+                          <span className="text-slate-400">Remaining</span>
+                          <span className="text-slate-900 dark:text-slate-100">{displayRemaining}</span>
+                        </div>
+                        <div className="flex justify-between text-xs font-bold pt-1 border-t border-slate-200 dark:border-zinc-800/80 mt-1">
+                          <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">Available Sparks</span>
+                          <span className="text-orange-500 font-bold flex items-center gap-1.5">
+                            {remainingSparksDisplay}
+                            <Image src="/sparks.png" alt="Sparks icon" width={14} height={14} className="opacity-80" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        logoutMutation.mutate();
+                        setIsMenuOpen(false);
+                      }}
+                      className="flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-500/10 transition-colors w-full cursor-pointer"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span className="text-sm font-medium">Sign Out</span>
+                    </button>
+                  </>
                 )}
               </div>
             </motion.div>

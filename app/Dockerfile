@@ -116,6 +116,10 @@ RUN pip install --no-cache-dir --upgrade pip \
 # This way, "app" is a proper Python package and relative imports work.
 COPY app/ /code/app/
 
+# Copy Alembic files for database migrations in production
+COPY alembic.ini /code/alembic.ini
+COPY alembic/ /code/alembic/
+
 # Create writable directories for the non-root user
 # ──────────────────────────────────────────────────
 # The app creates a logs/ folder at runtime to write log files.
