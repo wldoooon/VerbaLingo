@@ -11,6 +11,7 @@ import { useAuthStore } from "@/stores/auth-store"
 import { Loader2, Bot, Play, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { useMediaQuery } from "@/hooks/use-media-query"
 
 // Dynamic imports for heavy components
 const VideoPlayerCard = dynamic(() => import("@/components/features/player/video-player-card"), {
@@ -52,6 +53,7 @@ export default function RoutedSearchPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isAiCollapsed, setIsAiCollapsed] = useState(false)
   const [mobileTab, setMobileTab] = useState<"player" | "ai">("player")
+  const isDesktop = useMediaQuery("(min-width: 1280px)")
 
   // Auto-switch to AI tab when a word meaning is requested (mobile)
   useEffect(() => {
@@ -215,37 +217,39 @@ export default function RoutedSearchPage() {
               )}
             </div>
 
-            {/* ── Mobile/Tablet AI Panel (below xl) ── */}
+            {/* ── AI Panel (single instance, responsive layout) ── */}
             {playlist.length > 0 && (
-              <div className={`xl:hidden ${mobileTab !== "ai" ? "hidden" : ""}`}>
-                <div className="h-[calc(100vh-10rem)] overflow-hidden bg-card">
-                  <AiCompletion externalPrompt={externalPrompt} />
-                </div>
-              </div>
-            )}
-
-            {/* ── Desktop AI Panel (xl+) ── */}
-            {playlist.length > 0 && (
-              <div className="hidden xl:block relative sticky top-0 h-[calc(100vh-5rem)] border-l bg-card">
-
-                {/* Sidebar-style toggle — sits on the left border line, outside overflow-hidden so it's never clipped */}
-                <button
-                  onClick={() => setIsAiCollapsed(!isAiCollapsed)}
-                  className="absolute -left-3 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
-                  title={isAiCollapsed ? "Open AI Assistant" : "Close AI Assistant"}
-                >
-                  {isAiCollapsed
-                    ? <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
-                    : <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />}
-                </button>
-
-                {/* Inner panel — overflow-hidden only here, not on the button's parent */}
-                <div className="h-full overflow-hidden">
-                  <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
-                    <AiCompletion externalPrompt={externalPrompt} />
+              <>
+                {/* Mobile/Tablet: shown when AI tab is active */}
+                {!isDesktop && (
+                  <div className={mobileTab !== "ai" ? "hidden" : ""}>
+                    <div className="h-[calc(100vh-10rem)] overflow-hidden bg-card">
+                      <AiCompletion externalPrompt={externalPrompt} />
+                    </div>
                   </div>
-                </div>
-              </div>
+                )}
+
+                {/* Desktop: sidebar panel */}
+                {isDesktop && (
+                  <div className="relative sticky top-0 h-[calc(100vh-5rem)] border-l bg-card">
+                    <button
+                      onClick={() => setIsAiCollapsed(!isAiCollapsed)}
+                      className="absolute -left-3 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
+                      title={isAiCollapsed ? "Open AI Assistant" : "Close AI Assistant"}
+                    >
+                      {isAiCollapsed
+                        ? <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+                        : <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />}
+                    </button>
+
+                    <div className="h-full overflow-hidden">
+                      <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
+                        <AiCompletion externalPrompt={externalPrompt} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
