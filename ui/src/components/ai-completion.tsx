@@ -645,7 +645,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
                 </main>
 
-                <footer className="relative w-full flex-shrink-0 mt-3 sm:mt-6 pt-3 sm:pt-4">
+                <footer className="relative w-full flex-shrink-0 mt-1 sm:mt-2 pt-2 sm:pt-3">
                     {/* Footer top gradient border */}
                     <div className="absolute top-0 left-0 right-0 flex h-px">
                         <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
@@ -687,7 +687,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                     </div>
                     <div className="text-center mt-3 px-4">
                         <p className="text-[10px] text-muted-foreground/50 font-medium tracking-wide">
-                            Responses are AI-generated and may occasionally contain inaccuracies. Please verify critical information.
+                            AI can make mistakes. Double-check important info.
                         </p>
                     </div>
                 </footer>
