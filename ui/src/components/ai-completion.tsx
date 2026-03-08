@@ -97,6 +97,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     const [error, setError] = useState<Error | null>(null);
 
     const complete = async (prompt: string) => {
+        if (isLoading) return;
         setIsLoading(true);
         setCompletion("");
         setError(null);
