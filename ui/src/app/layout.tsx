@@ -17,15 +17,36 @@ import { Analytics } from "@vercel/analytics/next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "VerbaLingo - Learn Languages from Real Content",
-  description: "Master languages with real-world video clips from movies, podcasts, and more.",
+  title: {
+    default: "PokiSpokey - Learn Languages from Real Content",
+    template: "%s | PokiSpokey",
+  },
+  description:
+    "Master languages with real-world video clips from movies, podcasts, and more.",
+  metadataBase: new URL("https://pokispokey.com"),
+  openGraph: {
+    title: "PokiSpokey - Learn Languages from Real Content",
+    description:
+      "Master languages with real-world video clips from movies, podcasts, and more.",
+    url: "https://pokispokey.com",
+    siteName: "PokiSpokey",
+    images: [{ url: "/main_logo.png", width: 512, height: 512, alt: "PokiSpokey" }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "PokiSpokey - Learn Languages from Real Content",
+    description:
+      "Master languages with real-world video clips from movies, podcasts, and more.",
+    images: ["/main_logo.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="scroll-smooth overflow-x-hidden w-full" suppressHydrationWarning style={{ fontSize: '80%' }}>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://www.youtube.com" />
         <link rel="preconnect" href="https://i.ytimg.com" />
         <link rel="preconnect" href="https://s.ytimg.com" />

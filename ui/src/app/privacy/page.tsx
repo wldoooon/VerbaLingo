@@ -1,4 +1,10 @@
 import React from 'react';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "PokiSpokey privacy policy — how we handle your data.",
+};
 
 export default function PrivacyPage() {
     return (
