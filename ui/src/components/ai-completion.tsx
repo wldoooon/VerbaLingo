@@ -427,11 +427,6 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
 
                 <main className="w-full flex-1 flex flex-col mt-6 space-y-6 min-h-0">
-                    <div className="flex items-center gap-4 px-8 opacity-60 mb-2">
-                        <div className="h-px bg-border flex-1" />
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">Today</span>
-                        <div className="h-px bg-border flex-1" />
-                    </div>
                     {/* Suggestions */}
                     <AnimatePresence>
                         {!shouldHideSuggestions && (
