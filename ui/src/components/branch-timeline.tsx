@@ -66,41 +66,43 @@ export function BranchTimeline({
                     {/* Scrollable Nodes */}
                     <div
                         ref={scrollContainerRef}
-                        className="relative w-full h-full flex items-center gap-8 overflow-x-auto no-scrollbar px-[40%] scroll-smooth"
+                        className="relative w-full h-full overflow-x-auto no-scrollbar scroll-smooth"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                     >
-                        {branches.map((branch, i) => {
-                            const isActive = i === currentIndex;
-                            const isPast = i < currentIndex;
+                        <div className="flex items-center justify-center min-w-full w-max gap-4 sm:gap-8 px-4 h-full">
+                            {branches.map((branch, i) => {
+                                const isActive = i === currentIndex;
+                                const isPast = i < currentIndex;
 
-                            return (
-                                <TooltipProvider key={i}>
-                                    <Tooltip delayDuration={0}>
-                                        <TooltipTrigger asChild>
-                                            <button
-                                                onClick={() => onSelectIndex(i)}
-                                                className="group relative flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary rounded-full"
-                                            >
-                                                {/* The Dot Node */}
-                                                <div className={cn(
-                                                    "w-4 h-4 rounded-full transition-all duration-300 relative z-10",
-                                                    isActive
-                                                        ? "bg-primary w-6 h-6 shadow-[0_0_0_4px_rgba(59,130,246,0.2)]"
-                                                        : "bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 scale-90"
-                                                )}>
-                                                    {isActive && (
-                                                        <div className="absolute inset-0 m-auto w-2 h-2 rounded-full bg-white dark:bg-black" />
-                                                    )}
-                                                </div>
-                                            </button>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="top" className="max-w-[200px] text-xs p-2">
-                                            <p className="line-clamp-3">{branch.prompt}</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            );
-                        })}
+                                return (
+                                    <TooltipProvider key={i}>
+                                        <Tooltip delayDuration={0}>
+                                            <TooltipTrigger asChild>
+                                                <button
+                                                    onClick={() => onSelectIndex(i)}
+                                                    className="group relative flex-shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary rounded-full cursor-pointer"
+                                                >
+                                                    {/* The Dot Node */}
+                                                    <div className={cn(
+                                                        "w-4 h-4 rounded-full transition-all duration-300 relative z-10",
+                                                        isActive
+                                                            ? "bg-primary w-6 h-6 shadow-[0_0_0_4px_rgba(59,130,246,0.2)]"
+                                                            : "bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 scale-90"
+                                                    )}>
+                                                        {isActive && (
+                                                            <div className="absolute inset-0 m-auto w-2 h-2 rounded-full bg-white dark:bg-black" />
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top" className="max-w-[200px] text-xs p-2">
+                                                <p className="line-clamp-3">{branch.prompt}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 

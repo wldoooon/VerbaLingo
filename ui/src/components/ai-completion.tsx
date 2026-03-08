@@ -5,7 +5,7 @@ import { useSearchStore } from "@/stores/use-search-store";
 import { useUsageStore } from "@/stores/usage-store";
 import { Button } from "@/components/ui/button";
 import { Response } from "@/components/ui/shadcn-io/ai/response";
-import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight, Bot, Lock, MessageSquare, Zap, ArrowRight } from "lucide-react";
+import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight, Bot, Lock, MessageSquare, Zap, ArrowRight, CircleCheck, CircleAlert } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
@@ -13,7 +13,7 @@ import { useResponseHistory } from "@/hooks/useResponseHistory";
 import { SessionSelector } from "@/components/session-selector";
 import { BranchTimeline } from "@/components/branch-timeline";
 import { useRouter, useSearchParams as useNextSearchParams } from "next/navigation";
-import { anchoredToastManager } from "@/components/ui/toast";
+import { toastManager, anchoredToastManager } from "@/components/ui/toast";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import {
     Tooltip,
@@ -178,6 +178,24 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     const handleCopy = () => {
         const textToCopy = currentBranch ? currentBranch.response : completion;
         if (textToCopy) copyToClipboard(textToCopy);
+    };
+
+    const handleLike = () => {
+        toastManager.add({
+            title: "Feedback Sent",
+            description: "Thanks! We'll use this to improve future answers.",
+            type: "success",
+            timeout: 3000,
+        });
+    };
+
+    const handleDislike = () => {
+        toastManager.add({
+            title: "Feedback Recorded",
+            description: "Thanks for letting us know! We'll work on doing better.",
+            type: "info",
+            timeout: 3000,
+        });
     };
 
     const smartSuggestions = useMemo(() => generateSmartSuggestions(query), [query]);
@@ -607,7 +625,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                                                 ref={copyButtonRef}
                                                                 variant="ghost"
                                                                 size="icon"
-                                                                className="h-8 w-8 hover:text-primary transition-colors"
+                                                                className="h-8 w-8 hover:text-primary transition-colors cursor-pointer"
                                                                 onClick={handleCopy}
                                                                 disabled={isCopied}
                                                             >
@@ -619,10 +637,20 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                                                         </TooltipContent>
                                                     </Tooltip>
                                                 </TooltipProvider>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-green-500 transition-colors">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 hover:text-green-500 transition-colors cursor-pointer"
+                                                    onClick={handleLike}
+                                                >
                                                     <ThumbsUp size={16} />
                                                 </Button>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-red-500 transition-colors">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 hover:text-red-500 transition-colors cursor-pointer"
+                                                    onClick={handleDislike}
+                                                >
                                                     <ThumbsDown size={16} />
                                                 </Button>
                                             </div>
@@ -647,12 +675,12 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
                         <Input
                             type="text"
-                            maxLength={60}
+                            maxLength={150}
                             placeholder={outOfSparks ? "Out of Sparks! Upgrade to continue." : "Ask about pronunciation, definitions, examples..."}
                             className="w-full rounded-full pl-10 pr-24 py-6 bg-muted shadow-sm border border-primary/40 focus-visible:bg-background transition-colors"
                             value={inputValue}
                             onChange={(e) => {
-                                const val = e.target.value.slice(0, 60);
+                                const val = e.target.value.slice(0, 150);
                                 setInputValue(val);
                             }}
                             onKeyPress={handleKeyPress}
@@ -662,9 +690,9 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         {/* Character limit indicator */}
                         <div className={cn(
                             "absolute right-12 top-1/2 -translate-y-1/2 text-[10px] font-medium pointer-events-none transition-all duration-200",
-                            inputValue.length >= 60 ? "text-red-500 font-bold" : "text-muted-foreground/40"
+                            inputValue.length >= 150 ? "text-red-500 font-bold" : "text-muted-foreground/40"
                         )}>
-                            {inputValue.length}/60
+                            {inputValue.length}/150
                         </div>
 
                         <button
@@ -677,7 +705,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                     </div>
                     <div className="text-center mt-3 px-4">
                         <p className="text-[10px] text-muted-foreground/50 font-medium tracking-wide">
-                            AI can make mistakes. Please verify important information.
+                            Responses are AI-generated and may occasionally contain inaccuracies. Please verify critical information.
                         </p>
                     </div>
                 </footer>
