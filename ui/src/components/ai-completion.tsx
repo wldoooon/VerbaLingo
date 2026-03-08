@@ -298,9 +298,9 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         complete(externalPrompt);
     }, [externalPrompt]);
 
-    // Store completed response as a branch
+    // Store completed response as a branch (skip truncated/partial responses < 50 chars)
     useEffect(() => {
-        if (!isLoading && completion && completion.trim() && currentPromptRef.current) {
+        if (!isLoading && completion && completion.trim().length >= 50 && currentPromptRef.current) {
             addBranch(currentPromptRef.current, completion);
         }
     }, [isLoading]); // Removed completion/addBranch from deps to avoid double-add
