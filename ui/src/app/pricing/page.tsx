@@ -142,13 +142,13 @@ function PricingCard({
     >
       {/* Most Popular badge */}
       {isPopular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-background px-5 py-1.5 rounded-full shadow-lg border border-border whitespace-nowrap">
+        <div className="absolute -top-4 right-15 translate-x-1/2 bg-background px-4 py-1.5 rounded-full shadow-md border border-border whitespace-nowrap z-10">
           <ShinyText
             text="Recommended"
             speed={3}
             delay={0}
             color="#71717a"
-            shineColor="#f97316"
+            shineColor="#ffffffff"
             spread={120}
             direction="left"
             className="text-[11px] font-black uppercase tracking-widest inline-block"
@@ -157,18 +157,18 @@ function PricingCard({
       )}
 
       {/* Plan name */}
-      <p className="text-orange-500 font-black text-sm tracking-widest uppercase mb-3">
+      <p className="text-orange-500 font-black text-sm tracking-widest uppercase mb-4 text-center">
         {tier.name}
       </p>
 
       {/* Price */}
-      <div className="flex items-start mb-1">
+      <div className="flex items-start justify-center mb-1">
         <span className="text-3xl font-black text-foreground mt-2 mr-0.5">$</span>
         <span className="text-7xl font-black text-foreground leading-none tracking-tighter">
           {tier.price === 0 ? "0" : tier.price}
         </span>
       </div>
-      <p className="text-sm text-muted-foreground mb-6">
+      <p className="text-sm text-muted-foreground mb-8 text-center font-medium">
         {tier.price === 0 ? "free forever" : "per user per month"}
       </p>
 
@@ -218,8 +218,8 @@ function PricingCard({
             )}
           >
             {fi === 0 && f.includes("plus") ? null : (
-              <span className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center">
-                <Check className="w-3 h-3 text-orange-500" />
+              <span className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
+                <Check className="w-3.5 h-3.5 text-black stroke-[3]" />
               </span>
             )}
             {f}
@@ -261,7 +261,7 @@ export default function PricingPage() {
           className="text-lg text-muted-foreground leading-relaxed"
         >
           Simple pricing. No hidden fees. Payments via{" "}
-          <strong className="text-foreground">Gumroad</strong> — not Stripe.
+          <strong className="text-foreground">Gumroad</strong>
         </motion.p>
 
         <motion.div
