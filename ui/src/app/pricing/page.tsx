@@ -9,11 +9,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import ShinyText from '@/components/ShinyText';
-import { Caveat } from 'next/font/google';
+import { Carter_One, Caveat } from 'next/font/google';
 
-const caveatFont = Caveat({
+const caveat = Caveat({
   subsets: ['latin'],
-  weight: ['700']
+  weight: ['400']
+})
+
+const caveatFont = Carter_One({
+  subsets: ['latin'],
+  weight: ['400']
 });
 
 // ─── Pricing Data ────────────────────────────────────────────────────────────
@@ -165,7 +170,7 @@ function PricingCard({
       {/* Plan name */}
       <p className={cn(
         "text-orange-500 font-medium text-3xl mb-4 text-center capitalize mt-4 tracking-normal",
-        caveatFont.className
+        caveat.className
       )}>
         {tier.name.toLowerCase()}
       </p>
@@ -261,7 +266,7 @@ export default function PricingPage() {
           transition={{ duration: 0.5, delay: 0.08 }}
           className="text-4xl md:text-6xl font-black text-foreground mb-5 tracking-tighter"
         >
-          Fuel your language<br />journey.
+          <span className={caveatFont.className}>Fuel your language journey.</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 16 }}
