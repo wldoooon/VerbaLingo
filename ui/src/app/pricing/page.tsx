@@ -9,6 +9,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import ShinyText from '@/components/ShinyText';
+import { Caveat } from 'next/font/google';
+
+const caveatFont = Caveat({
+  subsets: ['latin'],
+  weight: ['700']
+});
 
 // ─── Pricing Data ────────────────────────────────────────────────────────────
 const TIERS = [
@@ -157,8 +163,11 @@ function PricingCard({
       )}
 
       {/* Plan name */}
-      <p className="text-orange-500 font-black text-sm tracking-widest uppercase mb-4 text-center">
-        {tier.name}
+      <p className={cn(
+        "text-orange-500 font-medium text-3xl mb-4 text-center capitalize mt-4 tracking-normal",
+        caveatFont.className
+      )}>
+        {tier.name.toLowerCase()}
       </p>
 
       {/* Price */}
