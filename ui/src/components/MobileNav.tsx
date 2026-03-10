@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Compass, Bookmark, CreditCard, Megaphone, User, Menu, X, LifeBuoy, ChevronRight, LogOut, Sun, Moon, Zap } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
@@ -25,11 +25,25 @@ export function MobileNav() {
   const logoutMutation = useLogoutMutation();
   const isAuthenticated = authStatus === 'authenticated';
 
+  // Prevent background scrolling when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
+
   const usageMap = useUsageStore((s) => s.usage);
-  const stats = usageMap['ai_chat'] || { current: 0, balance: 0, limit: -1, remaining: -1 };
+  const stats = usageMap?.['ai_chat'] || { current: 0, balance: 0, limit: -1, remaining: -1 };
+  const maxSparks = authUser?.tier === "pro" ? 250000 : 30000;
   const currentBalance = stats.balance ?? 0;
-  const displayLimit = stats.limit === -1 ? '∞' : stats.limit;
-  const displayRemaining = stats.remaining === -1 ? '∞' : (stats.remaining > 0 ? stats.remaining : 0);
+
+  const displayLimit = maxSparks.toLocaleString();
+  const displayRemaining = currentBalance.toLocaleString();
   const remainingSparksDisplay = (currentBalance / 1000).toFixed(2);
 
   // Don't show on search/watch pages (they have their own layout)
