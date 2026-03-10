@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react';
-import { Check, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Check, ArrowRight, ShieldCheck, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { AuthDialog } from '@/components/auth-dialog';
 import { motion } from 'framer-motion';
@@ -9,6 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import ShinyText from '@/components/ShinyText';
+import { Faq } from '@/components/Faq';
 import { Carter_One, Caveat } from 'next/font/google';
 
 const caveat = Caveat({
@@ -121,6 +122,39 @@ const TIERS = [
   },
 ];
 
+const COMPARE_FEATURES = [
+  {
+    category: "Core Usage",
+    features: [
+      { name: "AI Sparks per month", values: ["50K", "800K", "5M", "15M", "Unlimited"] },
+      { name: "Searches per month", values: ["100", "500", "2,000", "Unlimited", "Unlimited"] },
+    ]
+  },
+  {
+    category: "Learning Tools",
+    features: [
+      { name: "Transcript highlighting", values: [true, true, true, true, true] },
+      { name: "Word lookup & context", values: [true, true, true, true, true] },
+      { name: "AI explanations", values: ["Basic", "Advanced", "Advanced", "Advanced", "Advanced"] },
+    ]
+  },
+  {
+    category: "Power Features",
+    features: [
+      { name: "Advanced usage analytics", values: [false, false, true, true, true] },
+      { name: "Bulk export", values: [false, false, false, true, true] },
+      { name: "Early access to new features", values: [false, false, true, true, true] },
+    ]
+  },
+  {
+    category: "Support & Perks",
+    features: [
+      { name: "Support level", values: ["Community", "Priority", "Priority", "Priority", "Dedicated"] },
+      { name: "Founding member badge", values: [false, false, false, false, true] },
+    ]
+  }
+];
+
 function PricingCard({
   tier,
   index,
@@ -177,8 +211,8 @@ function PricingCard({
 
       {/* Price */}
       <div className="flex items-start justify-center mb-1">
-        <span className="text-3xl font-black text-foreground mt-2 mr-0.5">$</span>
-        <span className="text-7xl font-black text-foreground leading-none tracking-tighter">
+        <span className={cn("text-3xl font-black text-foreground mt-2 mr-0.5", caveatFont.className)}>$</span>
+        <span className={cn("text-7xl font-black text-foreground leading-none tracking-tighter", caveatFont.className)}>
           {tier.price === 0 ? "0" : tier.price}
         </span>
       </div>
@@ -300,6 +334,71 @@ export default function PricingPage() {
           />
         ))}
       </div>
+
+      {/* ── Compare Table ────────────────────────────────────────────── */}
+      <div className="mt-36 max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className={cn("text-4xl md:text-6xl font-black text-foreground uppercase tracking-widest mb-6", caveatFont.className)}>
+            COMPARE PLANS & FEATURES
+          </h2>
+          <p className="text-muted-foreground text-base font-bold">
+            Have questions? Jump directly to our FAQ section. <Link href="#faq" className="text-blue-600 dark:text-blue-500 hover:text-blue-700 transition-colors">Go to FAQs ↓</Link>
+          </p>
+        </div>
+
+        <div className="w-full overflow-x-auto pb-4">
+          <table className="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+              <tr>
+                <th className="w-[25%] p-5"></th>
+                {TIERS.map((tier) => (
+                  <th key={tier.id} className="p-5 text-center font-bold text-foreground text-lg tracking-tight w-[15%]">
+                    {tier.name}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARE_FEATURES.map((section) => (
+                <React.Fragment key={section.category}>
+                  <tr className="border-b-0">
+                    <td colSpan={6} className="py-3 pt-12">
+                      <div className="bg-slate-100 dark:bg-zinc-800/80 rounded-xl px-5 py-4 font-black text-foreground text-base uppercase tracking-wider">
+                        {section.category}
+                      </div>
+                    </td>
+                  </tr>
+                  {section.features.map((feature) => (
+                    <tr key={feature.name} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                      <td className="py-5 px-5 text-base font-medium text-foreground">{feature.name}</td>
+                      {feature.values.map((val, vIdx) => (
+                        <td key={vIdx} className="py-5 px-3 text-center text-base text-foreground font-medium">
+                          {typeof val === "boolean" ? (
+                            val ? (
+                              <span className="flex w-6 h-6 bg-orange-500 rounded-full items-center justify-center mx-auto">
+                                <Check className="w-4 h-4 text-black stroke-[3]" />
+                              </span>
+                            ) : (
+                              <span className="flex w-6 h-6 bg-slate-200 dark:bg-zinc-800 rounded-full items-center justify-center mx-auto">
+                                <X className="w-4 h-4 text-slate-400 dark:text-zinc-500 stroke-[3]" />
+                              </span>
+                            )
+                          ) : (
+                            val
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── FAQ Section ────────────────────────────────────────────── */}
+      <Faq />
 
       {/* ── Trust Footer ─────────────────────────────────────────────── */}
       <motion.div
