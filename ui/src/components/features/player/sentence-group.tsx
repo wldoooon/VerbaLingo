@@ -78,8 +78,10 @@ export const SentenceGroup = memo(({
                 const wordText = (w.text || "").trim()
                 const queryParts = query.split(/\s+/).filter(part => part.length > 0)
                 const isSearchMatch = queryParts.length > 0 && queryParts.some(part => {
-                  const cleanWord = wordText.toLowerCase().replace(/[.,!?;:()\[\]{}"']/g, '');
-                  return cleanWord === part.toLowerCase();
+                  const punctuationRegex = /[.,!?;:()\[\]{}"']/g;
+                  const cleanWord = wordText.toLowerCase().replace(punctuationRegex, '');
+                  const cleanPart = part.toLowerCase().replace(punctuationRegex, '');
+                  return cleanWord.length > 0 && cleanPart.length > 0 && cleanWord === cleanPart;
                 })
 
                 return (
