@@ -306,21 +306,26 @@ export default function PricingPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="text-lg text-muted-foreground leading-relaxed"
+          className="text-lg text-muted-foreground leading-relaxed flex items-center justify-center gap-2 flex-wrap"
         >
-          Simple pricing. No hidden fees. Payments via{" "}
-          <strong className="text-foreground">Gumroad</strong>
+          Simple pricing. No hidden fees. Payments via
+          <span className="inline-flex items-center gap-1.5">
+            <Image
+              src="/gumroad_logo.png"
+              alt="Gumroad Logo"
+              width={18}
+              height={18}
+              className="w-[18px] h-[18px] object-contain shrink-0"
+            />
+            <Image
+              src="/gumroad_text_logo.png"
+              alt="Gumroad"
+              width={80}
+              height={18}
+              className="h-3 w-auto object-contain"
+            />
+          </span>
         </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.25 }}
-          className="inline-flex items-center gap-2 mt-5 px-4 py-2 rounded-full bg-muted border border-border text-xs text-muted-foreground"
-        >
-          <ShieldCheck className="w-3.5 h-3.5 text-green-500" />
-          Secure checkout via <span className="font-bold text-foreground ml-1">Gumroad</span>
-        </motion.div>
       </div>
 
       {/* ── Pricing Cards ────────────────────────────────────────────── */}
