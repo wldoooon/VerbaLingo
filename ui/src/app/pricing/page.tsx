@@ -232,7 +232,7 @@ function PricingCard({
       )}
 
       {/* Header Box */}
-      <div className="border border-slate-200 dark:border-zinc-700/60 rounded-2xl pt-5 pb-6 -mx-4 mb-8 mt-2">
+      <div className="border border-slate-200 dark:border-zinc-700/60 rounded-2xl pt-5 pb-6 -mx-5 mb-8 -mt-6">
         {/* Plan name */}
         <p className={cn(
           "text-black-500 font-medium text-3xl mb-4 text-center capitalize tracking-normal flex justify-center",

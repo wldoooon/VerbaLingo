@@ -7,6 +7,7 @@ python-multipart>=0.0.9
 # ─── Database ───
 sqlmodel>=0.0.22
 asyncpg>=0.29.0
+alembic==1.17.2
 
 # ─── Search Engine ───
 manticoresearch @ git+https://github.com/manticoresoftware/manticoresearch-python-asyncio.git@b2c0780e189293cf783e5f7045bb077ed679c6e4
