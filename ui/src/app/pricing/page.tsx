@@ -204,10 +204,10 @@ function PricingCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.5, delay: index * 0.07 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4, delay: index * 0.05 }}
       className={cn(
         "relative flex flex-col h-full bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-700/60 shadow-md px-5 sm:px-7 py-8 transition-all duration-300",
         isPopular
@@ -320,25 +320,25 @@ export default function PricingPage() {
       {/* ── Hero Header ──────────────────────────────────────────────── */}
       <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-20">
         <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.4 }}
           className="text-orange-500 font-black uppercase tracking-[0.25em] text-xs mb-4"
         >
           Membership
         </motion.p>
         <motion.h1
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.08 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
           className="text-3xl sm:text-4xl md:text-6xl font-black text-foreground mb-5 tracking-tighter"
         >
           <span className={caveatFont.className}>Fuel your language journey.</span>
         </motion.h1>
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.18 }}
           className="text-base sm:text-lg text-muted-foreground leading-relaxed flex items-center justify-center gap-2 flex-wrap"
         >
           Simple pricing. No hidden fees. Payments via
@@ -369,7 +369,13 @@ export default function PricingPage() {
       </div>
 
       {/* ── Compare Table ────────────────────────────────────────────── */}
-      <div className="mt-20 sm:mt-36 max-w-7xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.4 }}
+        className="mt-20 sm:mt-36 max-w-7xl mx-auto"
+      >
         <div className="text-center mb-10 sm:mb-16">
           <h2 className={cn("text-2xl sm:text-4xl md:text-5xl font-black text-foreground uppercase tracking-widest mb-6", caveatFont.className)}>
             COMPARE PLANS &amp; FEATURES
@@ -469,7 +475,7 @@ export default function PricingPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Trust Footer ─────────────────────────────────────────────── */}
       <motion.div
