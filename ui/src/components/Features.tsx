@@ -4,6 +4,10 @@ import React from 'react';
 import { Search, Bot, Mic, Globe, Sparkles } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import AnimatedContent from "./AnimatedContent";
+import { Carter_One } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const carterOne = Carter_One({ weight: '400', subsets: ['latin'] });
 
 export function Features() {
   return (
@@ -13,7 +17,7 @@ export function Features() {
         {/* Animated Header */}
         <AnimatedContent distance={40} direction="vertical" duration={0.8} threshold={0.2}>
           <div className="text-center mb-16 max-w-2xl mx-auto">
-            <h2 className="text-[clamp(2rem,7vw,3.5rem)] font-black text-foreground mb-4 tracking-tight leading-tight">
+            <h2 className={cn("text-[clamp(2rem,7vw,3.5rem)] font-black text-foreground mb-4 tracking-tight leading-tight", carterOne.className)}>
               Everything you need to fluency
             </h2>
             <p className="text-muted-foreground text-lg leading-relaxed">

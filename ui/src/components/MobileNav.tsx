@@ -13,6 +13,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from 'next-themes';
+import { Carter_One } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const carterOne = Carter_One({ weight: '400', subsets: ['latin'] });
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -154,7 +158,7 @@ export function MobileNav() {
                 <div className="flex items-center gap-2">
                   <Image src="/main_logo.png" alt="PokiSpokey" width={40} height={40} className="shrink-0" />
                   <div className="flex items-start">
-                    <h1 className="text-xl font-black text-foreground tracking-tight leading-none">
+                    <h1 className={cn("text-xl font-black text-foreground tracking-tight leading-none", carterOne.className)}>
                       Poki<span className="text-primary">Spokey</span>
                     </h1>
                     <Badge variant="secondary" className="text-[8px] px-1 py-0 h-[14px] font-bold uppercase tracking-widest bg-slate-200 dark:bg-zinc-800 text-slate-500 dark:text-slate-400 border-transparent rounded-full ml-1 -mt-1">

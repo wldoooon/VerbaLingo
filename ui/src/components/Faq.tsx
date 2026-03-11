@@ -13,6 +13,10 @@ import { ContactMorphSurface } from "@/components/ui/contact-morph-surface"
 import { HelpCircle } from "lucide-react"
 import ShinyText from "./ShinyText"
 import AnimatedContent from "./AnimatedContent"
+import { Carter_One } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const carterOne = Carter_One({ weight: '400', subsets: ['latin'] });
 
 const faqData = [
   {
@@ -80,7 +84,7 @@ export function Faq() {
               {/* Header */}
               <div className="space-y-4 flex flex-col items-center text-center lg:items-start lg:text-left">
 
-                <h2 className="text-[clamp(2.5rem,7vw,3.5rem)] font-black tracking-tighter leading-tight">
+                <h2 className={cn("text-[clamp(2.5rem,7vw,3.5rem)] font-black tracking-tighter leading-tight", carterOne.className)}>
                   <ShinyText
                     text="Got questions?"
                     speed={2}

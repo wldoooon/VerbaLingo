@@ -8,6 +8,10 @@ import Image from 'next/image';
 import FoxLogo from './FoxLogo';
 import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/stores/auth-store';
+import { Carter_One } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const carterOne = Carter_One({ weight: '400', subsets: ['latin'] });
 import { useLogoutMutation } from '@/lib/authHooks';
 import {
   DropdownMenu,
@@ -139,7 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
         <Image src="/main_logo.png" alt="PokiSpokey Logo" width={isCollapsed ? 44 : 52} height={isCollapsed ? 44 : 52} className="shrink-0" />
         {!isCollapsed && (
           <div className="flex items-start">
-            <h1 className="text-2xl font-black text-foreground tracking-tight leading-none">
+            <h1 className={cn("text-2xl font-black text-foreground tracking-tight leading-none", carterOne.className)}>
               Poki<span className="text-primary">Spokey</span>
             </h1>
             <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-[15px] font-bold uppercase tracking-widest bg-slate-200 dark:bg-zinc-800 text-slate-500 dark:text-slate-400 border-transparent rounded-full flex items-center justify-center leading-none ml-1 -mt-1.5">
