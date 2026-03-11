@@ -370,13 +370,57 @@ export default function PricingPage() {
 
       {/* ── Compare Table ────────────────────────────────────────────── */}
       <div className="mt-20 sm:mt-36 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 sm:mb-16">
           <h2 className={cn("text-2xl sm:text-4xl md:text-5xl font-black text-foreground uppercase tracking-widest mb-6", caveatFont.className)}>
-            COMPARE PLANS & FEATURES
+            COMPARE PLANS &amp; FEATURES
           </h2>
         </div>
 
-        <div className="w-full overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* ── MOBILE: Card layout (hidden on md+) ── */}
+        <div className="block md:hidden space-y-8">
+          {COMPARE_FEATURES.map((section) => (
+            <div key={section.category}>
+              {/* Category header */}
+              <div className="bg-slate-100 dark:bg-zinc-800/80 rounded-xl px-4 py-3 font-black text-foreground text-sm uppercase tracking-wider mb-3">
+                {section.category}
+              </div>
+              {section.features.map((feature) => (
+                <div key={feature.name} className="border border-border/50 rounded-xl mb-3 overflow-hidden">
+                  {/* Feature name */}
+                  <div className="bg-muted/30 px-4 py-2.5 font-semibold text-foreground text-sm border-b border-border/50">
+                    {feature.name}
+                  </div>
+                  {/* Tier values */}
+                  <div className="divide-y divide-border/40">
+                    {TIERS.map((tier, vIdx) => (
+                      <div key={tier.id} className="flex items-center justify-between px-4 py-2.5">
+                        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{tier.name}</span>
+                        <span className="text-sm font-medium text-foreground">
+                          {typeof feature.values[vIdx] === "boolean" ? (
+                            feature.values[vIdx] ? (
+                              <span className="flex w-5 h-5 bg-orange-500 rounded-full items-center justify-center">
+                                <Check className="w-3 h-3 text-black stroke-[3]" />
+                              </span>
+                            ) : (
+                              <span className="flex w-5 h-5 bg-slate-200 dark:bg-zinc-800 rounded-full items-center justify-center">
+                                <X className="w-3 h-3 text-slate-400 dark:text-zinc-500 stroke-[3]" />
+                              </span>
+                            )
+                          ) : (
+                            feature.values[vIdx]
+                          )}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {/* ── DESKTOP: Full table (hidden on mobile) ── */}
+        <div className="hidden md:block w-full overflow-x-auto pb-4">
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
               <tr>
