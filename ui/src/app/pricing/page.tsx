@@ -209,9 +209,9 @@ function PricingCard({
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, delay: index * 0.07 }}
       className={cn(
-        "relative flex flex-col bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-700/60 shadow-md px-7 py-8 transition-all duration-300",
+        "relative flex flex-col h-full bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-700/60 shadow-md px-5 sm:px-7 py-8 transition-all duration-300",
         isPopular
-          ? "shadow-2xl shadow-orange-200/40 dark:shadow-orange-900/20 border-orange-200 dark:border-orange-800/40 -mt-6 pb-14 pt-10"
+          ? "shadow-2xl shadow-orange-200/40 dark:shadow-orange-900/20 border-orange-200 dark:border-orange-800/40 sm:-mt-6 pb-10 sm:pb-14 pt-8 sm:pt-10"
           : "hover:shadow-lg hover:-translate-y-1"
       )}
     >
@@ -232,7 +232,7 @@ function PricingCard({
       )}
 
       {/* Header Box */}
-      <div className="border border-slate-200 dark:border-zinc-700/60 rounded-2xl pt-5 pb-6 -mx-5 mb-8 -mt-6">
+      <div className="border border-slate-200 dark:border-zinc-700/60 rounded-2xl pt-5 pb-6 -mx-4 sm:-mx-5 mb-6 sm:mb-8 -mt-6">
         {/* Plan name */}
         <p className={cn(
           "text-black-500 font-medium text-3xl mb-4 text-center capitalize tracking-normal flex justify-center",
@@ -244,12 +244,12 @@ function PricingCard({
         {/* Price */}
         <div className="flex items-start justify-center mb-1">
           <span className={cn("text-3xl font-black text-foreground mt-2 mr-0.5")}>$</span>
-          <span className={cn("text-7xl font-black text-foreground leading-none tracking-tighter")}>
+          <span className={cn("text-6xl sm:text-7xl font-black text-foreground leading-none tracking-tighter")}>
             {tier.price === 0 ? "0" : tier.price}
           </span>
         </div>
         <p className="text-sm text-muted-foreground text-center font-medium">
-          {tier.price === 0 ? "free forever" : "per user per month"}
+          {tier.price === 0 ? "free forever" : "per month"}
         </p>
       </div>
 
@@ -315,10 +315,10 @@ export default function PricingPage() {
   const authStatus = useAuthStore((s) => s.status);
 
   return (
-    <div className="max-w-screen-2xl mx-auto px-6 py-12 pb-32">
+    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 pb-24 sm:pb-32">
 
       {/* ── Hero Header ──────────────────────────────────────────────── */}
-      <div className="text-center max-w-3xl mx-auto mb-20">
+      <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-20">
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -331,7 +331,7 @@ export default function PricingPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.08 }}
-          className="text-4xl md:text-6xl font-black text-foreground mb-5 tracking-tighter"
+          className="text-3xl sm:text-4xl md:text-6xl font-black text-foreground mb-5 tracking-tighter"
         >
           <span className={caveatFont.className}>Fuel your language journey.</span>
         </motion.h1>
@@ -339,26 +339,25 @@ export default function PricingPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.15 }}
-          className="text-lg text-muted-foreground leading-relaxed flex items-center justify-center gap-2 flex-wrap"
+          className="text-base sm:text-lg text-muted-foreground leading-relaxed flex items-center justify-center gap-2 flex-wrap"
         >
           Simple pricing. No hidden fees. Payments via
           <span className="inline-flex items-center gap-1.5">
-            <Image
-              src="/gumroad_logo.png"
-              alt="Gumroad Logo"
-              width={18}
-              height={18}
-              className="w-[18px] h-[18px] object-contain shrink-0"
-            />
+            <svg viewBox="-0.5 -0.5 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" height="20" width="20" className="text-foreground shrink-0">
+              <path d="M7.5 14.337187499999999C3.7239375000000003 14.337187499999999 0.6628125 11.276062499999998 0.6628125 7.5 0.6628125 3.7239375000000003 3.7239375000000003 0.6628125 7.5 0.6628125c3.7760624999999997 0 6.837187500000001 3.061125 6.837187500000001 6.837187500000001 0 3.7760624999999997 -3.061125 6.837187500000001 -6.837187500000001 6.837187500000001Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1"></path>
+              <path d="M7.5 14.337187499999999c-1.5104375 0 -2.7348749999999997 -3.061125 -2.7348749999999997 -6.837187500000001C4.765125 3.7239375000000003 5.9895625 0.6628125 7.5 0.6628125c1.5103749999999998 0 2.7348749999999997 3.061125 2.7348749999999997 6.837187500000001 0 3.7760624999999997 -1.2245 6.837187500000001 -2.7348749999999997 6.837187500000001Z" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1"></path>
+              <path d="M5.4488125 13.653500000000001c-2.051125 -0.6837500000000001 -2.7348749999999997 -3.6845624999999997 -2.7348749999999997 -5.811625 0 -2.1270625 1.025625 -4.7860625 3.418625 -6.495375" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1"></path>
+              <path d="M9.551187500000001 1.3464999999999998c2.051125 0.6837500000000001 2.7348749999999997 3.6846250000000005 2.7348749999999997 5.811625 0 2.1270625 -1.025625 4.7860625 -3.418625 6.495375" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1"></path>
+            </svg>
             <span className={cn("text-foreground font-bold text-lg leading-none", comfortaaFont.className)}>
-              gumroad
+              polar
             </span>
           </span>
         </motion.p>
       </div>
 
       {/* ── Pricing Cards ────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5 gap-5 max-w-[1400px] mx-auto">
         {TIERS.map((tier, i) => (
           <PricingCard
             key={tier.id}
@@ -370,15 +369,15 @@ export default function PricingPage() {
       </div>
 
       {/* ── Compare Table ────────────────────────────────────────────── */}
-      <div className="mt-36 max-w-7xl mx-auto">
+      <div className="mt-20 sm:mt-36 max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className={cn("text-4xl md:text-6xl font-black text-foreground uppercase tracking-widest mb-6", caveatFont.className)}>
+          <h2 className={cn("text-2xl sm:text-4xl md:text-5xl font-black text-foreground uppercase tracking-widest mb-6", caveatFont.className)}>
             COMPARE PLANS & FEATURES
           </h2>
         </div>
 
-        <div className="w-full overflow-x-auto pb-4">
-          <table className="w-full text-left border-collapse min-w-[800px]">
+        <div className="w-full overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
               <tr>
                 <th className="w-[25%] p-5"></th>
@@ -434,11 +433,11 @@ export default function PricingPage() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-80px" }}
         transition={{ duration: 0.5 }}
-        className="mt-20 pt-10 border-t border-border grid md:grid-cols-3 gap-8 text-center"
+        className="mt-14 sm:mt-20 pt-8 sm:pt-10 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 text-center"
       >
         <div>
           <h4 className="text-foreground font-bold mb-2">Secure Payments</h4>
-          <p className="text-muted-foreground text-sm">All transactions handled securely by Gumroad.</p>
+          <p className="text-muted-foreground text-sm">All transactions handled securely by Polar.</p>
         </div>
         <div>
           <h4 className="text-foreground font-bold mb-2">Cancel Anytime</h4>
