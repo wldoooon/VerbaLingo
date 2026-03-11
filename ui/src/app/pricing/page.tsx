@@ -9,8 +9,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import ShinyText from '@/components/ShinyText';
-import { Faq } from '@/components/Faq';
-import { Carter_One, Caveat } from 'next/font/google';
+import { Carter_One, Caveat, Comfortaa } from 'next/font/google';
 
 const caveat = Caveat({
   subsets: ['latin'],
@@ -20,6 +19,11 @@ const caveat = Caveat({
 const caveatFont = Carter_One({
   subsets: ['latin'],
   weight: ['400']
+})
+
+const comfortaaFont = Comfortaa({
+  subsets: ['latin'],
+  weight: ['700']
 });
 
 // ─── Pricing Data ────────────────────────────────────────────────────────────
@@ -112,7 +116,7 @@ const TIERS = [
     description: "No limits. The ultimate language immersion experience with founding member perks.",
     features: [
       "Everything in Scholar, plus:",
-      "∞ AI Sparks / month",
+      "Unlimited AI Sparks / month",
       "Unlimited searches",
       "Dedicated support channel",
       "Founding member badge",
@@ -154,6 +158,32 @@ const COMPARE_FEATURES = [
     ]
   }
 ];
+
+// Helper: extract a leading number/symbol and wrap it with ShinyText
+function renderFeatureText(text: string) {
+  // Match a leading number (with commas/dots) OR the word "Unlimited" at the start
+  const match = text.match(/^([\.\d,\u221e]+|Unlimited)(\s.+)?$/);
+  if (match && match[1]) {
+    const numPart = match[1];
+    const rest = match[2] || '';
+    return (
+      <span className="inline">
+        <ShinyText
+          text={numPart}
+          speed={3}
+          delay={0}
+          color="#585858ff"
+          shineColor="#ffffffff"
+          spread={80}
+          direction="left"
+          className={cn("inline font-extrabold")}
+        />
+        {rest}
+      </span>
+    );
+  }
+  return text;
+}
 
 function PricingCard({
   tier,
@@ -201,24 +231,27 @@ function PricingCard({
         </div>
       )}
 
-      {/* Plan name */}
-      <p className={cn(
-        "text-orange-500 font-medium text-3xl mb-4 text-center capitalize mt-4 tracking-normal",
-        caveat.className
-      )}>
-        {tier.name.toLowerCase()}
-      </p>
+      {/* Header Box */}
+      <div className="border border-slate-200 dark:border-zinc-700/60 rounded-2xl pt-5 pb-6 -mx-4 mb-8 mt-2">
+        {/* Plan name */}
+        <p className={cn(
+          "text-black-500 font-medium text-3xl mb-4 text-center capitalize tracking-normal flex justify-center",
+          caveat.className
+        )}>
+          {tier.name.toLowerCase()}
+        </p>
 
-      {/* Price */}
-      <div className="flex items-start justify-center mb-1">
-        <span className={cn("text-3xl font-black text-foreground mt-2 mr-0.5", caveatFont.className)}>$</span>
-        <span className={cn("text-7xl font-black text-foreground leading-none tracking-tighter", caveatFont.className)}>
-          {tier.price === 0 ? "0" : tier.price}
-        </span>
+        {/* Price */}
+        <div className="flex items-start justify-center mb-1">
+          <span className={cn("text-3xl font-black text-foreground mt-2 mr-0.5")}>$</span>
+          <span className={cn("text-7xl font-black text-foreground leading-none tracking-tighter")}>
+            {tier.price === 0 ? "0" : tier.price}
+          </span>
+        </div>
+        <p className="text-sm text-muted-foreground text-center font-medium">
+          {tier.price === 0 ? "free forever" : "per user per month"}
+        </p>
       </div>
-      <p className="text-sm text-muted-foreground mb-8 text-center font-medium">
-        {tier.price === 0 ? "free forever" : "per user per month"}
-      </p>
 
       {/* CTA Button */}
       {!tier.gumroadLink ? (
@@ -270,7 +303,7 @@ function PricingCard({
                 <Check className="w-3.5 h-3.5 text-black stroke-[3]" />
               </span>
             )}
-            {f}
+            {fi === 0 && f.includes("plus") ? f : renderFeatureText(f)}
           </li>
         ))}
       </ul>
@@ -317,13 +350,9 @@ export default function PricingPage() {
               height={18}
               className="w-[18px] h-[18px] object-contain shrink-0"
             />
-            <Image
-              src="/gumroad_text_logo.png"
-              alt="Gumroad"
-              width={80}
-              height={18}
-              className="h-3 w-auto object-contain"
-            />
+            <span className={cn("text-foreground font-bold text-lg leading-none", comfortaaFont.className)}>
+              gumroad
+            </span>
           </span>
         </motion.p>
       </div>
@@ -346,9 +375,6 @@ export default function PricingPage() {
           <h2 className={cn("text-4xl md:text-6xl font-black text-foreground uppercase tracking-widest mb-6", caveatFont.className)}>
             COMPARE PLANS & FEATURES
           </h2>
-          <p className="text-muted-foreground text-base font-bold">
-            Have questions? Jump directly to our FAQ section. <Link href="#faq" className="text-blue-600 dark:text-blue-500 hover:text-blue-700 transition-colors">Go to FAQs ↓</Link>
-          </p>
         </div>
 
         <div className="w-full overflow-x-auto pb-4">
@@ -401,9 +427,6 @@ export default function PricingPage() {
           </table>
         </div>
       </div>
-
-      {/* ── FAQ Section ────────────────────────────────────────────── */}
-      <Faq />
 
       {/* ── Trust Footer ─────────────────────────────────────────────── */}
       <motion.div
