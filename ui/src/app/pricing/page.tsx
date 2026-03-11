@@ -371,9 +371,9 @@ export default function PricingPage() {
       {/* ── Compare Table ────────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
+        animate={{ opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 2 }}
         className="mt-20 sm:mt-36 max-w-7xl mx-auto"
       >
         <div className="text-center mb-10 sm:mb-16">
