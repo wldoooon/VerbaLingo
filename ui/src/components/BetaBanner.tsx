@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 
-const BANNER_VERSION = "beta-3.0"
+const BANNER_VERSION = "beta-v1.0"
 const STORAGE_KEY = `Pokispokey-banner-dismissed-${BANNER_VERSION}`
 
 export function BetaBanner() {
@@ -59,12 +59,12 @@ export function BetaBanner() {
             inline-flex items-center
             px-2.5 py-0.5
             text-[9px] font-black uppercase tracking-[0.25em]
-            bg-primary/10 text-primary
+            bg-slate-200 dark:bg-zinc-800 text-slate-500 dark:text-slate-400
             rounded-full
-            border border-primary/15
+            border border-transparent
             shrink-0
           ">
-            Beta 3.0
+            Beta v1.0
           </span>
 
           {/* Separator — thin vertical line */}
@@ -76,8 +76,8 @@ export function BetaBanner() {
             tracking-wide
             hidden sm:block
           ">
-            You're using an early build — some features may shift.
-            <span className="text-foreground/70 font-bold ml-1">Feedback welcome.</span>
+            This is a beta release. You might encounter bugs or errors.
+            <span className="text-foreground/70 font-bold ml-1">Please report issues to support.</span>
           </p>
 
           {/* Mobile-only compact message */}
@@ -86,7 +86,7 @@ export function BetaBanner() {
             tracking-wide
             block sm:hidden
           ">
-            Early build — things may shift.
+            Beta version—expect bugs. Please report issues.
           </p>
 
           {/* Dismiss — text "×", not an icon */}
