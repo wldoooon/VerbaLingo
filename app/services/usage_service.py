@@ -22,22 +22,28 @@ from ..core.logging import logger
 
 settings = get_settings()
 
-# Feature limits per tier (daily)
+# Feature limits per tier (daily). 0 = blocked, -1 = unlimited.
 FEATURE_LIMITS = {
     "search": {
-        UserTier.FREE: 50,
-        UserTier.PRO: -1,  # unlimited
-        UserTier.UNLIMITED: -1,
+        UserTier.FREE:     4,
+        UserTier.BASIC:    17,
+        UserTier.PRO:      67,
+        UserTier.PREMIUM:  -1,
+        UserTier.MAX:      -1,
     },
     "ai_chat": {
-        UserTier.FREE: -1,  # Migrating to Token Wallet (No daily limit)
-        UserTier.PRO: -1,
-        UserTier.UNLIMITED: -1,
+        UserTier.FREE:     15,
+        UserTier.BASIC:    50,
+        UserTier.PRO:      100,
+        UserTier.PREMIUM:  -1,
+        UserTier.MAX:      -1,
     },
     "export": {
-        UserTier.FREE: 5,
-        UserTier.PRO: -1,
-        UserTier.UNLIMITED: -1,
+        UserTier.FREE:     5,
+        UserTier.BASIC:    10,
+        UserTier.PRO:      -1,
+        UserTier.PREMIUM:  -1,
+        UserTier.MAX:      -1,
     },
 }
 
@@ -216,7 +222,7 @@ async def get_user_usage_stats(
         usage = None
     
     return {
-        "tier": tier.value,
+        "tier": tier,
         "daily": {
             "search": {"current": search_count, "limit": _get_limit(tier, "search"), "remaining": max(0, _get_limit(tier, "search") - search_count) if _get_limit(tier, "search") != -1 else -1},
             "ai_chat": {

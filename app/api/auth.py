@@ -106,7 +106,7 @@ async def verify_email(
     logger.info(f"Email verified: {email}")
     return {
         "message": "Email verified successfully",
-        "user": {"id": str(user.id), "email": user.email, "tier": user.tier.value}
+        "user": {"id": str(user.id), "email": user.email, "tier": user.tier}
     }
 
 
@@ -153,7 +153,7 @@ async def login(
     
     return {
         "message": "Login successful",
-        "user": {"id": str(user.id), "email": user.email, "tier": user.tier.value}
+        "user": {"id": str(user.id), "email": user.email, "tier": user.tier}
     }
 
 
@@ -177,7 +177,7 @@ async def me(
         "email": current_user.email,
         "full_name": current_user.full_name,
         "is_active": current_user.is_active,
-        "tier": current_user.tier.value,
+        "tier": current_user.tier,
         "is_email_verified": current_user.is_email_verified,
         "oauth_provider": current_user.oauth_provider,
         "oauth_avatar_url": current_user.oauth_avatar_url,
@@ -381,7 +381,7 @@ async def google_callback(
                         user: {{
                             id: '{user.id}',
                             email: '{user.email}',
-                            tier: '{user.tier.value}'
+                            tier: '{user.tier}'
                         }}
                     }}, '*');
                 }}

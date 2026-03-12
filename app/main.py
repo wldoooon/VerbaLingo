@@ -13,6 +13,7 @@ from .core.config import get_settings
 from .core.manticore_client import get_manticore_configuration
 from .core.limiter import limiter
 from .core.logging import logger, setup_logging
+from . import models # Force model registration for relationships
 from .api.routes import router
 from .api.auth import router as auth_router
 
