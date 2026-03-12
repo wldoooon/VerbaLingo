@@ -31,7 +31,8 @@ class UserUsage(SQLModel, table=True):
     daily_exports_count: int = Field(default=0)
     
     # Wallet / Economy (resets on subscription billing cycle)
-    ai_credit_balance: int = Field(default=30000)
+    # Default matches FREE tier (50,000 Sparks). Paid tiers set on subscription.created webhook.
+    ai_credit_balance: int = Field(default=50000)
     usage_reset_date: date | None = Field(default=None)
     
     # Lifetime Counters (never reset, for analytics)
@@ -57,6 +58,6 @@ class UserUsage(SQLModel, table=True):
 class UserUsageRead(SQLModel):
     daily_searches_count: int = 0
     daily_exports_count: int = 0
-    ai_credit_balance: int = 30000
+    ai_credit_balance: int = 50000
     total_searches: int = 0
     total_ai_chats: int = 0

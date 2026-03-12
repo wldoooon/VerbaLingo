@@ -24,6 +24,7 @@ from sqlmodel import SQLModel
 from app.core.config import get_settings
 from app.models.user import User
 from app.models.user_usage import UserUsage
+from app.models.subscription import Subscription  # noqa: F401
 
 settings = get_settings()
 # Override sqlalchemy.url with our .env URL (escape % for configparser)

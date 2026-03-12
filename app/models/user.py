@@ -4,23 +4,29 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Optional, TYPE_CHECKING, Dict, Any
 from sqlmodel import SQLModel, Field, Relationship, Column
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, String
 
 if TYPE_CHECKING:
     from .user_usage import UserUsage
+    from .subscription import Subscription
 
 
 class UserTier(str, Enum):
     FREE = "free"
+    BASIC = "basic"
     PRO = "pro"
-    UNLIMITED = "unlimited"
+    PREMIUM = "premium"
+    MAX = "max"
 
 
 class UserBase(SQLModel):
     email: str = Field(unique=True, index=True, nullable=False)
     full_name: str | None = Field(default=None, max_length=255)
     is_active: bool = Field(default=True)
-    tier: UserTier = Field(default=UserTier.FREE)
+    tier: UserTier = Field(
+        default=UserTier.FREE,
+        sa_column=Column(String, nullable=False, server_default="free")
+    )
 
 class User(UserBase, table=True):
     id: uuid.UUID = Field(
@@ -64,6 +70,9 @@ class User(UserBase, table=True):
         sa_column=Column(DateTime(timezone=True))
     )
 
+    # Polar billing — customer identity only (permanent, survives cancellation/resubscription)
+    polar_customer_id: str | None = Field(default=None, index=True, unique=True)
+
     # Timestamps (with timezone support)
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
@@ -74,8 +83,9 @@ class User(UserBase, table=True):
         sa_column=Column(DateTime(timezone=True), onupdate=lambda: datetime.now(timezone.utc))
     )
 
-    # Relationship to Usage (1-to-1)
     usage: Optional["UserUsage"] = Relationship(back_populates="user")
+
+    subscriptions: list["Subscription"] = Relationship(back_populates="user")
 
 
 # API Schemas

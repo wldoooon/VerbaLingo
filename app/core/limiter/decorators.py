@@ -57,10 +57,13 @@ def get_identifier_and_tier(request: Request) -> Tuple[str, RateLimitTier]:
     if user is not None:
         user_id = str(user.id)
         user_tier = getattr(user, "tier", "free")
-        if user_tier == "pro":
-            tier = RateLimitTier.PRO
-        else:
-            tier = RateLimitTier.FREE
+        tier_map = {
+            "basic":   RateLimitTier.BASIC,
+            "pro":     RateLimitTier.PRO,
+            "premium": RateLimitTier.PREMIUM,
+            "max":     RateLimitTier.MAX,
+        }
+        tier = tier_map.get(user_tier, RateLimitTier.FREE)
         return f"user:{user_id}", tier
 
     ip = TieredRateLimiter.get_client_ip(request)

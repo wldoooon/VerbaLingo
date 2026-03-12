@@ -15,7 +15,6 @@ from .core.limiter import limiter
 from .core.logging import logger, setup_logging
 from .api.routes import router
 from .api.auth import router as auth_router
-from .db.init_db import init_db
 
 settings = get_settings()
 
@@ -27,14 +26,8 @@ async def lifespan(app: FastAPI):
     
     app.state.api_client = None
     app.state.search_api = None
-    
-    # 1. Initialize Database Tables
-    try:
-        await init_db()
-    except Exception as db_err:
-        logger.error(f"Database initialization failed: {db_err}")
-    
-    # 2. Initialize Manticore Search Client
+
+    # 1. Initialize Manticore Search Client
     try:
         config = get_manticore_configuration()
         api_client = manticoresearch.ApiClient(config)
