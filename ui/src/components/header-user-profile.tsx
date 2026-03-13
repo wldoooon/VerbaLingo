@@ -281,16 +281,24 @@ export function HeaderUserProfile({
             </Link>
           </div>
 
+
+          <DropdownMenuSeparator className="my-1 mx-2 bg-slate-100 dark:bg-zinc-800/50" />
+
           <div className="space-y-2">
-            <div className="flex justify-between text-xs font-large">
-              <span className="text-slate-400">Total Credits</span>
+            <div className="flex justify-between text-sm font-bold">
+              <span className="text-slate-400 font-medium">Total Credits</span>
               <span className="text-slate-900 dark:text-slate-100">{displayLimit}</span>
             </div>
-            <div className="flex justify-between text-xs font-medium">
-              <span className="text-slate-400">Remaining</span>
+            <div className="flex justify-between text-sm font-bold">
+              <span className="text-slate-400 font-medium">Remaining</span>
               <span className="text-slate-900 dark:text-slate-100">{displayRemaining}</span>
             </div>
           </div>
+        </div>
+
+
+        <div className="relative my-1 px-2">
+          <div className="h-px bg-slate-100 dark:bg-zinc-800/50 w-full" />
         </div>
 
         <DropdownMenuGroup className="pt-1">
@@ -305,9 +313,7 @@ export function HeaderUserProfile({
             <span className="text-sm font-medium">Billing & Subscription</span>
           </DropdownMenuItem>
 
-          <div className="relative my-1 px-2">
-            <div className="h-px bg-slate-100 dark:bg-zinc-800/50 w-full" />
-          </div>
+
 
           <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
             <TrendingUp className="mr-3 h-4 w-4 text-slate-400" />
@@ -337,7 +343,7 @@ export function HeaderUserProfile({
 
         <DropdownMenuItem
 
-          className="rounded-xl py-2.5 text-red-500 focus:text-red-500 cursor-pointer"
+          className="rounded-xl py-3 text-red-500 focus:text-white focus:bg-red-400 cursor-pointer flex justify-center items-center gap-1 transition-colors"
 
           onSelect={(e) => {
 
@@ -349,7 +355,6 @@ export function HeaderUserProfile({
 
         >
 
-          <LogOut className="mr-3 h-4 w-4" />
 
           <span className="text-sm font-bold">Sign out</span>
 
