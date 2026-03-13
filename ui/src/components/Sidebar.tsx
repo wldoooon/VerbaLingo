@@ -163,7 +163,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
               {authUser?.oauth_avatar_url ? (
                 <img src={authUser.oauth_avatar_url} alt="Avatar" className="h-full w-full object-cover" />
               ) : (
-                <User className="size-5 text-primary-foreground" />
+                <img src="/user_logo.png" alt="Profile" className="h-full w-full object-cover" />
               )}
             </div>
             {!isCollapsed && (

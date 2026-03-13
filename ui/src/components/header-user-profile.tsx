@@ -275,7 +275,6 @@ export function HeaderUserProfile({
                 <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 group-hover:from-orange-500 group-hover:via-pink-600 group-hover:to-purple-600 transition-all duration-300"></span>
                 <span className="relative flex items-center gap-1">
                   Upgrade
-                  <Zap className="h-3 w-3 fill-current" />
                 </span>
               </span>
             </Link>

@@ -83,7 +83,7 @@ export function HeaderToolbar({
 
         email: authUser.email,
 
-        avatar: authUser.oauth_avatar_url || "/avatars/user.jpg",
+        avatar: authUser.oauth_avatar_url || "/user_logo.png",
 
       }
 
