@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Check, ArrowRight, ShieldCheck, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { AuthDialog } from '@/components/auth-dialog';
@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import ShinyText from '@/components/ShinyText';
 import { Carter_One, Caveat, Comfortaa } from 'next/font/google';
+import { BetaDialog } from '@/components/beta-dialog';
 
 const caveat = Caveat({
   subsets: ['latin'],
@@ -187,16 +188,18 @@ function PricingCard({
   tier,
   index,
   authStatus,
+  onPaidCtaClick,
 }: {
   tier: typeof TIERS[0];
   index: number;
   authStatus: string;
+  onPaidCtaClick: () => void;
 }) {
   const isPopular = tier.isPopular;
 
   const handleCta = () => {
     if (tier.gumroadLink) {
-      window.open(tier.gumroadLink, "_blank");
+      onPaidCtaClick();
     }
   };
 
@@ -311,6 +314,7 @@ function PricingCard({
 
 export default function PricingPage() {
   const authStatus = useAuthStore((s) => s.status);
+  const [betaDialogOpen, setBetaDialogOpen] = useState(false);
 
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 pb-24 sm:pb-32">
@@ -362,6 +366,7 @@ export default function PricingPage() {
             tier={tier}
             index={i}
             authStatus={authStatus}
+            onPaidCtaClick={() => setBetaDialogOpen(true)}
           />
         ))}
       </div>
@@ -496,6 +501,8 @@ export default function PricingPage() {
           <p className="text-muted-foreground text-sm">Your AI credits refresh automatically each billing cycle.</p>
         </div>
       </motion.div>
+
+      <BetaDialog open={betaDialogOpen} onOpenChange={setBetaDialogOpen} />
     </div>
   );
 }
