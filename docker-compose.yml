@@ -197,6 +197,22 @@ services:
     depends_on:
       - backend
 
+  # ─── DbGate (Web Database Manager) ─────────────────────
+  dbgate:
+    image: dbgate/dbgate:latest
+    container_name: verbalingo-dbgate
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000" # We bind to localhost to keep it totally shielded from the public internet
+    volumes:
+      - dbgate_data:/root/.dbgate
+    deploy:
+      resources:
+        limits:
+          memory: 256M # DbGate is much lighter than CloudBeaver
+    networks:
+      - verbalingo-net
+
 # ─── Named Volumes ─────────────────────────────────────
 # Named volumes persist data between container restarts.
 # Even if you `docker compose down`, volumes survive.
@@ -211,6 +227,8 @@ volumes:
   caddy_data:
     driver: local
   caddy_config:
+    driver: local
+  dbgate_data:
     driver: local
 
 # ─── Network ───────────────────────────────────────────

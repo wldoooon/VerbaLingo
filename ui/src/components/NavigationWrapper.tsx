@@ -17,7 +17,7 @@ export default function NavigationWrapper() {
       ? {
           name: emailToName(user.email),
           email: user.email,
-          avatar: "/avatars/user.jpg",
+          avatar: "/user_logo.png",
         }
       : {
           name: "Guest",

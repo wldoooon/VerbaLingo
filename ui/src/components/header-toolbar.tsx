@@ -83,7 +83,7 @@ export function HeaderToolbar({
 
         email: authUser.email,
 
-        avatar: authUser.oauth_avatar_url || "/avatars/user.jpg",
+        avatar: authUser.oauth_avatar_url || "/user_logo.png",
 
       }
 
@@ -217,20 +217,7 @@ export function HeaderToolbar({
 
 
 
-      {/* Sparks Display Badge */}
-      {status === "authenticated" && authUser && mounted && (
-        <Tooltip delayDuration={200}>
-          <TooltipTrigger asChild>
-            <div className="flex items-center justify-center cursor-pointer mr-2 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800/50 transition-colors">
-              <span className="text-[14px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 tracking-tight">
-                {remainingSparksDisplay}
-                <Image src="/sparks.png" alt="Sparks icon" width={25} height={25} className="object-contain opacity-90" />
-              </span>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">Available Sparks</TooltipContent>
-        </Tooltip>
-      )}
+
 
 
 

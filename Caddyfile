@@ -1,0 +1,3 @@
+api.pokispokey.com {
+    reverse_proxy backend:5001
+}

@@ -15,6 +15,7 @@
     "@headless-tree/core": "^1.5.1",
     "@headless-tree/react": "^1.5.1",
     "@heroui/scroll-shadow": "^2.3.17",
+    "@heroui/tabs": "^2.2.29",
     "@hookform/resolvers": "^5.2.2",
     "@icons-pack/react-simple-icons": "^13.7.0",
     "@mantine/hooks": "^8.3.3",

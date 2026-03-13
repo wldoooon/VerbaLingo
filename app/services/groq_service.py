@@ -62,7 +62,17 @@ class GroqService:
                     total = chunk.usage.total_tokens if getattr(chunk.usage, "total_tokens", None) else 0
                     
                     if total > 0:
-                        logger.info(f"CALCULATOR: Input={input_t} | Output={output_t} | Total={total}")
+                        logger.info(
+                            f"\n"
+                            f"╔══════════════════════════════════════════╗\n"
+                            f"║         TOKEN USAGE RECEIPT            ║\n"
+                            f"╚══════════════════════════════════════════╝\n"
+                            f"  Input  Tokens : {input_t:>8,}  (prompt sent to Groq)\n"
+                            f"  Output Tokens : {output_t:>8,}  (AI response generated)\n"
+                            f"  ─────────────────────────────────────────\n"
+                            f"  TOTAL  Tokens : {total:>8,}  (will be deducted from wallet)\n"
+                            f"════════════════════════════════════════════"
+                        )
                         yield "", total
                         return
 

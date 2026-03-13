@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.polar.sh)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "WebFetch(domain:polar.sh)",
+      "WebFetch(domain:docs.opensaas.sh)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ]
+  }
+}

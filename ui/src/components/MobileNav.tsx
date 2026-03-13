@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Compass, Bookmark, CreditCard, Megaphone, User, Menu, X, LifeBuoy, ChevronRight, LogOut, Sun, Moon, Zap } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
@@ -13,6 +13,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from 'next-themes';
+import { Carter_One } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const carterOne = Carter_One({ weight: '400', subsets: ['latin'] });
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -25,11 +29,25 @@ export function MobileNav() {
   const logoutMutation = useLogoutMutation();
   const isAuthenticated = authStatus === 'authenticated';
 
+  // Prevent background scrolling when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
+
   const usageMap = useUsageStore((s) => s.usage);
-  const stats = usageMap['ai_chat'] || { current: 0, balance: 0, limit: -1, remaining: -1 };
+  const stats = usageMap?.['ai_chat'] || { current: 0, balance: 0, limit: -1, remaining: -1 };
+  const maxSparks = authUser?.tier === "pro" ? 250000 : 30000;
   const currentBalance = stats.balance ?? 0;
-  const displayLimit = stats.limit === -1 ? '∞' : stats.limit;
-  const displayRemaining = stats.remaining === -1 ? '∞' : (stats.remaining > 0 ? stats.remaining : 0);
+
+  const displayLimit = maxSparks.toLocaleString();
+  const displayRemaining = currentBalance.toLocaleString();
   const remainingSparksDisplay = (currentBalance / 1000).toFixed(2);
 
   // Don't show on search/watch pages (they have their own layout)
@@ -140,7 +158,7 @@ export function MobileNav() {
                 <div className="flex items-center gap-2">
                   <Image src="/main_logo.png" alt="PokiSpokey" width={40} height={40} className="shrink-0" />
                   <div className="flex items-start">
-                    <h1 className="text-xl font-black text-foreground tracking-tight leading-none">
+                    <h1 className={cn("text-xl font-black text-foreground tracking-tight leading-none", carterOne.className)}>
                       Poki<span className="text-primary">Spokey</span>
                     </h1>
                     <Badge variant="secondary" className="text-[8px] px-1 py-0 h-[14px] font-bold uppercase tracking-widest bg-slate-200 dark:bg-zinc-800 text-slate-500 dark:text-slate-400 border-transparent rounded-full ml-1 -mt-1">

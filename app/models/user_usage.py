@@ -9,14 +9,6 @@ if TYPE_CHECKING:
 
 
 class UserUsage(SQLModel, table=True):
-    """
-    Stores usage counters for each user.
-    
-    Design:
-    - One-to-One relationship with User
-    - Daily counters reset at midnight UTC
-    - Total counters are cumulative (for analytics)
-    """
     __tablename__ = "user_usage"
     
     user_id: uuid.UUID = Field(
@@ -26,20 +18,17 @@ class UserUsage(SQLModel, table=True):
         index=True
     )
     
-    # Daily Counters (reset daily)
-    daily_searches_count: int = Field(default=0)
-    daily_exports_count: int = Field(default=0)
+    searches_count: int = Field(default=0)
     
-    # Wallet / Economy (resets on subscription billing cycle)
-    ai_credit_balance: int = Field(default=30000)
-    usage_reset_date: date | None = Field(default=None)
+    ai_credit_balance: int = Field(default=50000)
+    usage_reset_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
     
-    # Lifetime Counters (never reset, for analytics)
     total_searches: int = Field(default=0)
     total_ai_chats: int = Field(default=0)
-    total_exports: int = Field(default=0)
     
-    # Timestamps (with timezone support)
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
         sa_column=Column(DateTime(timezone=True), nullable=False)
@@ -49,14 +38,11 @@ class UserUsage(SQLModel, table=True):
         sa_column=Column(DateTime(timezone=True), onupdate=lambda: datetime.now(timezone.utc))
     )
     
-    # Relationship back to User
     user: "User" = Relationship(back_populates="usage")
 
 
-# API Schemas
 class UserUsageRead(SQLModel):
-    daily_searches_count: int = 0
-    daily_exports_count: int = 0
-    ai_credit_balance: int = 30000
+    searches_count: int = 0
+    ai_credit_balance: int = 50000
     total_searches: int = 0
     total_ai_chats: int = 0

@@ -114,17 +114,27 @@ export function HeaderUserProfile({
   // Use 'ai_chat' stats as the driver for the main 'Credit' UI (Sparks)
   const stats = usageMap['ai_chat'] || { current: 0, balance: 0, limit: -1, remaining: -1 }
 
-  const maxSparks = fullUser?.tier === "pro" ? 250000 : 30000
+  const TIER_SPARKS: Record<string, number> = {
+    free:    50_000,
+    basic:   800_000,
+    pro:     5_000_000,
+    premium: 15_000_000,
+    max:     -1, // unlimited
+  }
+  const tier = fullUser?.tier ?? "free"
+  const maxSparks = TIER_SPARKS[tier] ?? 50_000
+  const isUnlimited = maxSparks === -1
+
   const currentBalance = stats.balance ?? 0
-  const usedSparks = Math.max(0, maxSparks - currentBalance)
+  const usedSparks = isUnlimited ? 0 : Math.max(0, maxSparks - currentBalance)
 
   // Calculate percentage USED for the ring (0% when full, 100% when empty)
-  const percentageUsed = maxSparks > 0 ? Math.max(0, Math.min(100, (usedSparks / maxSparks) * 100)) : 0
+  const percentageUsed = isUnlimited ? 0 : (maxSparks > 0 ? Math.max(0, Math.min(100, (usedSparks / maxSparks) * 100)) : 0)
   const circumference = 2 * Math.PI * 18 // r=18
   const offset = circumference - (percentageUsed / 100) * circumference
 
   // Values for display
-  const displayLimit = maxSparks.toLocaleString()
+  const displayLimit = isUnlimited ? "∞" : maxSparks.toLocaleString()
   const displayRemaining = currentBalance.toLocaleString()
 
   // Calculate Sparks (1 Spark = 1000 credits)
@@ -262,53 +272,12 @@ export function HeaderUserProfile({
 
         <DropdownMenuSeparator className="my-1 mx-2 bg-slate-100 dark:bg-zinc-800/50" />
 
-        <DropdownMenuGroup className="pt-2">
-
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
-            <Settings className="mr-3 h-4 w-4 text-slate-400" />
-            <span className="text-sm font-medium">Settings</span>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
-            <ShieldCheck className="mr-3 h-4 w-4 text-slate-400" />
-            <span className="text-sm font-medium">Subscription</span>
-          </DropdownMenuItem>
-
-          <div className="relative my-1 px-2">
-            <div className="h-px bg-slate-100 dark:bg-zinc-800/50 w-full" />
-          </div>
-
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
-            <TrendingUp className="mr-3 h-4 w-4 text-slate-400" />
-            <span className="text-sm font-medium">Usage analytics</span>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            className="rounded-xl py-2.5 cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              setTheme(theme === 'dark' ? 'light' : 'dark');
-            }}
-          >
-            {theme === 'dark' ? (
-              <Sun className="mr-3 h-4 w-4 text-slate-400" />
-            ) : (
-              <Moon className="mr-3 h-4 w-4 text-slate-400" />
-            )}
-            <span className="text-sm font-medium">
-              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-            </span>
-          </DropdownMenuItem>
-
-        </DropdownMenuGroup>
-
-        {/* Balance Card - Moved below main menu items */}
+        {/* Balance Card - Under user info */}
         <div className="p-3.5 rounded-[1.25rem] border border-slate-200 dark:border-zinc-700/50 my-2 bg-white dark:bg-zinc-800/40 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <span className="text-[15px] font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2 tracking-tight">
-                <Image src="/sparks.png" alt="Sparks" width={20} height={20} className="object-contain" />
-                Sparks
+              <span className="text-[14px] font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 tracking-tight">
+                Balance
               </span>
             </div>
             <Link href="/pricing" className="shrink-0">
@@ -316,38 +285,57 @@ export function HeaderUserProfile({
                 <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 group-hover:from-orange-500 group-hover:via-pink-600 group-hover:to-purple-600 transition-all duration-300"></span>
                 <span className="relative flex items-center gap-1">
                   Upgrade
-                  <Zap className="h-3 w-3 fill-current" />
                 </span>
               </span>
             </Link>
           </div>
 
+
+          <DropdownMenuSeparator className="my-1 mx-2 bg-slate-100 dark:bg-zinc-800/50" />
+
           <div className="space-y-2">
-            <div className="flex justify-between text-xs font-medium">
-              <span className="text-slate-400">Total Credits</span>
+            <div className="flex justify-between text-sm font-bold">
+              <span className="text-slate-400 font-medium">Total Credits</span>
               <span className="text-slate-900 dark:text-slate-100">{displayLimit}</span>
             </div>
-            <div className="flex justify-between text-xs font-medium">
-              <span className="text-slate-400">Remaining</span>
+            <div className="flex justify-between text-sm font-bold">
+              <span className="text-slate-400 font-medium">Remaining</span>
               <span className="text-slate-900 dark:text-slate-100">{displayRemaining}</span>
-            </div>
-            <div className="flex justify-between text-xs font-bold pt-1 border-t border-slate-200 dark:border-zinc-800/80 mt-1">
-              <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">Available Sparks</span>
-              <span className="text-orange-500 font-bold flex items-center gap-1.5">
-                {remainingSparksDisplay}
-                <Image src="/sparks.png" alt="Sparks icon" width={14} height={14} className="opacity-80" />
-              </span>
             </div>
           </div>
         </div>
 
+
+        <div className="relative my-1 px-2">
+          <div className="h-px bg-slate-100 dark:bg-zinc-800/50 w-full" />
+        </div>
+
+        <DropdownMenuGroup className="pt-1">
+
+          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+            <Settings className="mr-3 h-4 w-4 text-slate-400" />
+            <span className="text-sm font-medium">Profile Settings</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+            <ShieldCheck className="mr-3 h-4 w-4 text-slate-400" />
+            <span className="text-sm font-medium">Billing & Subscription</span>
+          </DropdownMenuItem>
+
+
+
+          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+            <TrendingUp className="mr-3 h-4 w-4 text-slate-400" />
+            <span className="text-sm font-medium">Usage analytics</span>
+          </DropdownMenuItem>
+
+        </DropdownMenuGroup>
+
         <DropdownMenuSeparator className="my-1 bg-slate-100 dark:bg-zinc-800/50" />
-
-
 
         <DropdownMenuItem
 
-          className="rounded-xl py-2.5 text-red-500 focus:text-red-500 cursor-pointer"
+          className="rounded-xl py-3 text-red-500 focus:text-white focus:bg-red-400 cursor-pointer flex justify-center items-center gap-1 transition-colors"
 
           onSelect={(e) => {
 
@@ -359,7 +347,6 @@ export function HeaderUserProfile({
 
         >
 
-          <LogOut className="mr-3 h-4 w-4" />
 
           <span className="text-sm font-bold">Sign out</span>
 
