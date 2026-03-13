@@ -84,7 +84,7 @@ export function Faq() {
               {/* Header */}
               <div className="space-y-4 flex flex-col items-center text-center lg:items-start lg:text-left">
 
-                <h2 className={cn("text-[clamp(2.5rem,7vw,3.5rem)] font-black tracking-tighter leading-tight", carterOne.className)}>
+                <h2 className={cn("text-[clamp(2.5rem,7vw,3.5rem)] font-black leading-tight", carterOne.className)}>
                   <ShinyText
                     text="Got questions?"
                     speed={2}
@@ -93,7 +93,7 @@ export function Faq() {
                     shineColor="#ffffff"
                     spread={120}
                     direction="left"
-                    className="inline-block"
+                    className="inline-block pr-4"
                   />
                 </h2>
 

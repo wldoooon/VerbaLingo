@@ -114,17 +114,27 @@ export function HeaderUserProfile({
   // Use 'ai_chat' stats as the driver for the main 'Credit' UI (Sparks)
   const stats = usageMap['ai_chat'] || { current: 0, balance: 0, limit: -1, remaining: -1 }
 
-  const maxSparks = fullUser?.tier === "pro" ? 250000 : 30000
+  const TIER_SPARKS: Record<string, number> = {
+    free:    50_000,
+    basic:   800_000,
+    pro:     5_000_000,
+    premium: 15_000_000,
+    max:     -1, // unlimited
+  }
+  const tier = fullUser?.tier ?? "free"
+  const maxSparks = TIER_SPARKS[tier] ?? 50_000
+  const isUnlimited = maxSparks === -1
+
   const currentBalance = stats.balance ?? 0
-  const usedSparks = Math.max(0, maxSparks - currentBalance)
+  const usedSparks = isUnlimited ? 0 : Math.max(0, maxSparks - currentBalance)
 
   // Calculate percentage USED for the ring (0% when full, 100% when empty)
-  const percentageUsed = maxSparks > 0 ? Math.max(0, Math.min(100, (usedSparks / maxSparks) * 100)) : 0
+  const percentageUsed = isUnlimited ? 0 : (maxSparks > 0 ? Math.max(0, Math.min(100, (usedSparks / maxSparks) * 100)) : 0)
   const circumference = 2 * Math.PI * 18 // r=18
   const offset = circumference - (percentageUsed / 100) * circumference
 
   // Values for display
-  const displayLimit = maxSparks.toLocaleString()
+  const displayLimit = isUnlimited ? "∞" : maxSparks.toLocaleString()
   const displayRemaining = currentBalance.toLocaleString()
 
   // Calculate Sparks (1 Spark = 1000 credits)
@@ -317,23 +327,6 @@ export function HeaderUserProfile({
           <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
             <TrendingUp className="mr-3 h-4 w-4 text-slate-400" />
             <span className="text-sm font-medium">Usage analytics</span>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            className="rounded-xl py-2.5 cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              setTheme(theme === 'dark' ? 'light' : 'dark');
-            }}
-          >
-            {theme === 'dark' ? (
-              <Sun className="mr-3 h-4 w-4 text-slate-400" />
-            ) : (
-              <Moon className="mr-3 h-4 w-4 text-slate-400" />
-            )}
-            <span className="text-sm font-medium">
-              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-            </span>
           </DropdownMenuItem>
 
         </DropdownMenuGroup>
