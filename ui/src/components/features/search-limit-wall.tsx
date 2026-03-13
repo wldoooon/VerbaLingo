@@ -60,11 +60,13 @@ export function SearchLimitWall() {
         >
             <div className="w-full max-w-5xl">
                 {/* Main Card */}
-                <div className="relative bg-card border border-border rounded-3xl shadow-xl overflow-hidden">
-                    {/* Subtle gradient background */}
+                <div className="relative bg-card/50 border border-border/50 rounded-[2.5rem] shadow-sm overflow-hidden group hover:border-primary/30 transition-all">
+                    {/* Decorative background Search icon - matching Context Engine™ style */}
+                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <Search className="w-64 h-64 text-primary transform rotate-12 translate-x-12 -translate-y-12" />
+                    </div>
 
-
-                    <div className="relative p-8 sm:p-10">
+                    <div className="relative p-8 sm:p-12">
 
 
                         {/* Heading — achievement framing */}
