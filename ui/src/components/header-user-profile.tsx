@@ -262,53 +262,12 @@ export function HeaderUserProfile({
 
         <DropdownMenuSeparator className="my-1 mx-2 bg-slate-100 dark:bg-zinc-800/50" />
 
-        <DropdownMenuGroup className="pt-2">
-
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
-            <Settings className="mr-3 h-4 w-4 text-slate-400" />
-            <span className="text-sm font-medium">Settings</span>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
-            <ShieldCheck className="mr-3 h-4 w-4 text-slate-400" />
-            <span className="text-sm font-medium">Subscription</span>
-          </DropdownMenuItem>
-
-          <div className="relative my-1 px-2">
-            <div className="h-px bg-slate-100 dark:bg-zinc-800/50 w-full" />
-          </div>
-
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
-            <TrendingUp className="mr-3 h-4 w-4 text-slate-400" />
-            <span className="text-sm font-medium">Usage analytics</span>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            className="rounded-xl py-2.5 cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              setTheme(theme === 'dark' ? 'light' : 'dark');
-            }}
-          >
-            {theme === 'dark' ? (
-              <Sun className="mr-3 h-4 w-4 text-slate-400" />
-            ) : (
-              <Moon className="mr-3 h-4 w-4 text-slate-400" />
-            )}
-            <span className="text-sm font-medium">
-              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
-            </span>
-          </DropdownMenuItem>
-
-        </DropdownMenuGroup>
-
-        {/* Balance Card - Moved below main menu items */}
+        {/* Balance Card - Under user info */}
         <div className="p-3.5 rounded-[1.25rem] border border-slate-200 dark:border-zinc-700/50 my-2 bg-white dark:bg-zinc-800/40 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="text-[15px] font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2 tracking-tight">
-                <Image src="/sparks.png" alt="Sparks" width={20} height={20} className="object-contain" />
-                Sparks
+                Usage
               </span>
             </div>
             <Link href="/pricing" className="shrink-0">
@@ -341,9 +300,47 @@ export function HeaderUserProfile({
           </div>
         </div>
 
+        <DropdownMenuGroup className="pt-1">
+
+          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+            <Settings className="mr-3 h-4 w-4 text-slate-400" />
+            <span className="text-sm font-medium">Profile Settings</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+            <ShieldCheck className="mr-3 h-4 w-4 text-slate-400" />
+            <span className="text-sm font-medium">Billing & Subscription</span>
+          </DropdownMenuItem>
+
+          <div className="relative my-1 px-2">
+            <div className="h-px bg-slate-100 dark:bg-zinc-800/50 w-full" />
+          </div>
+
+          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+            <TrendingUp className="mr-3 h-4 w-4 text-slate-400" />
+            <span className="text-sm font-medium">Usage analytics</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="rounded-xl py-2.5 cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              setTheme(theme === 'dark' ? 'light' : 'dark');
+            }}
+          >
+            {theme === 'dark' ? (
+              <Sun className="mr-3 h-4 w-4 text-slate-400" />
+            ) : (
+              <Moon className="mr-3 h-4 w-4 text-slate-400" />
+            )}
+            <span className="text-sm font-medium">
+              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            </span>
+          </DropdownMenuItem>
+
+        </DropdownMenuGroup>
+
         <DropdownMenuSeparator className="my-1 bg-slate-100 dark:bg-zinc-800/50" />
-
-
 
         <DropdownMenuItem
 
