@@ -99,7 +99,6 @@ const TIERS = [
       "Everything in Pro, plus:",
       "15,000,000 AI Sparks / month",
       "Unlimited searches",
-      "Bulk export",
       "Priority support",
     ],
     gumroadLink: "https://gumroad.com/l/your-scholar-link",
@@ -146,7 +145,6 @@ const COMPARE_FEATURES = [
     category: "Power Features",
     features: [
       { name: "Advanced usage analytics", values: [false, false, true, true, true] },
-      { name: "Bulk export", values: [false, false, false, true, true] },
       { name: "Early access to new features", values: [false, false, true, true, true] },
     ]
   },

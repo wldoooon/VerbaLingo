@@ -1,15 +1,3 @@
-"""
-Usage Service
-=============
-Hybrid approach: Redis for real-time limiting, PostgreSQL for persistence.
-
-Flow:
-1. Check Redis counter (fast gate)
-2. If Redis miss → restore from PostgreSQL
-3. Increment Redis on success
-4. Update PostgreSQL in background (async)
-"""
-
 from datetime import date, datetime, timezone
 from typing import Optional, Tuple
 from redis.asyncio import Redis
@@ -22,43 +10,33 @@ from ..core.logging import logger
 
 settings = get_settings()
 
-# Feature limits per tier (daily). 0 = blocked, -1 = unlimited.
 FEATURE_LIMITS = {
     "search": {
-        UserTier.FREE:     4,
-        UserTier.BASIC:    17,
-        UserTier.PRO:      67,
+        UserTier.FREE:     250,    
+        UserTier.BASIC:    500,    
+        UserTier.PRO:      2000,   
         UserTier.PREMIUM:  -1,
         UserTier.MAX:      -1,
     },
     "ai_chat": {
-        UserTier.FREE:     15,
-        UserTier.BASIC:    50,
-        UserTier.PRO:      100,
+        UserTier.FREE:     50,     
+        UserTier.BASIC:    500,
+        UserTier.PRO:      2000,
         UserTier.PREMIUM:  -1,
         UserTier.MAX:      -1,
-    },
-    "export": {
-        UserTier.FREE:     5,
-        UserTier.BASIC:    10,
-        UserTier.PRO:      -1,
-        UserTier.PREMIUM:  -1,
-        UserTier.MAX:      -1,
-    },
+    }
 }
 
-# Anonymous limits (by IP)
 ANONYMOUS_LIMITS = {
     "search": 3,
-    "ai_chat": 0,  # blocked
-    "export": 0,   # blocked
+    "ai_chat": 0
 }
 
 
 def _get_redis_key(identifier: str, feature: str) -> str:
-    """Generate Redis key with today's date for auto-reset."""
-    today = date.today().isoformat()
-    return f"usage:{identifier}:{feature}:{today}"
+    today = date.today()
+    month_key = f"{today.year}-{today.month:02}"
+    return f"usage:{identifier}:{feature}:{month_key}"
 
 
 def _get_limit(tier: Optional[UserTier], feature: str) -> int:
@@ -114,7 +92,7 @@ async def check_usage_limit(
     
     # Check if over limit
     if current_count >= limit:
-        return False, f"Daily {feature} limit reached ({limit}/day). Resets at midnight.", current_count, limit
+        return False, f"Monthly {feature} limit reached ({limit}/month). Resets next month.", current_count, limit
     
     return True, None, current_count, limit
 
@@ -164,21 +142,23 @@ async def sync_usage_to_db(
         
         today = date.today()
         
-        # Check if we need to reset daily counters
-        if usage.usage_reset_date != today:
-            usage.daily_searches_count = 0
-            usage.daily_exports_count = 0
-            usage.usage_reset_date = today
+        # Check if we need to reset monthly counters
+        # We reset if usage_reset_at is from a different month or year
+        is_new_month = (
+            usage.usage_reset_at.month != today.month or 
+            usage.usage_reset_at.year != today.year
+        )
+        
+        if is_new_month:
+            usage.searches_count = 0
+            usage.usage_reset_at = datetime.now(timezone.utc)
         
         # Increment the appropriate counter
         if feature == "search":
-            usage.daily_searches_count += 1
+            usage.searches_count += 1
             usage.total_searches += 1
         elif feature == "ai_chat":
             usage.total_ai_chats += 1
-        elif feature == "export":
-            usage.daily_exports_count += 1
-            usage.total_exports += 1
         
         usage.updated_at = datetime.now(timezone.utc)
         db.add(usage)
@@ -198,21 +178,20 @@ async def get_user_usage_stats(
     Get current usage stats for a user.
     Returns dict with current counts and limits.
     """
-    tier = user.tier
-    today = date.today().isoformat()
+    today = date.today()
+    month_key = f"{today.year}-{today.month:02}"
     identifier = f"user:{user.id}"
+    tier = user.tier
     
     # Get current counts from Redis in a single batch (MGET)
     keys = [
-        f"usage:{identifier}:search:{today}",
-        f"usage:{identifier}:ai_chat:{today}",
-        f"usage:{identifier}:export:{today}"
+        f"usage:{identifier}:search:{month_key}",
+        f"usage:{identifier}:ai_chat:{month_key}"
     ]
     
     redis_counts = await redis.mget(keys)
     search_count = int(redis_counts[0] or 0)
     ai_chat_count = int(redis_counts[1] or 0)
-    export_count = int(redis_counts[2] or 0)
     
     # Get lifetime stats from PostgreSQL (optional, don't block if missing)
     try:
@@ -223,7 +202,7 @@ async def get_user_usage_stats(
     
     return {
         "tier": tier,
-        "daily": {
+        "monthly": {
             "search": {"current": search_count, "limit": _get_limit(tier, "search"), "remaining": max(0, _get_limit(tier, "search") - search_count) if _get_limit(tier, "search") != -1 else -1},
             "ai_chat": {
                 "current": ai_chat_count, 
@@ -231,12 +210,10 @@ async def get_user_usage_stats(
                 "limit": _get_limit(tier, "ai_chat"), 
                 "remaining": max(0, _get_limit(tier, "ai_chat") - ai_chat_count) if _get_limit(tier, "ai_chat") != -1 else -1
             },
-            "export": {"current": export_count, "limit": _get_limit(tier, "export"), "remaining": max(0, _get_limit(tier, "export") - export_count) if _get_limit(tier, "export") != -1 else -1},
         },
         "lifetime": {
             "total_searches": usage.total_searches if usage else 0,
             "total_ai_chats": usage.total_ai_chats if usage else 0,
-            "total_exports": usage.total_exports if usage else 0,
         },
         "reset_date": date.today().isoformat(),
     }
@@ -260,17 +237,15 @@ async def _restore_from_db(
         
         today = date.today()
         
-        # If the DB date is old, counts are effectively 0 for today
-        if usage.usage_reset_date != today:
+        # If the DB date is not from current month, counts are effectively 0
+        if usage.usage_reset_at.month != today.month or usage.usage_reset_at.year != today.year:
             return 0
         
         # Get the count from DB
         if feature == "search":
-            count = usage.daily_searches_count
+            count = usage.searches_count
         elif feature == "ai_chat":
-            count = 0 # No daily limit anymore
-        elif feature == "export":
-            count = usage.daily_exports_count
+            count = 0 # Handled by balance mostly, but tracker might use messages
         else:
             count = 0
         
@@ -302,41 +277,42 @@ async def sync_all_dirty_users(redis: Redis):
 
     logger.info(f"Starting usage sync for {len(user_ids)} users")
     
-    today = date.today().isoformat()
+    today = date.today()
+    month_key = f"{today.year}-{today.month:02}"
     synced_count = 0
 
     async with AsyncSession(engine) as session:
         for user_id_str in user_ids:
             try:
                 user_id = uuid.UUID(user_id_str)
-                # Get the latest daily counts from Redis
-                # Keys: usage:user:{id}:{feature}:{today}
+                # Get the latest monthly counts from Redis
+                # Keys: usage:user:{id}:{feature}:{month_key}
                 identifier = f"user:{user_id}"
                 
-                search_count = int(await redis.get(f"usage:{identifier}:search:{today}") or 0)
-                ai_chat_count = int(await redis.get(f"usage:{identifier}:ai_chat:{today}") or 0)
-                export_count = int(await redis.get(f"usage:{identifier}:export:{today}") or 0)
+                search_count = int(await redis.get(f"usage:{identifier}:search:{month_key}") or 0)
+                ai_chat_count = int(await redis.get(f"usage:{identifier}:ai_chat:{month_key}") or 0)
 
                 # Get the DB record
                 usage = await session.get(UserUsage, user_id)
                 if not usage:
                     continue
                 
-                # Update DB to match Redis source-of-truth
-                # We also update lifetime totals by the delta
-                if usage.usage_reset_date == date.today():
-                    # Same day: add the difference to total
-                    usage.total_searches += (search_count - usage.daily_searches_count)
-                    usage.total_exports += (export_count - usage.daily_exports_count)
+                # Check if DB date is from current month
+                is_current_month = (
+                    usage.usage_reset_at.month == today.month and 
+                    usage.usage_reset_at.year == today.year
+                )
+
+                if is_current_month:
+                    # Same month: add the difference to lifetime totals
+                    usage.total_searches += (search_count - usage.searches_count)
                 else:
-                    # New day in DB: the Redis count is the new daily, and we add it all to total
+                    # New month in DB: simple override and add everything to total
                     usage.total_searches += search_count
                     usage.total_ai_chats += ai_chat_count
-                    usage.total_exports += export_count
-                    usage.usage_reset_date = date.today()
+                    usage.usage_reset_at = datetime.now(timezone.utc)
 
-                usage.daily_searches_count = search_count
-                usage.daily_exports_count = export_count
+                usage.searches_count = search_count
                 usage.updated_at = datetime.now(timezone.utc)
                 
                 session.add(usage)
