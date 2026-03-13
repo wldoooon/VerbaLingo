@@ -13,9 +13,15 @@ output_transcripts.jsonl
 Thumbs.db
 
 .github/
-
+scraping_test
+verbaLingo_agent
 dataset
+.claude
 garbage
+notes
+manticore_cli
+.GEMINI.md
+Caddyfile
 
 # Loguru log files
 logs/
