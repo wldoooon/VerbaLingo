@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import QueryProvider from "@/components/QueryProvider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -58,6 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         style={{ fontSize: '85%' }}
         suppressHydrationWarning
       >
+        <Script src="https://www.youtube.com/iframe_api" strategy="lazyOnload" />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
