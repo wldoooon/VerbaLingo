@@ -146,11 +146,6 @@ export function SearchBar() {
     const toggleCategory = (cat: string) => {
         if (cat === 'All') {
             setSelectedCategories(['All']);
-            // Push to URL: clear category param
-            const params = new URLSearchParams(window.location.search);
-            params.delete('category');
-            params.delete('i'); // Reset index on filter change
-            router.push(`${pathname}?${params.toString()}`);
             return;
         }
 
@@ -162,16 +157,6 @@ export function SearchBar() {
         }
         if (newCats.length === 0) newCats = ['All'];
         setSelectedCategories(newCats);
-
-        // Push to URL: Auto-search
-        if (pathname.startsWith('/search')) {
-            const params = new URLSearchParams(window.location.search);
-            const catString = newCats.includes('All') ? null : newCats.join(',');
-            if (catString) params.set('category', catString);
-            else params.delete('category');
-            params.delete('i'); // Reset index
-            router.push(`${pathname}?${params.toString()}`);
-        }
     };
 
     const isCategorySelected = (cat: string) => {
@@ -210,13 +195,13 @@ export function SearchBar() {
         if (isAnonymous) {
             toastManager.add({
                 title: 'Search limit reached',
-                description: 'Create a free account for 50 searches/day',
+                description: 'Create a free account to continue searching',
                 type: 'info',
             });
         } else {
             toastManager.add({
-                title: `Daily search limit reached (${limit}/day)`,
-                description: 'Resets at midnight — upgrade for unlimited searches',
+                title: `Daily search limit reached (${limit}/today)`,
+                description: 'Resets at the end of the month sign up for more',
                 type: 'warning',
             });
         }
@@ -464,16 +449,6 @@ export function SearchBar() {
                                             if (!lang.available) return;
                                             setSelectedLanguage(lang.value);
                                             setStoreLanguage(lang.value.toLowerCase());
-
-                                            // Auto-search logic for language
-                                            if (pathname.startsWith('/search/')) {
-                                                const pathParts = pathname.split('/');
-                                                if (pathParts.length >= 4) {
-                                                    const searchQ = pathParts[2];
-                                                    const newLang = lang.value.toLowerCase();
-                                                    router.push(`/search/${searchQ}/${newLang}${window.location.search}`);
-                                                }
-                                            }
                                         }}
                                         className={cn(
                                             "rounded-lg py-2.5 flex items-center justify-between",
