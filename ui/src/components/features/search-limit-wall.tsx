@@ -26,24 +26,14 @@ import { Button } from "@/components/ui/button"
 const benefits = [
     {
         icon: Search,
-        title: "Unlimited Searches",
+        title: "More Searches",
         description: "Search across 14.2M video clips without limits",
     },
     {
         icon: MessageSquare,
         title: "AI Language Assistant",
         description: "Ask anything about usage, tone, and cultural nuance",
-    },
-    {
-        icon: BookOpen,
-        title: "Save & Organize",
-        description: "Build your personal vocabulary from real-world clips",
-    },
-    {
-        icon: Zap,
-        title: "Track Progress",
-        description: "See how your comprehension improves over time",
-    },
+    }
 ]
 
 // Staggered animation config for the benefits list
@@ -87,7 +77,7 @@ export function SearchLimitWall() {
                             <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight mb-2">
                                 You've explored 3 clips!
                             </h2>
-                            <p className="text-muted-foreground font-medium text-sm sm:text-base max-w-sm mx-auto leading-relaxed">
+                            <p className="text-muted-foreground font-medium text-sm sm:text-base max-w-sm mx-auto leading-relaxed cursor-pointer">
                                 Create a free account to continue searching across millions of real-world video clips.
                             </p>
                         </motion.div>
@@ -103,11 +93,8 @@ export function SearchLimitWall() {
                                 <motion.div
                                     key={benefit.title}
                                     variants={itemVariants}
-                                    className="flex items-start gap-3 p-3 rounded-xl bg-muted/40 border border-border/50 hover:border-primary/20 transition-colors"
+                                    className="flex items-start gap-3 p-3 rounded-md bg-muted/40 border border-border/50 hover:border-primary/20 transition-colors"
                                 >
-                                    <div className="shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                                        <benefit.icon className="w-4.5 h-4.5 text-primary" />
-                                    </div>
                                     <div>
                                         <p className="font-bold text-foreground text-sm leading-tight">
                                             {benefit.title}
@@ -130,9 +117,8 @@ export function SearchLimitWall() {
                             <AuthDialog defaultTab="signup">
                                 <Button
                                     size="lg"
-                                    className="w-full h-12 rounded-xl text-base font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all group"
+                                    className="w-full h-12 rounded-xl text-base font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all group cursor-pointer"
                                 >
-                                    <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse" />
                                     Create Free Account
                                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                                 </Button>
@@ -146,15 +132,7 @@ export function SearchLimitWall() {
                             </AuthDialog>
                         </motion.div>
 
-                        {/* Trust signal */}
-                        <motion.p
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.8 }}
-                            className="text-center text-[11px] text-muted-foreground/60 mt-6 font-medium"
-                        >
-                            Free forever · No credit card required · 50 searches/day
-                        </motion.p>
+
                     </div>
                 </div>
             </div>
