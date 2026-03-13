@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Check, ArrowRight, ShieldCheck, X } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 import { AuthDialog } from '@/components/auth-dialog';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -253,19 +253,37 @@ function PricingCard({
         </p>
 
         {/* Price */}
-        <div className="flex items-start justify-center mb-1">
-          <span className={cn("text-3xl font-black text-foreground mt-2 mr-0.5")}>$</span>
-          <span className={cn("text-6xl sm:text-7xl font-black text-foreground leading-none tracking-tighter")}>
-            {displayPrice === 0 ? "0" : displayPrice}
-          </span>
+        <div className="flex items-start justify-center mb-1 overflow-hidden">
+          <span className="text-3xl font-black text-foreground mt-2 mr-0.5">$</span>
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={displayPrice}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="text-6xl sm:text-7xl font-black text-foreground leading-none tracking-tighter inline-block"
+            >
+              {displayPrice === 0 ? "0" : displayPrice}
+            </motion.span>
+          </AnimatePresence>
         </div>
-        <p className="text-sm text-muted-foreground text-center font-medium">
-          {tier.price === 0
-            ? "free forever"
-            : isAnnual
-              ? `$${tier.annualPrice?.toFixed(2)} billed annually`
-              : "per month"}
-        </p>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.p
+            key={isAnnual ? "annual-label" : "monthly-label"}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="text-sm text-muted-foreground text-center font-medium"
+          >
+            {tier.price === 0
+              ? "free forever"
+              : isAnnual
+                ? `$${tier.annualPrice?.toFixed(2)} billed annually`
+                : "per month"}
+          </motion.p>
+        </AnimatePresence>
       </div>
 
       {/* CTA Button */}
@@ -335,7 +353,7 @@ export default function PricingPage() {
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 pb-24 sm:pb-32">
 
       {/* ── Hero Header ──────────────────────────────────────────────── */}
-      <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-20">
+      <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -356,7 +374,7 @@ export default function PricingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4, delay: 0.18 }}
-          className="text-base sm:text-lg text-muted-foreground leading-relaxed flex items-center justify-center gap-2 flex-wrap"
+          className="text-base sm:text-lg text-muted-foreground leading-relaxed flex items-center justify-center gap-2 flex-wrap mb-8"
         >
           Simple pricing. No hidden fees. Payments via
           <span className="inline-flex items-center gap-1.5">
@@ -371,36 +389,41 @@ export default function PricingPage() {
             </span>
           </span>
         </motion.p>
-      </div>
 
-      {/* ── Billing Toggle ───────────────────────────────────────────── */}
-      <div className="flex justify-center mb-10">
-        <Tabs
-          selectedKey={billing}
-          onSelectionChange={(key) => setBilling(key as "monthly" | "annually")}
-          variant="bordered"
-          radius="full"
-          classNames={{
-            base: "border border-border rounded-full p-1",
-            tabList: "gap-1 bg-transparent p-0",
-            tab: "px-5 py-2 text-sm font-semibold text-muted-foreground data-[selected=true]:text-foreground rounded-full",
-            cursor: "bg-foreground rounded-full shadow-sm",
-            tabContent: "group-data-[selected=true]:text-background font-semibold",
-          }}
+        {/* ── Billing Toggle ─────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.26 }}
+          className="flex justify-center"
         >
-          <Tab key="monthly" title="Monthly" />
-          <Tab
-            key="annually"
-            title={
-              <span className="flex items-center gap-2">
-                Annually
-                <span className="text-[10px] font-black uppercase tracking-wide bg-orange-500 text-white px-2 py-0.5 rounded-full leading-none">
-                  2 months free
+          <Tabs
+            selectedKey={billing}
+            onSelectionChange={(key) => setBilling(key as "monthly" | "annually")}
+            variant="bordered"
+            radius="full"
+            classNames={{
+              base: "border border-border rounded-full p-1",
+              tabList: "gap-1 bg-transparent p-0",
+              tab: "px-5 py-2 text-sm font-semibold text-muted-foreground data-[selected=true]:text-foreground rounded-full",
+              cursor: "bg-foreground rounded-full shadow-sm",
+              tabContent: "group-data-[selected=true]:text-background font-semibold",
+            }}
+          >
+            <Tab key="monthly" title="Monthly" />
+            <Tab
+              key="annually"
+              title={
+                <span className="flex items-center gap-2">
+                  Annually
+                  <span className="text-[10px] font-black uppercase tracking-wide bg-orange-500 text-white px-2 py-0.5 rounded-full leading-none">
+                    2 months free
+                  </span>
                 </span>
-              </span>
-            }
-          />
-        </Tabs>
+              }
+            />
+          </Tabs>
+        </motion.div>
       </div>
 
       {/* ── Pricing Cards ────────────────────────────────────────────── */}
