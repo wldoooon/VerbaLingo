@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import ShinyText from '@/components/ShinyText';
 import { Carter_One, Caveat, Comfortaa } from 'next/font/google';
 import { BetaDialog } from '@/components/beta-dialog';
+import { Tabs, Tab } from '@heroui/tabs';
 
 const caveat = Caveat({
   subsets: ['latin'],
@@ -52,6 +53,7 @@ const TIERS = [
     id: "price_basic_learner",
     name: "BASIC LEARNER",
     price: 4.99,
+    annualPrice: 49.90,   // 10 months (2 months free)
     interval: "month",
     isPopular: false,
     aiCredits: "800,000",
@@ -71,6 +73,7 @@ const TIERS = [
     id: "price_pro_student",
     name: "PRO STUDENT",
     price: 8.99,
+    annualPrice: 89.90,   // 10 months (2 months free)
     interval: "month",
     isPopular: true,
     aiCredits: "5,000,000",
@@ -91,6 +94,7 @@ const TIERS = [
     id: "price_scholar_max",
     name: "SCHOLAR MAX",
     price: 14.99,
+    annualPrice: 149.90,  // 10 months (2 months free)
     interval: "month",
     isPopular: false,
     aiCredits: "15,000,000",
@@ -109,6 +113,7 @@ const TIERS = [
     id: "price_vip_unlimited",
     name: "VIP UNLIMITED",
     price: 18.99,
+    annualPrice: 189.90,  // 10 months (2 months free)
     interval: "month",
     isPopular: false,
     aiCredits: "∞",
@@ -188,14 +193,19 @@ function PricingCard({
   tier,
   index,
   authStatus,
+  billing,
   onPaidCtaClick,
 }: {
   tier: typeof TIERS[0];
   index: number;
   authStatus: string;
+  billing: "monthly" | "annually";
   onPaidCtaClick: () => void;
 }) {
   const isPopular = tier.isPopular;
+  const isAnnual = billing === "annually" && tier.price > 0;
+  const annualMonthly = tier.annualPrice ? +(tier.annualPrice / 12).toFixed(2) : null;
+  const displayPrice = isAnnual && annualMonthly ? annualMonthly : tier.price;
 
   const handleCta = () => {
     if (tier.gumroadLink) {
@@ -246,11 +256,15 @@ function PricingCard({
         <div className="flex items-start justify-center mb-1">
           <span className={cn("text-3xl font-black text-foreground mt-2 mr-0.5")}>$</span>
           <span className={cn("text-6xl sm:text-7xl font-black text-foreground leading-none tracking-tighter")}>
-            {tier.price === 0 ? "0" : tier.price}
+            {displayPrice === 0 ? "0" : displayPrice}
           </span>
         </div>
         <p className="text-sm text-muted-foreground text-center font-medium">
-          {tier.price === 0 ? "free forever" : "per month"}
+          {tier.price === 0
+            ? "free forever"
+            : isAnnual
+              ? `$${tier.annualPrice?.toFixed(2)} billed annually`
+              : "per month"}
         </p>
       </div>
 
@@ -315,6 +329,7 @@ function PricingCard({
 export default function PricingPage() {
   const authStatus = useAuthStore((s) => s.status);
   const [betaDialogOpen, setBetaDialogOpen] = useState(false);
+  const [billing, setBilling] = useState<"monthly" | "annually">("monthly");
 
   return (
     <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 pb-24 sm:pb-32">
@@ -358,6 +373,36 @@ export default function PricingPage() {
         </motion.p>
       </div>
 
+      {/* ── Billing Toggle ───────────────────────────────────────────── */}
+      <div className="flex justify-center mb-10">
+        <Tabs
+          selectedKey={billing}
+          onSelectionChange={(key) => setBilling(key as "monthly" | "annually")}
+          variant="bordered"
+          radius="full"
+          classNames={{
+            base: "border border-border rounded-full p-1",
+            tabList: "gap-1 bg-transparent p-0",
+            tab: "px-5 py-2 text-sm font-semibold text-muted-foreground data-[selected=true]:text-foreground rounded-full",
+            cursor: "bg-foreground rounded-full shadow-sm",
+            tabContent: "group-data-[selected=true]:text-background font-semibold",
+          }}
+        >
+          <Tab key="monthly" title="Monthly" />
+          <Tab
+            key="annually"
+            title={
+              <span className="flex items-center gap-2">
+                Annually
+                <span className="text-[10px] font-black uppercase tracking-wide bg-orange-500 text-white px-2 py-0.5 rounded-full leading-none">
+                  2 months free
+                </span>
+              </span>
+            }
+          />
+        </Tabs>
+      </div>
+
       {/* ── Pricing Cards ────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5 gap-5 max-w-[1400px] mx-auto">
         {TIERS.map((tier, i) => (
@@ -366,6 +411,7 @@ export default function PricingPage() {
             tier={tier}
             index={i}
             authStatus={authStatus}
+            billing={billing}
             onPaidCtaClick={() => setBetaDialogOpen(true)}
           />
         ))}
