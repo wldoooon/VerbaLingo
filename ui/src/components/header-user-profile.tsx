@@ -266,8 +266,8 @@ export function HeaderUserProfile({
         <div className="p-3.5 rounded-[1.25rem] border border-slate-200 dark:border-zinc-700/50 my-2 bg-white dark:bg-zinc-800/40 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <span className="text-[15px] font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2 tracking-tight">
-                Usage
+              <span className="text-[14px] font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 tracking-tight">
+                Balance
               </span>
             </div>
             <Link href="/pricing" className="shrink-0">
@@ -282,20 +282,13 @@ export function HeaderUserProfile({
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between text-xs font-medium">
+            <div className="flex justify-between text-xs font-large">
               <span className="text-slate-400">Total Credits</span>
               <span className="text-slate-900 dark:text-slate-100">{displayLimit}</span>
             </div>
             <div className="flex justify-between text-xs font-medium">
               <span className="text-slate-400">Remaining</span>
               <span className="text-slate-900 dark:text-slate-100">{displayRemaining}</span>
-            </div>
-            <div className="flex justify-between text-xs font-bold pt-1 border-t border-slate-200 dark:border-zinc-800/80 mt-1">
-              <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">Available Sparks</span>
-              <span className="text-orange-500 font-bold flex items-center gap-1.5">
-                {remainingSparksDisplay}
-                <Image src="/sparks.png" alt="Sparks icon" width={14} height={14} className="opacity-80" />
-              </span>
             </div>
           </div>
         </div>
