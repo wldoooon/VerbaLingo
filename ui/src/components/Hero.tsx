@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Activity, MessageSquare, Layers, Database, TrendingUp, Quote } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/animate-ui/components/radix/tooltip";
 import { useTheme } from "next-themes";
@@ -315,21 +316,30 @@ export function Hero() {
                 <div
                   key={cat.id}
                   onClick={() => setActiveCategory(index)}
-                  className={`absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}
+                  className={`absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}
                   style={{
                     transform: `translateX(${translateX}) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
                     opacity: opacity,
                     zIndex: zIndex,
-                    filter: `blur(${blur}px)`,
+                    willChange: 'transform, opacity',
+                    backfaceVisibility: 'hidden',
                   }}
                 >
-                  <div className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card group transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'}`}>
+                  <div 
+                    className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card group transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'} isolate transform translate-z-0`}
+                    style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
+                  >
                     {/* Image Background */}
-                    <div className="absolute inset-0">
-                      <img
+                    <div className="absolute inset-0 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
+                      <Image
                         src={cat.image}
                         alt={cat.label}
-                        className="w-full h-full object-cover grayscale transition-all duration-700 group-hover:grayscale-0 group-hover:scale-110"
+                        fill
+                        placeholder="blur"
+                        blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+                        className="object-cover grayscale transition-transform duration-700 group-hover:grayscale-0 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, 400px"
+                        priority={isActive}
                       />
                       <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/90" />
                     </div>
@@ -350,7 +360,7 @@ export function Hero() {
                     </div>
 
                     {/* Hover Border Glow */}
-                    <div className={`absolute inset-0 border-2 border-transparent transition-all duration-500 rounded-[2rem] ${isActive ? 'border-primary/20' : 'group-hover:border-primary/20'}`} />
+                    <div className={`absolute inset-0 border-2 border-transparent transition-all duration-500 rounded-[1.5rem] sm:rounded-[2rem] ${isActive ? 'border-primary/20' : 'group-hover:border-primary/20'}`} />
                   </div>
                 </div>
               );
