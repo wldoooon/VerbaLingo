@@ -45,7 +45,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth overflow-x-hidden w-full" suppressHydrationWarning style={{ fontSize: '80%' }}>
+    <html lang="en" className="scroll-smooth overflow-x-hidden w-full" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="preconnect" href="https://www.youtube.com" />
@@ -57,7 +57,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body
         className={`${inter.className} w-full min-h-screen bg-background`}
-        style={{ fontSize: '85%' }}
         suppressHydrationWarning
       >
         <Script src="https://www.youtube.com/iframe_api" strategy="lazyOnload" />
