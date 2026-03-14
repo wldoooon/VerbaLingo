@@ -243,7 +243,7 @@ export default function AudioCard({
 
   return (
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-6 shadow-2xl", className)}>
-      
+
       {/* ── MOBILE COMPACT CONTROLS (< md) ── */}
       <div className="md:hidden flex flex-col gap-3">
         <div className="absolute top-3 right-3 text-[10px] font-bold text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20 z-20">
@@ -315,34 +315,34 @@ export default function AudioCard({
           )}
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full" onClick={() => guardedAction(prevVideo)}><SkipBack size={20} /></Button>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(prevVideo)}><SkipBack size={20} /></Button>
             <span className="text-xs text-muted-foreground">Previous</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full" onClick={() => guardedAction(skipBackward)}><RotateCcw size={20} /></Button>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(skipBackward)}><RotateCcw size={20} /></Button>
             <span className="text-xs text-muted-foreground">-10s</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button size="icon" className="h-16 w-16 rounded-full bg-primary" onClick={() => guardedAction(togglePlayPause)}>
+            <Button size="icon" className="h-16 w-16 rounded-full bg-primary cursor-pointer" onClick={() => guardedAction(togglePlayPause)}>
               {isPlaying ? <Pause size={28} /> : <Play size={28} className="ml-1" />}
             </Button>
             <span className="text-xs text-muted-foreground">{isPlaying ? "Pause" : "Play"}</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full" onClick={() => guardedAction(skipForward)}><RotateCcw size={20} className="scale-x-[-1]" /></Button>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(skipForward)}><RotateCcw size={20} className="scale-x-[-1]" /></Button>
             <span className="text-xs text-muted-foreground">+10s</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" size="icon" className="h-11 w-11 rounded-full" onClick={() => guardedAction(repeatTargetSentence)} disabled={!targetSentence}><Repeat size={20} /></Button>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(repeatTargetSentence)} disabled={!targetSentence}><Repeat size={20} /></Button>
             <span className="text-xs text-muted-foreground">Repeat</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full" onClick={() => guardedAction(nextVideo)}><SkipForward size={20} /></Button>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(nextVideo)}><SkipForward size={20} /></Button>
             <span className="text-xs text-muted-foreground">Next</span>
           </div>
         </div>
@@ -351,7 +351,7 @@ export default function AudioCard({
         <div className="flex items-center gap-4 flex-1 max-w-[180px] justify-end">
           <Popover open={speedPopoverOpen} onOpenChange={setSpeedPopoverOpen}>
             <PopoverTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 cursor-pointer">
                 <Gauge size={18} />
                 <span className="font-semibold">{rate}x</span>
               </Button>
@@ -359,7 +359,7 @@ export default function AudioCard({
             <PopoverContent className="w-[320px] p-5 rounded-2xl shadow-xl" align="end">
               <Slider value={[speeds.indexOf(rate)]} max={speeds.length - 1} step={1} onValueChange={(v) => setRate(speeds[v[0]])} />
               <div className="flex justify-between mt-3 text-xs font-bold text-muted-foreground">
-                {speeds.map(s => <span key={s} className={rate === s ? "text-primary": ""}>{s}x</span>)}
+                {speeds.map(s => <span key={s} className={rate === s ? "text-primary" : ""}>{s}x</span>)}
               </div>
             </PopoverContent>
           </Popover>
