@@ -73,13 +73,13 @@ export function CookieBanner() {
                             <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
                                 <Button
                                     variant="outline"
-                                    className="w-full sm:flex-1 rounded-xl h-10 border-border/50 font-medium hover:bg-muted"
+                                    className="w-full sm:flex-1 rounded-xl h-10 border-border/50 font-medium hover:bg-muted cursor-pointer"
                                     onClick={handleDecline}
                                 >
                                     Decline Optional
                                 </Button>
                                 <Button
-                                    className="w-full sm:flex-1 rounded-xl h-10 bg-orange-500 hover:bg-orange-600 text-white font-bold border-0 shadow-sm"
+                                    className="w-full sm:flex-1 rounded-xl h-10 bg-orange-500 hover:bg-orange-600 text-white font-bold border-0 shadow-sm cursor-pointer"
                                     onClick={handleAccept}
                                 >
                                     Accept All
