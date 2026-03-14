@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from "next/navigation"
 import dynamic from "next/dynamic"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
-import { useInfiniteSearch } from "@/lib/useApi"
+import { useInfiniteSearch, useTranscriptPrefetch } from "@/lib/useApi"
 import { useEntitlements } from "@/hooks/use-entitlements"
 import { useAuthStore } from "@/stores/auth-store"
 import { Loader2, Bot, Play, ChevronLeft, ChevronRight } from "lucide-react"
@@ -78,6 +78,9 @@ export default function RoutedSearchPage() {
     if (!data?.pages) return []
     return data.pages.flatMap((page) => page.hits || [])
   }, [data])
+
+  // Prefetch transcripts for upcoming clips to eliminate loading lag
+  useTranscriptPrefetch(playlist, currentVideoIndex, languageParam as string);
 
   const totalHits = useMemo(() => {
     if (!data?.pages || data.pages.length === 0) return 0
