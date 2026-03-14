@@ -214,7 +214,7 @@ export default function RoutedSearchPage() {
                       aggregations={aggregations}
                     />
                   </div>
-                  
+
                   {/* Scrollable Content Layer */}
                   <div className="px-4 pb-12 sm:px-6 space-y-4">
                     <AudioCard
@@ -222,6 +222,8 @@ export default function RoutedSearchPage() {
                       playlist={playlist}
                       totalItems={totalHits}
                       searchQuery={searchQuery}
+                      language={languageParam}
+                      isLoading={isLoading || (isFetching && !isFetchingNextPage)}
                       onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
                     />
                   </div>

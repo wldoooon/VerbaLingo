@@ -88,29 +88,31 @@ export default function VideoPlayerCard({
     }
   }
 
-  // Sync global playerRef & JIT Seek
-  useEffect(() => {
-    let newActivePlayer: YouTubePlayer | null = null
-    if (activeKey === 'A') newActivePlayer = playerARef.current
-    if (activeKey === 'B') newActivePlayer = playerBRef.current
-    if (activeKey === 'C') newActivePlayer = playerCRef.current
+    // Sync global playerRef & JIT Seek
+    const activeClipId = activeKey === 'A' ? clipA?.video_id : activeKey === 'B' ? clipB?.video_id : clipC?.video_id
 
-    setPlayer(newActivePlayer)
+    useEffect(() => {
+      let newActivePlayer: YouTubePlayer | null = null
+      if (activeKey === 'A') newActivePlayer = playerARef.current
+      if (activeKey === 'B') newActivePlayer = playerBRef.current
+      if (activeKey === 'C') newActivePlayer = playerCRef.current
 
-    if (newActivePlayer) {
-      const activeClip = activeKey === 'A' ? clipA : activeKey === 'B' ? clipB : clipC
-      if (activeClip) {
-        safeCall(newActivePlayer, 'seekTo', getClipStart(activeClip), true)
+      setPlayer(newActivePlayer)
+
+      if (newActivePlayer) {
+        const activeClip = activeKey === 'A' ? clipA : activeKey === 'B' ? clipB : clipC
+        if (activeClip) {
+          safeCall(newActivePlayer, 'seekTo', getClipStart(activeClip), true)
+        }
+        safeCall(newActivePlayer, 'playVideo')
+        if (isMuted) {
+          safeCall(newActivePlayer, 'mute')
+        } else {
+          safeCall(newActivePlayer, 'unMute')
+          safeCall(newActivePlayer, 'setVolume', 100)
+        }
       }
-      safeCall(newActivePlayer, 'playVideo')
-      if (isMuted) {
-        safeCall(newActivePlayer, 'mute')
-      } else {
-        safeCall(newActivePlayer, 'unMute')
-        safeCall(newActivePlayer, 'setVolume', 100)
-      }
-    }
-  }, [activeKey, isMuted, clipA, clipB, clipC, setPlayer])
+    }, [activeKey, isMuted, activeClipId, setPlayer])
 
   const startPolling = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)

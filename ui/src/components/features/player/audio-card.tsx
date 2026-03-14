@@ -79,6 +79,8 @@ type AudioCardProps = {
   className?: string
   defaultRate?: number
   searchQuery?: string
+  language?: string
+  isLoading?: boolean
 }
 
 export default function AudioCard({
@@ -88,6 +90,8 @@ export default function AudioCard({
   className,
   defaultRate = 1,
   searchQuery = "",
+  language: propLanguage,
+  isLoading: isParentLoading,
   onExplainWordPrompt
 }: AudioCardProps & { onExplainWordPrompt?: (prompt: string) => void }) {
   const [rate, setRate] = useState(defaultRate)
@@ -118,10 +122,16 @@ export default function AudioCard({
   } = usePlayerStore()
 
   // Read settings from store
-  const { language, setQuery, setCategory } = useSearchStore()
+  const { setQuery, setCategory, language: storeLanguage } = useSearchStore()
+  const activeLanguage = propLanguage || storeLanguage || "english"
 
   // Fetch transcript for current video
-  const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(currentClip?.video_id || "", language, currentClip?.position)
+  // Disable if parent is loading to avoid fetching transcript for "stale" clips during search transition
+  const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(
+    !isParentLoading ? (currentClip?.video_id || "") : "", 
+    activeLanguage, 
+    currentClip?.position
+  )
 
   // Sync playback rate with store
   useEffect(() => {
@@ -173,7 +183,14 @@ export default function AudioCard({
   // Find the sentence that contains the search query
   const targetSentenceRef = useRef<HTMLDivElement>(null)
   const hasScrolledToTarget = useRef(false)
+  const hasStartedPlayback = useRef(false)
   const lastActiveSentenceIdx = useRef<number>(0)
+
+  // Reset scroll and playback flags when the video changes
+  useEffect(() => {
+    hasScrolledToTarget.current = false
+    hasStartedPlayback.current = false
+  }, [currentClip?.video_id])
 
   const targetSentence = sentencesInClip.find((sentence: any) => {
     // Match by start time with a small tolerance (0.1s) to handle float precision
@@ -210,15 +227,17 @@ export default function AudioCard({
       hasScrolledToTarget.current = true
 
       // Start playback after scroll completes (500ms delay)
+      // ONLY if we haven't started playing this clip yet
       setTimeout(() => {
-        if (!isPlaying && targetSentence) {
+        if (!hasStartedPlayback.current && targetSentence) {
           const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
           seekTo(startTime)
           play()
+          hasStartedPlayback.current = true
         }
       }, 500)
     }
-  }, [targetSentence, scrollContainerRef, seekTo, play, isPlaying])
+  }, [targetSentence, scrollContainerRef, seekTo, play])
 
   // Auto-scroll to active sentence during playback - CONSTRAINED to transcript box only
   useEffect(() => {
@@ -385,7 +404,7 @@ export default function AudioCard({
           // Navigate to routed search page including current language from store
           try {
             const encoded = encodeURIComponent(clean)
-            router.push(`/search/${encoded}/${language.toLowerCase()}`)
+            router.push(`/search/${encoded}/${activeLanguage.toLowerCase()}`)
           } catch {
             // ignore navigation errors for now
           }
