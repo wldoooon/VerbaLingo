@@ -387,10 +387,10 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
     }
 
     return (
-        <div className="w-full h-full flex flex-col">
-            <div className="relative w-full h-full flex flex-col bg-card p-3 sm:p-6">
+        <div className="w-full h-full flex flex-col pt-0 pb-0 shadow-none">
+            <div className="relative w-full h-full flex flex-col bg-card">
 
-                <header className="relative w-full flex-shrink-0">
+                <header className="relative w-full flex-shrink-0 px-4 pt-4 sm:px-6 sm:pt-6">
                     {/* Session Selector (History) - Top Right */}
                     <div className="absolute right-0 top-0 z-20">
                         <SessionSelector
@@ -425,7 +425,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                     </div>
                 </header>
 
-                <main className="w-full flex-1 flex flex-col mt-3 sm:mt-6 space-y-4 sm:space-y-6 min-h-0 overflow-y-auto">
+                <main className="w-full flex-1 flex flex-col mt-3 sm:mt-6 space-y-4 sm:space-y-6 min-h-0 overflow-y-auto px-4 sm:px-6">
                     {/* Suggestions */}
                     <AnimatePresence>
                         {!shouldHideSuggestions && (
@@ -646,7 +646,7 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
 
                 </main>
 
-                <footer className="relative w-full flex-shrink-0 mt-1 sm:mt-2 pt-2 sm:pt-3">
+                <footer className="relative w-full flex-shrink-0 mt-auto px-4 pb-4 sm:px-6 sm:pb-6 pt-4">
                     {/* Footer top gradient border */}
                     <div className="absolute top-0 left-0 right-0 flex h-px">
                         <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>

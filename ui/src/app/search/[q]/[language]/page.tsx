@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from "next/navigation"
 import dynamic from "next/dynamic"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
-import { useInfiniteSearch } from "@/lib/useApi"
+import { useInfiniteSearch, useTranscriptPrefetch } from "@/lib/useApi"
 import { useEntitlements } from "@/hooks/use-entitlements"
 import { useAuthStore } from "@/stores/auth-store"
 import { Loader2, Bot, Play, ChevronLeft, ChevronRight } from "lucide-react"
@@ -78,6 +78,9 @@ export default function RoutedSearchPage() {
     if (!data?.pages) return []
     return data.pages.flatMap((page) => page.hits || [])
   }, [data])
+
+  // Prefetch transcripts for upcoming clips to eliminate loading lag
+  useTranscriptPrefetch(playlist, currentVideoIndex, languageParam as string);
 
   const totalHits = useMemo(() => {
     if (!data?.pages || data.pages.length === 0) return 0
@@ -196,24 +199,35 @@ export default function RoutedSearchPage() {
             )}
 
             {/* ── Player content or Empty State ── */}
-            <div className={`space-y-4 p-4 sm:p-6 pb-12 xl:pb-6 ${mobileTab !== "player" ? "hidden xl:block" : ""}`}>
+            <div className={`flex flex-col xl:pb-6 ${mobileTab !== "player" ? "hidden xl:block" : ""}`}>
               {playlist.length === 0 && !isLoading && !isFetching ? (
-                <NoResults query={q} />
+                <div className="p-4 sm:p-6">
+                  <NoResults query={q} />
+                </div>
               ) : (
-                <>
-                  <VideoPlayerCard
-                    playlist={playlist}
-                    isFetching={isFetching || isFetchingNextPage}
-                    aggregations={aggregations}
-                  />
-                  <AudioCard
-                    currentClip={playlist[currentVideoIndex]}
-                    playlist={playlist}
-                    totalItems={totalHits}
-                    searchQuery={searchQuery}
-                    onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
-                  />
-                </>
+                <div className="flex flex-col relative w-full">
+                  {/* Sticky Header Layer for Mobile */}
+                  <div className="xl:relative sticky top-0 z-40 bg-background/95 backdrop-blur-sm xl:bg-transparent xl:backdrop-blur-none px-4 pt-3 pb-2 sm:px-6">
+                    <VideoPlayerCard
+                      playlist={playlist}
+                      isFetching={isFetching || isFetchingNextPage}
+                      aggregations={aggregations}
+                    />
+                  </div>
+
+                  {/* Scrollable Content Layer */}
+                  <div className="px-4 pb-12 sm:px-6 space-y-4">
+                    <AudioCard
+                      currentClip={playlist[currentVideoIndex]}
+                      playlist={playlist}
+                      totalItems={totalHits}
+                      searchQuery={searchQuery}
+                      language={languageParam}
+                      isLoading={isLoading || (isFetching && !isFetchingNextPage)}
+                      onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
+                    />
+                  </div>
+                </div>
               )}
             </div>
 
@@ -231,7 +245,7 @@ export default function RoutedSearchPage() {
 
                 {/* Desktop: sidebar panel */}
                 {isDesktop && (
-                  <div className="relative sticky top-0 h-[calc(100vh-5rem)] border-l bg-card">
+                  <div className="relative sticky top-0 h-screen border-l bg-card z-30">
                     <button
                       onClick={() => setIsAiCollapsed(!isAiCollapsed)}
                       className="absolute -left-3 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"

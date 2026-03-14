@@ -10,6 +10,8 @@ import React, {
   type RefObject,
 } from "react"
 import { AnimatePresence, motion } from "motion/react"
+import { toastManager } from "@/components/ui/toast"
+import { Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -322,9 +324,11 @@ function ContactDock() {
               </AnimatePresence>
             </motion.div>
           )}
-          <span className="text-sm font-medium text-foreground">
-            {success ? "Sent!" : "Still have questions?"}
-          </span>
+          {!showForm && (
+            <span className="text-sm font-medium text-foreground">
+              {success ? "Sent!" : "Still have questions?"}
+            </span>
+          )}
         </div>
         <button
           type="button"
@@ -378,8 +382,12 @@ function ContactForm({ onSuccess }: { onSuccess: () => void }) {
     damping: 35,
   }
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    if (isSubmitting) return
+
     const form = e.currentTarget
     const data: ContactFormData = {
       name: (form.elements.namedItem("name") as HTMLInputElement).value,
@@ -388,15 +396,67 @@ function ContactForm({ onSuccess }: { onSuccess: () => void }) {
       message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
     }
 
-    if (onSubmit) {
-      try {
+    // Beautiful Validation
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!data.name.trim()) {
+      toastManager.add({ 
+        title: "What's your name?", 
+        description: "We'd love to know who we're talking to!", 
+        type: "error" 
+      })
+      return
+    }
+    if (!data.email.trim() || !EMAIL_REGEX.test(data.email)) {
+      toastManager.add({ 
+        title: "Email looks incorrect", 
+        description: "Please enter a valid email so we can reply back!", 
+        type: "error" 
+      })
+      return
+    }
+    if (!data.subject.trim()) {
+      toastManager.add({ 
+        title: "Missing a subject!", 
+        description: "Give us a quick hint about your question.", 
+        type: "error" 
+      })
+      return
+    }
+    if (!data.message.trim() || data.message.length < 10) {
+      toastManager.add({ 
+        title: "Tell us more!", 
+        description: "Please write a slightly longer message (min 10 chars).", 
+        type: "error" 
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      if (onSubmit) {
         await onSubmit(data)
-        onSuccess()
-      } catch (error) {
-        console.error("Contact form submission error:", error)
+      } else {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1500))
       }
-    } else {
+      
+      toastManager.add({
+        title: "Message sent!",
+        description: "We'll get back to you as soon as possible. ✨",
+        type: "success"
+      })
       onSuccess()
+    } catch (error) {
+      console.error("Contact form submission error:", error)
+      toastManager.add({ 
+        title: "Submission failed", 
+        description: "Something went wrong. Please try again later.", 
+        type: "error" 
+      })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -492,15 +552,22 @@ function ContactForm({ onSuccess }: { onSuccess: () => void }) {
             {/* Submit */}
             <button
               type="submit"
+              disabled={isSubmitting}
               className={cn(
-                "w-full py-2.5 rounded-full text-sm font-semibold",
-                "bg-primary text-primary-foreground",
-                "hover:bg-primary/90 transition-colors",
+                "w-full py-2.5 rounded-full text-sm font-semibold flex items-center justify-center gap-2",
+                "bg-primary text-primary-foreground transition-all active:scale-95",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                "cursor-pointer"
+                "cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
               )}
             >
-              Send Message
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Send Message"
+              )}
             </button>
           </motion.div>
         )}

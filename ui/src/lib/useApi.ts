@@ -81,7 +81,7 @@ export const useInfiniteSearch = (
   });
 };
 
-const fetchTranscript = async (
+export const fetchTranscript = async (
   videoId: string,
   language: string,
   centerPosition?: number,
@@ -107,6 +107,39 @@ export const useTranscript = (
     queryFn: () => fetchTranscript(videoId, language, centerPosition),
     enabled: !!videoId,
   });
+};
+
+/**
+ * Hook to prefetch transcripts for the next few clips in the playlist
+ */
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+
+export const useTranscriptPrefetch = (
+  playlist: any[],
+  currentIndex: number,
+  language: string = "english"
+) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!playlist || playlist.length === 0) return;
+
+    // Prefetch the next 2 clips
+    const prefetchCount = 2;
+    for (let i = 1; i <= prefetchCount; i++) {
+        const nextIndex = currentIndex + i;
+        if (nextIndex < playlist.length) {
+            const nextClip = playlist[nextIndex];
+            
+            queryClient.prefetchQuery({
+                queryKey: ["transcript", nextClip.video_id, language, nextClip.position],
+                queryFn: () => fetchTranscript(nextClip.video_id, language, nextClip.position),
+                staleTime: 1000 * 60 * 5, // 5 minutes
+            });
+        }
+    }
+  }, [currentIndex, playlist, language, queryClient]);
 };
 
 // Translate a single text using the backend proxy (FastAPI -> LibreTranslate)
