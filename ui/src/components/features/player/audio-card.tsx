@@ -242,190 +242,145 @@ export default function AudioCard({
   }, [currentTime, isPlaying])
 
   return (
-    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-5 shadow-2xl", className)}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-4 mb-2">
-        {/* Volume control - Top row left on mobile, Left on desktop */}
-        <div className="order-2 md:order-1 flex items-center gap-3 w-full md:flex-1 md:max-w-[180px]">
-          <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
-          <Slider
-            value={[volume]}
-            max={100}
-            step={1}
-            onValueChange={(val) => setVolume(val[0])}
-            className="cursor-pointer"
-          />
-        </div>
+    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-5 shadow-2xl overflow-hidden", className)}>
+      {/* Clip Count Indicator - Absolute Top Right for Mobile/Desktop */}
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 text-[10px] sm:text-xs font-bold text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20 z-20">
+        {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
+      </div>
 
-        {/* Transport controls - Center */}
-        <div className="order-1 md:order-2 flex flex-wrap items-center justify-center gap-2 sm:gap-4 relative w-full md:w-auto mt-6 md:mt-0">
+      <div className="flex flex-col gap-3">
+        {/* Compact Control Row */}
+        <div className="flex items-center justify-between gap-2 mt-4 sm:mt-0">
+          
+          {/* Volume - Compact for Mobile */}
+          <div className="flex items-center gap-2">
+             <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-muted">
+                  <Volume2 size={18} className="text-muted-foreground" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-40 p-3 rounded-xl border-border/50" side="top">
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Volume</p>
+                  <Slider
+                    value={[volume]}
+                    max={100}
+                    step={1}
+                    onValueChange={(val) => setVolume(val[0])}
+                    className="cursor-pointer"
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
 
-          {isThrottled && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-card/95 backdrop-blur-sm border border-border/50 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-300 px-6">
-              <div className="flex flex-col items-center gap-2 text-center">
-                <div className="text-2xl">🐱</div>
-                <p className="text-sm font-bold text-foreground">Whoa, slow down!</p>
-                <p className="text-xs text-muted-foreground leading-snug">
-                  You&apos;re clicking really fast. Give it a second.
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="h-1.5 w-24 rounded-full bg-muted overflow-hidden">
+          {/* Transport Controls - Compact & Centered */}
+          <div className="flex items-center justify-center gap-1 sm:gap-4 flex-1">
+            {isThrottled && (
+              <div className="absolute inset-x-0 top-0 z-50 flex items-center justify-center rounded-2xl bg-card/95 backdrop-blur-sm border border-border/50 shadow-lg p-6">
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <p className="text-xs font-bold text-foreground">Whoa, slow down!</p>
+                  <div className="h-1 w-20 rounded-full bg-muted overflow-hidden">
                     <div
                       className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
                       style={{ width: `${((cooldownSeconds - cooldownLeft) / cooldownSeconds) * 100}%` }}
                     />
                   </div>
-                  <span className="text-xs font-mono font-bold text-primary tabular-nums">{cooldownLeft}s</span>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 sm:h-11 sm:w-11 rounded-full hover:bg-muted"
+              className="h-9 w-9 rounded-full hover:bg-muted"
               onClick={() => guardedAction(prevVideo)}
               disabled={isThrottled}
-              aria-label="Previous clip"
             >
-              <SkipBack className="w-4 h-4 sm:w-5 sm:h-5" />
+              <SkipBack className="w-4 h-4" />
             </Button>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">Previous</span>
-          </div>
 
-          <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 sm:h-11 sm:w-11 rounded-full hover:bg-muted"
+              className="h-9 w-9 rounded-full hover:bg-muted"
               onClick={() => guardedAction(skipBackward)}
               disabled={isThrottled}
-              aria-label="Rewind 10 seconds"
             >
-              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
+              <RotateCcw className="w-4 h-4" />
             </Button>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">-10s</span>
-          </div>
 
-          <div className="flex flex-col items-center gap-1">
             <Button
               size="icon"
-              className="h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl"
+              className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg flex-shrink-0"
               onClick={() => guardedAction(togglePlayPause)}
-              aria-label={isPlaying ? "Pause" : "Play"}
             >
-              {isPlaying ? <Pause className="w-6 h-6 sm:w-7 sm:h-7" /> : <Play className="w-6 h-6 sm:w-7 sm:h-7 ml-1" />}
+              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
             </Button>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">{isPlaying ? "Pause" : "Play"}</span>
-          </div>
 
-          <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 sm:h-11 sm:w-11 rounded-full hover:bg-muted"
+              className="h-9 w-9 rounded-full hover:bg-muted"
               onClick={() => guardedAction(skipForward)}
               disabled={isThrottled}
-              aria-label="Forward 10 seconds"
             >
-              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 scale-x-[-1]" />
+              <RotateCcw className="w-4 h-4 scale-x-[-1]" />
             </Button>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">+10s</span>
-          </div>
 
-          <div className="flex flex-col items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 sm:h-11 sm:w-11 rounded-full hover:bg-muted disabled:opacity-50"
-              onClick={() => guardedAction(repeatTargetSentence)}
-              disabled={!targetSentence || isThrottled}
-              aria-label="Repeat target sentence"
-              title="Repeat sentence with search word"
-            >
-              <Repeat className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">Repeat</span>
-          </div>
-
-          <div className="flex flex-col items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 sm:h-11 sm:w-11 rounded-full hover:bg-muted"
+              className="h-9 w-9 rounded-full hover:bg-muted"
               onClick={() => guardedAction(nextVideo)}
               disabled={isThrottled}
-              aria-label="Next clip"
             >
-              <SkipForward className="w-4 h-4 sm:w-5 sm:h-5" />
+              <SkipForward className="w-4 h-4" />
             </Button>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">Next</span>
-          </div>
-        </div>
-
-        {/* Clip Count Indicator - Simple & Clean */}
-        <div className="absolute top-4 left-4 md:left-auto md:right-4 text-[10px] sm:text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20 z-10 hidden md:block">
-          Clip {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
-        </div>
-
-        {/* Speed controls - Top row right on mobile, Right on desktop */}
-        <div className="order-3 md:order-3 flex items-center gap-4 w-full justify-between md:flex-1 md:max-w-[180px] md:justify-end">
-          <div className="md:hidden text-[10px] sm:text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20">
-            Clip {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
           </div>
 
-          <Popover open={speedPopoverOpen} onOpenChange={setSpeedPopoverOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2">
-                <Gauge size={18} />
-                <span className="font-semibold">{rate}x</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[280px] sm:w-[320px] p-4 sm:p-5 rounded-2xl shadow-xl border-border/50" align="end">
-              <div className="flex flex-col gap-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold">Playback Speed</span>
-                </div>
+          {/* Speed & Repeat Group */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("h-9 w-9 rounded-full hover:bg-muted transition-colors", targetSentence ? "text-primary" : "text-muted-foreground")}
+              onClick={() => guardedAction(repeatTargetSentence)}
+              disabled={!targetSentence || isThrottled}
+            >
+              <Repeat className="w-4 h-4" />
+            </Button>
 
-                {/* Slider track area */}
-                <div className="relative px-3 sm:px-4 pb-6">
-                  <div className="relative w-full h-5 flex items-center">
-                    {/* The interactive slider */}
+            <Popover open={speedPopoverOpen} onOpenChange={setSpeedPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-9 gap-1 px-2 rounded-lg hover:bg-muted font-bold">
+                  <span className="text-xs">{rate}x</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[280px] p-4 rounded-2xl shadow-xl border-border/50" align="end" side="top">
+                <div className="flex flex-col gap-4">
+                  <span className="text-xs font-bold uppercase text-muted-foreground">Speed</span>
+                  <div className="relative px-2 pb-6">
                     <Slider
                       value={[speeds.indexOf(rate)]}
                       max={speeds.length - 1}
                       step={1}
                       onValueChange={(val) => setRate(speeds[val[0]])}
-                      className="cursor-pointer relative z-10 w-full hover:opacity-100"
+                      className="cursor-pointer"
                     />
-
-                    {/* Clickable labels underneath perfectly aligned to thumb positions */}
-                    {speeds.map((s, i) => {
-                      const percent = (i / (speeds.length - 1)) * 100;
-                      return (
-                        <button
-                          key={`label-${s}`}
-                          onClick={() => setRate(s)}
-                          className={cn(
-                            "absolute top-6 w-8 text-center transition-all hover:text-foreground hover:scale-110 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm transform -translate-x-1/2 text-[11px] sm:text-xs",
-                            rate === s ? "text-primary font-bold scale-110" : "text-muted-foreground font-medium"
-                          )}
-                          style={{ left: `${percent}%` }}
-                          title={`Jump to ${s}x`}
-                        >
-                          {s}x
-                        </button>
-                      );
-                    })}
+                    <div className="flex justify-between mt-2">
+                       {speeds.map((s) => (
+                         <span key={s} className={cn("text-[10px] font-bold", rate === s ? "text-primary" : "text-muted-foreground")}>{s}</span>
+                       ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
-      </div >
+      </div>
 
       <TranscriptBox
         sentences={sentencesInClip}

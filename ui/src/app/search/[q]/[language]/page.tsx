@@ -196,24 +196,33 @@ export default function RoutedSearchPage() {
             )}
 
             {/* ── Player content or Empty State ── */}
-            <div className={`space-y-4 p-4 sm:p-6 pb-12 xl:pb-6 ${mobileTab !== "player" ? "hidden xl:block" : ""}`}>
+            <div className={`flex flex-col xl:pb-6 ${mobileTab !== "player" ? "hidden xl:block" : ""}`}>
               {playlist.length === 0 && !isLoading && !isFetching ? (
-                <NoResults query={q} />
+                <div className="p-4 sm:p-6">
+                  <NoResults query={q} />
+                </div>
               ) : (
-                <>
-                  <VideoPlayerCard
-                    playlist={playlist}
-                    isFetching={isFetching || isFetchingNextPage}
-                    aggregations={aggregations}
-                  />
-                  <AudioCard
-                    currentClip={playlist[currentVideoIndex]}
-                    playlist={playlist}
-                    totalItems={totalHits}
-                    searchQuery={searchQuery}
-                    onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
-                  />
-                </>
+                <div className="flex flex-col relative w-full">
+                  {/* Sticky Header Layer for Mobile */}
+                  <div className="xl:relative sticky top-0 z-40 bg-background/95 backdrop-blur-sm xl:bg-transparent xl:backdrop-blur-none px-4 pt-3 pb-2 sm:px-6">
+                    <VideoPlayerCard
+                      playlist={playlist}
+                      isFetching={isFetching || isFetchingNextPage}
+                      aggregations={aggregations}
+                    />
+                  </div>
+                  
+                  {/* Scrollable Content Layer */}
+                  <div className="px-4 pb-12 sm:px-6 space-y-4">
+                    <AudioCard
+                      currentClip={playlist[currentVideoIndex]}
+                      playlist={playlist}
+                      totalItems={totalHits}
+                      searchQuery={searchQuery}
+                      onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
+                    />
+                  </div>
+                </div>
               )}
             </div>
 
