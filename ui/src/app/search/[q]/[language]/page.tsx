@@ -243,7 +243,7 @@ export default function RoutedSearchPage() {
 
                 {/* Desktop: sidebar panel */}
                 {isDesktop && (
-                  <div className="relative sticky top-0 h-[calc(100vh-5rem)] border-l bg-card">
+                  <div className="relative sticky top-0 h-screen border-l bg-card z-30">
                     <button
                       onClick={() => setIsAiCollapsed(!isAiCollapsed)}
                       className="absolute -left-3 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
