@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/animate-ui/components/radix/tooltip";
 import { useTheme } from "next-themes";
 import { Features } from "./Features";
+import AnimatedContent from "./AnimatedContent";
 
 const categories = [
   {
@@ -162,140 +163,149 @@ export function Hero() {
 
 
 
-            <h1 className="text-[clamp(3.5rem,8vw,4.5rem)] lg:text-7xl font-black text-foreground tracking-tighter leading-[0.85] mb-6 relative inline-block w-fit">
-              {/* Mascot Behind Text - Anchored together using 'em' scaling */}
-              <span
-                className="absolute -z-10 opacity-80 pointer-events-none transition-transform duration-1000 group-hover:scale-105 inline-block"
-                style={{
-                  width: '6em',
-                  height: '6em',
-                  top: '-1.8em',
-                  right: '-4em'
-                }}
-              >
-                <img
-                  src={mounted && resolvedTheme === 'dark' ? "/sleeping_cat.png" : "/cat_logo3.png"}
-                  alt="Mascot"
-                  className="w-full h-full object-contain"
-                />
-              </span>
+            <AnimatedContent distance={40} direction="vertical" duration={1} delay={0.1}>
+              <h1 className="text-[clamp(3.5rem,8vw,4.5rem)] lg:text-7xl font-black text-foreground tracking-tighter leading-[0.85] mb-6 relative inline-block w-fit">
+                {/* Mascot Behind Text - Anchored together using 'em' scaling */}
+                <span
+                  className="absolute -z-10 opacity-80 pointer-events-none transition-transform duration-1000 group-hover:scale-105 inline-block"
+                  style={{
+                    width: '6em',
+                    height: '6em',
+                    top: '-1.8em',
+                    right: '-4em'
+                  }}
+                >
+                  <img
+                    src={mounted && resolvedTheme === 'dark' ? "/sleeping_cat.png" : "/cat_logo3.png"}
+                    alt="Mascot"
+                    className="w-full h-full object-contain"
+                  />
+                </span>
 
-              Speak <br />
-              The <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Moment.</span>
-            </h1>
+                Speak <br />
+                The <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Moment.</span>
+              </h1>
+            </AnimatedContent>
 
-            <p className="text-lg text-muted-foreground mb-10 max-w-lg leading-relaxed font-medium border-l-2 border-primary/30 pl-6">
-              Bridge the gap between dictionary definitions and native fluency. Our engine indexes <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">14.2M video frames</span>, paired with an <span className="text-foreground font-bold">AI Assistant</span> you can ask anything about usage, tone, and cultural nuance.
-            </p>
+            <AnimatedContent distance={30} direction="vertical" duration={0.8} delay={0.25}>
+              <p className="text-lg text-muted-foreground mb-10 max-w-lg leading-relaxed font-medium border-l-2 border-primary/30 pl-6">
+                Bridge the gap between dictionary definitions and native fluency. Our engine indexes <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">14.2M video frames</span>, paired with an <span className="text-foreground font-bold">AI Assistant</span> you can ask anything about usage, tone, and cultural nuance.
+              </p>
+            </AnimatedContent>
 
-            {/* Live Context Spotlight Widget */}
-            <div className="w-full max-w-md bg-background/60 backdrop-blur-md border border-border rounded-3xl shadow-xl overflow-hidden mb-10 p-1 group/widget transition-all duration-500 hover:shadow-primary/10">
-              <div className="bg-card rounded-[1.4rem] overflow-hidden border border-border/50 shadow-sm transition-all duration-500">
+            <AnimatedContent distance={50} direction="horizontal" reverse={true} duration={1} delay={0.4}>
+              {/* Live Context Spotlight Widget */}
+              <div className="w-full max-w-md bg-background/60 backdrop-blur-md border border-border rounded-3xl shadow-xl overflow-hidden mb-10 p-1 group/widget transition-all duration-500 hover:shadow-primary/10">
+                <div className="bg-card rounded-[1.4rem] overflow-hidden border border-border/50 shadow-sm transition-all duration-500">
 
 
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="max-w-[70%]">
-                      <h2 className="text-3xl font-black text-foreground tracking-tighter mb-1 animate-in fade-in duration-500" key={currentHighlight.word}>
-                        {currentHighlight.word}
-                      </h2>
-                      <p className="text-xs font-medium text-muted-foreground leading-snug line-clamp-2">
-                        {currentHighlight.definition}
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="max-w-[70%]">
+                        <h2 className="text-3xl font-black text-foreground tracking-tighter mb-1 animate-in fade-in duration-500" key={currentHighlight.word}>
+                          {currentHighlight.word}
+                        </h2>
+                        <p className="text-xs font-medium text-muted-foreground leading-snug line-clamp-2">
+                          {currentHighlight.definition}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-mono font-black text-primary">{currentHighlight.frequency}</div>
+                      </div>
+                    </div>
+
+                    <div className="relative bg-muted/30 rounded-2xl p-4 border border-border/50 group-hover/widget:border-primary/20 transition-colors">
+                      <Quote className="absolute -top-2 -left-1 w-6 h-6 text-muted-foreground opacity-20" />
+                      <p className="text-foreground font-bold italic text-base leading-relaxed relative z-10 px-1">
+                        "{currentHighlight.context}"
                       </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-lg font-mono font-black text-primary">{currentHighlight.frequency}</div>
+                      <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3">
+                        <button
+                          onClick={() => handleSearch(currentHighlight.word)}
+                          className="bg-foreground text-background hover:bg-primary hover:text-primary-foreground px-3.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all active:scale-95 group/btn"
+                        >
+                          View
+                          <ArrowRight className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="relative bg-muted/30 rounded-2xl p-4 border border-border/50 group-hover/widget:border-primary/20 transition-colors">
-                    <Quote className="absolute -top-2 -left-1 w-6 h-6 text-muted-foreground opacity-20" />
-                    <p className="text-foreground font-bold italic text-base leading-relaxed relative z-10 px-1">
-                      "{currentHighlight.context}"
-                    </p>
-                    <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3">
-                      <button
-                        onClick={() => handleSearch(currentHighlight.word)}
-                        className="bg-foreground text-background hover:bg-primary hover:text-primary-foreground px-3.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all active:scale-95 group/btn"
-                      >
-                        View
-                        <ArrowRight className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" />
-                      </button>
+                  <div className="px-6 py-3 bg-muted/20 border-t border-border/30 flex items-center justify-between">
+                    <div className="flex gap-1">
+                      {trendingHighlights.map((_, i) => (
+                        <div key={i} className={`h-1 rounded-full transition-all duration-300 ${i === highlightIdx ? 'w-6 bg-primary' : 'w-1.5 bg-border'}`}></div>
+                      ))}
                     </div>
                   </div>
                 </div>
+              </div>
+            </AnimatedContent>
 
-                <div className="px-6 py-3 bg-muted/20 border-t border-border/30 flex items-center justify-between">
-                  <div className="flex gap-1">
-                    {trendingHighlights.map((_, i) => (
-                      <div key={i} className={`h-1 rounded-full transition-all duration-300 ${i === highlightIdx ? 'w-6 bg-primary' : 'w-1.5 bg-border'}`}></div>
-                    ))}
+            <AnimatedContent distance={20} direction="vertical" duration={0.8} delay={0.6}>
+              {/* Library Scale Metrics Strip */}
+              <div className="flex flex-col gap-6 mt-2">
+                <div className="flex items-center gap-4">
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-50">Library Scale</span>
+                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
+                </div>
+
+                <div className="flex flex-wrap sm:flex-nowrap justify-between gap-6 sm:gap-4 px-2">
+                  <div className="flex flex-col gap-2 group cursor-default w-full sm:w-1/3">
+                    <div className="flex items-center gap-2 text-primary">
+                      <Globe className="w-4 h-4" />
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Global Languages</span>
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">3+</span>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase">Native dialects</span>
+                    </div>
+                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-primary/30 w-3/4"></div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2 group cursor-default sm:border-x border-border/50 sm:px-6 w-full sm:w-1/3">
+                    <div className="flex items-center gap-2 text-primary">
+                      <Layers className="w-4 h-4" />
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Active Categories</span>
+                    </div>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">3+</span>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase">Subject areas</span>
+                    </div>
+                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-primary/30 w-1/2"></div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-2 group cursor-default sm:text-right w-full sm:w-1/3">
+                    <div className="flex items-center justify-end gap-2 text-primary">
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Contextual Clips</span>
+                    </div>
+                    <div className="flex items-baseline justify-end gap-1.5">
+                      <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">14.2M</span>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase">Indexed frames</span>
+                    </div>
+                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-primary/30 w-5/6 ml-auto"></div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Library Scale Metrics Strip */}
-            <div className="flex flex-col gap-6 mt-2">
-              <div className="flex items-center gap-4">
-                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
-                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-50">Library Scale</span>
-                <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
-              </div>
-
-              <div className="flex flex-wrap sm:flex-nowrap justify-between gap-6 sm:gap-4 px-2">
-                <div className="flex flex-col gap-2 group cursor-default w-full sm:w-1/3">
-                  <div className="flex items-center gap-2 text-primary">
-                    <Globe className="w-4 h-4" />
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Global Languages</span>
-                  </div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">3+</span>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Native dialects</span>
-                  </div>
-                  <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary/30 w-3/4"></div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2 group cursor-default sm:border-x border-border/50 sm:px-6 w-full sm:w-1/3">
-                  <div className="flex items-center gap-2 text-primary">
-                    <Layers className="w-4 h-4" />
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Active Categories</span>
-                  </div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">3+</span>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Subject areas</span>
-                  </div>
-                  <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary/30 w-1/2"></div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2 group cursor-default sm:text-right w-full sm:w-1/3">
-                  <div className="flex items-center justify-end gap-2 text-primary">
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Contextual Clips</span>
-                  </div>
-                  <div className="flex items-baseline justify-end gap-1.5">
-                    <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">14.2M</span>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase">Indexed frames</span>
-                  </div>
-                  <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary/30 w-5/6 ml-auto"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </AnimatedContent>
 
             {/* Removed: Start Exploring & Trusted By */}
           </div>
 
           {/* Right Column: Curved Carousel (Preserved & Merged) */}
-          <div
-            className="relative h-[420px] sm:h-[520px] xl:h-[650px] w-full flex items-center justify-center perspective-[800px] xl:perspective-[1000px] mt-8 xl:mt-0"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-          >
+          <AnimatedContent distance={0} duration={1.5} delay={0.6} className="w-full">
+            <div
+              className="relative h-[420px] sm:h-[520px] xl:h-[650px] w-full flex items-center justify-center perspective-[800px] xl:perspective-[1000px] mt-8 xl:mt-0"
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+            >
             {categories.map((cat, index) => {
               const offset = getOffset(index);
               const absOffset = Math.abs(offset);
@@ -366,12 +376,12 @@ export function Hero() {
               );
             })}
           </div>
-        </div>
+        </AnimatedContent>
+      </div>
 
         {/* Feature Grid */}
         <Features />
-
       </div>
-    </div >
+    </div>
   );
 }
