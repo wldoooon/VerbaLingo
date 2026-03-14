@@ -19,17 +19,17 @@ class SearchService:
         
         # Resolve the table name dynamically based on language
         table_name = self._resolve_table(language)
-        logger.debug(f"General search for {language} -> {table_name}")
+        logger.debug(f"Optimized search for {language} -> {table_name}")
 
         # 1. If user selected a specific category, just search that one normally
         if category:
             offset = (page - 1) * limit
             return await self._search_single_category(q, category, table_name, limit=limit, offset=offset, sub_category=sub_category)
 
-        # 2. General Search: Run parallel queries for each category to ensure diversity
-        # Instead of dividing the limit by 4, we ask each category for the FULL limit.
-        # This acts as a massive buffer so if Cartoons has 0 hits, Movies can provide up to 30.
-        limit_per_cat = limit  
+        # 2. General Search: Optimized Parallel Diversification
+        # Even for an MVP, we use "Smart Buffering": fetching 15 instead of 30 
+        # per category to stay fast without wasting memory.
+        limit_per_cat = max(limit // 2, 12) 
         offset_per_cat = (page - 1) * limit_per_cat
 
         tasks = []
@@ -40,10 +40,7 @@ class SearchService:
         results_list = await asyncio.gather(*tasks)
         
         # 3. Interleave/Merge Results (Round Robin)
-        # results_list is a list of dicts: [{"hits": {"hits": [...]}}, ...]
         mixed_hits = []
-        
-        # Extract the hit lists
         category_hit_queues = []
         total_hits_found = 0
         
@@ -53,37 +50,32 @@ class SearchService:
             if hits:
                 category_hit_queues.append(list(hits))
         
-        # Round Robin Merge
+        # Round Robin Merge with Deduplication
         seen_sentences = set()
         seen_video_ids = set()
         
         while category_hit_queues:
-            for i in range(len(category_hit_queues) - 1, -1, -1): # Iterate backwards to safely pop
+            for i in range(len(category_hit_queues) - 1, -1, -1):
                 queue = category_hit_queues[i]
                 if not queue:
                     category_hit_queues.pop(i)
                     continue
 
-                # Peek at the top item
                 candidate = queue[0]
                 source = candidate.get("_source", {})
                 sentence = candidate.get("_formatted", {}).get("sentence_text", "").strip().lower()
                 video_id = source.get("video_id")
 
-                # Deduplication Check (Block same sentence OR same video)
                 if (video_id and video_id in seen_video_ids) or (sentence in seen_sentences):
-                    # Duplicate found - discard it
                     queue.pop(0) 
                 else:
-                    # New unique item - accept it
                     seen_sentences.add(sentence)
                     if video_id:
                         seen_video_ids.add(video_id)
                     mixed_hits.append(queue.pop(0))
                     
-                    # Stop interleaving immediately if we hit our requested limit
                     if len(mixed_hits) >= limit:
-                        category_hit_queues = [] # break outer loop
+                        category_hit_queues = [] 
                         break
         
         return {

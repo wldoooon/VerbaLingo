@@ -48,6 +48,7 @@ async def lifespan(app: FastAPI):
         scheduler = AsyncIOScheduler()
         # Use the dedicated redis_client singleton
         redis_conn = await redis_client.get_client()
+        app.state.redis = redis_conn
         scheduler.add_job(
             sync_all_dirty_users, 
             "interval", 
