@@ -242,143 +242,127 @@ export default function AudioCard({
   }, [currentTime, isPlaying])
 
   return (
-    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-5 shadow-2xl overflow-hidden", className)}>
-      {/* Clip Count Indicator - Absolute Top Right for Mobile/Desktop */}
-      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 text-[10px] sm:text-xs font-bold text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20 z-20">
-        {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
-      </div>
+    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-6 shadow-2xl", className)}>
+      
+      {/* ── MOBILE COMPACT CONTROLS (< md) ── */}
+      <div className="md:hidden flex flex-col gap-3">
+        <div className="absolute top-3 right-3 text-[10px] font-bold text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20 z-20">
+          {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
+        </div>
 
-      <div className="flex flex-col gap-3">
-        {/* Compact Control Row */}
-        <div className="flex items-center justify-between gap-2 mt-4 sm:mt-0">
-          
-          {/* Volume - Compact for Mobile */}
-          <div className="flex items-center gap-2">
-             <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-muted">
-                  <Volume2 size={18} className="text-muted-foreground" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-40 p-3 rounded-xl border-border/50" side="top">
-                <div className="space-y-3">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Volume</p>
-                  <Slider
-                    value={[volume]}
-                    max={100}
-                    step={1}
-                    onValueChange={(val) => setVolume(val[0])}
-                    className="cursor-pointer"
-                  />
-                </div>
-              </PopoverContent>
-            </Popover>
+        <div className="flex items-center justify-between gap-2 mt-4">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
+                <Volume2 size={18} className="text-muted-foreground" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-40 p-3 rounded-xl" side="top">
+              <Slider value={[volume]} max={100} onValueChange={(val) => setVolume(val[0])} />
+            </PopoverContent>
+          </Popover>
+
+          <div className="flex items-center justify-center gap-1 flex-1">
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => guardedAction(prevVideo)}><SkipBack size={16} /></Button>
+            <Button size="icon" className="h-10 w-10 rounded-full" onClick={() => guardedAction(togglePlayPause)}>
+              {isPlaying ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
+            </Button>
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => guardedAction(nextVideo)}><SkipForward size={16} /></Button>
           </div>
 
-          {/* Transport Controls - Compact & Centered */}
-          <div className="flex items-center justify-center gap-1 sm:gap-4 flex-1">
-            {isThrottled && (
-              <div className="absolute inset-x-0 top-0 z-50 flex items-center justify-center rounded-2xl bg-card/95 backdrop-blur-sm border border-border/50 shadow-lg p-6">
-                <div className="flex flex-col items-center gap-2 text-center">
-                  <p className="text-xs font-bold text-foreground">Whoa, slow down!</p>
-                  <div className="h-1 w-20 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full transition-all duration-1000 ease-linear"
-                      style={{ width: `${((cooldownSeconds - cooldownLeft) / cooldownSeconds) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full hover:bg-muted"
-              onClick={() => guardedAction(prevVideo)}
-              disabled={isThrottled}
-            >
-              <SkipBack className="w-4 h-4" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full hover:bg-muted"
-              onClick={() => guardedAction(skipBackward)}
-              disabled={isThrottled}
-            >
-              <RotateCcw className="w-4 h-4" />
-            </Button>
-
-            <Button
-              size="icon"
-              className="h-12 w-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg flex-shrink-0"
-              onClick={() => guardedAction(togglePlayPause)}
-            >
-              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full hover:bg-muted"
-              onClick={() => guardedAction(skipForward)}
-              disabled={isThrottled}
-            >
-              <RotateCcw className="w-4 h-4 scale-x-[-1]" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full hover:bg-muted"
-              onClick={() => guardedAction(nextVideo)}
-              disabled={isThrottled}
-            >
-              <SkipForward className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Speed & Repeat Group */}
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn("h-9 w-9 rounded-full hover:bg-muted transition-colors", targetSentence ? "text-primary" : "text-muted-foreground")}
-              onClick={() => guardedAction(repeatTargetSentence)}
-              disabled={!targetSentence || isThrottled}
-            >
-              <Repeat className="w-4 h-4" />
-            </Button>
-
+            <Button variant="ghost" size="icon" className={cn("h-9 w-9", targetSentence ? "text-primary" : "")} onClick={() => guardedAction(repeatTargetSentence)}><Repeat size={16} /></Button>
             <Popover open={speedPopoverOpen} onOpenChange={setSpeedPopoverOpen}>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-9 gap-1 px-2 rounded-lg hover:bg-muted font-bold">
-                  <span className="text-xs">{rate}x</span>
-                </Button>
+                <Button variant="ghost" size="sm" className="h-9 px-2 font-bold text-xs">{rate}x</Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[280px] p-4 rounded-2xl shadow-xl border-border/50" align="end" side="top">
-                <div className="flex flex-col gap-4">
-                  <span className="text-xs font-bold uppercase text-muted-foreground">Speed</span>
-                  <div className="relative px-2 pb-6">
-                    <Slider
-                      value={[speeds.indexOf(rate)]}
-                      max={speeds.length - 1}
-                      step={1}
-                      onValueChange={(val) => setRate(speeds[val[0]])}
-                      className="cursor-pointer"
-                    />
-                    <div className="flex justify-between mt-2">
-                       {speeds.map((s) => (
-                         <span key={s} className={cn("text-[10px] font-bold", rate === s ? "text-primary" : "text-muted-foreground")}>{s}</span>
-                       ))}
-                    </div>
-                  </div>
+              <PopoverContent className="w-64 p-4" side="top" align="end">
+                <Slider value={[speeds.indexOf(rate)]} max={speeds.length - 1} step={1} onValueChange={(v) => setRate(speeds[v[0]])} />
+                <div className="flex justify-between mt-2 text-[10px] font-bold text-muted-foreground">
+                  {speeds.map(s => <span key={s}>{s}</span>)}
                 </div>
               </PopoverContent>
             </Popover>
           </div>
+        </div>
+      </div>
+
+      {/* ── DESKTOP FULL CONTROLS (>= md) ── */}
+      <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-4 mb-2">
+        {/* Clip Count Indicator */}
+        <div className="absolute top-4 right-4 text-[10px] sm:text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20 z-10">
+          Clip {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
+        </div>
+
+        {/* Volume control */}
+        <div className="flex items-center gap-3 flex-1 max-w-[180px]">
+          <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
+          <Slider
+            value={[volume]}
+            max={100}
+            step={1}
+            onValueChange={(val) => setVolume(val[0])}
+            className="cursor-pointer"
+          />
+        </div>
+
+        {/* Transport controls */}
+        <div className="flex items-center justify-center gap-4 relative">
+          {isThrottled && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-card/95 backdrop-blur-sm border border-border/50 shadow-lg px-6">
+              <p className="text-xs font-bold">Slow down! ({cooldownLeft}s)</p>
+            </div>
+          )}
+
+          <div className="flex flex-col items-center gap-1">
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full" onClick={() => guardedAction(prevVideo)}><SkipBack size={20} /></Button>
+            <span className="text-xs text-muted-foreground">Previous</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full" onClick={() => guardedAction(skipBackward)}><RotateCcw size={20} /></Button>
+            <span className="text-xs text-muted-foreground">-10s</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <Button size="icon" className="h-16 w-16 rounded-full bg-primary" onClick={() => guardedAction(togglePlayPause)}>
+              {isPlaying ? <Pause size={28} /> : <Play size={28} className="ml-1" />}
+            </Button>
+            <span className="text-xs text-muted-foreground">{isPlaying ? "Pause" : "Play"}</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full" onClick={() => guardedAction(skipForward)}><RotateCcw size={20} className="scale-x-[-1]" /></Button>
+            <span className="text-xs text-muted-foreground">+10s</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <Button variant="ghost" size="icon" size="icon" className="h-11 w-11 rounded-full" onClick={() => guardedAction(repeatTargetSentence)} disabled={!targetSentence}><Repeat size={20} /></Button>
+            <span className="text-xs text-muted-foreground">Repeat</span>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full" onClick={() => guardedAction(nextVideo)}><SkipForward size={20} /></Button>
+            <span className="text-xs text-muted-foreground">Next</span>
+          </div>
+        </div>
+
+        {/* Speed controls */}
+        <div className="flex items-center gap-4 flex-1 max-w-[180px] justify-end">
+          <Popover open={speedPopoverOpen} onOpenChange={setSpeedPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Gauge size={18} />
+                <span className="font-semibold">{rate}x</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[320px] p-5 rounded-2xl shadow-xl" align="end">
+              <Slider value={[speeds.indexOf(rate)]} max={speeds.length - 1} step={1} onValueChange={(v) => setRate(speeds[v[0]])} />
+              <div className="flex justify-between mt-3 text-xs font-bold text-muted-foreground">
+                {speeds.map(s => <span key={s} className={rate === s ? "text-primary": ""}>{s}x</span>)}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 
