@@ -35,6 +35,7 @@ export default function VideoPlayerCard({
   const {
     currentVideoIndex,
     isMuted,
+    playbackRate,
     setCurrentTime,
     setPlayerState,
     setPlayer,
@@ -45,6 +46,9 @@ export default function VideoPlayerCard({
 
   // Read playlist from React Query cache
   const { category, language, subCategory, setSubCategory, lastAggregations, setLastAggregations } = useSearchStore()
+
+  // Tracking for logic isolation
+  const lastSeekedClipId = useRef<string | null>(null)
 
   // Sync aggregations only when there is no sub-category (to keep "all chips" context)
   useEffect(() => {
@@ -73,10 +77,6 @@ export default function VideoPlayerCard({
 
   /**
    * Safe wrapper for all YouTube player calls.
-   * When next is clicked fast, react-youtube destroys the old iframe and
-   * creates a new one. The ref still holds the OLD destroyed player.
-   * Calling any method on it throws: "Cannot read properties of null".
-   * try/catch absorbs those transient errors instead of crashing the page.
    */
   const safeCall = (player: YouTubePlayer | null, fn: string, ...args: any[]) => {
     try {
@@ -84,35 +84,60 @@ export default function VideoPlayerCard({
         (player as any)[fn](...args)
       }
     } catch {
-      // Player not ready or already destroyed — ignore
+      // ignore
     }
   }
 
-    // Sync global playerRef & JIT Seek
-    const activeClipId = activeKey === 'A' ? clipA?.video_id : activeKey === 'B' ? clipB?.video_id : clipC?.video_id
+  // Sync global playerRef & JIT Seek + Audio Isolation
+  const activeClipId = activeKey === 'A' ? clipA?.video_id : activeKey === 'B' ? clipB?.video_id : clipC?.video_id
 
-    useEffect(() => {
-      let newActivePlayer: YouTubePlayer | null = null
-      if (activeKey === 'A') newActivePlayer = playerARef.current
-      if (activeKey === 'B') newActivePlayer = playerBRef.current
-      if (activeKey === 'C') newActivePlayer = playerCRef.current
+  useEffect(() => {
+    // 1. Identify and set the globally active player instance for controls
+    let currentActive: YouTubePlayer | null = null
+    if (activeKey === 'A') currentActive = playerARef.current
+    if (activeKey === 'B') currentActive = playerBRef.current
+    if (activeKey === 'C') currentActive = playerCRef.current
+    
+    // Always update the active player ref in store when it shifts
+    setPlayer(currentActive)
 
-      setPlayer(newActivePlayer)
+    const syncSinglePlayer = (key: 'A' | 'B' | 'C', player: YouTubePlayer | null) => {
+      if (!player) return
+      const isActuallyActive = key === activeKey
+      const clip = key === 'A' ? clipA : key === 'B' ? clipB : clipC
+      if (!clip) return
 
-      if (newActivePlayer) {
-        const activeClip = activeKey === 'A' ? clipA : activeKey === 'B' ? clipB : clipC
-        if (activeClip) {
-          safeCall(newActivePlayer, 'seekTo', getClipStart(activeClip), true)
+      if (isActuallyActive) {
+        // ACTIVE PLAYER configuration
+        
+        // Only seek if this is the FIRST time we are seeing this video ID as active
+        // This prevents the video from jumping to start on ogni re-render/logic change.
+        if (lastSeekedClipId.current !== clip.video_id) {
+            safeCall(player, 'seekTo', getClipStart(clip), true)
+            lastSeekedClipId.current = clip.video_id
         }
-        safeCall(newActivePlayer, 'playVideo')
+        
+        safeCall(player, 'playVideo')
+        safeCall(player, 'setPlaybackRate', playbackRate)
+
+        // Apply global mute state
         if (isMuted) {
-          safeCall(newActivePlayer, 'mute')
+          safeCall(player, 'mute')
         } else {
-          safeCall(newActivePlayer, 'unMute')
-          safeCall(newActivePlayer, 'setVolume', 100)
+          safeCall(player, 'unMute')
+          safeCall(player, 'setVolume', 100)
         }
+      } else {
+        // BACKGROUND PLAYER - explicitly mute
+        safeCall(player, 'mute')
       }
-    }, [activeKey, isMuted, activeClipId, setPlayer])
+    }
+
+    syncSinglePlayer('A', playerARef.current)
+    syncSinglePlayer('B', playerBRef.current)
+    syncSinglePlayer('C', playerCRef.current)
+
+  }, [activeKey, activeClipId, isMuted, playbackRate, setPlayer, clipA?.video_id, clipB?.video_id, clipC?.video_id])
 
   const startPolling = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)

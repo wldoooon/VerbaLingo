@@ -5,6 +5,7 @@ import type { YouTubePlayer } from "react-youtube";
 interface PlayerStore extends PlayerStateBase {
   isPlaying: boolean;
   duration: number;
+  playbackRate: number;
   player: YouTubePlayer | null;
   
   // Actions
@@ -32,6 +33,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   currentTime: 0,
   isPlaying: false,
   duration: 0,
+  playbackRate: 1,
   player: null,
 
   resetIndex: () => set({ currentVideoIndex: 0 }),
@@ -56,6 +58,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
     if (player) player.seekTo(time, true);
   },
   setPlaybackRate: (rate) => {
+    set({ playbackRate: rate });
     const { player } = get();
     if (player) player.setPlaybackRate(rate);
   },
