@@ -163,6 +163,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                         <LoginForm
                             onSuccess={() => setIsOpen(false)}
                             onForgot={() => setTab("forgot_password")}
+                            onUnverified={handleSignupVerify}
                             externalError={error}
                         />
                     ) : tab === "signup" ? (

@@ -36,7 +36,7 @@ function getErrorMessage(err: unknown) {
     return "Authentication failed"
 }
 
-export function LoginForm({ onSuccess, onForgot, externalError }: { onSuccess: () => void, onForgot: () => void, externalError?: string | null }) {
+export function LoginForm({ onSuccess, onForgot, onUnverified, externalError }: { onSuccess: () => void, onForgot: () => void, onUnverified: (email: string, pass: string) => void, externalError?: string | null }) {
     const loginMutation = useLoginMutation()
     const loginRateLimit = useRateLimitCountdown(loginMutation.error)
     const form = useForm<LoginValues>({
@@ -50,7 +50,14 @@ export function LoginForm({ onSuccess, onForgot, externalError }: { onSuccess: (
         try {
             await loginMutation.mutateAsync(values)
             onSuccess()
-        } catch { }
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                const detail = err.response?.data?.detail
+                if (detail?.error_code === "EMAIL_NOT_VERIFIED") {
+                    onUnverified(values.email, values.password)
+                }
+            }
+        }
     }
 
     return (

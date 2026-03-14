@@ -145,7 +145,11 @@ async def login(
     if not user.is_email_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Please verify your email before logging in."
+            detail={
+                "message": "Please verify your email before logging in.",
+                "error_code": "EMAIL_NOT_VERIFIED",
+                "email": user.email
+            }
         )
     
     access_token = create_access_token(data={"sub": str(user.id)})
