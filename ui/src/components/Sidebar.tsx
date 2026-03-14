@@ -139,8 +139,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
       }
     >
       {/* 0. Brand Header */}
-      <div className={`pt-5 pb-0 flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-6 gap-0.2'}`}>
-        <Image src="/main_logo.png" alt="PokiSpokey Logo" width={isCollapsed ? 44 : 52} height={isCollapsed ? 44 : 52} className="shrink-0" />
+      <Link
+        href="/"
+        className={`pt-5 pb-0 flex items-center ${isCollapsed ? 'justify-center px-0' : 'px-6 gap-0.2'} group/logo hover:opacity-90 transition-opacity cursor-pointer`}
+      >
+        <Image src="/main_logo.png" alt="PokiSpokey Logo" width={isCollapsed ? 44 : 52} height={isCollapsed ? 44 : 52} className="shrink-0 transition-transform duration-300 group-hover/logo:scale-110" />
         {!isCollapsed && (
           <div className="flex items-start">
             <h1 className={cn("text-2xl font-black text-foreground tracking-tight leading-none", carterOne.className)}>
@@ -151,7 +154,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobile = false, user }) => {
             </Badge>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* 1. Top Section: User Identity Badge */}
       {authStatus === 'authenticated' && (
