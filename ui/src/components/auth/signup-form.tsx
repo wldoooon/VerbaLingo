@@ -54,7 +54,6 @@ export function SignupForm({ onVerify, externalError }: { onVerify: (email: stri
             await signupMutation.mutateAsync({
                 email: values.email,
                 password: values.password,
-                full_name: "User"
             })
             // Signup OK → OTP sent → parent switches to verify step
             onVerify(values.email, values.password)

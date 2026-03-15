@@ -47,7 +47,7 @@ export function VerifyEmailForm({ email, password, onSuccess, onBack }: VerifyEm
     const { remaining, isCoolingDown, start: startCooldown } = useResendCooldown(60)
 
     const handleResend = () => {
-        signupMutation.mutate({ email, password, full_name: "User" })
+        signupMutation.mutate({ email, password })
         startCooldown()
     }
 
