@@ -27,9 +27,9 @@ class SearchService:
             return await self._search_single_category(q, category, table_name, limit=limit, offset=offset, sub_category=sub_category)
 
         # 2. General Search: Optimized Parallel Diversification
-        # Even for an MVP, we use "Smart Buffering": fetching 15 instead of 30 
-        # per category to stay fast without wasting memory.
-        limit_per_cat = max(limit // 2, 12) 
+        # INCREASED BUFFER: Fetching 20 instead of 15 per category to account for
+        # heavy deduplication. This ensures we almost always fill the 30-hit page.
+        limit_per_cat = max(int(limit * 0.7), 20) 
         offset_per_cat = (page - 1) * limit_per_cat
 
         tasks = []

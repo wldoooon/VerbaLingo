@@ -69,11 +69,15 @@ export const useInfiniteSearch = (
       ),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) => {
-      // If we received fewer than 30 hits, we reached the end
-      if (!lastPage || !lastPage.hits || lastPage.hits.length < 30) {
-        return undefined;
+      if (!lastPage || !lastPage.hits) return undefined;
+      
+      const totalCollected = allPages.reduce((acc, page) => acc + page.hits.length, 0);
+      
+      // If we haven't reached the total yet, there's more to fetch
+      if (totalCollected < lastPage.total) {
+        return allPages.length + 1;
       }
-      return allPages.length + 1;
+      return undefined;
     },
     enabled: !!query && query.trim().length > 0,
     staleTime: 1000 * 60 * 5,
