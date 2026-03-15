@@ -57,22 +57,19 @@ export default function VideoPlayerCard({
     }
   }, [aggregations, subCategory, setLastAggregations]);
 
-  // Triple Player Logic (Pool of 3)
-  const activeKey = (['A', 'B', 'C'] as const)[currentVideoIndex % 3]
+  // Dual Player Logic (Pool of 2: Active + Buffer)
+  const activeKey = (['A', 'B'] as const)[currentVideoIndex % 2]
 
-  const windowIndices = [currentVideoIndex, currentVideoIndex + 1, currentVideoIndex + 2]
+  const windowIndices = [currentVideoIndex, currentVideoIndex + 1]
 
-  const indexA = windowIndices.find(i => i % 3 === 0)
-  const indexB = windowIndices.find(i => i % 3 === 1)
-  const indexC = windowIndices.find(i => i % 3 === 2)
+  const indexA = windowIndices.find(i => i % 2 === 0)
+  const indexB = windowIndices.find(i => i % 2 === 1)
 
   const clipA = indexA !== undefined ? playlist[indexA] : undefined
   const clipB = indexB !== undefined ? playlist[indexB] : undefined
-  const clipC = indexC !== undefined ? playlist[indexC] : undefined
 
   const playerARef = useRef<YouTubePlayer | null>(null)
   const playerBRef = useRef<YouTubePlayer | null>(null)
-  const playerCRef = useRef<YouTubePlayer | null>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   /**
@@ -89,29 +86,27 @@ export default function VideoPlayerCard({
   }
 
   // Sync global playerRef & JIT Seek + Audio Isolation
-  const activeClipId = activeKey === 'A' ? clipA?.video_id : activeKey === 'B' ? clipB?.video_id : clipC?.video_id
+  const activeClipId = activeKey === 'A' ? clipA?.video_id : clipB?.video_id
 
   useEffect(() => {
     // 1. Identify and set the globally active player instance for controls
     let currentActive: YouTubePlayer | null = null
     if (activeKey === 'A') currentActive = playerARef.current
     if (activeKey === 'B') currentActive = playerBRef.current
-    if (activeKey === 'C') currentActive = playerCRef.current
     
     // Always update the active player ref in store when it shifts
     setPlayer(currentActive)
 
-    const syncSinglePlayer = (key: 'A' | 'B' | 'C', player: YouTubePlayer | null) => {
+    const syncSinglePlayer = (key: 'A' | 'B', player: YouTubePlayer | null) => {
       if (!player) return
       const isActuallyActive = key === activeKey
-      const clip = key === 'A' ? clipA : key === 'B' ? clipB : clipC
+      const clip = key === 'A' ? clipA : clipB
       if (!clip) return
 
       if (isActuallyActive) {
         // ACTIVE PLAYER configuration
         
         // Only seek if this is the FIRST time we are seeing this video ID as active
-        // This prevents the video from jumping to start on ogni re-render/logic change.
         if (lastSeekedClipId.current !== clip.video_id) {
             safeCall(player, 'seekTo', getClipStart(clip), true)
             lastSeekedClipId.current = clip.video_id
@@ -128,16 +123,16 @@ export default function VideoPlayerCard({
           safeCall(player, 'setVolume', 100)
         }
       } else {
-        // BACKGROUND PLAYER - explicitly mute
+        // BACKGROUND PLAYER - explicitly mute and ensure it's playing (buffering) if it's the next video
         safeCall(player, 'mute')
+        safeCall(player, 'playVideo') // Keep it playing in background to buffer
       }
     }
 
     syncSinglePlayer('A', playerARef.current)
     syncSinglePlayer('B', playerBRef.current)
-    syncSinglePlayer('C', playerCRef.current)
 
-  }, [activeKey, activeClipId, isMuted, playbackRate, setPlayer, clipA?.video_id, clipB?.video_id, clipC?.video_id])
+  }, [activeKey, activeClipId, isMuted, playbackRate, setPlayer, clipA?.video_id, clipB?.video_id])
 
   const startPolling = () => {
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -153,7 +148,7 @@ export default function VideoPlayerCard({
     if (intervalRef.current) clearInterval(intervalRef.current)
   }
 
-  const onStateChange = (event: { data: number; target: any }, key: 'A' | 'B' | 'C') => {
+  const onStateChange = (event: { data: number; target: any }, key: 'A' | 'B') => {
     if (key !== activeKey) {
       if (event.data === 1 && typeof event.target.mute === 'function') {
         event.target.mute()
@@ -174,11 +169,9 @@ export default function VideoPlayerCard({
   }
 
   // Effect: Recycled players must be manually seeked when their video changes.
-  // Reset the ref first — react-youtube is re-creating the iframe, old player is destroyed.
   useEffect(() => {
-    playerARef.current = null          // clear stale ref while iframe rebuilds
+    playerARef.current = null          
     if (clipA) {
-      // onReady will re-populate the ref; safeCall guards if it fires early
       safeCall(playerARef.current, 'seekTo', getClipStart(clipA), true)
       if (activeKey !== 'A') safeCall(playerARef.current, 'playVideo')
     }
@@ -192,24 +185,14 @@ export default function VideoPlayerCard({
     }
   }, [clipB?.video_id])
 
-  useEffect(() => {
-    playerCRef.current = null
-    if (clipC) {
-      safeCall(playerCRef.current, 'seekTo', getClipStart(clipC), true)
-      if (activeKey !== 'C') safeCall(playerCRef.current, 'playVideo')
-    }
-  }, [clipC?.video_id])
 
-
-  const onReady = (event: { target: YouTubePlayer }, key: 'A' | 'B' | 'C') => {
+  const onReady = (event: { target: YouTubePlayer }, key: 'A' | 'B') => {
     if (key === 'A') playerARef.current = event.target
     if (key === 'B') playerBRef.current = event.target
-    if (key === 'C') playerCRef.current = event.target
 
     let clip: any = null
     if (key === 'A') clip = clipA
     if (key === 'B') clip = clipB
-    if (key === 'C') clip = clipC
 
     if (clip) {
       safeCall(event.target, 'seekTo', getClipStart(clip), true)
@@ -217,11 +200,12 @@ export default function VideoPlayerCard({
 
     if (key === activeKey) {
       setPlayer(event.target)
-      safeCall(event.target, 'getDuration') // warm up
+      safeCall(event.target, 'getDuration') 
       try { setPlayerState({ duration: event.target.getDuration() }) } catch { }
       if (!isMuted) safeCall(event.target, 'unMute')
     } else {
       safeCall(event.target, 'mute')
+      safeCall(event.target, 'playVideo') // Buffer background
     }
   }
 
@@ -266,7 +250,7 @@ export default function VideoPlayerCard({
         isLoading={isFetching}
         className="mb-3 -mt-2"
       />
-      <div className="relative w-full h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] overflow-hidden rounded-2xl bg-black">
+      <div className="relative w-full h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] overflow-hidden rounded-2xl bg-black shadow-inner">
 
         {/* Layer A */}
         <div className={cn("absolute inset-0 w-full h-full transition-opacity duration-300",
@@ -278,7 +262,7 @@ export default function VideoPlayerCard({
               onReady={(e) => onReady(e, 'A')}
               onStateChange={(e) => onStateChange(e, 'A')}
               className="w-full h-full"
-              iframeClassName="w-full h-full"
+              iframeClassName="w-full h-full border-none"
             />
           )}
         </div>
@@ -293,22 +277,7 @@ export default function VideoPlayerCard({
               onReady={(e) => onReady(e, 'B')}
               onStateChange={(e) => onStateChange(e, 'B')}
               className="w-full h-full"
-              iframeClassName="w-full h-full"
-            />
-          )}
-        </div>
-
-        {/* Layer C */}
-        <div className={cn("absolute inset-0 w-full h-full transition-opacity duration-300",
-          activeKey === 'C' ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none")}>
-          {clipC && (
-            <YouTube
-              videoId={clipC.video_id}
-              opts={getOpts(clipC)}
-              onReady={(e) => onReady(e, 'C')}
-              onStateChange={(e) => onStateChange(e, 'C')}
-              className="w-full h-full"
-              iframeClassName="w-full h-full"
+              iframeClassName="w-full h-full border-none"
             />
           )}
         </div>
