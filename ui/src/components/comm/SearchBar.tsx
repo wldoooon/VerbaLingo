@@ -471,12 +471,12 @@ export function SearchBar() {
                         {/* Search Action Button */}
                         <Button
                             size="icon"
-                            onClick={() => hasAccess ? handleSearch() : router.push(isAnonymous ? '/signup' : '/pricing')}
-                            disabled={(!query.trim() && hasAccess) || isSearching || !isLoaded}
+                            onClick={() => { if (hasAccess) handleSearch(); }}
+                            disabled={(!query.trim() && hasAccess) || isSearching || !isLoaded || (!hasAccess && isLoaded)}
                             className={cn(
                                 "h-8 w-8 sm:h-9 sm:w-9 rounded-lg shadow-lg transition-all duration-300 shrink-0 ml-0.5",
                                 !hasAccess
-                                    ? "bg-orange-500/20 text-orange-500 hover:bg-orange-500/30 shadow-none cursor-pointer"
+                                    ? "bg-muted text-muted-foreground shadow-none cursor-not-allowed"
                                     : query.trim()
                                         ? 'bg-primary text-primary-foreground hover:scale-105 hover:bg-primary/90'
                                         : 'bg-muted text-muted-foreground shadow-none'

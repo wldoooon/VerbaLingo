@@ -444,7 +444,7 @@ function ContactForm({ onSuccess }: { onSuccess: () => void }) {
       
       toastManager.add({
         title: "Message sent!",
-        description: "We'll get back to you as soon as possible. ✨",
+        description: "We'll get back to you as soon as possible.",
         type: "success"
       })
       onSuccess()
