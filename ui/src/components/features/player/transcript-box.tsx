@@ -58,11 +58,14 @@ export const TranscriptBox = ({
   const [centerIdx, setCenterIdx] = useState(0)
 
   // Only update center index when the active group actually changes
+  // Added bypass for when user is hovering to prevent jarring jumps while they try to interact
+  const [isHovered, setIsHovered] = useState(false)
+
   useEffect(() => {
-    if (activeGroupIdx !== -1) {
+    if (activeGroupIdx !== -1 && !isHovered) {
       setCenterIdx(activeGroupIdx)
     }
-  }, [activeGroupIdx])
+  }, [activeGroupIdx, isHovered])
 
   return (
     <div className="relative mt-1">
@@ -71,6 +74,8 @@ export const TranscriptBox = ({
 
       <div
         ref={scrollContainerRef}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         className="max-h-[200px] overflow-y-auto rounded-2xl px-3 py-3 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
         {isTranscriptLoading ? (

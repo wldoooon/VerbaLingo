@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
@@ -240,8 +240,20 @@ export default function AudioCard({
   }, [targetSentence, scrollContainerRef, seekTo, play])
 
   // Auto-scroll to active sentence during playback - CONSTRAINED to transcript box only
+  // Optimized to only scroll when the active sentence group actually changes
+  const lastScrolledPos = useRef<number | null>(null)
+  
+  // Find currently active sentence index from time
+  const activeSentenceIdx = useMemo(() => {
+    const TIMING_LEAD = 0.08
+    const t = currentTime + TIMING_LEAD
+    return sentencesInClip.findIndex(s => t >= s.start_time && t < s.end_time)
+  }, [currentTime, sentencesInClip])
+
   useEffect(() => {
     if (activeSentenceRef.current && scrollContainerRef.current && isPlaying) {
+      if (activeSentenceIdx === lastScrolledPos.current) return
+      
       const container = scrollContainerRef.current
       const active = activeSentenceRef.current
 
@@ -252,13 +264,15 @@ export default function AudioCard({
       const relativeTop = activeRect.top - containerRect.top + container.scrollTop
       const scrollTo = relativeTop - (container.clientHeight / 2) + (activeRect.height / 2)
 
-      // Scroll ONLY the container, not the page
+      // Only scroll if we are reasonably far from the target or if it's a new sentence index
       container.scrollTo({
         top: scrollTo,
         behavior: 'smooth'
       })
+      
+      lastScrolledPos.current = activeSentenceIdx
     }
-  }, [currentTime, isPlaying])
+  }, [activeSentenceIdx, isPlaying])
 
   return (
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-6 shadow-2xl", className)}>
