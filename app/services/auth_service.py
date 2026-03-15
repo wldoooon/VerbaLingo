@@ -44,12 +44,15 @@ async def create_new_user(db: AsyncSession, user_data: UserCreate) -> User:
     
     # 2. Secure the password
     hashed_pwd = hash_password(user_data.password)
-    
-    # 3. Create User
+
+    # 3. Derive display name from email prefix if none provided
+    derived_name = (user_data.full_name or "").strip() or user_data.email.split("@")[0]
+
+    # 4. Create User
     new_user = User(
         email=user_data.email,
         hashed_password=hashed_pwd,
-        full_name=user_data.full_name,
+        full_name=derived_name,
         tier_expires_at=datetime.now(timezone.utc) + timedelta(days=30)
     )
     db.add(new_user)

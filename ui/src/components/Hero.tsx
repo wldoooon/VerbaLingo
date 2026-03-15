@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Activity, MessageSquare, Layers, Database, TrendingUp, Quote } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -149,6 +149,24 @@ export function Hero() {
     if (diff < -length / 2) diff += length;
     return diff;
   };
+
+  // Memoize all card style calculations — only recomputes when activeCategory changes
+  const cardStyles = useMemo(() => {
+    return categories.map((_, index) => {
+      const offset = getOffset(index);
+      const absOffset = Math.abs(offset);
+      const isActive = offset === 0;
+      const translateX = `calc(${offset} * clamp(50px, 8vw, 110px))`;
+      const translateZ = absOffset * -80;
+      const rotateY = offset * -12;
+      const opacity = isActive ? 1 : Math.max(0.15, 1 - absOffset * 0.28);
+      const zIndex = 10 - absOffset;
+      const scale = isActive ? 1 : Math.max(0.75, 0.92 - absOffset * 0.06);
+      const hidden = absOffset >= 3;
+      return { offset, absOffset, isActive, translateX, translateZ, rotateY, opacity, zIndex, scale, hidden };
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCategory]);
 
   return (
     <div className="relative w-full">
@@ -303,40 +321,29 @@ export function Hero() {
           <AnimatedContent distance={0} duration={1.5} delay={0.6} className="w-full">
             <div
               className="relative h-[420px] sm:h-[520px] xl:h-[650px] w-full flex items-center justify-center perspective-[800px] xl:perspective-[1000px] mt-8 xl:mt-0"
+              style={{ transformStyle: 'preserve-3d' }}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
             {categories.map((cat, index) => {
-              const offset = getOffset(index);
-              const absOffset = Math.abs(offset);
-              const isActive = offset === 0;
+              const { isActive, translateX, translateZ, rotateY, opacity, zIndex, scale, hidden } = cardStyles[index];
 
-              // Responsive translation: smaller horizontal gap on smaller screens
-              const translateX = `calc(${offset} * clamp(50px, 8vw, 110px))`;
-              const translateZ = absOffset * -80; // slightly less depth push for moble safety
-              const rotateY = offset * -12;
-
-              // Gentler fade so all 6 cards are visible (was 0.4 → now 0.28)
-              const opacity = isActive ? 1 : Math.max(0.15, 1 - absOffset * 0.28);
-              const zIndex = 10 - absOffset;
-              const scale = isActive ? 1 : Math.max(0.75, 0.92 - absOffset * 0.06);
-              const blur = isActive ? 0 : absOffset * 1;
+              if (hidden) return null;
 
               return (
                 <div
                   key={cat.id}
                   onClick={() => setActiveCategory(index)}
-                  className={`absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer`}
+                  className="absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer [backface-visibility:hidden]"
                   style={{
                     transform: `translateX(${translateX}) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
-                    opacity: opacity,
-                    zIndex: zIndex,
+                    opacity,
+                    zIndex,
                     willChange: 'transform, opacity',
-                    backfaceVisibility: 'hidden',
                   }}
                 >
-                  <div 
-                    className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card group transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'} isolate transform translate-z-0`}
+                  <div
+                    className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card group transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'} isolate`}
                     style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
                   >
                     {/* Image Background */}
@@ -347,7 +354,7 @@ export function Hero() {
                         fill
                         placeholder="blur"
                         blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
-                        className="object-cover grayscale transition-transform duration-700 group-hover:grayscale-0 group-hover:scale-110"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
                         sizes="(max-width: 768px) 100vw, 400px"
                         priority={isActive}
                       />
