@@ -23,6 +23,8 @@ type TranscriptBoxProps = {
   targetSentence: Sentence | undefined
   onSearchWord?: (word: string) => void
   onExplainWordInContext?: (payload: { word: string; sentence: string }) => void
+  isHoveredParent?: boolean
+  onHoverChange?: (hovered: boolean) => void
 }
 
 export const TranscriptBox = ({
@@ -35,6 +37,8 @@ export const TranscriptBox = ({
   targetSentence,
   onSearchWord,
   onExplainWordInContext,
+  isHoveredParent,
+  onHoverChange,
 }: TranscriptBoxProps) => {
   // Group sentences into chunks of 3
   const sentenceGroups = useMemo(() => {
@@ -56,17 +60,8 @@ export const TranscriptBox = ({
     })
   })
 
-  const [centerIdx, setCenterIdx] = useState(0)
-
-  // Only update center index when the active group actually changes
-  // Added bypass for when user is hovering to prevent jarring jumps while they try to interact
-  const [isHovered, setIsHovered] = useState(false)
-
-  useEffect(() => {
-    if (activeGroupIdx !== -1 && !isHovered) {
-      setCenterIdx(activeGroupIdx)
-    }
-  }, [activeGroupIdx, isHovered])
+  // The center logic is now handled by the parent's lazy scroll
+  const centerIdx = activeGroupIdx !== -1 ? activeGroupIdx : 0
 
   return (
     <div className="relative mt-1">
@@ -75,8 +70,8 @@ export const TranscriptBox = ({
 
       <div
         ref={scrollContainerRef}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => onHoverChange?.(true)}
+        onMouseLeave={() => onHoverChange?.(false)}
         className="max-h-[200px] overflow-y-auto rounded-2xl px-3 py-3 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
         {isTranscriptLoading ? (

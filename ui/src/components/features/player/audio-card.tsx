@@ -101,6 +101,7 @@ export default function AudioCard({
   const [speedPopoverOpen, setSpeedPopoverOpen] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const activeSentenceRef = useRef<HTMLDivElement>(null)
+  const [isTranscriptHovered, setIsTranscriptHovered] = useState(false)
 
   const { isThrottled, cooldownLeft, guardedAction, cooldownSeconds } = useSpamGuard()
 
@@ -251,7 +252,8 @@ export default function AudioCard({
   }, [currentTime, sentencesInClip])
 
   useEffect(() => {
-    if (activeSentenceRef.current && scrollContainerRef.current && isPlaying) {
+    // Only auto-scroll if playing, not hovered, and we have the necessary refs
+    if (activeSentenceRef.current && scrollContainerRef.current && isPlaying && !isTranscriptHovered) {
       if (activeSentenceIdx === lastScrolledPos.current) return
       
       const container = scrollContainerRef.current
@@ -260,19 +262,23 @@ export default function AudioCard({
       const containerRect = container.getBoundingClientRect()
       const activeRect = active.getBoundingClientRect()
 
-      // Calculate the offset within the container
-      const relativeTop = activeRect.top - containerRect.top + container.scrollTop
-      const scrollTo = relativeTop - (container.clientHeight / 2) + (activeRect.height / 2)
-
-      // Only scroll if we are reasonably far from the target or if it's a new sentence index
-      container.scrollTo({
-        top: scrollTo,
-        behavior: 'smooth'
-      })
+      // Calculate relative position within 0 to 1 range (0 = top, 1 = bottom)
+      const relativePos = (activeRect.top - containerRect.top) / containerRect.height
       
-      lastScrolledPos.current = activeSentenceIdx
+      // LAZY SCROLL: Only center if the sentence is outside the middle 30% of the box
+      // This is the secret to stopping the "shaking" - don't move if it's already roughly center
+      if (relativePos < 0.35 || relativePos > 0.65) {
+        const relativeTop = activeRect.top - containerRect.top + container.scrollTop
+        const scrollTo = relativeTop - (container.clientHeight / 2) + (activeRect.height / 2)
+
+        container.scrollTo({
+          top: scrollTo,
+          behavior: 'smooth'
+        })
+        lastScrolledPos.current = activeSentenceIdx
+      }
     }
-  }, [activeSentenceIdx, isPlaying])
+  }, [activeSentenceIdx, isPlaying, isTranscriptHovered])
 
   return (
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-6 shadow-2xl", className)}>
@@ -427,6 +433,8 @@ export default function AudioCard({
           const prompt = `Explain the meaning and nuance of the word "${word}" specifically in this sentence. Focus on how it is used here, any implied tone or register, and give 2-3 additional example sentences with similar usage.\n\nSentence: "${sentence}"`
           onExplainWordPrompt?.(prompt)
         }}
+        isHoveredParent={isTranscriptHovered}
+        onHoverChange={setIsTranscriptHovered}
       />
     </div >
   )
