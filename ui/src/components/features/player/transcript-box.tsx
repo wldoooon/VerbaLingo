@@ -1,6 +1,7 @@
 "use client"
 
 import { RefObject, useState, useMemo, useEffect } from "react"
+import { Skeleton } from "@/components/ui/skeleton"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { SentenceGroup } from "./sentence-group"
 
@@ -79,8 +80,15 @@ export const TranscriptBox = ({
         className="max-h-[200px] overflow-y-auto rounded-2xl px-3 py-3 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
         {isTranscriptLoading ? (
-          <div className="w-full py-8 flex items-center justify-center">
-            <div className="h-8 w-8 rounded-full border-2 border-muted-foreground/40 border-t-primary animate-spin" />
+          <div className="w-full py-4 space-y-4 animate-in fade-in duration-500">
+            <div className="flex flex-col items-center gap-2 px-6">
+              <Skeleton className="h-4 w-[90%] rounded-full opacity-40" />
+              <Skeleton className="h-4 w-[75%] rounded-full opacity-20" />
+            </div>
+            <div className="flex flex-col items-center gap-2 px-6">
+              <Skeleton className="h-4 w-[85%] rounded-full opacity-30" />
+              <Skeleton className="h-4 w-[60%] rounded-full opacity-10" />
+            </div>
           </div>
         ) : sentenceGroups.length > 0 ? (
           sentenceGroups.map((group, groupIdx) => (
