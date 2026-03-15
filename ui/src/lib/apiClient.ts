@@ -3,7 +3,7 @@ import { useUsageStore } from "@/stores/usage-store";
 import { toastManager } from "@/components/ui/toast";
 
 export const apiClient = axios.create({
-  baseURL: "/api/v1",
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL ?? "",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

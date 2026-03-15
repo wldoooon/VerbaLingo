@@ -104,7 +104,7 @@ export function useVerifyOtpMutation() {
   return useMutation({
     mutationFn: async (vars: { email: string; otp: string }) => {
       const res = await apiClient.post<{ message: string }>(
-        "/auth/verify-otp",
+        "/auth/verify-reset-otp",
         vars,
       );
       return res.data;

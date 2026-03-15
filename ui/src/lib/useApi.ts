@@ -30,7 +30,7 @@ const fetchSearchResults = async (
   }
 
   const response = await apiClient.get<SearchResponse>(
-    `/search?${params.toString()}`,
+    `/api/v1/search?${params.toString()}`,
   );
   return response.data;
 };
@@ -92,7 +92,7 @@ export const fetchTranscript = async (
     params.append("center_position", centerPosition.toString());
   }
   const response = await apiClient.get<TranscriptResponse>(
-    `/videos/${videoId}/transcript?${params.toString()}`,
+    `/api/v1/videos/${videoId}/transcript?${params.toString()}`,
   );
   return response.data;
 };
@@ -154,7 +154,7 @@ const fetchTranslate = async (
   params.append("target", target);
 
   const response = await apiClient.get<TranslateResponse>(
-    `/translate?${params.toString()}`,
+    `/api/v1/translate?${params.toString()}`,
   );
   return response.data;
 };
