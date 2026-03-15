@@ -27,6 +27,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 
 import { useForgotPasswordMutation, useResetPasswordMutation, useVerifyOtpMutation } from "@/lib/authHooks"
 import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown"
+import { useResendCooldown } from "@/hooks/useResendCooldown"
 import axios from "axios"
 
 const emailSchema = z.object({ email: z.string().email() })
@@ -62,6 +63,9 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
     const forgotRateLimit = useRateLimitCountdown(forgotPasswordMutation.error)
     const verifyRateLimit = useRateLimitCountdown(verifyOtpMutation.error)
     const resetRateLimit = useRateLimitCountdown(resetPasswordMutation.error)
+
+    // Resend cooldown for OTP step
+    const { remaining: resendRemaining, isCoolingDown: resendCooling, start: startResendCooldown } = useResendCooldown(60)
 
     // Step 1: Email Form
     const emailForm = useForm<{ email: string }>({ resolver: zodResolver(emailSchema), defaultValues: { email: "" } })
@@ -172,12 +176,14 @@ export function PasswordResetWizard({ onBack }: { onBack: () => void }) {
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="h-7 text-xs rounded-md bg-orange-500 text-white hover:text-white hover:bg-orange-600 border-0 font-bold cursor-pointer"
-                            onClick={() => forgotPasswordMutation.mutate({ email })}
-                            disabled={forgotPasswordMutation.isPending}
+                            className="h-7 text-xs rounded-md bg-orange-500 text-white hover:text-white hover:bg-orange-600 border-0 font-bold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                            onClick={() => { forgotPasswordMutation.mutate({ email }); startResendCooldown(); }}
+                            disabled={forgotPasswordMutation.isPending || resendCooling}
                         >
-                            {forgotPasswordMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <RefreshCwIcon className="w-3 h-3 mr-1" />}
-                            Resend Code
+                            {forgotPasswordMutation.isPending
+                                ? <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                                : <RefreshCwIcon className="w-3 h-3 mr-1" />}
+                            {resendCooling ? `Resend in ${resendRemaining}s` : "Resend Code"}
                         </Button>
                     </div>
 

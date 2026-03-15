@@ -6,6 +6,7 @@ import type { LoginResponse, SignupResponse, UserRead } from "@/lib/authTypes";
 import axios from "axios";
 
 import { useUsageStore } from "@/stores/usage-store";
+import { toastManager } from "@/components/ui/toast";
 
 export function useMeQuery() {
   const setAllUsage = useUsageStore((state) => state.setAllUsage);
@@ -44,6 +45,7 @@ export function useLoginMutation() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["me"] });
+      toastManager.add({ title: "Welcome back!", type: "success" });
     },
   });
 }
@@ -59,6 +61,7 @@ export function useLogoutMutation() {
     onSuccess: () => {
       // setQueryData immediately marks user as null — no refetch triggered
       queryClient.setQueryData(["me"], null);
+      toastManager.add({ title: "Signed out successfully", type: "info" });
     },
   });
 }
@@ -91,6 +94,9 @@ export function useForgotPasswordMutation() {
       );
       return res.data;
     },
+    onSuccess: () => {
+      toastManager.add({ title: "Code sent!", description: "Check your inbox for the 6-digit code.", type: "info" });
+    },
   });
 }
 
@@ -119,6 +125,7 @@ export function useVerifyEmailMutation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
+      toastManager.add({ title: "Email verified!", description: "Welcome aboard — you're all set.", type: "success" });
     },
   });
 }
@@ -135,6 +142,9 @@ export function useResetPasswordMutation() {
         vars,
       );
       return res.data;
+    },
+    onSuccess: () => {
+      toastManager.add({ title: "Password updated!", description: "Your new password is active. You can now log in.", type: "success" });
     },
   });
 }

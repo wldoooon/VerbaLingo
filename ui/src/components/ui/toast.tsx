@@ -3,7 +3,6 @@
 import { Toast } from "@base-ui/react/toast";
 import {
   CircleAlertIcon,
-  CircleCheckIcon,
   InfoIcon,
   LoaderCircleIcon,
   TriangleAlertIcon,
@@ -15,11 +14,47 @@ import { buttonVariants } from "@/components/ui/button";
 const toastManager = Toast.createToastManager();
 const anchoredToastManager = Toast.createToastManager();
 
+function AnimatedSuccessIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={cn("text-green-500", className)}
+      style={{ animation: "pop-in 0.35s cubic-bezier(.22,1,.36,1) forwards" }}
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        style={{
+          strokeDasharray: 63,
+          strokeDashoffset: 63,
+          animation: "draw-circle 0.4s ease-out forwards",
+        }}
+      />
+      <path
+        d="M7 12.5l3.5 3.5 6.5-7"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{
+          strokeDasharray: 20,
+          strokeDashoffset: 20,
+          animation: "draw-check 0.3s ease-out 0.35s forwards",
+        }}
+      />
+    </svg>
+  );
+}
+
 const TOAST_ICONS = {
   error: CircleAlertIcon,
   info: InfoIcon,
   loading: LoaderCircleIcon,
-  success: CircleCheckIcon,
   warning: TriangleAlertIcon,
 } as const;
 
@@ -56,7 +91,7 @@ function Toasts({ position = "bottom-right" }: { position: ToastPosition }) {
     <Toast.Portal data-slot="toast-portal">
       <Toast.Viewport
         className={cn(
-          "fixed z-50 mx-auto flex w-[calc(100%-var(--toast-inset)*2)] max-w-[420px] [--toast-inset:--spacing(4)] sm:[--toast-inset:--spacing(8)]",
+          "fixed z-[9999] mx-auto flex w-[calc(100%-var(--toast-inset)*2)] max-w-[420px] [--toast-inset:--spacing(4)] sm:[--toast-inset:--spacing(8)]",
           // Vertical positioning
           "data-[position*=top]:top-(--toast-inset)",
           "data-[position*=bottom]:bottom-(--toast-inset)",
@@ -72,6 +107,8 @@ function Toasts({ position = "bottom-right" }: { position: ToastPosition }) {
           const Icon = toast.type
             ? TOAST_ICONS[toast.type as keyof typeof TOAST_ICONS]
             : null;
+
+          const isSuccess = toast.type === "success";
 
           return (
             <Toast.Root
@@ -129,12 +166,16 @@ function Toasts({ position = "bottom-right" }: { position: ToastPosition }) {
             >
               <Toast.Content className="pointer-events-auto flex items-center justify-between gap-3 overflow-hidden px-5 py-4 text-sm transition-opacity duration-250 data-behind:pointer-events-none data-behind:opacity-0 data-expanded:opacity-100">
                 <div className="flex gap-3 items-start">
-                  {Icon && (
+                  {(Icon || isSuccess) && (
                     <div
                       className="mt-0.5 [&>svg]:h-5 [&>svg]:w-5 [&_svg]:pointer-events-none [&_svg]:shrink-0"
                       data-slot="toast-icon"
                     >
-                      <Icon className="in-data-[type=loading]:animate-spin in-data-[type=error]:text-destructive in-data-[type=info]:text-info in-data-[type=success]:text-success in-data-[type=warning]:text-warning in-data-[type=loading]:opacity-80" />
+                      {isSuccess ? (
+                        <AnimatedSuccessIcon />
+                      ) : Icon ? (
+                        <Icon className="in-data-[type=loading]:animate-spin in-data-[type=error]:text-destructive in-data-[type=info]:text-info in-data-[type=warning]:text-warning in-data-[type=loading]:opacity-80" />
+                      ) : null}
                     </div>
                   )}
 

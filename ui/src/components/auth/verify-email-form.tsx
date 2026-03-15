@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/input-otp"
 import { useVerifyEmailMutation, useSignupMutation } from "@/lib/authHooks"
 import { useRateLimitCountdown } from "@/hooks/useRateLimitCountdown"
+import { useResendCooldown } from "@/hooks/useResendCooldown"
 import axios from "axios"
 
 function getErrorMessage(err: unknown) {
@@ -43,9 +44,11 @@ export function VerifyEmailForm({ email, password, onSuccess, onBack }: VerifyEm
     const verifyMutation = useVerifyEmailMutation()
     const signupMutation = useSignupMutation()
     const verifyRateLimit = useRateLimitCountdown(verifyMutation.error)
+    const { remaining, isCoolingDown, start: startCooldown } = useResendCooldown(60)
 
     const handleResend = () => {
         signupMutation.mutate({ email, password, full_name: "User" })
+        startCooldown()
     }
 
     return (
@@ -65,12 +68,14 @@ export function VerifyEmailForm({ email, password, onSuccess, onBack }: VerifyEm
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="h-7 text-xs rounded-md bg-orange-500 text-white hover:text-white hover:bg-orange-600 border-0 font-bold cursor-pointer"
+                        className="h-7 text-xs rounded-md bg-orange-500 text-white hover:text-white hover:bg-orange-600 border-0 font-bold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                         onClick={handleResend}
-                        disabled={signupMutation.isPending}
+                        disabled={signupMutation.isPending || isCoolingDown}
                     >
-                        {signupMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <RefreshCwIcon className="w-3 h-3 mr-1" />}
-                        Resend Code
+                        {signupMutation.isPending
+                            ? <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                            : <RefreshCwIcon className="w-3 h-3 mr-1" />}
+                        {isCoolingDown ? `Resend in ${remaining}s` : "Resend Code"}
                     </Button>
                 </div>
 
