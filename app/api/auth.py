@@ -313,7 +313,11 @@ async def google_login(request: Request, mode: str = "login"):
     logger.info(f"DEBUG: Starting OAuth flow in mode: {mode}")
     
     redirect_uri = settings.GOOGLE_REDIRECT_URI
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    return await oauth.google.authorize_redirect(
+        request, 
+        redirect_uri,
+        scope='openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
+    )
 
 
 @router.get("/google/callback", response_class=HTMLResponse)

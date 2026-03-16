@@ -93,7 +93,12 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# 1. CORS Middleware - Required for Next.js to talk to the API
+# 1. Session Middleware - Required for OAuth state management
+# Authlib stores the 'state' parameter in session to prevent CSRF attacks
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+
+# 2. CORS Middleware - MUST be added AFTER SessionMiddleware to be the OUTERMOST 
+# layer so it can handle preflight (OPTIONS) requests before sessions logic.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in settings.BACKEND_CORS_ORIGINS.split(",") if o.strip()],
@@ -107,10 +112,6 @@ app.add_middleware(
         "RateLimit-Policy",
     ],
 )
-
-# 2. Session Middleware - Required for OAuth state management
-# Authlib stores the 'state' parameter in session to prevent CSRF attacks
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 app.include_router(auth_router)
 app.include_router(router)

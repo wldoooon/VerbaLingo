@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { cn } from "@/lib/utils"
@@ -99,12 +99,14 @@ export default function AudioCard({
   const router = useRouter()
   const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
   const [speedPopoverOpen, setSpeedPopoverOpen] = useState(false)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const activeSentenceRef = useRef<HTMLDivElement>(null)
+
+  // Countdown for Next Button (5s Strategy)
+  const [nextCooldown, setNextCooldown] = useState(0)
+  const nextTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const { isThrottled, cooldownLeft, guardedAction, cooldownSeconds } = useSpamGuard()
 
-  const PLAYBACK_START_OFFSET = 0.2
+  const PLAYBACK_START_OFFSET = 0.0
 
   // Get player state and controls from Zustand store
   const {
@@ -128,8 +130,8 @@ export default function AudioCard({
   // Fetch transcript for current video
   // Disable if parent is loading to avoid fetching transcript for "stale" clips during search transition
   const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(
-    !isParentLoading ? (currentClip?.video_id || "") : "", 
-    activeLanguage, 
+    !isParentLoading ? (currentClip?.video_id || "") : "",
+    activeLanguage,
     currentClip?.position
   )
 
@@ -175,21 +177,63 @@ export default function AudioCard({
     }
   }
 
-  // Get ALL sentences from the transcript (not just the clip window)
-  const allSentences = transcriptData?.sentences || []
+  // Sort and Normalize (Clean) word timestamps to prevent "ghost highlights" (words staying lit too long)
+  const sanitizedSentences = useMemo(() => {
+    const raw = transcriptData?.sentences || []
+    return [...raw].sort((a, b) => a.start_time - b.start_time).map(sentence => {
+      if (!sentence.words) return sentence
 
-  // Sort by start time
-  const sentencesInClip = [...allSentences].sort((a: any, b: any) => a.start_time - b.start_time)
+      const words = [...sentence.words]
+      for (let i = 0; i < words.length; i++) {
+        const current = words[i]
+        const next = words[i + 1]
+
+        // Strategy: Force a realistic "Average" duration (0.45s)
+        // This prevents the highlight from getting stuck on words with bad data.
+        const MAX_WORD_DURATION = 0.45
+        const safetyEnd = current.start + MAX_WORD_DURATION
+        
+        // Ensure the original end isn't already behind the start
+        current.end = Math.max(current.end, current.start + 0.05)
+
+        if (next) {
+          // Rule: Cap by duration AND strictly stop before the next word starts
+          current.end = Math.min(current.end, safetyEnd, next.start)
+        } else {
+          // Last word: Just cap by the 0.45s average duration
+          current.end = Math.min(current.end, safetyEnd)
+        }
+      }
+      return { ...sentence, words }
+    })
+  }, [transcriptData])
+
+  // Use the sanitized (cleaned) results
+  const sentencesInClip = sanitizedSentences
   // Find the sentence that contains the search query
-  const targetSentenceRef = useRef<HTMLDivElement>(null)
-  const hasScrolledToTarget = useRef(false)
   const hasStartedPlayback = useRef(false)
   const lastActiveSentenceIdx = useRef<number>(0)
 
-  // Reset scroll and playback flags when the video changes
+  // Reset playback flags when the video changes
   useEffect(() => {
-    hasScrolledToTarget.current = false
     hasStartedPlayback.current = false
+
+    // Start 5s countdown on every new clip
+    setNextCooldown(5)
+    if (nextTimerRef.current) clearInterval(nextTimerRef.current)
+    nextTimerRef.current = setInterval(() => {
+      setNextCooldown(prev => {
+        if (prev <= 1) {
+          if (nextTimerRef.current) clearInterval(nextTimerRef.current)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => {
+      if (nextTimerRef.current) clearInterval(nextTimerRef.current)
+    }
   }, [currentClip?.video_id])
 
   const targetSentence = sentencesInClip.find((sentence: any) => {
@@ -204,61 +248,17 @@ export default function AudioCard({
     return query && text.toLowerCase().includes(query)
   })
 
-  // Auto-scroll to target sentence on mount - CONSTRAINED to transcript box only
+  // Initialize playback on mount - no scrolling needed in Flashcard Mode
   useEffect(() => {
-    if (targetSentenceRef.current && scrollContainerRef.current && !hasScrolledToTarget.current) {
-      // Calculate scroll position manually to avoid affecting global scroll
-      const container = scrollContainerRef.current
-      const target = targetSentenceRef.current
-
-      const containerRect = container.getBoundingClientRect()
-      const targetRect = target.getBoundingClientRect()
-
-      // Calculate the offset within the container
-      const relativeTop = targetRect.top - containerRect.top + container.scrollTop
-      const scrollTo = relativeTop - (container.clientHeight / 2) + (targetRect.height / 2)
-
-      // Scroll ONLY the container, not the page
-      container.scrollTo({
-        top: scrollTo,
-        behavior: 'smooth'
-      })
-
-      hasScrolledToTarget.current = true
-
-      // Start playback after scroll completes (500ms delay)
-      // ONLY if we haven't started playing this clip yet
-      setTimeout(() => {
-        if (!hasStartedPlayback.current && targetSentence) {
-          const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
-          seekTo(startTime)
-          play()
-          hasStartedPlayback.current = true
-        }
-      }, 500)
+    if (targetSentence && !hasStartedPlayback.current) {
+      const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
+      seekTo(startTime)
+      play()
+      hasStartedPlayback.current = true
     }
-  }, [targetSentence, scrollContainerRef, seekTo, play])
+  }, [targetSentence, seekTo, play])
 
-  // Auto-scroll to active sentence during playback - CONSTRAINED to transcript box only
-  useEffect(() => {
-    if (activeSentenceRef.current && scrollContainerRef.current && isPlaying) {
-      const container = scrollContainerRef.current
-      const active = activeSentenceRef.current
-
-      const containerRect = container.getBoundingClientRect()
-      const activeRect = active.getBoundingClientRect()
-
-      // Calculate the offset within the container
-      const relativeTop = activeRect.top - containerRect.top + container.scrollTop
-      const scrollTo = relativeTop - (container.clientHeight / 2) + (activeRect.height / 2)
-
-      // Scroll ONLY the container, not the page
-      container.scrollTo({
-        top: scrollTo,
-        behavior: 'smooth'
-      })
-    }
-  }, [currentTime, isPlaying])
+  // Removed Scrolling logic - switched to Single Sentence Transitions
 
   return (
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-6 shadow-2xl", className)}>
@@ -286,7 +286,21 @@ export default function AudioCard({
             <Button size="icon" className="h-10 w-10 rounded-full" onClick={() => guardedAction(togglePlayPause)}>
               {isPlaying ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
             </Button>
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => guardedAction(nextVideo)}><SkipForward size={16} /></Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 relative"
+              onClick={() => {
+                if (nextCooldown === 0) guardedAction(nextVideo)
+              }}
+              disabled={nextCooldown > 0}
+            >
+              {nextCooldown > 0 ? (
+                <span className="text-[10px] font-black text-primary animate-pulse">{nextCooldown}s</span>
+              ) : (
+                <SkipForward size={16} />
+              )}
+            </Button>
           </div>
 
           <div className="flex items-center gap-1">
@@ -361,8 +375,24 @@ export default function AudioCard({
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(nextVideo)}><SkipForward size={20} /></Button>
-            <span className="text-xs text-muted-foreground">Next</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full cursor-pointer relative"
+              onClick={() => {
+                if (nextCooldown === 0) guardedAction(nextVideo)
+              }}
+              disabled={nextCooldown > 0}
+            >
+              {nextCooldown > 0 ? (
+                <div className="flex items-center justify-center h-full w-full">
+                  <span className="text-sm font-black text-primary animate-in zoom-in duration-300">{nextCooldown}s</span>
+                </div>
+              ) : (
+                <SkipForward size={20} />
+              )}
+            </Button>
+            <span className="text-xs text-muted-foreground">{nextCooldown > 0 ? "Wait..." : "Next"}</span>
           </div>
         </div>
 
@@ -389,9 +419,6 @@ export default function AudioCard({
         sentences={sentencesInClip}
         searchQuery={searchQuery}
         isTranscriptLoading={isTranscriptLoading}
-        scrollContainerRef={scrollContainerRef}
-        activeSentenceRef={activeSentenceRef}
-        targetSentenceRef={targetSentenceRef}
         targetSentence={targetSentence}
         onSearchWord={(word) => {
           const clean = word.trim()

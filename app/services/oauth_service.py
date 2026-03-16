@@ -22,7 +22,7 @@ oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     
     client_kwargs={
-        'scope': 'openid email profile',
+        'scope': 'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
         'prompt': 'consent',  # Force consent screen so user sees permissions
     }
 )
