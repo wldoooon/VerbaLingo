@@ -2,9 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useParams, useSearchParams } from "next/navigation"
-import VideoPlayerCard from "@/components/features/player/video-player-card"
-import AudioCard from "@/components/features/player/audio-card"
 import dynamic from "next/dynamic"
+
+// Dynamic imports are required for components that use browser-only APIs (like YouTube/window)
+const VideoPlayerCard = dynamic(() => import("@/components/features/player/video-player-card"), {
+  loading: () => <div className="h-[400px] w-full animate-pulse bg-muted rounded-xl" />,
+  ssr: false
+})
+const AudioCard = dynamic(() => import("@/components/features/player/audio-card"), {
+  ssr: false
+})
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
 import { useInfiniteSearch, useTranscriptPrefetch } from "@/lib/useApi"

@@ -31,25 +31,32 @@ export const TranscriptBox = ({
   onSearchWord,
   onExplainWordInContext,
 }: TranscriptBoxProps) => {
-  const currentTime = usePlayerStore(state => state.currentTime)
-
   // THE STICKY ENGINE: Remembers where we are to prevent jumping during gaps
   const lastValidIdx = useRef<number>(-1)
-  const currentKey = `${targetSentence?.start_time}-${sentences.length}`
   const lastKey = useRef("")
+
+  // Zustand selector: only returns a NEW value (and triggers re-render) when the
+  // active sentence INDEX changes — not on every currentTime tick.
+  // This eliminates jitter-induced flickering at sentence boundaries.
+  const activeSentenceIdx = usePlayerStore(state => {
+    const TIMING_LEAD = 0.15
+    const t = state.currentTime + TIMING_LEAD
+    return sentences.findIndex(s => t >= s.start_time && t < s.end_time)
+  })
 
   // Find the trio: Previous, Active, and Next
   const trio = useMemo(() => {
-    const TIMING_LEAD = 0.15
-    const t = currentTime + TIMING_LEAD
+    if (sentences.length === 0) return null
 
-    // Find active index
-    let activeIdx = sentences.findIndex(s => t >= s.start_time && t < s.end_time)
+    let activeIdx = activeSentenceIdx
 
     // Video/Clip changed? Reset memory to the target hit
+    const currentKey = `${targetSentence?.start_time}-${sentences.length}`
     if (currentKey !== lastKey.current) {
       lastKey.current = currentKey
-      const targetIdx = targetSentence ? sentences.findIndex(s => s.start_time === targetSentence.start_time) : 0
+      const targetIdx = targetSentence
+        ? sentences.findIndex(s => s.start_time === targetSentence.start_time)
+        : 0
       lastValidIdx.current = Math.max(0, targetIdx)
     }
 
@@ -63,13 +70,17 @@ export const TranscriptBox = ({
 
     if (activeIdx === -1) return null
 
+    // Safety: index could be stale/out-of-bounds after a video switch
+    const active = sentences[activeIdx]
+    if (!active) return null
+
     return {
       prev: sentences[activeIdx - 1],
-      active: sentences[activeIdx],
+      active,
       next: sentences[activeIdx + 1],
       activeIdx
     }
-  }, [currentTime, sentences, targetSentence])
+  }, [activeSentenceIdx, sentences, targetSentence])
 
   return (
     <div className="relative mt-1 h-[180px] flex items-center justify-center overflow-hidden">
