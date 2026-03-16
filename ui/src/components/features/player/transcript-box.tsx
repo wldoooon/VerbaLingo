@@ -40,58 +40,42 @@ export const TranscriptBox = ({
   isHoveredParent,
   onHoverChange,
 }: TranscriptBoxProps) => {
-  // Group sentences into chunks of 3
-  const sentenceGroups = useMemo(() => {
-    const groups: Sentence[][] = []
-    for (let i = 0; i < sentences.length; i += 3) {
-      groups.push(sentences.slice(i, i + 3))
-    }
-    return groups
+  // No more merging! Each sentence is its own individual group
+  const flatGroups = useMemo(() => {
+    return sentences.map(s => [s])
   }, [sentences])
 
-  // Find which group contains our target (search hit) sentence
-  const targetGroupIdx = useMemo(() => {
+  // Find which index contains our target (search hit) sentence
+  const targetIdx = useMemo(() => {
     if (!targetSentence) return 0
-    const idx = sentenceGroups.findIndex(group => 
-      group.some(s => s.start_time === targetSentence.start_time)
-    )
+    const idx = sentences.findIndex(s => s.start_time === targetSentence.start_time)
     return Math.max(0, idx)
-  }, [sentenceGroups, targetSentence])
+  }, [sentences, targetSentence])
 
-  // OPTIMIZATION: Only track the index of the active group to minimize container re-renders
-  const activeGroupIdx = usePlayerStore(state => {
+  // Track the active sentence index
+  const activeIdx = usePlayerStore(state => {
     const TIMING_LEAD = 0.08
     const adjustedTime = state.currentTime + TIMING_LEAD
-    return sentenceGroups.findIndex((group) => {
-      const s = group[0].start_time
-      const e = group[group.length - 1].end_time
-      return adjustedTime >= s && adjustedTime < e
-    })
+    return sentences.findIndex((s) => adjustedTime >= s.start_time && adjustedTime < s.end_time)
   })
 
   // THE FIX: Memory and Priority
-  // We use a ref to remember where we were so we don't "jump" during silences
   const lastValidIdx = useRef(-1)
-  
-  // Initialize or Reset the ref when the target/sentences change
   const currentKey = `${targetSentence?.start_time}-${sentences.length}`
   const lastKey = useRef("")
   
   const centerIdx = useMemo(() => {
-    // If the video changed, reset the lastValidIdx immediately
     if (currentKey !== lastKey.current) {
       lastKey.current = currentKey
-      lastValidIdx.current = targetGroupIdx
+      lastValidIdx.current = targetIdx
     }
 
-    if (activeGroupIdx !== -1) {
-      lastValidIdx.current = activeGroupIdx
-      return activeGroupIdx
+    if (activeIdx !== -1) {
+      lastValidIdx.current = activeIdx
+      return activeIdx
     }
-    
-    // If no active sentence found (gap/loading), stay anchored to our memory
-    return lastValidIdx.current !== -1 ? lastValidIdx.current : targetGroupIdx
-  }, [activeGroupIdx, targetGroupIdx, currentKey])
+    return lastValidIdx.current !== -1 ? lastValidIdx.current : targetIdx
+  }, [activeIdx, targetIdx, currentKey])
 
   return (
     <div className="relative mt-1">
@@ -100,9 +84,7 @@ export const TranscriptBox = ({
 
       <div
         ref={scrollContainerRef}
-        onMouseEnter={() => onHoverChange?.(true)}
-        onMouseLeave={() => onHoverChange?.(false)}
-        className="max-h-[200px] overflow-y-auto rounded-2xl px-3 py-3 scroll-smooth flex flex-col items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        className="max-h-[200px] overflow-hidden rounded-2xl px-3 py-3 scroll-smooth flex flex-col items-stretch touch-action-none pointer-events-none"
       >
         {isTranscriptLoading ? (
           <div className="w-full py-4 space-y-4 animate-in fade-in duration-500">
@@ -115,24 +97,25 @@ export const TranscriptBox = ({
               <Skeleton className="h-4 w-[60%] rounded-full opacity-10" />
             </div>
           </div>
-        ) : sentenceGroups.length > 0 ? (
+        ) : flatGroups.length > 0 ? (
           <>
             {/* Top Spacer for centering the first item */}
             <div className="h-[100px] shrink-0 pointer-events-none" aria-hidden="true" />
             
-            {sentenceGroups.map((group, groupIdx) => (
-              <SentenceGroup
-                key={`${group[0].start_time}-${groupIdx}`}
-                group={group}
-                groupIdx={groupIdx}
-                centerIdx={centerIdx}
-                searchQuery={searchQuery}
-                activeSentenceRef={activeSentenceRef}
-                targetSentenceRef={targetSentenceRef}
-                isTargetGroup={targetSentence ? group.some(s => s.start_time === targetSentence.start_time) : false}
-                onSearchWord={onSearchWord}
-                onExplainWordInContext={onExplainWordInContext}
-              />
+            {flatGroups.map((group: Sentence[], groupIdx: number) => (
+              <div key={`${group[0].start_time}-${groupIdx}`} className="pointer-events-auto">
+                <SentenceGroup
+                  group={group}
+                  groupIdx={groupIdx}
+                  centerIdx={centerIdx}
+                  searchQuery={searchQuery}
+                  activeSentenceRef={activeSentenceRef}
+                  targetSentenceRef={targetSentenceRef}
+                  isTargetGroup={targetSentence ? group.some((s: Sentence) => s.start_time === targetSentence.start_time) : false}
+                  onSearchWord={onSearchWord}
+                  onExplainWordInContext={onExplainWordInContext}
+                />
+              </div>
             ))}
 
             {/* Bottom Spacer for centering the last item */}

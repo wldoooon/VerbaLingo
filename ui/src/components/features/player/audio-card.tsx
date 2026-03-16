@@ -297,8 +297,8 @@ export default function AudioCard({
   }, [currentTime, sentencesInClip])
 
   useEffect(() => {
-    // Only auto-scroll if playing, not hovered, and we have the necessary refs
-    if (activeSentenceRef.current && scrollContainerRef.current && isPlaying && !isTranscriptHovered) {
+    // Only auto-scroll if playing and we have the necessary refs
+    if (activeSentenceRef.current && scrollContainerRef.current && isPlaying) {
       if (activeSentenceIdx === lastScrolledPos.current) return
       
       const container = scrollContainerRef.current
@@ -310,9 +310,9 @@ export default function AudioCard({
       // Calculate relative position within 0 to 1 range (0 = top, 1 = bottom)
       const relativePos = (activeRect.top - containerRect.top) / containerRect.height
       
-      // LAZY SCROLL: Only center if the sentence is outside the middle 30% of the box
-      // This is the secret to stopping the "shaking" - don't move if it's already roughly center
-      if (relativePos < 0.35 || relativePos > 0.65) {
+      // Since it's a flat list of single sentences, we can be more aggressive with centering
+      // to keep the active sentence strictly in focus.
+      if (relativePos < 0.4 || relativePos > 0.6) {
         const relativeTop = activeRect.top - containerRect.top + container.scrollTop
         const scrollTo = relativeTop - (container.clientHeight / 2) + (activeRect.height / 2)
 
