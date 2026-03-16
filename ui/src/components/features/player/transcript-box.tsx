@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef } from "react"
+import { useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import { usePlayerStore } from "@/stores/use-player-store"
@@ -18,7 +18,6 @@ type TranscriptBoxProps = {
   sentences: Sentence[]
   searchQuery: string
   isTranscriptLoading: boolean
-  targetSentence: Sentence | undefined
   onSearchWord?: (word: string) => void
   onExplainWordInContext?: (payload: { word: string; sentence: string }) => void
 }
@@ -27,50 +26,37 @@ export const TranscriptBox = ({
   sentences,
   searchQuery,
   isTranscriptLoading,
-  targetSentence,
   onSearchWord,
   onExplainWordInContext,
 }: TranscriptBoxProps) => {
-  // THE STICKY ENGINE: Remembers where we are to prevent jumping during gaps
-  const lastValidIdx = useRef<number>(-1)
-  const lastKey = useRef("")
-
-  // Zustand selector: only returns a NEW value (and triggers re-render) when the
-  // active sentence INDEX changes — not on every currentTime tick.
-  // Lead is scaled with playbackRate: at 2× speed the rAF lag doubles in video-time.
-  const activeSentenceIdx = usePlayerStore(state => {
+  // Zustand selector: only triggers re-render when the sentence INDEX changes.
+  // Handles gaps between sentences by returning the most recently passed sentence
+  // (sentences are sorted by start_time from audio-card's sanitizedSentences).
+  // No refs needed — the selector itself is the sticky engine.
+  const activeIdx = usePlayerStore(state => {
+    if (sentences.length === 0) return -1
     const TIMING_LEAD = 0.05 * state.playbackRate
     const t = state.currentTime + TIMING_LEAD
-    return sentences.findIndex(s => t >= s.start_time && t < s.end_time)
+
+    // Exact match: currentTime is within a sentence
+    const exact = sentences.findIndex(s => t >= s.start_time && t < s.end_time)
+    if (exact !== -1) return exact
+
+    // Gap/silence: return the last sentence whose start we've passed.
+    // Since sentences are sorted, scan forward and stop when we overshoot.
+    let last = -1
+    for (let i = 0; i < sentences.length; i++) {
+      if (t >= sentences[i].start_time) last = i
+      else break
+    }
+    return last
   })
 
-  // Find the trio: Previous, Active, and Next
+  // Find the trio: Previous, Active, and Next.
+  // Pure computation — no ref mutations, safe for Concurrent Mode.
   const trio = useMemo(() => {
-    if (sentences.length === 0) return null
+    if (sentences.length === 0 || activeIdx === -1) return null
 
-    let activeIdx = activeSentenceIdx
-
-    // Video/Clip changed? Reset memory to the target hit
-    const currentKey = `${targetSentence?.start_time}-${sentences.length}`
-    if (currentKey !== lastKey.current) {
-      lastKey.current = currentKey
-      const targetIdx = targetSentence
-        ? sentences.findIndex(s => s.start_time === targetSentence.start_time)
-        : 0
-      lastValidIdx.current = Math.max(0, targetIdx)
-    }
-
-    // Update memory if we found a new active sentence
-    if (activeIdx !== -1) {
-      lastValidIdx.current = activeIdx
-    } else {
-      // SILENCE detected: Use the last known sentence (Sticky Mode)
-      activeIdx = lastValidIdx.current
-    }
-
-    if (activeIdx === -1) return null
-
-    // Safety: index could be stale/out-of-bounds after a video switch
     const active = sentences[activeIdx]
     if (!active) return null
 
@@ -78,9 +64,8 @@ export const TranscriptBox = ({
       prev: sentences[activeIdx - 1],
       active,
       next: sentences[activeIdx + 1],
-      activeIdx
     }
-  }, [activeSentenceIdx, sentences, targetSentence])
+  }, [activeIdx, sentences])
 
   return (
     <div className="relative mt-1 h-[180px] flex items-center justify-center overflow-hidden">

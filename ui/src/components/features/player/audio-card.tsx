@@ -419,7 +419,6 @@ export default function AudioCard({
         sentences={sentencesInClip}
         searchQuery={searchQuery}
         isTranscriptLoading={isTranscriptLoading}
-        targetSentence={targetSentence}
         onSearchWord={(word) => {
           const clean = word.trim()
           if (!clean) return
