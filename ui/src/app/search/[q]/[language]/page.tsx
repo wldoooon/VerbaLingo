@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useParams, useSearchParams } from "next/navigation"
+import VideoPlayerCard from "@/components/features/player/video-player-card"
+import AudioCard from "@/components/features/player/audio-card"
 import dynamic from "next/dynamic"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
@@ -13,14 +15,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/use-media-query"
 
-// Dynamic imports for heavy components
-const VideoPlayerCard = dynamic(() => import("@/components/features/player/video-player-card"), {
-  loading: () => <div className="h-[400px] w-full animate-pulse bg-muted rounded-xl" />,
-  ssr: false
-})
-const AudioCard = dynamic(() => import("@/components/features/player/audio-card"), {
-  ssr: false
-})
 const AiCompletion = dynamic(() => import("@/components/ai-completion").then(mod => mod.AiCompletion), {
   loading: () => <div className="h-full w-full animate-pulse bg-muted" />,
   ssr: false
@@ -134,7 +128,6 @@ export default function RoutedSearchPage() {
 
     setHasRequested(true)
     resetIndex() // Reset index at the start of a new search
-    refetch()
 
     setQuery(q)
     setCategory(categoryForContext)
@@ -160,10 +153,6 @@ export default function RoutedSearchPage() {
         {showWall ? (
           /* ── Signup Wall ── */
           <SearchLimitWall />
-        ) : (!hasRequested || isLoading || (isFetching && playlist.length === 0)) ? (
-          <div className="flex h-full items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
         ) : (
           <div className={cn(
             "mt-0 max-w-full xl:grid xl:items-start transition-[grid-template-columns] duration-300 ease-in-out",
@@ -223,7 +212,7 @@ export default function RoutedSearchPage() {
                       totalItems={totalHits}
                       searchQuery={searchQuery}
                       language={languageParam}
-                      isLoading={isLoading || (isFetching && !isFetchingNextPage)}
+                      isLoading={isLoading || (isFetching && playlist.length === 0)}
                       onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
                     />
                   </div>

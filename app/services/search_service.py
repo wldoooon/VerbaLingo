@@ -29,7 +29,7 @@ class SearchService:
         # 2. General Search: Optimized Parallel Diversification
         # INCREASED BUFFER: Fetching 20 instead of 15 per category to account for
         # heavy deduplication. This ensures we almost always fill the 30-hit page.
-        limit_per_cat = max(int(limit * 0.7), 20) 
+        limit_per_cat = max(int(limit * 0.4), 12) 
         offset_per_cat = (page - 1) * limit_per_cat
 
         tasks = []
