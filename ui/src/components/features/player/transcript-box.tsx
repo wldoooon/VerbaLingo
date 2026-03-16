@@ -37,9 +37,9 @@ export const TranscriptBox = ({
 
   // Zustand selector: only returns a NEW value (and triggers re-render) when the
   // active sentence INDEX changes — not on every currentTime tick.
-  // This eliminates jitter-induced flickering at sentence boundaries.
+  // Lead is scaled with playbackRate: at 2× speed the rAF lag doubles in video-time.
   const activeSentenceIdx = usePlayerStore(state => {
-    const TIMING_LEAD = 0.15
+    const TIMING_LEAD = 0.05 * state.playbackRate
     const t = state.currentTime + TIMING_LEAD
     return sentences.findIndex(s => t >= s.start_time && t < s.end_time)
   })

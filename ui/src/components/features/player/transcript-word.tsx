@@ -27,9 +27,10 @@ export const TranscriptWord = memo(({
 
   // CRITICAL OPTIMIZATION: Only subscribe to the highlight state of THIS specific word.
   // Component will only re-render when isCurrentWord toggles.
+  // Lead scaled with playbackRate so timing stays accurate at any speed.
   const isCurrentWord = usePlayerStore(state => {
     if (!state.isPlaying) return false
-    const TIMING_LEAD = 0.08
+    const TIMING_LEAD = 0.05 * state.playbackRate
     const adjustedTime = state.currentTime + TIMING_LEAD
     return adjustedTime >= start && adjustedTime < end
   })
