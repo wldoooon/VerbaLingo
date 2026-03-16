@@ -72,6 +72,7 @@ export default function VideoPlayerCard({
   const playerBRef = useRef<YouTubePlayer | null>(null)
   const rafRef = useRef<number | null>(null)
   const lastTimeRef = useRef<number>(-1)
+  const mountedRef = useRef(true)
 
   /**
    * Safe wrapper for all YouTube player calls.
@@ -160,14 +161,18 @@ export default function VideoPlayerCard({
     }
   }
 
-  // Cancel rAF and clear stale player ref on unmount.
-  // Without setPlayer(null), AudioCard's play() fires on the dead iframe after navigation → crash.
+  // Cancel rAF, clear stale player refs, and mark unmounted on cleanup.
+  // setPlayer(null) prevents AudioCard from calling playVideo() on the dead iframe after navigation.
+  // mountedRef blocks the onReady setTimeout from firing on a dead player (→ null.src crash).
   useEffect(() => {
     return () => {
+      mountedRef.current = false
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current)
         rafRef.current = null
       }
+      playerARef.current = null
+      playerBRef.current = null
       setPlayer(null)
     }
   }, [])
@@ -229,10 +234,11 @@ export default function VideoPlayerCard({
       try { event.target.setPlaybackQuality('hd720') } catch(e) {}
     } else {
       safeCall(event.target, 'mute')
-      // TURBO BUFFER: Play for 1.2s in background then pause. 
+      // TURBO BUFFER: Play for 1.2s in background then pause.
       // This forces YouTube to load the actual video data into the browser cache.
       safeCall(event.target, 'playVideo')
       setTimeout(() => {
+        if (!mountedRef.current) return
         if (key !== activeKey) {
             safeCall(event.target, 'pauseVideo')
         }
