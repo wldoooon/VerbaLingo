@@ -214,6 +214,7 @@ export default function RoutedSearchPage() {
                   {/* Sticky Header Layer for Mobile */}
                   <div className="xl:relative sticky top-0 z-40 bg-background/95 backdrop-blur-sm xl:bg-transparent xl:backdrop-blur-none px-4 pt-3 pb-2 sm:px-6">
                     <VideoPlayerCard
+                      key={`${q}-${languageParam}`}
                       playlist={playlist}
                       isFetching={isFetching || isFetchingNextPage}
                       aggregations={aggregations}

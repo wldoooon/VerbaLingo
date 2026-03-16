@@ -95,7 +95,7 @@ export default function VideoPlayerCard({
     let currentActive: YouTubePlayer | null = null
     if (activeKey === 'A') currentActive = playerARef.current
     if (activeKey === 'B') currentActive = playerBRef.current
-    
+
     // Always update the active player ref in store when it shifts
     setPlayer(currentActive)
 
@@ -107,13 +107,13 @@ export default function VideoPlayerCard({
 
       if (isActuallyActive) {
         // ACTIVE PLAYER configuration
-        
+
         // Only seek if this is the FIRST time we are seeing this video ID as active
         if (lastSeekedClipId.current !== clip.video_id) {
-            safeCall(player, 'seekTo', getClipStart(clip), true)
-            lastSeekedClipId.current = clip.video_id
+          safeCall(player, 'seekTo', getClipStart(clip), true)
+          lastSeekedClipId.current = clip.video_id
         }
-        
+
         safeCall(player, 'playVideo')
         safeCall(player, 'setPlaybackRate', playbackRate)
 
@@ -179,8 +179,8 @@ export default function VideoPlayerCard({
 
   const onStateChange = (event: { data: number; target: any }, key: 'A' | 'B') => {
     if (key !== activeKey) {
-      if (event.data === 1 && typeof event.target.mute === 'function') {
-        event.target.mute()
+      if (event.data === 1) {
+        safeCall(event.target, 'mute')
       }
       return
     }
@@ -188,7 +188,7 @@ export default function VideoPlayerCard({
     const isNowPlaying = event.data === 1
 
     if (isNowPlaying && !isMuted) {
-      event.target.unMute()
+      safeCall(event.target, 'unMute')
     }
 
     setPlayerState({ isPlaying: isNowPlaying })
@@ -214,6 +214,8 @@ export default function VideoPlayerCard({
 
 
   const onReady = (event: { target: YouTubePlayer }, key: 'A' | 'B') => {
+    if (!event.target) return
+    
     if (key === 'A') playerARef.current = event.target
     if (key === 'B') playerBRef.current = event.target
 
@@ -227,11 +229,18 @@ export default function VideoPlayerCard({
 
     if (key === activeKey) {
       setPlayer(event.target)
-      safeCall(event.target, 'getDuration') 
-      try { setPlayerState({ duration: event.target.getDuration() }) } catch { }
+      try { 
+        if (typeof event.target.getDuration === 'function') {
+          setPlayerState({ duration: event.target.getDuration() }) 
+        }
+      } catch { }
       if (!isMuted) safeCall(event.target, 'unMute')
       // Force high quality on active player
-      try { event.target.setPlaybackQuality('hd720') } catch(e) {}
+      try { 
+        if (typeof event.target.setPlaybackQuality === 'function') {
+          event.target.setPlaybackQuality('hd720') 
+        }
+      } catch (e) { }
     } else {
       safeCall(event.target, 'mute')
       // TURBO BUFFER: Play for 1.2s in background then pause.
@@ -240,7 +249,7 @@ export default function VideoPlayerCard({
       setTimeout(() => {
         if (!mountedRef.current) return
         if (key !== activeKey) {
-            safeCall(event.target, 'pauseVideo')
+          safeCall(event.target, 'pauseVideo')
         }
       }, 1200)
     }

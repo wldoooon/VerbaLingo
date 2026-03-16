@@ -4,12 +4,10 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, X, ArrowRight, ChevronDown, Check, Clock, Lock, Video, Tv, Mic, Music, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
 import { useSearchStore } from '@/stores/use-search-store';
 import { useEntitlements } from '@/hooks/use-entitlements';
 import { useAuthStore } from '@/stores/auth-store';
 import { toastManager } from '@/components/ui/toast';
-import { fetchSearchResults } from '@/lib/useApi';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -90,12 +88,10 @@ export function SearchBar() {
     const containerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const pathname = usePathname();
-    const queryClient = useQueryClient();
 
     // Zustand Store
     const storeLanguage = useSearchStore(s => s.language);
     const storeCategory = useSearchStore(s => s.category);
-    const subCategory = useSearchStore(s => s.subCategory);
     const { setLanguage: setStoreLanguage, setCategory: setStoreCategory } = useSearchStore();
 
     // Sync local language state to store if they differ
@@ -241,16 +237,6 @@ export function SearchBar() {
 
         const targetPath = `/search/${encodeURIComponent(q.trim())}/${lang}`;
         const targetUrl = params.toString() ? `${targetPath}?${params.toString()}` : targetPath;
-
-        // Fire the search API request RIGHT NOW — before navigation even starts.
-        // By the time the search page mounts (~200-400ms later), the data may already
-        // be in TanStack Query cache, making results feel instant.
-        queryClient.prefetchInfiniteQuery({
-            queryKey: ["searchInfinite", q.trim(), lang, cats, subCategory],
-            queryFn: ({ pageParam }) => fetchSearchResults(q.trim(), lang, cats, subCategory, pageParam as number),
-            initialPageParam: 1,
-            staleTime: 1000 * 60 * 5,
-        });
 
         if (pathname === decodeURIComponent(targetPath) || pathname === targetPath) {
             router.push(targetUrl);

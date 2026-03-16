@@ -7,7 +7,7 @@ interface PlayerStore extends PlayerStateBase {
   duration: number;
   playbackRate: number;
   player: YouTubePlayer | null;
-  
+
   // Actions
   resetIndex: () => void;
   nextVideo: () => void;
@@ -15,9 +15,11 @@ interface PlayerStore extends PlayerStateBase {
   setMuted: (muted: boolean) => void;
   setCurrentTime: (time: number) => void;
   setIndex: (index: number) => void;
-  setPlayerState: (state: Partial<{ isPlaying: boolean; duration: number }>) => void;
+  setPlayerState: (
+    state: Partial<{ isPlaying: boolean; duration: number }>,
+  ) => void;
   setPlayer: (player: YouTubePlayer | null) => void;
-  
+
   // Controls
   play: () => void;
   pause: () => void;
@@ -37,8 +39,12 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
   player: null,
 
   resetIndex: () => set({ currentVideoIndex: 0 }),
-  nextVideo: () => set((state) => ({ currentVideoIndex: state.currentVideoIndex + 1 })),
-  prevVideo: () => set((state) => ({ currentVideoIndex: Math.max(0, state.currentVideoIndex - 1) })),
+  nextVideo: () =>
+    set((state) => ({ currentVideoIndex: state.currentVideoIndex + 1 })),
+  prevVideo: () =>
+    set((state) => ({
+      currentVideoIndex: Math.max(0, state.currentVideoIndex - 1),
+    })),
   setMuted: (muted) => set({ isMuted: muted }),
   setCurrentTime: (time) => set({ currentTime: time }),
   setIndex: (index) => set({ currentVideoIndex: index }),
@@ -47,23 +53,23 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
   play: () => {
     const { player } = get();
-    if (player) player.playVideo();
+    player?.playVideo?.();
   },
   pause: () => {
     const { player } = get();
-    if (player) player.pauseVideo();
+    player?.pauseVideo?.();
   },
   seekTo: (time) => {
     const { player } = get();
-    if (player) player.seekTo(time, true);
+    player?.seekTo?.(time, true);
   },
   setPlaybackRate: (rate) => {
     set({ playbackRate: rate });
     const { player } = get();
-    if (player) player.setPlaybackRate(rate);
+    player?.setPlaybackRate?.(rate);
   },
   setVolume: (volume) => {
     const { player } = get();
-    if (player) player.setVolume(volume);
+    player?.setVolume?.(volume);
   },
 }));
