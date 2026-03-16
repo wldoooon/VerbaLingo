@@ -138,11 +138,15 @@ export default function VideoPlayerCard({
   const startPolling = () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
     const tick = () => {
-      // Always read the latest player from the store — avoids stale closure when clips change
-      const t = usePlayerStore.getState().player?.getCurrentTime()
-      if (typeof t === 'number' && t !== lastTimeRef.current) {
-        lastTimeRef.current = t
-        setCurrentTime(t)
+      try {
+        // Always read the latest player from the store — avoids stale closure when clips change
+        const t = usePlayerStore.getState().player?.getCurrentTime()
+        if (typeof t === 'number' && t !== lastTimeRef.current) {
+          lastTimeRef.current = t
+          setCurrentTime(t)
+        }
+      } catch {
+        // YouTube player can throw when not ready or when the iframe is being destroyed
       }
       rafRef.current = requestAnimationFrame(tick)
     }
@@ -155,6 +159,16 @@ export default function VideoPlayerCard({
       rafRef.current = null
     }
   }
+
+  // Cancel rAF on unmount — without this the loop runs forever after navigation
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = null
+      }
+    }
+  }, [])
 
   const onStateChange = (event: { data: number; target: any }, key: 'A' | 'B') => {
     if (key !== activeKey) {
