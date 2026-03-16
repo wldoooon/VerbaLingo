@@ -180,11 +180,35 @@ export default function AudioCard({
     }
   }
 
-  // Get ALL sentences from the transcript (not just the clip window)
-  const allSentences = transcriptData?.sentences || []
+  // Sort and Normalize (Clean) word timestamps to prevent "ghost highlights" (words staying lit too long)
+  const sanitizedSentences = useMemo(() => {
+    const raw = transcriptData?.sentences || []
+    return [...raw].sort((a, b) => a.start_time - b.start_time).map(sentence => {
+      if (!sentence.words) return sentence
+      
+      const words = [...sentence.words]
+      for (let i = 0; i < words.length; i++) {
+        const current = words[i]
+        const next = words[i + 1]
+        
+        // Strategy: Cap word duration to 0.6s max, or the start of the next word
+        const MAX_WORD_DURATION = 0.6
+        const safetyEnd = current.start + MAX_WORD_DURATION
+        
+        if (next) {
+          // Rule: Don't last longer than 0.6s AND don't overlap next word
+          current.end = Math.min(current.end, safetyEnd, next.start)
+        } else {
+          // Last word of the sentence
+          current.end = Math.min(current.end, safetyEnd)
+        }
+      }
+      return { ...sentence, words }
+    })
+  }, [transcriptData])
 
-  // Sort by start time
-  const sentencesInClip = [...allSentences].sort((a: any, b: any) => a.start_time - b.start_time)
+  // Use the sanitized (cleaned) results
+  const sentencesInClip = sanitizedSentences
   // Find the sentence that contains the search query
   const targetSentenceRef = useRef<HTMLDivElement>(null)
   const hasScrolledToTarget = useRef(false)
