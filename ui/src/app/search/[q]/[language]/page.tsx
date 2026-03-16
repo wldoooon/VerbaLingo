@@ -213,12 +213,16 @@ export default function RoutedSearchPage() {
                 <div className="flex flex-col relative w-full">
                   {/* Sticky Header Layer for Mobile */}
                   <div className="xl:relative sticky top-0 z-40 bg-background/95 backdrop-blur-sm xl:bg-transparent xl:backdrop-blur-none px-4 pt-3 pb-2 sm:px-6">
-                    <VideoPlayerCard
-                      key={`${q}-${languageParam}`}
-                      playlist={playlist}
-                      isFetching={isFetching || isFetchingNextPage}
-                      aggregations={aggregations}
-                    />
+                    {playlist.length > 0 ? (
+                      <VideoPlayerCard
+                        key={`${q}-${languageParam}`}
+                        playlist={playlist}
+                        isFetching={isFetching || isFetchingNextPage}
+                        aggregations={aggregations}
+                      />
+                    ) : (
+                      <div className="h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] w-full animate-pulse bg-muted rounded-2xl" />
+                    )}
                   </div>
 
                   {/* Scrollable Content Layer */}
