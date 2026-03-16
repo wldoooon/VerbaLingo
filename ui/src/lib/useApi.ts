@@ -11,7 +11,7 @@ type TranslateResponse = {
   target: string;
 };
 
-const fetchSearchResults = async (
+export const fetchSearchResults = async (
   query: string,
   language: string,
   category: string | null,
@@ -110,6 +110,8 @@ export const useTranscript = (
     queryKey: ["transcript", videoId, language, centerPosition],
     queryFn: () => fetchTranscript(videoId, language, centerPosition),
     enabled: !!videoId,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
   });
 };
 

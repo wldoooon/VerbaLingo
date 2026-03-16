@@ -35,6 +35,14 @@ export default function RoutedSearchPage() {
   const params = useParams<{ q: string; language: string }>()
   const searchParams = useSearchParams()
 
+  // Preload player component chunks immediately — don't wait for search results.
+  // Without this, chunks only download AFTER playlist arrives (waterfall).
+  // With this, chunks are in browser cache before the API even responds.
+  useEffect(() => {
+    import("@/components/features/player/video-player-card")
+    import("@/components/features/player/audio-card")
+  }, [])
+
   const q = decodeURIComponent(params.q || "")
   const languageParam = decodeURIComponent(params.language || "english")
 

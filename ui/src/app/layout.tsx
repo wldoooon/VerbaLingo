@@ -58,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${inter.className} w-full min-h-screen bg-background`}
         suppressHydrationWarning
       >
-        <Script src="https://www.youtube.com/iframe_api" strategy="lazyOnload" />
+        <Script src="https://www.youtube.com/iframe_api" strategy="afterInteractive" />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

@@ -109,7 +109,7 @@ export const TranscriptBox = ({
               className="flex flex-col items-center gap-4 py-4"
             >
               {/* Previous Context */}
-              <div className="opacity-20 scale-95 blur-[0.5px] transition-all duration-300 pointer-events-none hidden sm:block">
+              <div className="opacity-100 scale-100 transition-all duration-300 pointer-events-none hidden sm:block">
                 {trio.prev && (
                   <SentenceGroup
                     group={[trio.prev]}
@@ -131,7 +131,7 @@ export const TranscriptBox = ({
               </div>
 
               {/* Next Context */}
-              <div className="opacity-20 scale-95 blur-[0.5px] transition-all duration-300 pointer-events-none hidden sm:block">
+              <div className="opacity-100 scale-100 transition-all duration-300 pointer-events-none hidden sm:block">
                 {trio.next && (
                   <SentenceGroup
                     group={[trio.next]}
