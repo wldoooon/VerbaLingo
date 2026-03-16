@@ -106,7 +106,7 @@ export default function AudioCard({
 
   const { isThrottled, cooldownLeft, guardedAction, cooldownSeconds } = useSpamGuard()
 
-  const PLAYBACK_START_OFFSET = 0.2
+  const PLAYBACK_START_OFFSET = 0.0
 
   // Get player state and controls from Zustand store
   const {
@@ -188,15 +188,19 @@ export default function AudioCard({
         const current = words[i]
         const next = words[i + 1]
 
-        // Strategy: Cap word duration to 0.6s max, or the start of the next word
-        const MAX_WORD_DURATION = 0.6
+        // Strategy: Force a realistic "Average" duration (0.45s)
+        // This prevents the highlight from getting stuck on words with bad data.
+        const MAX_WORD_DURATION = 0.45
         const safetyEnd = current.start + MAX_WORD_DURATION
+        
+        // Ensure the original end isn't already behind the start
+        current.end = Math.max(current.end, current.start + 0.05)
 
         if (next) {
-          // Rule: Don't last longer than 0.6s AND don't overlap next word
+          // Rule: Cap by duration AND strictly stop before the next word starts
           current.end = Math.min(current.end, safetyEnd, next.start)
         } else {
-          // Last word of the sentence
+          // Last word: Just cap by the 0.45s average duration
           current.end = Math.min(current.end, safetyEnd)
         }
       }

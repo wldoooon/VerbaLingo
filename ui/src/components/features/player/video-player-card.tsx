@@ -123,9 +123,9 @@ export default function VideoPlayerCard({
           safeCall(player, 'setVolume', 100)
         }
       } else {
-        // BACKGROUND PLAYER - explicitly mute and ensure it's playing (buffering) if it's the next video
+        // BACKGROUND PLAYER - explicitly mute and ensure it's cued/paused to buffer but NOT competing for bandwidth
         safeCall(player, 'mute')
-        safeCall(player, 'playVideo') // Keep it playing in background to buffer
+        safeCall(player, 'pauseVideo') // Stop background playback to save HD bandwidth for active one
       }
     }
 
@@ -170,18 +170,16 @@ export default function VideoPlayerCard({
 
   // Effect: Recycled players must be manually seeked when their video changes.
   useEffect(() => {
-    playerARef.current = null          
     if (clipA) {
       safeCall(playerARef.current, 'seekTo', getClipStart(clipA), true)
-      if (activeKey !== 'A') safeCall(playerARef.current, 'playVideo')
+      if (activeKey !== 'A') safeCall(playerARef.current, 'pauseVideo')
     }
   }, [clipA?.video_id])
 
   useEffect(() => {
-    playerBRef.current = null
     if (clipB) {
       safeCall(playerBRef.current, 'seekTo', getClipStart(clipB), true)
-      if (activeKey !== 'B') safeCall(playerBRef.current, 'playVideo')
+      if (activeKey !== 'B') safeCall(playerBRef.current, 'pauseVideo')
     }
   }, [clipB?.video_id])
 
@@ -203,9 +201,11 @@ export default function VideoPlayerCard({
       safeCall(event.target, 'getDuration') 
       try { setPlayerState({ duration: event.target.getDuration() }) } catch { }
       if (!isMuted) safeCall(event.target, 'unMute')
+      // Force high quality on active player
+      try { event.target.setPlaybackQuality('hd720') } catch(e) {}
     } else {
       safeCall(event.target, 'mute')
-      safeCall(event.target, 'playVideo') // Buffer background
+      safeCall(event.target, 'pauseVideo') // Cue background
     }
   }
 
@@ -226,6 +226,8 @@ export default function VideoPlayerCard({
       cc_load_policy: 0,
       loop: 1,
       playlist: clip?.video_id,
+      origin: typeof window !== "undefined" ? window.location.origin : "",
+      vq: 'hd720', // Hint for HD
     },
     loading: "eager",
   } as const)

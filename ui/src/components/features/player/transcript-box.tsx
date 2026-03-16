@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import { usePlayerStore } from "@/stores/use-player-store"
@@ -33,17 +33,32 @@ export const TranscriptBox = ({
 }: TranscriptBoxProps) => {
   const currentTime = usePlayerStore(state => state.currentTime)
 
+  // THE STICKY ENGINE: Remembers where we are to prevent jumping during gaps
+  const lastValidIdx = useRef<number>(-1)
+  const currentKey = `${targetSentence?.start_time}-${sentences.length}`
+  const lastKey = useRef("")
+
   // Find the trio: Previous, Active, and Next
   const trio = useMemo(() => {
-    const TIMING_LEAD = 0.08
+    const TIMING_LEAD = 0.15
     const t = currentTime + TIMING_LEAD
-    
+
     // Find active index
     let activeIdx = sentences.findIndex(s => t >= s.start_time && t < s.end_time)
-    
-    // Fallback to target if not found
-    if (activeIdx === -1 && targetSentence) {
-      activeIdx = sentences.findIndex(s => s.start_time === targetSentence.start_time)
+
+    // Video/Clip changed? Reset memory to the target hit
+    if (currentKey !== lastKey.current) {
+      lastKey.current = currentKey
+      const targetIdx = targetSentence ? sentences.findIndex(s => s.start_time === targetSentence.start_time) : 0
+      lastValidIdx.current = Math.max(0, targetIdx)
+    }
+
+    // Update memory if we found a new active sentence
+    if (activeIdx !== -1) {
+      lastValidIdx.current = activeIdx
+    } else {
+      // SILENCE detected: Use the last known sentence (Sticky Mode)
+      activeIdx = lastValidIdx.current
     }
 
     if (activeIdx === -1) return null
@@ -60,9 +75,9 @@ export const TranscriptBox = ({
     <div className="relative mt-2 h-[220px] flex items-center justify-center rounded-3xl bg-card/40 border border-primary/5 shadow-inner overflow-hidden">
       {/* Immersive background glow */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-primary/5 opacity-50" />
-      
+
       <div className="relative w-full px-4">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           {isTranscriptLoading ? (
             <motion.div
               key="loader"
@@ -77,10 +92,10 @@ export const TranscriptBox = ({
           ) : trio ? (
             <motion.div
               key={trio.active.start_time}
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "circOut" }}
               className="flex flex-col items-center gap-4 py-4"
             >
               {/* Previous Context */}
@@ -130,4 +145,4 @@ export const TranscriptBox = ({
       </div>
     </div>
   )
-}
+}
