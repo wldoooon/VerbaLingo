@@ -1,6 +1,6 @@
 "use client"
 
-import { RefObject, useState, useMemo, useEffect } from "react"
+import { RefObject, useState, useMemo, useEffect, useRef } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { SentenceGroup } from "./sentence-group"
@@ -49,6 +49,15 @@ export const TranscriptBox = ({
     return groups
   }, [sentences])
 
+  // Find which group contains our target (search hit) sentence
+  const targetGroupIdx = useMemo(() => {
+    if (!targetSentence) return 0
+    const idx = sentenceGroups.findIndex(group => 
+      group.some(s => s.start_time === targetSentence.start_time)
+    )
+    return Math.max(0, idx)
+  }, [sentenceGroups, targetSentence])
+
   // OPTIMIZATION: Only track the index of the active group to minimize container re-renders
   const activeGroupIdx = usePlayerStore(state => {
     const TIMING_LEAD = 0.08
@@ -60,8 +69,29 @@ export const TranscriptBox = ({
     })
   })
 
-  // The center logic is now handled by the parent's lazy scroll
-  const centerIdx = activeGroupIdx !== -1 ? activeGroupIdx : 0
+  // THE FIX: Memory and Priority
+  // We use a ref to remember where we were so we don't "jump" during silences
+  const lastValidIdx = useRef(-1)
+  
+  // Initialize or Reset the ref when the target/sentences change
+  const currentKey = `${targetSentence?.start_time}-${sentences.length}`
+  const lastKey = useRef("")
+  
+  const centerIdx = useMemo(() => {
+    // If the video changed, reset the lastValidIdx immediately
+    if (currentKey !== lastKey.current) {
+      lastKey.current = currentKey
+      lastValidIdx.current = targetGroupIdx
+    }
+
+    if (activeGroupIdx !== -1) {
+      lastValidIdx.current = activeGroupIdx
+      return activeGroupIdx
+    }
+    
+    // If no active sentence found (gap/loading), stay anchored to our memory
+    return lastValidIdx.current !== -1 ? lastValidIdx.current : targetGroupIdx
+  }, [activeGroupIdx, targetGroupIdx, currentKey])
 
   return (
     <div className="relative mt-1">
@@ -86,20 +116,28 @@ export const TranscriptBox = ({
             </div>
           </div>
         ) : sentenceGroups.length > 0 ? (
-          sentenceGroups.map((group, groupIdx) => (
-            <SentenceGroup
-              key={`${group[0].start_time}-${groupIdx}`}
-              group={group}
-              groupIdx={groupIdx}
-              centerIdx={centerIdx}
-              searchQuery={searchQuery}
-              activeSentenceRef={activeSentenceRef}
-              targetSentenceRef={targetSentenceRef}
-              isTargetGroup={targetSentence ? group.some(s => s.start_time === targetSentence.start_time) : false}
-              onSearchWord={onSearchWord}
-              onExplainWordInContext={onExplainWordInContext}
-            />
-          ))
+          <>
+            {/* Top Spacer for centering the first item */}
+            <div className="h-[100px] shrink-0 pointer-events-none" aria-hidden="true" />
+            
+            {sentenceGroups.map((group, groupIdx) => (
+              <SentenceGroup
+                key={`${group[0].start_time}-${groupIdx}`}
+                group={group}
+                groupIdx={groupIdx}
+                centerIdx={centerIdx}
+                searchQuery={searchQuery}
+                activeSentenceRef={activeSentenceRef}
+                targetSentenceRef={targetSentenceRef}
+                isTargetGroup={targetSentence ? group.some(s => s.start_time === targetSentence.start_time) : false}
+                onSearchWord={onSearchWord}
+                onExplainWordInContext={onExplainWordInContext}
+              />
+            ))}
+
+            {/* Bottom Spacer for centering the last item */}
+            <div className="h-[100px] shrink-0 pointer-events-none" aria-hidden="true" />
+          </>
         ) : null}
       </div>
 

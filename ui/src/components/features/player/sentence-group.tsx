@@ -48,7 +48,7 @@ export const SentenceGroup = memo(({
   })
 
   const distance = Math.abs(groupIdx - centerIdx)
-  if (distance > 1) return null
+  if (distance > 2) return null
 
   return (
     <div
@@ -63,7 +63,7 @@ export const SentenceGroup = memo(({
         "mb-1 transition-[opacity,filter,transform] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex items-center justify-center text-center px-4 py-3",
         groupIdx === centerIdx
           ? "opacity-100 scale-100 blur-none"
-          : "opacity-30 scale-[0.98] blur-[0.5px] grayscale",
+          : "opacity-40 scale-[0.99] blur-[0.4px]",
       )}
     >
       <div className="relative text-base leading-relaxed inline-block">

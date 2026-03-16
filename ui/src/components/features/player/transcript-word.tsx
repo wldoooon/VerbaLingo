@@ -47,12 +47,16 @@ export const TranscriptWord = memo(({
           <button
             type="button"
             className={cn(
-              "mr-1 px-0.8 py-0.5 border-2 border-transparent rounded-md transition-colors duration-200 ease-in-out text-left inline-flex items-center",
+              "mr-1 px-1 py-0.5 border-2 rounded-md transition-all duration-150 ease-out text-left inline-flex items-center",
+              // The search hit (the word searching for)
               isSearchMatch && !isCurrentWord &&
-              "bg-primary text-primary-foreground",
+              "bg-primary text-primary-foreground border-primary shadow-sm",
+              // The active word being spoken right now
               isCurrentWord &&
-              "border-primary bg-accent/20",
-              !isCurrentWord && !isSearchMatch && "hover:bg-accent/40 hover:text-foreground",
+              "bg-primary/20 border-primary text-foreground font-bold scale-105 shadow-[0_0_15px_-3px_rgba(var(--primary),0.3)]",
+              // Normal state
+              !isCurrentWord && !isSearchMatch && 
+              "border-transparent hover:bg-accent/40 hover:text-foreground hover:scale-105",
             )}
           >
             {wordText || "\u00A0"}
