@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, startTransition } from 'react';
 import { Search, X, ArrowRight, ChevronDown, Check, Clock, Lock, Video, Tv, Mic, Music, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
@@ -253,14 +253,14 @@ export function SearchBar() {
         });
 
         if (pathname === decodeURIComponent(targetPath) || pathname === targetPath) {
-            router.push(targetUrl);
+            startTransition(() => { router.push(targetUrl) });
             return;
         }
 
         saveToRecent(q);
         setShowRecent(false);
         setIsSearching(true);
-        router.push(targetUrl);
+        startTransition(() => { router.push(targetUrl) });
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -400,9 +400,6 @@ export function SearchBar() {
                                 }}
                                 onFocus={() => {
                                     setShowRecent(true);
-                                    // Prefetch the search page JS bundle so it's already
-                                    // downloaded by the time the user hits enter.
-                                    router.prefetch(`/search/prefetch/${selectedLanguage.toLowerCase()}`);
                                 }}
                                 onKeyDown={handleKeyDown}
                                 className={cn(
