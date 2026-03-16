@@ -15,8 +15,8 @@ function getClipStart(clip: any): number {
   if (typeof clip.start === "number") start = clip.start
   else if (typeof clip.start_time === "number") start = clip.start_time
 
-  // Start 2.5s early to ensure context before the keyword
-  return Math.max(0, start - 2.5)
+  // Exact start - NO DELAY - faster loading & more precise UX
+  return Math.max(0, start)
 }
 
 type VideoPlayerCardProps = {
@@ -205,7 +205,14 @@ export default function VideoPlayerCard({
       try { event.target.setPlaybackQuality('hd720') } catch(e) {}
     } else {
       safeCall(event.target, 'mute')
-      safeCall(event.target, 'pauseVideo') // Cue background
+      // TURBO BUFFER: Play for 1.2s in background then pause. 
+      // This forces YouTube to load the actual video data into the browser cache.
+      safeCall(event.target, 'playVideo')
+      setTimeout(() => {
+        if (key !== activeKey) {
+            safeCall(event.target, 'pauseVideo')
+        }
+      }, 1200)
     }
   }
 
@@ -257,31 +264,27 @@ export default function VideoPlayerCard({
         {/* Layer A */}
         <div className={cn("absolute inset-0 w-full h-full transition-opacity duration-300",
           activeKey === 'A' ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none")}>
-          {clipA && (
-            <YouTube
-              videoId={clipA.video_id}
-              opts={getOpts(clipA)}
-              onReady={(e) => onReady(e, 'A')}
-              onStateChange={(e) => onStateChange(e, 'A')}
-              className="w-full h-full"
-              iframeClassName="w-full h-full border-none"
-            />
-          )}
+          <YouTube
+            videoId={clipA?.video_id || ""}
+            opts={getOpts(clipA)}
+            onReady={(e) => onReady(e, 'A')}
+            onStateChange={(e) => onStateChange(e, 'A')}
+            className="w-full h-full"
+            iframeClassName="w-full h-full border-none"
+          />
         </div>
 
         {/* Layer B */}
         <div className={cn("absolute inset-0 w-full h-full transition-opacity duration-300",
           activeKey === 'B' ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none")}>
-          {clipB && (
-            <YouTube
-              videoId={clipB.video_id}
-              opts={getOpts(clipB)}
-              onReady={(e) => onReady(e, 'B')}
-              onStateChange={(e) => onStateChange(e, 'B')}
-              className="w-full h-full"
-              iframeClassName="w-full h-full border-none"
-            />
-          )}
+          <YouTube
+            videoId={clipB?.video_id || ""}
+            opts={getOpts(clipB)}
+            onReady={(e) => onReady(e, 'B')}
+            onStateChange={(e) => onStateChange(e, 'B')}
+            className="w-full h-full"
+            iframeClassName="w-full h-full border-none"
+          />
         </div>
 
       </div>

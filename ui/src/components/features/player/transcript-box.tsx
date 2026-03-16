@@ -72,9 +72,8 @@ export const TranscriptBox = ({
   }, [currentTime, sentences, targetSentence])
 
   return (
-    <div className="relative mt-2 h-[220px] flex items-center justify-center rounded-3xl bg-card/40 border border-primary/5 shadow-inner overflow-hidden">
-      {/* Immersive background glow */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-primary/5 opacity-50" />
+    <div className="relative mt-1 h-[180px] flex items-center justify-center overflow-hidden">
+      {/* Simple, clean brand background */}
 
       <div className="relative w-full px-4">
         <AnimatePresence mode="popLayout">
