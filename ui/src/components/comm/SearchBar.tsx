@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect, useCallback, startTransition } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, X, ArrowRight, ChevronDown, Check, Clock, Lock, Video, Tv, Mic, Music, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
@@ -253,14 +253,14 @@ export function SearchBar() {
         });
 
         if (pathname === decodeURIComponent(targetPath) || pathname === targetPath) {
-            startTransition(() => { router.push(targetUrl) });
+            router.push(targetUrl);
             return;
         }
 
         saveToRecent(q);
         setShowRecent(false);
         setIsSearching(true);
-        startTransition(() => { router.push(targetUrl) });
+        router.push(targetUrl);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
