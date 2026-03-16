@@ -160,13 +160,15 @@ export default function VideoPlayerCard({
     }
   }
 
-  // Cancel rAF on unmount — without this the loop runs forever after navigation
+  // Cancel rAF and clear stale player ref on unmount.
+  // Without setPlayer(null), AudioCard's play() fires on the dead iframe after navigation → crash.
   useEffect(() => {
     return () => {
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current)
         rafRef.current = null
       }
+      setPlayer(null)
     }
   }, [])
 
