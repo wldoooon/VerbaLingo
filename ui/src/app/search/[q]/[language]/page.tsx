@@ -2,9 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useParams, useSearchParams } from "next/navigation"
-import VideoPlayerCard from "@/components/features/player/video-player-card"
-import AudioCard from "@/components/features/player/audio-card"
 import dynamic from "next/dynamic"
+
+// Dynamic imports are required for components that use browser-only APIs (like YouTube/window)
+const VideoPlayerCard = dynamic(() => import("@/components/features/player/video-player-card"), {
+  loading: () => <div className="h-[400px] w-full animate-pulse bg-muted rounded-xl" />,
+  ssr: false
+})
+const AudioCard = dynamic(() => import("@/components/features/player/audio-card"), {
+  ssr: false
+})
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
 import { useInfiniteSearch, useTranscriptPrefetch } from "@/lib/useApi"
@@ -27,6 +34,14 @@ import { NoResults } from "@/components/features/search/no-results"
 export default function RoutedSearchPage() {
   const params = useParams<{ q: string; language: string }>()
   const searchParams = useSearchParams()
+
+  // Preload player component chunks immediately — don't wait for search results.
+  // Without this, chunks only download AFTER playlist arrives (waterfall).
+  // With this, chunks are in browser cache before the API even responds.
+  useEffect(() => {
+    import("@/components/features/player/video-player-card")
+    import("@/components/features/player/audio-card")
+  }, [])
 
   const q = decodeURIComponent(params.q || "")
   const languageParam = decodeURIComponent(params.language || "english")

@@ -31,25 +31,32 @@ export const TranscriptBox = ({
   onSearchWord,
   onExplainWordInContext,
 }: TranscriptBoxProps) => {
-  const currentTime = usePlayerStore(state => state.currentTime)
-
   // THE STICKY ENGINE: Remembers where we are to prevent jumping during gaps
   const lastValidIdx = useRef<number>(-1)
-  const currentKey = `${targetSentence?.start_time}-${sentences.length}`
   const lastKey = useRef("")
+
+  // Zustand selector: only returns a NEW value (and triggers re-render) when the
+  // active sentence INDEX changes — not on every currentTime tick.
+  // Lead is scaled with playbackRate: at 2× speed the rAF lag doubles in video-time.
+  const activeSentenceIdx = usePlayerStore(state => {
+    const TIMING_LEAD = 0.05 * state.playbackRate
+    const t = state.currentTime + TIMING_LEAD
+    return sentences.findIndex(s => t >= s.start_time && t < s.end_time)
+  })
 
   // Find the trio: Previous, Active, and Next
   const trio = useMemo(() => {
-    const TIMING_LEAD = 0.15
-    const t = currentTime + TIMING_LEAD
+    if (sentences.length === 0) return null
 
-    // Find active index
-    let activeIdx = sentences.findIndex(s => t >= s.start_time && t < s.end_time)
+    let activeIdx = activeSentenceIdx
 
     // Video/Clip changed? Reset memory to the target hit
+    const currentKey = `${targetSentence?.start_time}-${sentences.length}`
     if (currentKey !== lastKey.current) {
       lastKey.current = currentKey
-      const targetIdx = targetSentence ? sentences.findIndex(s => s.start_time === targetSentence.start_time) : 0
+      const targetIdx = targetSentence
+        ? sentences.findIndex(s => s.start_time === targetSentence.start_time)
+        : 0
       lastValidIdx.current = Math.max(0, targetIdx)
     }
 
@@ -63,13 +70,17 @@ export const TranscriptBox = ({
 
     if (activeIdx === -1) return null
 
+    // Safety: index could be stale/out-of-bounds after a video switch
+    const active = sentences[activeIdx]
+    if (!active) return null
+
     return {
       prev: sentences[activeIdx - 1],
-      active: sentences[activeIdx],
+      active,
       next: sentences[activeIdx + 1],
       activeIdx
     }
-  }, [currentTime, sentences, targetSentence])
+  }, [activeSentenceIdx, sentences, targetSentence])
 
   return (
     <div className="relative mt-1 h-[180px] flex items-center justify-center overflow-hidden">
@@ -98,7 +109,7 @@ export const TranscriptBox = ({
               className="flex flex-col items-center gap-4 py-4"
             >
               {/* Previous Context */}
-              <div className="opacity-20 scale-95 blur-[0.5px] transition-all duration-300 pointer-events-none hidden sm:block">
+              <div className="opacity-100 scale-100 transition-all duration-300 pointer-events-none hidden sm:block">
                 {trio.prev && (
                   <SentenceGroup
                     group={[trio.prev]}
@@ -120,7 +131,7 @@ export const TranscriptBox = ({
               </div>
 
               {/* Next Context */}
-              <div className="opacity-20 scale-95 blur-[0.5px] transition-all duration-300 pointer-events-none hidden sm:block">
+              <div className="opacity-100 scale-100 transition-all duration-300 pointer-events-none hidden sm:block">
                 {trio.next && (
                   <SentenceGroup
                     group={[trio.next]}

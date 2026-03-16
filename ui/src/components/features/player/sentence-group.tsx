@@ -1,10 +1,7 @@
 "use client"
 
-import { memo, RefObject } from "react"
-import { cn } from "@/lib/utils"
+import { memo } from "react"
 import { TranscriptWord } from "./transcript-word"
-import { usePlayerStore } from "@/stores/use-player-store"
-import { normalizeTranscriptWords } from "@/lib/player-utils"
 
 type Word = { text: string; start: number; end: number }
 type Sentence = {
@@ -32,8 +29,7 @@ export const SentenceGroup = memo(({
       <div className="relative text-lg sm:text-2xl font-medium leading-relaxed inline-block text-foreground tracking-tight">
         {group.map((sentence, sIdx) => {
           const query = searchQuery.toLowerCase().trim()
-          const rawWords = (sentence.words as Word[] | undefined) || []
-          const words = normalizeTranscriptWords(rawWords)
+          const words: Word[] = (sentence.words as Word[] | undefined) || []
 
           return (
             <span key={`${sentence.start_time}-${sIdx}`}>

@@ -70,7 +70,8 @@ export default function VideoPlayerCard({
 
   const playerARef = useRef<YouTubePlayer | null>(null)
   const playerBRef = useRef<YouTubePlayer | null>(null)
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const rafRef = useRef<number | null>(null)
+  const lastTimeRef = useRef<number>(-1)
 
   /**
    * Safe wrapper for all YouTube player calls.
@@ -135,17 +136,24 @@ export default function VideoPlayerCard({
   }, [activeKey, activeClipId, isMuted, playbackRate, setPlayer, clipA?.video_id, clipB?.video_id])
 
   const startPolling = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current)
-    intervalRef.current = setInterval(() => {
-      const currentTime = activePlayer?.getCurrentTime()
-      if (typeof currentTime === 'number') {
-        setCurrentTime(currentTime)
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    const tick = () => {
+      // Always read the latest player from the store — avoids stale closure when clips change
+      const t = usePlayerStore.getState().player?.getCurrentTime()
+      if (typeof t === 'number' && t !== lastTimeRef.current) {
+        lastTimeRef.current = t
+        setCurrentTime(t)
       }
-    }, 100)
+      rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
   }
 
   const stopPolling = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current)
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = null
+    }
   }
 
   const onStateChange = (event: { data: number; target: any }, key: 'A' | 'B') => {
