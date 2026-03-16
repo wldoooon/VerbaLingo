@@ -1,6 +1,7 @@
 "use client"
 
-import { RefObject, useState, useMemo, useEffect, useRef } from "react"
+import { useMemo } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { SentenceGroup } from "./sentence-group"
@@ -17,115 +18,116 @@ type TranscriptBoxProps = {
   sentences: Sentence[]
   searchQuery: string
   isTranscriptLoading: boolean
-  scrollContainerRef: RefObject<HTMLDivElement | null>
-  activeSentenceRef: RefObject<HTMLDivElement | null>
-  targetSentenceRef: RefObject<HTMLDivElement | null>
   targetSentence: Sentence | undefined
   onSearchWord?: (word: string) => void
   onExplainWordInContext?: (payload: { word: string; sentence: string }) => void
-  isHoveredParent?: boolean
-  onHoverChange?: (hovered: boolean) => void
 }
 
 export const TranscriptBox = ({
   sentences,
   searchQuery,
   isTranscriptLoading,
-  scrollContainerRef,
-  activeSentenceRef,
-  targetSentenceRef,
   targetSentence,
   onSearchWord,
   onExplainWordInContext,
-  isHoveredParent,
-  onHoverChange,
 }: TranscriptBoxProps) => {
-  // No more merging! Each sentence is its own individual group
-  const flatGroups = useMemo(() => {
-    return sentences.map(s => [s])
-  }, [sentences])
+  const currentTime = usePlayerStore(state => state.currentTime)
 
-  // Find which index contains our target (search hit) sentence
-  const targetIdx = useMemo(() => {
-    if (!targetSentence) return 0
-    const idx = sentences.findIndex(s => s.start_time === targetSentence.start_time)
-    return Math.max(0, idx)
-  }, [sentences, targetSentence])
-
-  // Track the active sentence index
-  const activeIdx = usePlayerStore(state => {
+  // Find the trio: Previous, Active, and Next
+  const trio = useMemo(() => {
     const TIMING_LEAD = 0.08
-    const adjustedTime = state.currentTime + TIMING_LEAD
-    return sentences.findIndex((s) => adjustedTime >= s.start_time && adjustedTime < s.end_time)
-  })
-
-  // THE FIX: Memory and Priority
-  const lastValidIdx = useRef(-1)
-  const currentKey = `${targetSentence?.start_time}-${sentences.length}`
-  const lastKey = useRef("")
-  
-  const centerIdx = useMemo(() => {
-    if (currentKey !== lastKey.current) {
-      lastKey.current = currentKey
-      lastValidIdx.current = targetIdx
+    const t = currentTime + TIMING_LEAD
+    
+    // Find active index
+    let activeIdx = sentences.findIndex(s => t >= s.start_time && t < s.end_time)
+    
+    // Fallback to target if not found
+    if (activeIdx === -1 && targetSentence) {
+      activeIdx = sentences.findIndex(s => s.start_time === targetSentence.start_time)
     }
 
-    if (activeIdx !== -1) {
-      lastValidIdx.current = activeIdx
-      return activeIdx
+    if (activeIdx === -1) return null
+
+    return {
+      prev: sentences[activeIdx - 1],
+      active: sentences[activeIdx],
+      next: sentences[activeIdx + 1],
+      activeIdx
     }
-    return lastValidIdx.current !== -1 ? lastValidIdx.current : targetIdx
-  }, [activeIdx, targetIdx, currentKey])
+  }, [currentTime, sentences, targetSentence])
 
   return (
-    <div className="relative mt-1">
-      {/* Top fade gradient */}
-      <div className="pointer-events-none absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent z-10 rounded-t-2xl" />
+    <div className="relative mt-2 h-[220px] flex items-center justify-center rounded-3xl bg-card/40 border border-primary/5 shadow-inner overflow-hidden">
+      {/* Immersive background glow */}
+      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-primary/5 opacity-50" />
+      
+      <div className="relative w-full px-4">
+        <AnimatePresence mode="wait">
+          {isTranscriptLoading ? (
+            <motion.div
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center gap-3"
+            >
+              <Skeleton className="h-6 w-3/4 rounded-full opacity-30" />
+              <Skeleton className="h-6 w-1/2 rounded-full opacity-10" />
+            </motion.div>
+          ) : trio ? (
+            <motion.div
+              key={trio.active.start_time}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="flex flex-col items-center gap-4 py-4"
+            >
+              {/* Previous Context */}
+              <div className="opacity-20 scale-95 blur-[0.5px] transition-all duration-300 pointer-events-none hidden sm:block">
+                {trio.prev && (
+                  <SentenceGroup
+                    group={[trio.prev]}
+                    searchQuery={searchQuery}
+                    onSearchWord={onSearchWord}
+                    onExplainWordInContext={onExplainWordInContext}
+                  />
+                )}
+              </div>
 
-      <div
-        ref={scrollContainerRef}
-        className="max-h-[200px] overflow-hidden rounded-2xl px-3 py-3 scroll-smooth flex flex-col items-stretch touch-action-none pointer-events-none"
-      >
-        {isTranscriptLoading ? (
-          <div className="w-full py-4 space-y-4 animate-in fade-in duration-500">
-            <div className="flex flex-col items-center gap-2 px-6">
-              <Skeleton className="h-4 w-[90%] rounded-full opacity-40" />
-              <Skeleton className="h-4 w-[75%] rounded-full opacity-20" />
-            </div>
-            <div className="flex flex-col items-center gap-2 px-6">
-              <Skeleton className="h-4 w-[85%] rounded-full opacity-30" />
-              <Skeleton className="h-4 w-[60%] rounded-full opacity-10" />
-            </div>
-          </div>
-        ) : flatGroups.length > 0 ? (
-          <>
-            {/* Top Spacer for centering the first item */}
-            <div className="h-[100px] shrink-0 pointer-events-none" aria-hidden="true" />
-            
-            {flatGroups.map((group: Sentence[], groupIdx: number) => (
-              <div key={`${group[0].start_time}-${groupIdx}`} className="pointer-events-auto">
+              {/* ACTIVE FOCUS */}
+              <div className="opacity-100 scale-100 shadow-sm transition-all duration-300">
                 <SentenceGroup
-                  group={group}
-                  groupIdx={groupIdx}
-                  centerIdx={centerIdx}
+                  group={[trio.active]}
                   searchQuery={searchQuery}
-                  activeSentenceRef={activeSentenceRef}
-                  targetSentenceRef={targetSentenceRef}
-                  isTargetGroup={targetSentence ? group.some((s: Sentence) => s.start_time === targetSentence.start_time) : false}
                   onSearchWord={onSearchWord}
                   onExplainWordInContext={onExplainWordInContext}
                 />
               </div>
-            ))}
 
-            {/* Bottom Spacer for centering the last item */}
-            <div className="h-[100px] shrink-0 pointer-events-none" aria-hidden="true" />
-          </>
-        ) : null}
+              {/* Next Context */}
+              <div className="opacity-20 scale-95 blur-[0.5px] transition-all duration-300 pointer-events-none hidden sm:block">
+                {trio.next && (
+                  <SentenceGroup
+                    group={[trio.next]}
+                    searchQuery={searchQuery}
+                    onSearchWord={onSearchWord}
+                    onExplainWordInContext={onExplainWordInContext}
+                  />
+                )}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-muted-foreground/40 italic text-sm text-center"
+            >
+              Waiting for playback...
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* Bottom fade gradient */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent z-10 rounded-b-2xl" />
-    </div >
+    </div>
   )
-}
+}

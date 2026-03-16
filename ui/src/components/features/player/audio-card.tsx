@@ -99,9 +99,6 @@ export default function AudioCard({
   const router = useRouter()
   const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
   const [speedPopoverOpen, setSpeedPopoverOpen] = useState(false)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const activeSentenceRef = useRef<HTMLDivElement>(null)
-  const [isTranscriptHovered, setIsTranscriptHovered] = useState(false)
 
   // Countdown for Next Button (5s Strategy)
   const [nextCooldown, setNextCooldown] = useState(0)
@@ -133,8 +130,8 @@ export default function AudioCard({
   // Fetch transcript for current video
   // Disable if parent is loading to avoid fetching transcript for "stale" clips during search transition
   const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(
-    !isParentLoading ? (currentClip?.video_id || "") : "", 
-    activeLanguage, 
+    !isParentLoading ? (currentClip?.video_id || "") : "",
+    activeLanguage,
     currentClip?.position
   )
 
@@ -185,16 +182,16 @@ export default function AudioCard({
     const raw = transcriptData?.sentences || []
     return [...raw].sort((a, b) => a.start_time - b.start_time).map(sentence => {
       if (!sentence.words) return sentence
-      
+
       const words = [...sentence.words]
       for (let i = 0; i < words.length; i++) {
         const current = words[i]
         const next = words[i + 1]
-        
+
         // Strategy: Cap word duration to 0.6s max, or the start of the next word
         const MAX_WORD_DURATION = 0.6
         const safetyEnd = current.start + MAX_WORD_DURATION
-        
+
         if (next) {
           // Rule: Don't last longer than 0.6s AND don't overlap next word
           current.end = Math.min(current.end, safetyEnd, next.start)
@@ -210,14 +207,11 @@ export default function AudioCard({
   // Use the sanitized (cleaned) results
   const sentencesInClip = sanitizedSentences
   // Find the sentence that contains the search query
-  const targetSentenceRef = useRef<HTMLDivElement>(null)
-  const hasScrolledToTarget = useRef(false)
   const hasStartedPlayback = useRef(false)
   const lastActiveSentenceIdx = useRef<number>(0)
 
-  // Reset scroll and playback flags when the video changes
+  // Reset playback flags when the video changes
   useEffect(() => {
-    hasScrolledToTarget.current = false
     hasStartedPlayback.current = false
 
     // Start 5s countdown on every new clip
@@ -250,80 +244,17 @@ export default function AudioCard({
     return query && text.toLowerCase().includes(query)
   })
 
-  // Auto-scroll to target sentence on mount - CONSTRAINED to transcript box only
+  // Initialize playback on mount - no scrolling needed in Flashcard Mode
   useEffect(() => {
-    if (targetSentenceRef.current && scrollContainerRef.current && !hasScrolledToTarget.current) {
-      // Calculate scroll position manually to avoid affecting global scroll
-      const container = scrollContainerRef.current
-      const target = targetSentenceRef.current
-
-      const containerRect = container.getBoundingClientRect()
-      const targetRect = target.getBoundingClientRect()
-
-      // Calculate the offset within the container
-      const relativeTop = targetRect.top - containerRect.top + container.scrollTop
-      const scrollTo = relativeTop - (container.clientHeight / 2) + (targetRect.height / 2)
-
-      // Scroll ONLY the container, not the page
-      container.scrollTo({
-        top: scrollTo,
-        behavior: 'smooth'
-      })
-
-      hasScrolledToTarget.current = true
-
-      // Start playback after scroll completes (500ms delay)
-      // ONLY if we haven't started playing this clip yet
-      setTimeout(() => {
-        if (!hasStartedPlayback.current && targetSentence) {
-          const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
-          seekTo(startTime)
-          play()
-          hasStartedPlayback.current = true
-        }
-      }, 500)
+    if (targetSentence && !hasStartedPlayback.current) {
+      const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
+      seekTo(startTime)
+      play()
+      hasStartedPlayback.current = true
     }
-  }, [targetSentence, scrollContainerRef, seekTo, play])
+  }, [targetSentence, seekTo, play])
 
-  // Auto-scroll to active sentence during playback - CONSTRAINED to transcript box only
-  // Optimized to only scroll when the active sentence group actually changes
-  const lastScrolledPos = useRef<number | null>(null)
-  
-  // Find currently active sentence index from time
-  const activeSentenceIdx = useMemo(() => {
-    const TIMING_LEAD = 0.08
-    const t = currentTime + TIMING_LEAD
-    return sentencesInClip.findIndex(s => t >= s.start_time && t < s.end_time)
-  }, [currentTime, sentencesInClip])
-
-  useEffect(() => {
-    // Only auto-scroll if playing and we have the necessary refs
-    if (activeSentenceRef.current && scrollContainerRef.current && isPlaying) {
-      if (activeSentenceIdx === lastScrolledPos.current) return
-      
-      const container = scrollContainerRef.current
-      const active = activeSentenceRef.current
-
-      const containerRect = container.getBoundingClientRect()
-      const activeRect = active.getBoundingClientRect()
-
-      // Calculate relative position within 0 to 1 range (0 = top, 1 = bottom)
-      const relativePos = (activeRect.top - containerRect.top) / containerRect.height
-      
-      // Since it's a flat list of single sentences, we can be more aggressive with centering
-      // to keep the active sentence strictly in focus.
-      if (relativePos < 0.4 || relativePos > 0.6) {
-        const relativeTop = activeRect.top - containerRect.top + container.scrollTop
-        const scrollTo = relativeTop - (container.clientHeight / 2) + (activeRect.height / 2)
-
-        container.scrollTo({
-          top: scrollTo,
-          behavior: 'smooth'
-        })
-        lastScrolledPos.current = activeSentenceIdx
-      }
-    }
-  }, [activeSentenceIdx, isPlaying, isTranscriptHovered])
+  // Removed Scrolling logic - switched to Single Sentence Transitions
 
   return (
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-6 shadow-2xl", className)}>
@@ -351,10 +282,10 @@ export default function AudioCard({
             <Button size="icon" className="h-10 w-10 rounded-full" onClick={() => guardedAction(togglePlayPause)}>
               {isPlaying ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-9 w-9 relative" 
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 relative"
               onClick={() => {
                 if (nextCooldown === 0) guardedAction(nextVideo)
               }}
@@ -440,10 +371,10 @@ export default function AudioCard({
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-11 w-11 rounded-full cursor-pointer relative" 
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11 rounded-full cursor-pointer relative"
               onClick={() => {
                 if (nextCooldown === 0) guardedAction(nextVideo)
               }}
@@ -484,9 +415,6 @@ export default function AudioCard({
         sentences={sentencesInClip}
         searchQuery={searchQuery}
         isTranscriptLoading={isTranscriptLoading}
-        scrollContainerRef={scrollContainerRef}
-        activeSentenceRef={activeSentenceRef}
-        targetSentenceRef={targetSentenceRef}
         targetSentence={targetSentence}
         onSearchWord={(word) => {
           const clean = word.trim()
@@ -508,8 +436,6 @@ export default function AudioCard({
           const prompt = `Explain the meaning and nuance of the word "${word}" specifically in this sentence. Focus on how it is used here, any implied tone or register, and give 2-3 additional example sentences with similar usage.\n\nSentence: "${sentence}"`
           onExplainWordPrompt?.(prompt)
         }}
-        isHoveredParent={isTranscriptHovered}
-        onHoverChange={setIsTranscriptHovered}
       />
     </div >
   )

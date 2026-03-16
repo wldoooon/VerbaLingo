@@ -16,57 +16,20 @@ type Sentence = {
 
 type SentenceGroupProps = {
   group: Sentence[]
-  groupIdx: number
-  centerIdx: number
   searchQuery: string
-  activeSentenceRef: RefObject<HTMLDivElement | null>
-  targetSentenceRef: RefObject<HTMLDivElement | null>
-  isTargetGroup: boolean | null
   onSearchWord?: (word: string) => void
   onExplainWordInContext?: (payload: { word: string; sentence: string }) => void
 }
 
 export const SentenceGroup = memo(({
   group,
-  groupIdx,
-  centerIdx,
   searchQuery,
-  activeSentenceRef,
-  targetSentenceRef,
-  isTargetGroup,
   onSearchWord,
   onExplainWordInContext,
 }: SentenceGroupProps) => {
-  const groupStart = group[0].start_time
-  const groupEnd = group[group.length - 1].end_time
-
-  // Only re-render the group opacity/blur when the active state changes
-  const isActive = usePlayerStore(state => {
-    const TIMING_LEAD = 0.08
-    const adjustedTime = state.currentTime + TIMING_LEAD
-    return adjustedTime >= groupStart && adjustedTime < groupEnd
-  })
-
-  const distance = Math.abs(groupIdx - centerIdx)
-  if (distance > 2) return null
-
   return (
-    <div
-      ref={
-        isActive
-          ? activeSentenceRef
-          : isTargetGroup
-            ? targetSentenceRef
-            : null
-      }
-      className={cn(
-        "mb-1 transition-[opacity,filter,transform] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] flex items-center justify-center text-center px-4 py-3",
-        groupIdx === centerIdx
-          ? "opacity-100 scale-100 blur-none"
-          : "opacity-40 scale-[0.99] blur-[0.4px]",
-      )}
-    >
-      <div className="relative text-base leading-relaxed inline-block">
+    <div className="flex items-center justify-center text-center px-4 py-2">
+      <div className="relative text-lg sm:text-2xl font-medium leading-relaxed inline-block text-foreground tracking-tight">
         {group.map((sentence, sIdx) => {
           const query = searchQuery.toLowerCase().trim()
           const rawWords = (sentence.words as Word[] | undefined) || []
