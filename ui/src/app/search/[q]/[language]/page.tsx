@@ -221,21 +221,51 @@ export default function RoutedSearchPage() {
                         aggregations={aggregations}
                       />
                     ) : (
-                      <div className="h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] w-full animate-pulse bg-muted rounded-2xl" />
+                      <div className="space-y-3">
+                        {/* Facet chips skeleton */}
+                        <div className="flex gap-2 mb-3">
+                          {[80, 96, 72, 88].map((w, i) => (
+                            <div key={i} className="h-7 rounded-full bg-muted animate-pulse" style={{ width: w }} />
+                          ))}
+                        </div>
+                        {/* Video area skeleton */}
+                        <div className="h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] w-full animate-pulse bg-muted rounded-2xl" />
+                      </div>
                     )}
                   </div>
 
                   {/* Scrollable Content Layer */}
                   <div className="px-4 pb-12 sm:px-6 space-y-4">
-                    <AudioCard
-                      currentClip={playlist[currentVideoIndex]}
-                      playlist={playlist}
-                      totalItems={totalHits}
-                      searchQuery={searchQuery}
-                      language={languageParam}
-                      isLoading={isLoading || (isFetching && playlist.length === 0)}
-                      onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
-                    />
+                    {playlist.length > 0 ? (
+                      <AudioCard
+                        currentClip={playlist[currentVideoIndex]}
+                        playlist={playlist}
+                        totalItems={totalHits}
+                        searchQuery={searchQuery}
+                        language={languageParam}
+                        isLoading={isLoading || (isFetching && playlist.length === 0)}
+                        onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
+                      />
+                    ) : (
+                      <div className="w-full rounded-3xl bg-card p-4 sm:p-6 shadow-2xl space-y-5">
+                        {/* Controls row skeleton */}
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="h-6 w-28 rounded-full bg-muted animate-pulse" />
+                          <div className="flex items-center gap-3">
+                            {[...Array(5)].map((_, i) => (
+                              <div key={i} className="h-11 w-11 rounded-full bg-muted animate-pulse" />
+                            ))}
+                          </div>
+                          <div className="h-6 w-16 rounded-full bg-muted animate-pulse" />
+                        </div>
+                        {/* Transcript skeleton */}
+                        <div className="space-y-3 py-2">
+                          <div className="h-4 w-1/3 rounded-full bg-muted/60 animate-pulse mx-auto" />
+                          <div className="h-5 w-3/4 rounded-full bg-muted animate-pulse mx-auto" />
+                          <div className="h-4 w-1/2 rounded-full bg-muted/60 animate-pulse mx-auto" />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
