@@ -129,6 +129,7 @@ export const TranscriptBox = ({
             </motion.div>
           ) : (
             <motion.div
+              key="waiting"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="text-muted-foreground/40 italic text-sm text-center"

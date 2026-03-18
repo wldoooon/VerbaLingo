@@ -172,13 +172,13 @@ export default function RoutedSearchPage() {
         ) : (
           <div className={cn(
             "mt-0 max-w-full xl:grid xl:items-start transition-[grid-template-columns] duration-300 ease-in-out",
-            playlist.length === 0
+            (playlist.length === 0 && !isLoading && !isFetching)
               ? "xl:grid-cols-1"
               : (isAiCollapsed ? "xl:grid-cols-[1fr_48px]" : "xl:grid-cols-[1fr_560px]")
           )}>
 
             {/* ── Mobile/Tablet Tab Bar (below xl) ── */}
-            {playlist.length > 0 && (
+            {(playlist.length > 0 || isLoading || isFetching) && (
               <div className="xl:hidden flex items-center gap-1 px-4 pt-3 sm:px-6">
                 <button
                   onClick={() => setMobileTab("player")}
@@ -272,13 +272,35 @@ export default function RoutedSearchPage() {
             </div>
 
             {/* ── AI Panel (single instance, responsive layout) ── */}
-            {playlist.length > 0 && (
+            {(playlist.length > 0 || isLoading || isFetching) && (
               <>
                 {/* Mobile/Tablet: shown when AI tab is active */}
                 {!isDesktop && (
                   <div className={mobileTab !== "ai" ? "hidden" : ""}>
                     <div className="h-[calc(100vh-10rem)] overflow-hidden bg-card">
-                      <AiCompletion externalPrompt={externalPrompt} />
+                      {playlist.length === 0 ? (
+                        <div className="w-full h-full flex flex-col p-6 pointer-events-none">
+                          <div className="h-8 w-2/3 bg-muted/60 rounded-full mb-2 mx-auto animate-pulse" />
+                          <div className="h-4 w-1/2 bg-muted/40 rounded-full mb-8 mx-auto animate-pulse" />
+                          <div className="flex gap-2 flex-wrap mb-8 justify-center">
+                            {[1, 2, 3, 4].map((i) => (
+                              <div key={i} className="h-8 w-24 bg-muted/60 rounded-full animate-pulse" />
+                            ))}
+                          </div>
+                          <div className="w-full bg-muted/20 rounded-xl p-6 border animate-pulse">
+                            <div className="space-y-3">
+                              <div className="h-4 w-full bg-muted/60 rounded-full" />
+                              <div className="h-4 w-5/6 bg-muted/60 rounded-full" />
+                              <div className="h-4 w-4/6 bg-muted/60 rounded-full" />
+                            </div>
+                          </div>
+                          <div className="mt-auto pt-6 border-t border-border/40">
+                            <div className="h-14 w-full bg-muted/60 rounded-full animate-pulse" />
+                          </div>
+                        </div>
+                      ) : (
+                        <AiCompletion externalPrompt={externalPrompt} />
+                      )}
                     </div>
                   </div>
                 )}
@@ -286,21 +308,45 @@ export default function RoutedSearchPage() {
                 {/* Desktop: sidebar panel */}
                 {isDesktop && (
                   <div className="relative sticky top-0 h-screen border-l bg-card z-30">
-                    <button
-                      onClick={() => setIsAiCollapsed(!isAiCollapsed)}
-                      className="absolute -left-3 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
-                      title={isAiCollapsed ? "Open AI Assistant" : "Close AI Assistant"}
-                    >
-                      {isAiCollapsed
-                        ? <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
-                        : <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />}
-                    </button>
+                    {playlist.length === 0 ? (
+                        <div className="w-full h-full flex flex-col p-6 pointer-events-none">
+                          <div className="h-8 w-2/3 bg-muted/60 rounded-full mt-4 mb-2 mx-auto animate-pulse" />
+                          <div className="h-4 w-1/2 bg-muted/40 rounded-full mb-10 mx-auto animate-pulse" />
+                          <div className="flex gap-2 flex-wrap mb-10 justify-center">
+                            {[1, 2, 3, 4].map((i) => (
+                              <div key={i} className="h-8 w-32 bg-muted/60 rounded-full animate-pulse" />
+                            ))}
+                          </div>
+                          <div className="w-full bg-muted/20 rounded-xl p-6 border animate-pulse">
+                            <div className="space-y-4">
+                              <div className="h-4 w-full bg-muted/60 rounded-full" />
+                              <div className="h-4 w-[90%] bg-muted/60 rounded-full" />
+                              <div className="h-4 w-[75%] bg-muted/60 rounded-full" />
+                            </div>
+                          </div>
+                          <div className="mt-auto pt-6 border-t border-border/40">
+                            <div className="h-14 w-full bg-muted/60 rounded-full animate-pulse" />
+                          </div>
+                        </div>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => setIsAiCollapsed(!isAiCollapsed)}
+                          className="absolute -left-3 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
+                          title={isAiCollapsed ? "Open AI Assistant" : "Close AI Assistant"}
+                        >
+                          {isAiCollapsed
+                            ? <ChevronLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+                            : <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />}
+                        </button>
 
-                    <div className="h-full overflow-hidden">
-                      <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
-                        <AiCompletion externalPrompt={externalPrompt} />
-                      </div>
-                    </div>
+                        <div className="h-full overflow-hidden">
+                          <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
+                            <AiCompletion externalPrompt={externalPrompt} />
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </>
