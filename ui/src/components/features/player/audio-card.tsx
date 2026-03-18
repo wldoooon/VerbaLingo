@@ -129,7 +129,7 @@ export default function AudioCard({
 
   // Fetch transcript for current video
   // Disable if parent is loading to avoid fetching transcript for "stale" clips during search transition
-  const { data: transcriptData, isLoading: isTranscriptLoading } = useTranscript(
+  const { data: transcriptData, isPending: isTranscriptLoading } = useTranscript(
     !isParentLoading ? (currentClip?.video_id || "") : "",
     activeLanguage,
     currentClip?.position
