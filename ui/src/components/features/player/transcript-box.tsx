@@ -54,16 +54,21 @@ export const TranscriptBox = ({
 
   // Find the trio: Previous, Active, and Next.
   // Pure computation — no ref mutations, safe for Concurrent Mode.
+  // When activeIdx is -1 but sentences exist, fall back to showing the first sentence.
+  // This prevents the "Waiting for playback..." ghost state that occurs because
+  // currentTime in the store is still 0 while the YouTube player hasn't fired
+  // its first onStateChange yet.
   const trio = useMemo(() => {
-    if (sentences.length === 0 || activeIdx === -1) return null
+    if (sentences.length === 0) return null
 
-    const active = sentences[activeIdx]
+    const idx = activeIdx === -1 ? 0 : activeIdx
+    const active = sentences[idx]
     if (!active) return null
 
     return {
-      prev: sentences[activeIdx - 1],
+      prev: sentences[idx - 1],
       active,
-      next: sentences[activeIdx + 1],
+      next: sentences[idx + 1],
     }
   }, [activeIdx, sentences])
 
