@@ -498,7 +498,7 @@ export function SearchBar() {
 
             {/* Unified Suggestions & Recents Panel */}
             {showRecent && !isSearching && (recentSearches.length > 0 || (query.length >= 2 && (suggestions.length > 0 || isLoading))) && (
-                <Card className="absolute top-full left-0 right-0 mt-0 rounded-t-none rounded-b-2xl shadow-xl border-t-0 animate-in fade-in-0 zoom-in-95 z-30 bg-background/95 backdrop-blur-md overflow-hidden">
+                <Card className="absolute top-full left-0 right-0 mt-0 rounded-t-none rounded-b-2xl shadow-xl border-t-0 animate-in fade-in-0 zoom-in-95 z-50 bg-background/95 backdrop-blur-md overflow-hidden">
                     <CardContent className="p-0">
                         {/* 1. Autocomplete Suggestions */}
                         {query.length >= 2 && !isSearching && (
