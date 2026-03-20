@@ -20,52 +20,53 @@ const carterOne = Carter_One({ weight: '400', subsets: ['latin'] });
 
 const faqData = [
   {
-    question: "What is Pokispokey, and how can it help me?",
-    answer: "Pokispokey is a context-first language learning engine. We index millions of real-world video frames to show you exactly how native speakers use words in context, helping you master fluency faster than traditional methods.",
+    question: "What is PokiSpokey, and how does it work?",
+    answer: "PokiSpokey is a context-first language learning platform. You search for any word or expression, and we instantly show you real YouTube clips where native speakers use it at the exact timestamp, with a full transcript. Think of it as a dictionary that speaks. You can also ask our AI Assistant anything about the word's meaning, tone, or cultural context right from the player.",
     tag: "Getting Started",
   },
   {
     question: "Which languages are supported?",
-    answer: "We currently support English, French and German with more languages being added regularly. Each language has a curated library of real-world video content from movies, podcasts, and speeches.",
+    answer: "We currently support English, French, and German. Spanish is actively being added to our catalog. Each language has its own library of real-world video content spanning movies, podcasts, cartoons, talks, news, and more.",
+    tag: "Languages",
   },
   {
     question: "Is there a free tier available?",
-    answer: "Yes! Every new user gets 30,000 free Sparks to explore the platform. You can search for contexts and use our AI Assistant to learn languages.",
+    answer: "Yes! Every new account starts with 50,000 free ai credits and 100 searches per month, no credit card required. That's enough to explore hundreds of clips and have real conversations with the AI Assistant before deciding on a plan.",
     tag: "Pricing",
   },
   {
-    question: "How do Sparks work?",
-    answer: "Sparks are used when you chat with the AI Assistant. Each AI response costs Sparks based on the number of tokens generated — longer answers cost more. Searching is free and only limited by daily request quotas to keep things fast for everyone.",
+    question: "How do ai credits work?",
+    answer: "AI credits are the fuel for your AI Assistant conversations. Each message you send and receive costs AI credits based on the length of the exchange. Searching for clips is completely free and never costs AI credits — only your monthly search quota applies. When you run low, you can upgrade your plan or wait for your monthly AI credits to refill.",
     tag: "Sparks",
   },
   {
-    question: "What makes Pokispokey different from other language apps?",
-    answer: "Unlike traditional apps that use scripted examples, Pokispokey shows you real clips from movies, podcasts, and speeches. You learn how words are actually used by native speakers, with full context, tone, and emotion.",
+    question: "What counts as a search? Will refreshing the page use up my quota?",
+    answer: "Only genuinely new searches count. If you search the same word or phrase again within one hour — whether from refreshing, clicking back, or re-typing it — we detect the duplicate and don't charge your quota a second time. Browsing through results pages (page 2, 3…) of the same search also doesn't count as additional searches.",
+    tag: "Search",
+  },
+  {
+    question: "What makes PokiSpokey different from other language apps?",
+    answer: "Most apps use scripted sentences written by textbook authors. PokiSpokey uses 14.2 million real video frames from actual movies, podcasts, cartoons, and speeches. You hear the word with real intonation, emotion, and cultural weight — not a robotic voice reading a made-up sentence. The built-in AI Assistant then lets you ask anything about what you just heard.",
     tag: "Features",
   },
   {
-    question: "Can I use Pokispokey on mobile?",
-    answer: "Pokispokey is fully responsive and works in any modern browser on mobile, tablet, and desktop. We also offer a browser extension for quick lookups while browsing the web.",
-    tag: "Platform",
-  },
-  {
     question: "How does the AI Assistant work?",
-    answer: "Our AI Assistant uses your search context to provide personalized explanations, grammar breakdowns, and usage examples. It understands the video clip you're watching and can answer questions about vocabulary, pronunciation, and cultural nuances.",
+    answer: "The AI Assistant is aware of your current search query and the clip you are watching. You can ask things like 'Why does this feel informal?', 'What's the grammar structure here?', or 'Give me 3 similar expressions'. It responds in context, making every explanation feel like a conversation with a native-speaking tutor rather than a generic dictionary lookup.",
     tag: "AI",
   },
   {
-    question: "Is my learning data secure?",
-    answer: "Absolutely. We use high-level encryption for all user data and your search history is private to your account. We never share your data with third parties.",
-    tag: "Security",
+    question: "Can I use PokiSpokey on mobile?",
+    answer: "Yes — the platform is fully responsive and works in any modern browser on phones, tablets, and desktops. We also offer a Chrome extension that lets you look up any word or phrase directly from websites you're reading without switching tabs.",
+    tag: "Platform",
   },
   {
-    question: "Can I save clips and create collections?",
-    answer: "Yes! You can save any clip to your library, organize them into custom collections, and revisit them anytime. Your saved clips sync across all your devices.",
+    question: "What video categories are available?",
+    answer: "Clips are organized across six categories: Movies, Podcasts, Cartoons, Talks, News, and Shows. When you search, results are pulled from all categories simultaneously and interleaved, so you see diverse usage contexts in a single search. You can filter by category or sub-category to focus on a specific style of speech.",
     tag: "Features",
   },
   {
     question: "How can I contact support?",
-    answer: "We're here to help! You can reach our dedicated support team through the feedback dialog in the app or by clicking the 'Contact us' button on this page.",
+    answer: "You can reach us directly through the 'Contact us' button on this page. We read every message and typically reply within one business day.",
     tag: "Support",
   },
 ]

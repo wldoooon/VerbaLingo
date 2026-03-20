@@ -7,35 +7,56 @@ import { ArrowRight, Tag, Calendar } from 'lucide-react';
 // Data structure for your releases
 const releases = [
     {
-        version: "v1.4.0",
-        date: "Today",
-        title: "Bonjour! French Language Support",
-        description: "Mais oui! We have officially added full support for the French language.",
+        version: "v1.6.0",
+        date: "March 20, 2026",
+        title: "No More Double Counting",
+        description: "We overhauled how search usage is tracked so you never get charged twice for the same lookup. This update also brings major stability improvements to the video player and transcript sync.",
         changes: [
-            { type: "feat", description: "Added entirely new French language catalog with hundreds of thousands of indexed videos." },
-            { type: "feat", description: "Configured the AI Tutor companion to understand and explain French grammar and nuance." }
+            { type: "fix", description: "Searching the same word or phrase within one hour (refresh, back-navigation, re-typing) no longer deducts from your monthly quota a second time." },
+            { type: "fix", description: "Transcript box no longer vibrates or jumps between sentences during playback. Sync logic was rewritten with a sticky 'last passed sentence' engine." },
+        ]
+    },
+    {
+        version: "v1.5.0",
+        date: "March 10, 2026",
+        title: "Instant Search",
+        description: "Search results now feel instant.",
+        changes: [
+            { type: "feat", description: "Player component chunks are now pre-fetched on page load so video playback starts immediately when results arrive." },
+            { type: "fix", description: "Search bar no longer triggers conflicting route prefetches on focus, which was causing App Router internal state corruption on fast tab switches." },
+        ]
+    },
+    {
+        version: "v1.4.0",
+        date: "February 20, 2026",
+        title: "Bonjour! French Language Support",
+        description: "We officially added full support for the French language — a curated library of real-world clips spanning movies, podcasts, cartoons, and talks.",
+        changes: [
+            { type: "feat", description: "Added the French language catalog with hundreds of thousands of indexed video frames." },
+            { type: "feat", description: "AI Assistant now understands and explains French grammar, idiomatic expressions, and cultural nuances." },
+            { type: "feat", description: "Language selector in the search bar now includes French alongside English and German." },
         ]
     },
     {
         version: "v1.3.5",
-        date: "Yesterday",
+        date: "February 10, 2026",
         title: "Sub-Category Deep Search",
-        description: "Finding exactly what you need is now faster and more intuitive with specific sub-category filtering.",
+        description: "Finding exactly the right context is now faster with specific sub-category filtering layered on top of the main category.",
         changes: [
-            { type: "feat", description: "Added the ability to filter search results by highly specific sub-categories." },
-            { type: "update", description: "Improved search indexing speeds for complex layered queries." }
+            { type: "feat", description: "Added sub-category filters — drill down from 'Movies' to 'Drama', 'Comedy', 'Action', and more." },
+            { type: "update", description: "Improved search indexing speeds for complex layered queries across all six content categories." },
         ]
     },
     {
-        version: "v1.3.1",
-        date: "February 28, 2026",
-        title: "AI Companion Mobile Fixes",
-        description: "We've tightened up our mobile layouts, taking special care of how the AI Companion renders on small screens.",
+        version: "v1.3.0",
+        date: "January 28, 2026",
+        title: "Ai Credits Economy & Subscription Tiers",
+        description: "We launched the full subscription model with five tiers, a ai credits-based AI token economy, and real-time usage tracking synced to your account.",
         changes: [
-            { type: "fix", description: "Resolved an issue where the AI Companion feature card layout broke or overflowed text on iPads." },
-            { type: "fix", description: "Removed CPU-heavy robot icon animations in the AI Companion card to ensure buttery smooth performance on older phones." }
+            { type: "feat", description: "Introduced AI credits each AI Assistant response deducts credits based on response length. All plans start with a generous credits balance." },
+            { type: "feat", description: "Launched five subscription tiers: Free, Basic ($4.99/mo), Pro ($8.99/mo), Premium ($14.99/mo), and Max ($18.99/mo)." },
         ]
-    }
+    },
 ];
 
 
@@ -60,7 +81,7 @@ export default function ChangelogPage() {
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="text-xl text-muted-foreground max-w-2xl leading-relaxed"
                     >
-                        New updates and improvements to PokiSpokey. We release new features and fixes frequently to keep improving your language journey.
+                        New updates and improvements to VerbaLingo. We ship frequently — here's everything we've built so far.
                     </motion.p>
 
                 </div>
