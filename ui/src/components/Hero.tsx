@@ -9,6 +9,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/animate-ui
 import { useTheme } from "next-themes";
 import { Features } from "./Features";
 import AnimatedContent from "./AnimatedContent";
+import { useSearchStore } from "@/stores/use-search-store";
 
 const categories = [
   {
@@ -64,6 +65,7 @@ const categories = [
 export function Hero() {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
+  const language = useSearchStore((s) => s.language);
   const [mounted, setMounted] = useState(false);
   const [activeCategory, setActiveCategory] = useState(2);
   const [isPaused, setIsPaused] = useState(false);
@@ -76,54 +78,59 @@ export function Hero() {
 
   const trendingHighlights = [
     {
-      word: "Schadenfreude",
-      definition: "Pleasure derived from another's misfortune.",
-      context: "A sense of schadenfreude swept the crowd as the rival fumbled.",
-      frequency: "German Context",
-      usage: "82%"
+      word: "actually",
+      definition: "Used to emphasize a fact or to introduce something surprising.",
+      context: "I actually enjoyed the meeting — it was way more useful than I expected.",
+      frequency: "Common Word",
+      usage: "97%"
     },
     {
-      word: "Bite the bullet",
-      definition: "To endure an unpleasant but unavoidable situation.",
-      context: "She decided to bite the bullet and finally start the complex migration.",
-      frequency: "English Idiom",
-      usage: "95%"
+      word: "no worries",
+      definition: "A casual way of saying 'don't worry about it' or 'you're welcome'.",
+      context: "Thanks for waiting — no worries at all, take your time.",
+      frequency: "Daily Expression",
+      usage: "93%"
     },
     {
-      word: "Feierabend",
-      definition: "The state of being finished with work for the day.",
-      context: "It's 5:00 PM—time to close the laptop and enjoy the Feierabend.",
-      frequency: "German Context",
-      usage: "88%"
+      word: "kind of",
+      definition: "Used to soften a statement or indicate something is approximate.",
+      context: "It's kind of hard to explain, but I'll try my best.",
+      frequency: "Filler Phrase",
+      usage: "96%"
     },
     {
-      word: "Break the ice",
-      definition: "To say or do something to relieve tension in a social setting.",
-      context: "He told a joke to break the ice at the start of the meeting.",
-      frequency: "English Idiom",
+      word: "hang on",
+      definition: "To wait, or to hold tightly to something.",
+      context: "Hang on a second — I think I left my phone on the table.",
+      frequency: "Daily Expression",
       usage: "91%"
     },
     {
-      word: "Under the weather",
-      definition: "Feeling slightly unwell or sick.",
-      context: "I'm feeling a bit under the weather today, so I'll stay home.",
-      frequency: "English Phrase",
-      usage: "84%"
+      word: "anyway",
+      definition: "Used to return to a previous topic or dismiss something.",
+      context: "It was a long detour, but anyway, we finally made it to the café.",
+      frequency: "Common Word",
+      usage: "95%"
     },
     {
-      word: "Piece of cake",
-      definition: "Something that is very easy to do.",
-      context: "Don't worry about the exam; it was a total piece of cake!",
-      frequency: "English Idiom",
-      usage: "94%"
-    }
+      word: "go ahead",
+      definition: "To proceed or to give someone permission to do something.",
+      context: "If you're ready to present, go ahead — everyone's listening.",
+      frequency: "Daily Expression",
+      usage: "92%"
+    },
   ];
 
   const currentHighlight = trendingHighlights[highlightIdx];
 
   const handleSearch = (query: string) => {
-    router.push(`/search/${encodeURIComponent(query)}/General`);
+    router.push(`/search/${encodeURIComponent(query)}/${encodeURIComponent(language)}`);
   };
+
+  const exampleChips = [
+    "no way", "come on", "hold on", "let's go", "hang on",
+    "well done", "what's up", "good luck", "go ahead", "of course",
+  ];
 
   useEffect(() => {
     if (isPaused) return;

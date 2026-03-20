@@ -364,21 +364,22 @@ export function HeaderUserProfile({
 
         <DropdownMenuGroup className="pt-1">
 
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+          <DropdownMenuItem disabled className="rounded-xl py-2.5 cursor-not-allowed opacity-60">
             <Settings className="mr-3 h-4 w-4 text-slate-400" />
             <span className="text-sm font-medium">Profile Settings</span>
+            <span className="ml-auto text-[10px] font-bold uppercase tracking-wide bg-muted text-muted-foreground px-1.5 py-0.5 rounded-md">Soon</span>
           </DropdownMenuItem>
 
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+          <DropdownMenuItem disabled className="rounded-xl py-2.5 cursor-not-allowed opacity-60">
             <ShieldCheck className="mr-3 h-4 w-4 text-slate-400" />
             <span className="text-sm font-medium">Billing & Subscription</span>
+            <span className="ml-auto text-[10px] font-bold uppercase tracking-wide bg-muted text-muted-foreground px-1.5 py-0.5 rounded-md">Soon</span>
           </DropdownMenuItem>
 
-
-
-          <DropdownMenuItem className="rounded-xl py-2.5 cursor-pointer">
+          <DropdownMenuItem disabled className="rounded-xl py-2.5 cursor-not-allowed opacity-60">
             <TrendingUp className="mr-3 h-4 w-4 text-slate-400" />
             <span className="text-sm font-medium">Usage analytics</span>
+            <span className="ml-auto text-[10px] font-bold uppercase tracking-wide bg-muted text-muted-foreground px-1.5 py-0.5 rounded-md">Soon</span>
           </DropdownMenuItem>
 
         </DropdownMenuGroup>
@@ -387,7 +388,7 @@ export function HeaderUserProfile({
 
         <DropdownMenuItem
 
-          className="rounded-xl py-3 text-red-500 focus:text-white focus:bg-red-400 cursor-pointer flex justify-center items-center gap-1 transition-colors"
+          className="rounded-xl py-3 px-0 text-red-500 focus:text-white focus:bg-red-400 cursor-pointer flex justify-center items-center gap-1 transition-colors"
 
           onSelect={(e) => {
 
