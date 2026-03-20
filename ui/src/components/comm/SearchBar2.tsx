@@ -133,7 +133,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <div className="w-full max-w-3xl relative z-30" ref={containerRef}>
+    <div className="w-full max-w-3xl relative z-50" ref={containerRef}>
       <div className={`
         relative flex items-center w-full bg-white rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] p-2
         ${(showSuggestions && suggestions.length > 0) || activeMenu !== 'none'

@@ -14,7 +14,7 @@ interface NavigationProps {
 
 export function Navigation({ user, showNavMenu = true }: NavigationProps) {
   return (
-    <header className="w-full bg-transparent">
+    <header className="w-full bg-transparent relative z-50">
       <div className="relative border-b border-border">
         <div className="flex h-20 items-center px-4 sm:px-6 gap-2 sm:gap-4">
           {/* Search Bar with integrated filters - aligned center */}
