@@ -87,36 +87,31 @@ export function Hero() {
     {
       word: "no worries",
       definition: "A casual way of saying 'don't worry about it' or 'you're welcome'.",
-      context: "Thanks for waiting — no worries at all, take your time.",
-      frequency: "Daily Expression",
+      context: "Thanks for waiting no worries at all, take your time.",
       usage: "93%"
     },
     {
       word: "kind of",
       definition: "Used to soften a statement or indicate something is approximate.",
       context: "It's kind of hard to explain, but I'll try my best.",
-      frequency: "Filler Phrase",
       usage: "96%"
     },
     {
       word: "hang on",
       definition: "To wait, or to hold tightly to something.",
-      context: "Hang on a second — I think I left my phone on the table.",
-      frequency: "Daily Expression",
+      context: "Hang on a second I think I left my phone on the table.",
       usage: "91%"
     },
     {
       word: "anyway",
       definition: "Used to return to a previous topic or dismiss something.",
       context: "It was a long detour, but anyway, we finally made it to the café.",
-      frequency: "Common Word",
       usage: "95%"
     },
     {
       word: "go ahead",
       definition: "To proceed or to give someone permission to do something.",
       context: "If you're ready to present, go ahead — everyone's listening.",
-      frequency: "Daily Expression",
       usage: "92%"
     },
   ];
@@ -172,7 +167,7 @@ export function Hero() {
       const hidden = absOffset >= 3;
       return { offset, absOffset, isActive, translateX, translateZ, rotateY, opacity, zIndex, scale, hidden };
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCategory]);
 
   return (
@@ -332,66 +327,66 @@ export function Hero() {
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
-            {categories.map((cat, index) => {
-              const { isActive, translateX, translateZ, rotateY, opacity, zIndex, scale, hidden } = cardStyles[index];
+              {categories.map((cat, index) => {
+                const { isActive, translateX, translateZ, rotateY, opacity, zIndex, scale, hidden } = cardStyles[index];
 
-              if (hidden) return null;
+                if (hidden) return null;
 
-              return (
-                <div
-                  key={cat.id}
-                  onClick={() => setActiveCategory(index)}
-                  className="absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer [backface-visibility:hidden]"
-                  style={{
-                    transform: `translateX(${translateX}) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
-                    opacity,
-                    zIndex,
-                    willChange: 'transform, opacity',
-                  }}
-                >
+                return (
                   <div
-                    className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card group transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'} isolate`}
-                    style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
+                    key={cat.id}
+                    onClick={() => setActiveCategory(index)}
+                    className="absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer [backface-visibility:hidden]"
+                    style={{
+                      transform: `translateX(${translateX}) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+                      opacity,
+                      zIndex,
+                      willChange: 'transform, opacity',
+                    }}
                   >
-                    {/* Image Background */}
-                    <div className="absolute inset-0 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
-                      <Image
-                        src={cat.image}
-                        alt={cat.label}
-                        fill
-                        placeholder="blur"
-                        blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                        sizes="(max-width: 768px) 100vw, 400px"
-                        priority={isActive}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/90" />
-                    </div>
-
-                    {/* Top Badge: Clip Count */}
-                    <div className="absolute top-4 right-4 bg-muted/90 backdrop-blur-md border border-border/20 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                      <span className="text-xs font-bold text-foreground tracking-wide">{cat.count} Clips</span>
-                    </div>
-
-                    {/* Bottom Content */}
-                    <div className="absolute bottom-0 left-0 right-0 p-7 transform transition-transform duration-500">
-                      <div className="w-13 h-13 bg-muted/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/10 text-white shadow-lg">
-                        <cat.icon className="w-6 h-6" />
+                    <div
+                      className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card group transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'} isolate`}
+                      style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
+                    >
+                      {/* Image Background */}
+                      <div className="absolute inset-0 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
+                        <Image
+                          src={cat.image}
+                          alt={cat.label}
+                          fill
+                          placeholder="blur"
+                          blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                          sizes="(max-width: 768px) 100vw, 400px"
+                          priority={isActive}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/90" />
                       </div>
-                      <h3 className="text-2xl font-bold text-white mb-1">{cat.label}</h3>
-                      <p className="text-sm text-slate-300 font-medium">{cat.description}</p>
-                    </div>
 
-                    {/* Hover Border Glow */}
-                    <div className={`absolute inset-0 border-2 border-transparent transition-all duration-500 rounded-[1.5rem] sm:rounded-[2rem] ${isActive ? 'border-primary/20' : 'group-hover:border-primary/20'}`} />
+                      {/* Top Badge: Clip Count */}
+                      <div className="absolute top-4 right-4 bg-muted/90 backdrop-blur-md border border-border/20 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                        <span className="text-xs font-bold text-foreground tracking-wide">{cat.count} Clips</span>
+                      </div>
+
+                      {/* Bottom Content */}
+                      <div className="absolute bottom-0 left-0 right-0 p-7 transform transition-transform duration-500">
+                        <div className="w-13 h-13 bg-muted/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/10 text-white shadow-lg">
+                          <cat.icon className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-white mb-1">{cat.label}</h3>
+                        <p className="text-sm text-slate-300 font-medium">{cat.description}</p>
+                      </div>
+
+                      {/* Hover Border Glow */}
+                      <div className={`absolute inset-0 border-2 border-transparent transition-all duration-500 rounded-[1.5rem] sm:rounded-[2rem] ${isActive ? 'border-primary/20' : 'group-hover:border-primary/20'}`} />
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </AnimatedContent>
-      </div>
+                );
+              })}
+            </div>
+          </AnimatedContent>
+        </div>
 
         {/* Feature Grid */}
         <Features />

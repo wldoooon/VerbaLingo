@@ -46,17 +46,47 @@ export const SentenceGroup = memo(({
             }))
           }
 
+          // For no-timestamp (fallback) clips: match the query as a phrase within
+          // the sentence, then record which word indices fall inside the match range.
+          // This avoids false positives (e.g. "of" highlighted everywhere) and
+          // correctly highlights multi-word queries like "no way" or "hang on".
+          const isFallback = rawWords.length === 0 && !!sentence.sentence_text
+          const phraseHighlightSet = new Set<number>()
+          if (isFallback && query.length > 0 && sentence.sentence_text) {
+            const punct = /[.,!?;:()\[\]{}"']/g
+            const sentenceClean = sentence.sentence_text.toLowerCase().replace(punct, '')
+            const queryClean = query.replace(punct, '').trim()
+            const matchStart = sentenceClean.indexOf(queryClean)
+            if (matchStart >= 0) {
+              const matchEnd = matchStart + queryClean.length
+              let charPos = 0
+              sentenceClean.split(/\s+/).filter(t => t.length > 0).forEach((word, i) => {
+                const wordStart = sentenceClean.indexOf(word, charPos)
+                const wordEnd = wordStart + word.length
+                charPos = wordEnd
+                if (wordStart < matchEnd && wordEnd > matchStart) {
+                  phraseHighlightSet.add(i)
+                }
+              })
+            }
+          }
+
           return (
             <span key={`${sentence.start_time}-${sIdx}`}>
               {words.map((w, wi) => {
                 const wordText = (w.text || "").trim()
-                const queryParts = query.split(/\s+/).filter(part => part.length > 0)
-                const isSearchMatch = queryParts.length > 0 && queryParts.some(part => {
-                  const punctuationRegex = /[.,!?;:()\[\]{}"']/g;
-                  const cleanWord = wordText.toLowerCase().replace(punctuationRegex, '');
-                  const cleanPart = part.toLowerCase().replace(punctuationRegex, '');
-                  return cleanWord.length > 0 && cleanPart.length > 0 && cleanWord === cleanPart;
-                })
+
+                const isSearchMatch = isFallback
+                  ? phraseHighlightSet.has(wi)
+                  : (() => {
+                      const queryParts = query.split(/\s+/).filter(part => part.length > 0)
+                      const punctuationRegex = /[.,!?;:()\[\]{}"']/g
+                      const cleanWord = wordText.toLowerCase().replace(punctuationRegex, '')
+                      return queryParts.length > 0 && queryParts.some(part => {
+                        const cleanPart = part.toLowerCase().replace(punctuationRegex, '')
+                        return cleanWord.length > 0 && cleanPart.length > 0 && cleanWord === cleanPart
+                      })
+                    })()
 
                 return (
                   <TranscriptWord

@@ -65,7 +65,6 @@ export function Footer() {
         {/* Bottom: Copyright + icons */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 py-10">
           <div className="flex items-center gap-3">
-            <Image src="/main_logo.png" alt="PokiSpokey Logo" width={24} height={24} />
             <p className="text-sm text-muted-foreground tracking-wide">
               &copy; {new Date().getFullYear()} PokiSpokey. All rights reserved.
             </p>
@@ -78,8 +77,8 @@ export function Footer() {
               <Heart className="h-3.5 w-3.5 fill-red-500 text-red-500 animate-pulse" />
               <span>by</span>
               <div className="relative group/card">
-                <Link 
-                  href="https://x.com/wldooon" 
+                <Link
+                  href="https://x.com/wldooon"
                   target="_blank"
                   className="font-bold text-foreground hover:text-primary transition-colors"
                 >
@@ -92,10 +91,10 @@ export function Footer() {
                     <Link href="https://github.com/wldoooon" target="_blank" className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all">
                       <Github className="h-4 w-4" />
                     </Link>
-                    <Link href="https://x.com/wldooon" target="_blank" className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all">
+                    <Link href="https://x.com/wldoooon" target="_blank" className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all">
                       <Twitter className="h-4 w-4" />
                     </Link>
-                    <Link href="https://linkedin.com/in/wldooon" target="_blank" className="h-8 w-8 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all">
+                    <Link href="https://www.linkedin.com/in/walid-benraho/" target="_blank" className="h-8 w-8 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all">
                       <Linkedin className="h-4 w-4" />
                     </Link>
                   </div>
