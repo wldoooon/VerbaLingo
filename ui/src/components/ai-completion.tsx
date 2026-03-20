@@ -653,44 +653,68 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
                         <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
                     </div>
 
-                    {/* Input Bar */}
-                    <div className="relative w-full">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
-                        <Input
-                            type="text"
-                            maxLength={150}
-                            placeholder={outOfSparks ? "Out of Sparks! Upgrade to continue." : "Ask about pronunciation, definitions, examples..."}
-                            className="w-full rounded-full pl-10 pr-24 py-6 bg-muted shadow-sm border border-primary/40 focus-visible:bg-background transition-colors"
-                            value={inputValue}
-                            onChange={(e) => {
-                                const val = e.target.value.slice(0, 150);
-                                setInputValue(val);
+                    {outOfSparks ? (
+                        <div
+                            className="relative w-full cursor-pointer"
+                            onClick={() => {
+                                toastManager.add({
+                                    title: "You're out of credits",
+                                    description: "Upgrade your plan for more.",
+                                    type: "warning",
+                                    actionProps: {
+                                        children: "Upgrade",
+                                        onClick: () => router.push("/pricing"),
+                                    },
+                                });
                             }}
-                            onKeyPress={handleKeyPress}
-                            disabled={isLoading || outOfSparks}
-                        />
-
-                        {/* Character limit indicator */}
-                        <div className={cn(
-                            "absolute right-12 top-1/2 -translate-y-1/2 text-[10px] font-medium pointer-events-none transition-all duration-200",
-                            inputValue.length >= 150 ? "text-red-500 font-bold" : "text-muted-foreground/40"
-                        )}>
-                            {inputValue.length}/150
-                        </div>
-
-                        <button
-                            onClick={handleInputSubmit}
-                            disabled={!inputValue.trim() || isLoading || outOfSparks}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
-                        </button>
-                    </div>
-                    <div className="text-center mt-3 px-4">
-                        <p className="text-[10px] text-muted-foreground/50 font-medium tracking-wide">
-                            AI can make mistakes. Double-check important info.
-                        </p>
-                    </div>
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/40" />
+                            <div className="w-full rounded-full pl-10 pr-24 py-6 bg-muted/50 border border-border text-sm text-muted-foreground/40 select-none">
+                                Ask about pronunciation, definitions, examples...
+                            </div>
+                        </div>
+                    ) : (
+                        /* ── Normal Input Bar ── */
+                        <>
+                            <div className="relative w-full">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
+                                <Input
+                                    type="text"
+                                    maxLength={150}
+                                    placeholder="Ask about pronunciation, definitions, examples..."
+                                    className="w-full rounded-full pl-10 pr-24 py-6 bg-muted shadow-sm border border-primary/40 focus-visible:bg-background transition-colors"
+                                    value={inputValue}
+                                    onChange={(e) => {
+                                        const val = e.target.value.slice(0, 150);
+                                        setInputValue(val);
+                                    }}
+                                    onKeyPress={handleKeyPress}
+                                    disabled={isLoading}
+                                />
+
+                                {/* Character limit indicator */}
+                                <div className={cn(
+                                    "absolute right-12 top-1/2 -translate-y-1/2 text-[10px] font-medium pointer-events-none transition-all duration-200",
+                                    inputValue.length >= 150 ? "text-red-500 font-bold" : "text-muted-foreground/40"
+                                )}>
+                                    {inputValue.length}/150
+                                </div>
+
+                                <button
+                                    onClick={handleInputSubmit}
+                                    disabled={!inputValue.trim() || isLoading}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
+                                </button>
+                            </div>
+                            <div className="text-center mt-3 px-4">
+                                <p className="text-[10px] text-muted-foreground/50 font-medium tracking-wide">
+                                    AI can make mistakes. Double-check important info.
+                                </p>
+                            </div>
+                        </>
+                    )}
                 </footer>
             </div>
         </div>
