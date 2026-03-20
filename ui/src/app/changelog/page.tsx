@@ -30,6 +30,7 @@ const releases = [
         version: "v1.4.0",
         date: "February 20, 2026",
         title: "Bonjour! French Language Support",
+        flag: "https://flagcdn.com/fr.svg",
         description: "We officially added full support for the French language — a curated library of real-world clips spanning movies, podcasts, cartoons, and talks.",
         changes: [
             { type: "feat", description: "Added the French language catalog with hundreds of thousands of indexed video frames." },
@@ -130,7 +131,14 @@ export default function ChangelogPage() {
                                     </div>
 
                                     <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-sm">
-                                        <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4 tracking-tight">{release.title}</h2>
+                                        <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4 tracking-tight flex items-center gap-3">
+                                            {(release as any).flag && (
+                                                <div className="w-7 h-7 rounded-full overflow-hidden shadow-sm border border-border flex-shrink-0">
+                                                    <img src={(release as any).flag} alt="flag" className="w-full h-full object-cover" />
+                                                </div>
+                                            )}
+                                            {release.title}
+                                        </h2>
 
                                         {release.description && (
                                             <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-3xl">
