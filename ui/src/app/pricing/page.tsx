@@ -51,7 +51,7 @@ const TIERS = [
   },
   {
     id: "price_basic_learner",
-    name: "BASIC LEARNER",
+    name: "BASIC",
     price: 4.99,
     annualPrice: 49.90,   // 10 months (2 months free)
     interval: "month",
@@ -71,7 +71,7 @@ const TIERS = [
   },
   {
     id: "price_pro_student",
-    name: "PRO STUDENT",
+    name: "PRO",
     price: 8.99,
     annualPrice: 89.90,   // 10 months (2 months free)
     interval: "month",
@@ -92,7 +92,7 @@ const TIERS = [
   },
   {
     id: "price_scholar_max",
-    name: "SCHOLAR MAX",
+    name: "MAX",
     price: 14.99,
     annualPrice: 149.90,  // 10 months (2 months free)
     interval: "month",
@@ -111,7 +111,7 @@ const TIERS = [
   },
   {
     id: "price_vip_unlimited",
-    name: "VIP UNLIMITED",
+    name: "UNLIMITED",
     price: 18.99,
     annualPrice: 189.90,  // 10 months (2 months free)
     interval: "month",

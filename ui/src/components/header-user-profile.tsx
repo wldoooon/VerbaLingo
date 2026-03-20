@@ -28,7 +28,9 @@ import {
 
   Moon,
 
-  Sun
+  Sun,
+
+  Search
 
 } from "lucide-react"
 
@@ -111,8 +113,11 @@ export function HeaderUserProfile({
 
   const fullUser = useAuthStore((s) => s.user)
 
-  // Use 'ai_chat' stats as the driver for the main 'Credit' UI (Sparks)
+  // ── AI Credits stats ──
   const stats = usageMap['ai_chat'] || { current: 0, balance: 0, limit: -1, remaining: -1 }
+
+  // ── Search stats ──
+  const searchStats = usageMap['search'] || { current: 0, limit: 250, remaining: 250 }
 
   const TIER_SPARKS: Record<string, number> = {
     free:    50_000,
@@ -128,14 +133,30 @@ export function HeaderUserProfile({
   const currentBalance = stats.balance ?? 0
   const usedSparks = isUnlimited ? 0 : Math.max(0, maxSparks - currentBalance)
 
-  // Calculate percentage USED for the ring (0% when full, 100% when empty)
-  const percentageUsed = isUnlimited ? 0 : (maxSparks > 0 ? Math.max(0, Math.min(100, (usedSparks / maxSparks) * 100)) : 0)
+  // ── Combined Ring: Weighted Average (30% search + 70% AI) + Power Curve (N=2) ──
+  // This makes the ring feel generous at low usage and only fills up near the limit
+  const searchRaw = searchStats.limit > 0 ? Math.min(1, searchStats.current / searchStats.limit) : 0
+  const aiRaw = isUnlimited ? 0 : (maxSparks > 0 ? Math.min(1, usedSparks / maxSparks) : 0)
+
+  // Weighted average: AI costs real money so it weighs more
+  const w1 = isUnlimited ? 1 : 0.3  // search weight (if AI unlimited, search takes full weight)
+  const w2 = isUnlimited ? 0 : 0.7  // AI weight
+  const combined = (w1 * searchRaw) + (w2 * aiRaw)
+
+  // Power curve (N=2): squashes low usage to look even lower
+  const percentageUsed = Math.max(0, Math.min(100, Math.pow(combined, 2) * 100))
+
   const circumference = 2 * Math.PI * 18 // r=18
   const offset = circumference - (percentageUsed / 100) * circumference
 
   // Values for display
   const displayLimit = isUnlimited ? "∞" : maxSparks.toLocaleString()
   const displayRemaining = currentBalance.toLocaleString()
+
+  // Search display values
+  const searchCurrent = searchStats.current
+  const searchLimit = searchStats.limit
+  const searchPercentUsed = searchLimit > 0 ? Math.min(100, (searchCurrent / searchLimit) * 100) : 0
 
   // Calculate Sparks (1 Spark = 1000 credits)
   const remainingSparksDisplay = (currentBalance / 1000).toFixed(2)
@@ -302,6 +323,37 @@ export function HeaderUserProfile({
               <span className="text-slate-400 font-medium">Remaining</span>
               <span className="text-slate-900 dark:text-slate-100">{displayRemaining}</span>
             </div>
+          </div>
+
+          <DropdownMenuSeparator className="my-2 mx-0 bg-slate-100 dark:bg-zinc-800/50" />
+
+          {/* Search Usage */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] text-slate-400 font-medium flex items-center gap-1.5">
+                <Search className="h-3.5 w-3.5" />
+                Searches
+              </span>
+              <span className="text-[13px] font-bold text-slate-900 dark:text-slate-100 tabular-nums">
+                {searchCurrent}
+                <span className="text-slate-400 font-normal"> / {searchLimit === -1 ? "∞" : searchLimit}</span>
+              </span>
+            </div>
+            {searchLimit > 0 && (
+              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-zinc-700/50 overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-700 ease-out"
+                  style={{
+                    width: `${Math.min(100, searchPercentUsed)}%`,
+                    background: searchPercentUsed > 80
+                      ? 'linear-gradient(90deg, #f97316, #ef4444)'
+                      : searchPercentUsed > 50
+                        ? 'linear-gradient(90deg, #f97316, #eab308)'
+                        : 'linear-gradient(90deg, #22c55e, #3b82f6)',
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
 
