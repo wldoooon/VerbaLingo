@@ -5,6 +5,7 @@ Easy-to-use decorators for rate limiting endpoints.
 """
 from __future__ import annotations
 
+import hashlib
 from functools import wraps
 from typing import Callable, Optional, Tuple
 
@@ -189,14 +190,55 @@ def feature_rate_limit(feature: str):
                 # 2. Execute the actual function
                 result = await func(*args, **kwargs)
 
-                # 3. If we got here, it succeeded. Increment usage.
-                await usage_service.increment_usage(
-                    redis=redis_client,
-                    db=db_session,
-                    user=user,
-                    feature=feature,
-                    client_ip=client_ip
-                )
+                # 3. Conditionally increment usage.
+                #
+                # Fix A — Pagination: pages 2+ are continuations of the same search,
+                #   not new searches. Only page=1 counts against the quota.
+                #
+                # Fix B — Per-user dedup: if the user already searched this exact
+                #   query within the last hour, don't charge them again (covers
+                #   page refresh, back-navigation, same-tab re-search).
+                #   Key: search_dedup:{identifier}:{md5(q+lang+cat+subcat)}  TTL: 1h
+
+                should_increment = True
+
+                if feature == "search":
+                    page = int(request.query_params.get("page", "1"))
+
+                    # Fix A: skip pages > 1
+                    if page > 1:
+                        should_increment = False
+                        logger.debug(f"[RATE-LIMIT] pagination page={page} — skipping increment")
+
+                    # Fix B: per-user dedup on page=1
+                    if should_increment:
+                        q_param      = request.query_params.get("q", "")
+                        lang_param   = request.query_params.get("language", "english")
+                        cat_param    = request.query_params.get("category", "")
+                        subcat_param = request.query_params.get("sub_category", "")
+
+                        dedup_raw  = f"{q_param}:{lang_param}:{cat_param}:{subcat_param}"
+                        dedup_hash = hashlib.md5(dedup_raw.encode()).hexdigest()
+
+                        identifier = f"user:{user.id}" if user else f"ip:{client_ip}"
+                        dedup_key  = f"search_dedup:{identifier}:{dedup_hash}"
+
+                        already_searched = await redis_client.exists(dedup_key)
+                        if already_searched:
+                            should_increment = False
+                            logger.debug(f"[RATE-LIMIT] dedup hit for {identifier} — skipping increment")
+                        else:
+                            # Mark as searched — expires after 1 hour
+                            await redis_client.setex(dedup_key, 3600, "1")
+
+                if should_increment:
+                    await usage_service.increment_usage(
+                        redis=redis_client,
+                        db=db_session,
+                        user=user,
+                        feature=feature,
+                        client_ip=client_ip
+                    )
 
                 # 4. Inject headers into response if available
                 # Note: This requires the endpoint to accept a 'response' parameter
