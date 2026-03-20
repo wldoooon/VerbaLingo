@@ -242,7 +242,7 @@ export function Hero() {
                       <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3">
                         <button
                           onClick={() => handleSearch(currentHighlight.word)}
-                          className="bg-foreground text-background hover:bg-primary hover:text-primary-foreground px-3.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all active:scale-95 group/btn"
+                          className="bg-foreground text-background hover:bg-primary hover:text-primary-foreground px-3.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all active:scale-95 group/btn cursor-pointer"
                         >
                           View
                           <ArrowRight className="w-2.5 h-2.5 group-hover/btn:translate-x-0.5 transition-transform" />
