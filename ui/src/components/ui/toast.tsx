@@ -192,11 +192,10 @@ function Toasts({ position = "bottom-right" }: { position: ToastPosition }) {
                 </div>
                 {toast.actionProps && (
                   <Toast.Action
-                    className={buttonVariants({ size: "sm" })}
+                    {...toast.actionProps}
+                    className={cn(buttonVariants({ size: "sm" }), "cursor-pointer")}
                     data-slot="toast-action"
-                  >
-                    {toast.actionProps.children}
-                  </Toast.Action>
+                  />
                 )}
               </Toast.Content>
             </Toast.Root>
@@ -284,11 +283,10 @@ function AnchoredToasts() {
                     </div>
                     {toast.actionProps && (
                       <Toast.Action
-                        className={buttonVariants({ size: "xs" })}
+                        {...toast.actionProps}
+                        className={cn(buttonVariants({ size: "xs" }), "cursor-pointer")}
                         data-slot="toast-action"
-                      >
-                        {toast.actionProps.children}
-                      </Toast.Action>
+                      />
                     )}
                   </Toast.Content>
                 )}
