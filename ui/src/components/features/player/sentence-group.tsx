@@ -29,7 +29,22 @@ export const SentenceGroup = memo(({
       <div className="relative text-lg sm:text-2xl font-medium leading-relaxed inline-block text-foreground tracking-tight">
         {group.map((sentence, sIdx) => {
           const query = searchQuery.toLowerCase().trim()
-          const words: Word[] = (sentence.words as Word[] | undefined) || []
+          const rawWords: Word[] = (sentence.words as Word[] | undefined) || []
+
+          // FALLBACK: When word-level timestamps are missing, split sentence_text
+          // into individual words and distribute the sentence's time range evenly.
+          // This ensures every clip is clickable, highlightable, and visible.
+          let words: Word[] = rawWords
+          if (words.length === 0 && sentence.sentence_text) {
+            const textParts = sentence.sentence_text.split(/\s+/).filter(t => t.length > 0)
+            const duration = sentence.end_time - sentence.start_time
+            const wordDuration = textParts.length > 0 ? duration / textParts.length : duration
+            words = textParts.map((text, i) => ({
+              text,
+              start: sentence.start_time + i * wordDuration,
+              end: sentence.start_time + (i + 1) * wordDuration,
+            }))
+          }
 
           return (
             <span key={`${sentence.start_time}-${sIdx}`}>
