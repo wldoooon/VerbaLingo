@@ -279,7 +279,7 @@ export default function RoutedSearchPage() {
                 {/* Mobile/Tablet: shown when AI tab is active */}
                 {!isDesktop && (
                   <div className={mobileTab !== "ai" ? "hidden" : ""}>
-                    <div className="h-[calc(100vh-10rem)] overflow-hidden bg-card">
+                    <div className="h-[calc(100dvh-7.5rem)] overflow-hidden bg-card">
                       {playlist.length === 0 ? (
                         <div className="w-full h-full flex flex-col p-6 pointer-events-none">
                           <div className="h-8 w-2/3 bg-muted/60 rounded-full mb-2 mx-auto animate-pulse" />

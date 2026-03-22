@@ -454,8 +454,7 @@ export function AiCompletion({
     }
 
     return (
-        <div className="w-full h-full flex flex-col pt-0 pb-0 shadow-none">
-            <div className="relative w-full h-full flex flex-col bg-card">
+        <div className="w-full h-full flex flex-col bg-card">
 
                 <header className="relative w-full flex-shrink-0 px-4 pt-4 sm:px-6 sm:pt-6">
                     <div className="absolute right-0 top-0 z-20">
@@ -777,7 +776,6 @@ export function AiCompletion({
                         </>
                     )}
                 </footer>
-            </div>
         </div>
     );
 }
