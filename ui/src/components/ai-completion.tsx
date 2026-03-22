@@ -5,14 +5,14 @@ import { useSearchStore } from "@/stores/use-search-store";
 import { useUsageStore } from "@/stores/usage-store";
 import { Button } from "@/components/ui/button";
 import { Response } from "@/components/ui/shadcn-io/ai/response";
-import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, ChevronLeft, ChevronRight, Bot, Lock, MessageSquare, Zap, ArrowRight, CircleCheck, CircleAlert } from "lucide-react";
+import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, Lock, MessageSquare, Zap, Square, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
 import { useResponseHistory } from "@/hooks/useResponseHistory";
 import { SessionSelector } from "@/components/session-selector";
 import { BranchTimeline } from "@/components/branch-timeline";
-import { useRouter, useSearchParams as useNextSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toastManager, anchoredToastManager } from "@/components/ui/toast";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import {
@@ -31,27 +31,30 @@ interface SmartSuggestion {
     icon: React.ReactNode;
 }
 
-function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
+// Language-aware suggestions — no longer hardcoded to "English"
+function generateSmartSuggestions(searchWord: string, language: string): SmartSuggestion[] {
+    const lang = language || "English";
+
     if (!searchWord || searchWord.trim() === "") {
         return [
             {
                 title: "Learn pronunciation tips",
-                prompt: "What are some general tips for improving English pronunciation?",
+                prompt: `What are some general tips for improving ${lang} pronunciation?`,
                 icon: <Mic className="h-4 w-4" />,
             },
             {
                 title: "Common grammar mistakes",
-                prompt: "What are the most common grammar mistakes English learners make?",
+                prompt: `What are the most common grammar mistakes ${lang} learners make?`,
                 icon: <BookText className="h-4 w-4" />,
             },
             {
                 title: "Expand vocabulary",
-                prompt: "How can I effectively expand my English vocabulary?",
+                prompt: `How can I effectively expand my ${lang} vocabulary?`,
                 icon: <Repeat className="h-4 w-4" />,
             },
             {
                 title: "Common mistakes to avoid",
-                prompt: "What are common mistakes English learners make and how to avoid them?",
+                prompt: `What are common mistakes ${lang} learners make and how to avoid them?`,
                 icon: <XCircle className="h-4 w-4" />,
             },
         ];
@@ -60,71 +63,91 @@ function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
     return [
         {
             title: `Pronounce "${searchWord}" correctly`,
-            prompt: `Break down how to pronounce the word "${searchWord}" syllable by syllable with phonetic examples. Include common mistakes learners make.`,
+            prompt: `Break down how to pronounce "${searchWord}" in ${lang} syllable by syllable with phonetic examples. Include common mistakes learners make.`,
             icon: <Mic className="h-4 w-4" />,
         },
         {
             title: `"${searchWord}" in different contexts`,
-            prompt: `Show me 5 example sentences using the word "${searchWord}" in different contexts (formal, informal, academic, conversational). Explain the nuances.`,
+            prompt: `Show me 5 example sentences using "${searchWord}" in ${lang} in different contexts (formal, informal, academic, conversational). Explain the nuances.`,
             icon: <BookText className="h-4 w-4" />,
         },
         {
             title: `Similar words to "${searchWord}"`,
-            prompt: `What are 5 words similar in meaning or usage to "${searchWord}"? Explain the subtle differences between them with examples.`,
+            prompt: `What are 5 words similar in meaning or usage to "${searchWord}" in ${lang}? Explain the subtle differences with examples.`,
             icon: <Repeat className="h-4 w-4" />,
         },
         {
             title: `Common mistakes with "${searchWord}"`,
-            prompt: `What are the most common mistakes English learners make when using the word "${searchWord}"? How can I avoid them?`,
+            prompt: `What are the most common mistakes ${lang} learners make when using "${searchWord}"? How can I avoid them?`,
             icon: <XCircle className="h-4 w-4" />,
         },
     ];
 }
 
-export function AiCompletion({ 
-    externalPrompt, 
-    contextSnippet 
-}: { 
+// Maps raw API errors to user-friendly messages
+function getFriendlyError(err: Error): string {
+    const msg = err.message ?? "";
+    if (msg.includes("429")) return "You've run out of Sparks. Upgrade your plan for more.";
+    if (msg.includes("503") || msg.includes("ECONNREFUSED")) return "The AI service is temporarily unavailable. Please try again shortly.";
+    if (msg.includes("401") || msg.includes("403")) return "Session expired. Please refresh the page.";
+    if (err.name === "TypeError" && msg.toLowerCase().includes("fetch")) return "No internet connection detected. Check your network and try again.";
+    return "Something went wrong. Please try again.";
+}
+
+export function AiCompletion({
+    externalPrompt,
+    contextSnippet
+}: {
     externalPrompt: string | null;
     contextSnippet?: string | null;
 }) {
-    const { query } = useSearchStore();
+    const { query, language } = useSearchStore();
     const router = useRouter();
-    const nextSearchParams = useNextSearchParams();
     const authStatus = useAuthStore((s) => s.status);
     const isGuest = authStatus !== "authenticated";
     const usageMap = useUsageStore((s) => s.usage);
     const aiStats = usageMap?.['ai_chat'] || { balance: 0, remaining: 0 };
     const outOfSparks = !isGuest && (aiStats.balance ?? 0) <= 0;
 
-    // Replacement for useCompletion
     const [completion, setCompletion] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
+    // Stream control
+    const abortControllerRef = useRef<AbortController | null>(null);
+    const isLoadingRef = useRef(false); // sync ref so closures always read the latest value
+    const pendingExternalPromptRef = useRef<string | null>(null); // queued prompt if one arrives mid-stream
+
     const complete = async (prompt: string) => {
-        if (isLoading) return;
+        if (isLoadingRef.current) return;
+
+        // Cancel any in-progress stream before starting a new one
+        abortControllerRef.current?.abort();
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+
+        isLoadingRef.current = true;
         setIsLoading(true);
         setCompletion("");
         setError(null);
 
         try {
-                // Last 3 Q&A pairs as history for the model (read from ref to avoid stale closure)
             const history = branchesRef.current
                 .slice(-3)
-                .map(b => ({ prompt: b.prompt, response: b.response }))
+                .map(b => ({ prompt: b.prompt, response: b.response }));
 
             const response = await fetch("/api/v1/completion", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    prompt: prompt,
+                    prompt,
                     context: {
-                        query: query,
+                        query,
                         transcript: contextSnippet,
                         history,
                     }
                 }),
+                signal: controller.signal,
             });
 
             if (!response.ok) {
@@ -138,39 +161,60 @@ export function AiCompletion({
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
+                if (controller.signal.aborted) break;
                 const chunk = decoder.decode(value, { stream: true });
-                console.log("DEBUG CHUNK:", chunk);
                 setCompletion((prev) => prev + chunk);
+                // Auto-scroll to bottom as new tokens arrive
+                if (scrollContentRef.current) {
+                    scrollContentRef.current.scrollTop = scrollContentRef.current.scrollHeight;
+                }
             }
         } catch (err: any) {
+            if (err?.name === "AbortError") return; // User stopped — not an error state
             console.error("Completion error:", err);
             setError(err);
         } finally {
+            isLoadingRef.current = false;
             setIsLoading(false);
+
+            // Fire any prompt that arrived while this stream was running
+            const pending = pendingExternalPromptRef.current;
+            if (pending) {
+                pendingExternalPromptRef.current = null;
+                currentPromptRef.current = pending;
+                complete(pending);
+            }
         }
     };
 
+    const handleStop = () => {
+        abortControllerRef.current?.abort();
+    };
+
+    // Abort stream on unmount to prevent state updates on a dead component
+    useEffect(() => {
+        return () => { abortControllerRef.current?.abort(); };
+    }, []);
 
     const [inputValue, setInputValue] = useState("");
     const currentPromptRef = useRef<string>("");
     const branchesRef = useRef<{ prompt: string; response: string }[]>([]);
     const responseContainerRef = useRef<HTMLDivElement>(null);
     const scrollContentRef = useRef<HTMLDivElement>(null);
+    // Ref-based blur gradients — fixes the duplicate global ID bug when two instances render
+    const topBlurRef = useRef<HTMLDivElement>(null);
+    const bottomBlurRef = useRef<HTMLDivElement>(null);
     const [maxResponseHeight, setMaxResponseHeight] = useState<number>(400);
     const [canScroll, setCanScroll] = useState(false);
 
-    // Use our custom history hook
     const {
         currentBranch,
         totalBranches,
         currentIndex,
-        canGoBack,
-        canGoForward,
         addBranch,
         goToPrevious,
         goToNext,
         navigateToIndex,
-        getThreadContext,
         sessions,
         switchSession,
         activeSessionId,
@@ -180,7 +224,6 @@ export function AiCompletion({
         branches
     } = useResponseHistory();
 
-    // Keep branchesRef in sync so complete() always reads the latest history
     branchesRef.current = branches;
 
     // Copy Logic
@@ -221,22 +264,26 @@ export function AiCompletion({
         });
     };
 
-    const smartSuggestions = useMemo(() => generateSmartSuggestions(query), [query]);
+    const smartSuggestions = useMemo(() => generateSmartSuggestions(query, language), [query, language]);
 
-    // Auto-Switch Session when search query changes
+    // Auto-switch session when search query changes
     useEffect(() => {
         if (query && query.trim() !== "") {
             switchSession(query);
         }
     }, [query, switchSession]);
 
-    // Handle manual session selection
+    // Clear live stream state when query changes — prevents old response lingering
+    useEffect(() => {
+        setCompletion("");
+        setError(null);
+    }, [query]);
+
     const handleSessionSelect = (sessionId: string) => {
         switchSession(sessionId);
     };
 
     const shouldHideSuggestions = useMemo(() => {
-        // Hide if loading, or if we have a current response (stream or history)
         return isLoading || !!completion || !!currentBranch;
     }, [isLoading, completion, currentBranch]);
 
@@ -253,13 +300,8 @@ export function AiCompletion({
             const headerHeight = header?.clientHeight || 0;
             const footerHeight = footer?.clientHeight || 0;
             const suggestionsHeight = !shouldHideSuggestions && suggestions?.clientHeight || 0;
-
-            // New timeline height roughly ~100px when active. 
-            // We increase buffer from 100 to 180 to account for the timeline and padding safely.
-            // A more robust solution would be to measure the timeline container if present.
             const extraBuffer = totalBranches > 1 ? 180 : 100;
 
-            // Calculate available space
             const availableSpace = containerHeight - headerHeight - footerHeight - suggestionsHeight - extraBuffer;
             setMaxResponseHeight(Math.max(120, Math.min(availableSpace, 600)));
         };
@@ -267,9 +309,8 @@ export function AiCompletion({
         calculateMaxHeight();
         window.addEventListener('resize', calculateMaxHeight);
         return () => window.removeEventListener('resize', calculateMaxHeight);
-    }, [shouldHideSuggestions, totalBranches]); // Added totalBranches to deps
+    }, [shouldHideSuggestions, totalBranches]);
 
-    // Check if content is scrollable
     useEffect(() => {
         const checkScrollable = () => {
             if (scrollContentRef.current) {
@@ -278,7 +319,7 @@ export function AiCompletion({
             }
         };
 
-        const timeout = setTimeout(checkScrollable, 100); // Small delay to allow layout update
+        const timeout = setTimeout(checkScrollable, 100);
         window.addEventListener('resize', checkScrollable);
 
         return () => {
@@ -289,7 +330,7 @@ export function AiCompletion({
 
     const handleSuggestionClick = (suggestion: SmartSuggestion) => {
         if (outOfSparks) return;
-        setInputValue(suggestion.prompt);
+        // Fire directly — don't fill the input box with the verbose prompt
         currentPromptRef.current = suggestion.prompt;
         complete(suggestion.prompt);
     };
@@ -303,13 +344,13 @@ export function AiCompletion({
         }
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
+    const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
             handleInputSubmit();
         }
     };
 
-    // Trigger completion when a new external prompt is passed in (e.g. from AudioCard)
+    // External prompt handler — queues if mid-stream instead of silently dropping
     const lastHandledPromptRef = useRef<string | null>(null);
 
     useEffect(() => {
@@ -317,16 +358,23 @@ export function AiCompletion({
         if (externalPrompt === lastHandledPromptRef.current) return;
 
         lastHandledPromptRef.current = externalPrompt;
+
+        if (isLoadingRef.current) {
+            // Queue it — complete()'s finally block will fire it
+            pendingExternalPromptRef.current = externalPrompt;
+            return;
+        }
+
         currentPromptRef.current = externalPrompt;
         complete(externalPrompt);
     }, [externalPrompt]);
 
-    // Store completed response as a branch (skip truncated/partial responses < 50 chars)
+    // Save completed response as a branch (skip partial/stopped responses < 50 chars)
     useEffect(() => {
         if (!isLoading && completion && completion.trim().length >= 50 && currentPromptRef.current) {
             addBranch(currentPromptRef.current, completion);
         }
-    }, [isLoading]); // Removed completion/addBranch from deps to avoid double-add
+    }, [isLoading]);
 
     // Clear input after submission
     useEffect(() => {
@@ -353,7 +401,6 @@ export function AiCompletion({
                         transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
                         className="relative z-10 flex flex-col items-center text-center max-w-md mx-auto"
                     >
-                        {/* Heading */}
                         <h2 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">
                             Unlock AI Assistant
                         </h2>
@@ -361,7 +408,6 @@ export function AiCompletion({
                             Sign in to access your personal AI language coach — ask questions, get explanations, and level up your learning.
                         </p>
 
-                        {/* Feature pills */}
                         <div className="grid grid-cols-2 gap-3 mt-8 w-full">
                             {features.map((f, i) => (
                                 <motion.div
@@ -379,7 +425,6 @@ export function AiCompletion({
                             ))}
                         </div>
 
-                        {/* CTA buttons */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -413,7 +458,6 @@ export function AiCompletion({
             <div className="relative w-full h-full flex flex-col bg-card">
 
                 <header className="relative w-full flex-shrink-0 px-4 pt-4 sm:px-6 sm:pt-6">
-                    {/* Session Selector (History) - Top Right */}
                     <div className="absolute right-0 top-0 z-20">
                         <SessionSelector
                             sessions={sessions}
@@ -429,9 +473,7 @@ export function AiCompletion({
 
                     <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center pt-2">
                         {query ? (
-                            <>
-                                Learning about <span className="text-primary">"{query}"</span>
-                            </>
+                            <>Learning about <span className="text-primary">"{query}"</span></>
                         ) : "What do you want to learn?"}
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-2 sm:mt-4 max-w-lg mx-auto text-center text-xs sm:text-base">
@@ -441,7 +483,6 @@ export function AiCompletion({
                         }
                     </p>
 
-                    {/* Header bottom gradient border */}
                     <div className="relative mt-3 sm:mt-6">
                         <div className="absolute bottom-0 left-0 right-0 flex h-px">
                             <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
@@ -466,11 +507,7 @@ export function AiCompletion({
                                             key={i}
                                             initial={{ opacity: 0, scale: 0.8, y: 20 }}
                                             animate={{ opacity: 1, scale: 1, y: 0 }}
-                                            transition={{
-                                                duration: 0.4,
-                                                delay: i * 0.1,
-                                                ease: [0.4, 0, 0.2, 1]
-                                            }}
+                                            transition={{ duration: 0.4, delay: i * 0.1, ease: [0.4, 0, 0.2, 1] }}
                                         >
                                             <SuggestionChip
                                                 icon={suggestion.icon}
@@ -480,19 +517,15 @@ export function AiCompletion({
                                         </motion.div>
                                     ))}
                                 </div>
-                                {/* Separator */}
                                 <div className="w-full px-8">
                                     <div className="h-px bg-border/40 my-2" />
                                 </div>
-
                             </motion.div>
                         )}
                     </AnimatePresence>
 
-
-
-                    {/* AI Welcome Message - Only show when idle AND no history */}
-                    {!isLoading && !completion && !error && !currentBranch && query && (
+                    {/* Welcome message — isHistoryLoading guard prevents flash on session restore */}
+                    {!isLoading && !completion && !error && !currentBranch && !isHistoryLoading && query && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -500,19 +533,15 @@ export function AiCompletion({
                             className="w-full"
                         >
                             <div className="relative bg-card rounded-xl p-4 sm:p-6 text-left border-x">
-                                {/* Top gradient border */}
                                 <div className="absolute top-0 left-0 right-0 flex h-px">
                                     <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
                                     <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
                                 </div>
-
                                 <div className="text-sm sm:text-base text-card-foreground/90 leading-relaxed">
                                     Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
                                     <br /><br />
                                     Try tapping a suggestion above or type your own question below!
                                 </div>
-
-                                {/* Bottom gradient border */}
                                 <div className="absolute bottom-0 left-0 right-0 flex h-px">
                                     <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
                                     <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
@@ -544,67 +573,71 @@ export function AiCompletion({
                                 className="w-full"
                             >
                                 <div ref={responseContainerRef} className="relative bg-card rounded-xl p-6 text-left">
-
                                     <div className="relative">
-                                        {/* Top blur gradient */}
+                                        {/* Top blur gradient — ref-based, safe with multiple instances */}
                                         {canScroll && (
-                                            <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300" id="top-blur" />
+                                            <div
+                                                ref={topBlurRef}
+                                                className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300"
+                                            />
                                         )}
 
-                                        {/* Scrollable content */}
                                         <div
                                             ref={scrollContentRef}
                                             style={{ maxHeight: `${maxResponseHeight}px` }}
                                             className="overflow-y-auto text-card-foreground pl-1 pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
                                             onScroll={(e) => {
-                                                const element = e.currentTarget;
-                                                const topBlur = document.getElementById('top-blur');
-                                                const bottomBlur = document.getElementById('bottom-blur');
-
-                                                if (topBlur && bottomBlur) {
-                                                    // Check if scrolled from top
-                                                    if (element.scrollTop > 10) {
-                                                        topBlur.style.opacity = '1';
-                                                    } else {
-                                                        topBlur.style.opacity = '0';
-                                                    }
-
-                                                    // Check if scrolled to bottom
-                                                    const isBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 10;
-                                                    if (isBottom) {
-                                                        bottomBlur.style.opacity = '0';
-                                                    } else {
-                                                        bottomBlur.style.opacity = '1';
-                                                    }
+                                                const el = e.currentTarget;
+                                                if (topBlurRef.current) {
+                                                    topBlurRef.current.style.opacity = el.scrollTop > 10 ? '1' : '0';
+                                                }
+                                                if (bottomBlurRef.current) {
+                                                    const isBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 10;
+                                                    bottomBlurRef.current.style.opacity = isBottom ? '0' : '1';
                                                 }
                                             }}
                                         >
                                             {error ? (
-                                                <p className="text-red-500">{error.message}</p>
+                                                /* User-friendly error with retry */
+                                                <div className="flex flex-col items-center gap-3 py-2">
+                                                    <p className="text-sm text-muted-foreground text-center leading-relaxed">
+                                                        {getFriendlyError(error)}
+                                                    </p>
+                                                    {currentPromptRef.current && (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="gap-2 rounded-full cursor-pointer"
+                                                            onClick={() => complete(currentPromptRef.current)}
+                                                        >
+                                                            <RefreshCw className="h-3.5 w-3.5" />
+                                                            Try again
+                                                        </Button>
+                                                    )}
+                                                </div>
                                             ) : (
-                                                <>
-                                                    {/* Show current branch if navigating, otherwise show live streaming completion */}
-                                                    <div className="text-base md:text-lg leading-relaxed">
-                                                        <Response>
-                                                            {currentBranch && !isLoading
-                                                                ? currentBranch.response
-                                                                : completion
-                                                            }
-                                                        </Response>
-                                                    </div>
-                                                </>
+                                                <div className="text-base md:text-lg leading-relaxed">
+                                                    <Response>
+                                                        {currentBranch && !isLoading
+                                                            ? currentBranch.response
+                                                            : completion
+                                                        }
+                                                    </Response>
+                                                </div>
                                             )}
                                         </div>
 
-                                        {/* Bottom blur gradient */}
+                                        {/* Bottom blur gradient — ref-based */}
                                         {canScroll && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300" id="bottom-blur" />
+                                            <div
+                                                ref={bottomBlurRef}
+                                                className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300"
+                                            />
                                         )}
                                     </div>
 
                                     {!isLoading && !error && (
                                         <div className="flex flex-col items-center gap-4 mt-4 pt-4 border-t">
-                                            {/* Branch Navigation - Timeline Component */}
                                             {totalBranches > 1 && (
                                                 <div className="w-full">
                                                     <BranchTimeline
@@ -618,7 +651,6 @@ export function AiCompletion({
                                                 </div>
                                             )}
 
-                                            {/* Action Buttons - Moved under timeline */}
                                             <div className="flex items-center gap-2">
                                                 <TooltipProvider>
                                                     <Tooltip delayDuration={0}>
@@ -662,11 +694,9 @@ export function AiCompletion({
                             </motion.div>
                         )}
                     </AnimatePresence>
-
                 </main>
 
                 <footer className="relative w-full flex-shrink-0 mt-auto px-4 pb-4 sm:px-6 sm:pb-6 pt-4">
-                    {/* Footer top gradient border */}
                     <div className="absolute top-0 left-0 right-0 flex h-px">
                         <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
                         <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
@@ -693,7 +723,6 @@ export function AiCompletion({
                             </div>
                         </div>
                     ) : (
-                        /* ── Normal Input Bar ── */
                         <>
                             <div className="relative w-full">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
@@ -707,25 +736,38 @@ export function AiCompletion({
                                         const val = e.target.value.slice(0, 150);
                                         setInputValue(val);
                                     }}
-                                    onKeyPress={handleKeyPress}
+                                    onKeyDown={handleKeyDown}
                                     disabled={isLoading}
                                 />
 
-                                {/* Character limit indicator */}
-                                <div className={cn(
-                                    "absolute right-12 top-1/2 -translate-y-1/2 text-[10px] font-medium pointer-events-none transition-all duration-200",
-                                    inputValue.length >= 150 ? "text-red-500 font-bold" : "text-muted-foreground/40"
-                                )}>
-                                    {inputValue.length}/150
-                                </div>
+                                {/* Character counter — only shown when user is typing */}
+                                {inputValue.length > 0 && (
+                                    <div className={cn(
+                                        "absolute right-12 top-1/2 -translate-y-1/2 text-[10px] font-medium pointer-events-none transition-all duration-200",
+                                        inputValue.length >= 150 ? "text-red-500 font-bold" : "text-muted-foreground/40"
+                                    )}>
+                                        {inputValue.length}/150
+                                    </div>
+                                )}
 
-                                <button
-                                    onClick={handleInputSubmit}
-                                    disabled={!inputValue.trim() || isLoading}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
-                                </button>
+                                {/* Stop button during streaming, submit button otherwise */}
+                                {isLoading ? (
+                                    <button
+                                        onClick={handleStop}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-destructive hover:bg-destructive/80 transition-colors flex items-center justify-center cursor-pointer shadow-sm"
+                                        title="Stop generating"
+                                    >
+                                        <Square className="h-3 w-3 text-white fill-white" />
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleInputSubmit}
+                                        disabled={!inputValue.trim()}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
+                                    </button>
+                                )}
                             </div>
                             <div className="text-center mt-3 px-4">
                                 <p className="text-[10px] text-muted-foreground/50 font-medium tracking-wide">
