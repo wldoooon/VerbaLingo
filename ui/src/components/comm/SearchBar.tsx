@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Search, X, ArrowRight, ChevronDown, Check, Clock, Lock, Video, Tv, Mic, Music, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname } from 'next/navigation';
@@ -8,10 +8,8 @@ import { useSearchStore } from '@/stores/use-search-store';
 import { useEntitlements } from '@/hooks/use-entitlements';
 import { useAuthStore } from '@/stores/auth-store';
 import { toastManager } from '@/components/ui/toast';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Link from 'next/link';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -26,13 +24,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import TextType from '@/components/TextType';
 import { useDatamuse } from '@/hooks/useDatamuse';
 
-// Categories for filtering
+// Fix #12: DEFAULT_CATEGORIES label/value consistency ('Talks' was mislabeled 'Music')
 const DEFAULT_CATEGORIES = [
     { value: 'All', label: 'All', icon: <LayoutGrid className="w-4 h-4 mr-2 opacity-70" /> },
     { value: 'Movies', label: 'Movies', icon: <Video className="w-4 h-4 mr-2 opacity-70" /> },
     { value: 'Cartoons', label: 'TV Shows', icon: <Tv className="w-4 h-4 mr-2 opacity-70" /> },
     { value: 'Podcasts', label: 'Podcasts', icon: <Mic className="w-4 h-4 mr-2 opacity-70" /> },
-    { value: 'Talks', label: 'Music', icon: <Music className="w-4 h-4 mr-2 opacity-70" /> },
+    { value: 'Talks', label: 'Talks', icon: <Music className="w-4 h-4 mr-2 opacity-70" /> },
 ];
 
 const PodcastIcon = ({ className }: { className?: string }) => (
@@ -66,9 +64,41 @@ const LANGUAGES = [
     { value: 'Chinese', label: '中文', flag: 'https://flagcdn.com/cn.svg', available: false },
 ];
 
+// Fix #14: Language-specific placeholder examples
+const PLACEHOLDERS_BY_LANGUAGE: Record<string, string[]> = {
+    English: [
+        "hello, how are you today?",
+        "she gave him a run for his money",
+        "it's raining cats and dogs",
+        "break a leg tonight!",
+    ],
+    French: [
+        "bonjour, pouvez-vous m'aider?",
+        "je voudrais une baguette s'il vous plaît",
+        "il fait beau aujourd'hui",
+    ],
+    Germany: [
+        "guten Tag, ich hätte gerne ein Stück Kuchen",
+        "wie geht es Ihnen heute?",
+        "das Wetter ist wunderbar",
+    ],
+    Spanish: [
+        "hola, ¿cómo estás?",
+        "¿dónde está la biblioteca?",
+        "me gustaría practicar español",
+    ],
+    Japanese: [
+        "こんにちは、お元気ですか？",
+        "すみません、駅はどこですか？",
+    ],
+    Chinese: [
+        "你好，我想学习如何做这道菜",
+        "请问，地铁站在哪里？",
+    ],
+};
+
 export function SearchBar() {
     const [query, setQuery] = useState('');
-    const [selectedCategories, setSelectedCategories] = useState<string[]>(['All']);
     const [selectedLanguage, setSelectedLanguage] = useState('English');
     const [isSearching, setIsSearching] = useState(false);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -77,12 +107,14 @@ export function SearchBar() {
 
     const MAX_SEARCH_LENGTH = 60;
 
-    const { suggestions, isLoading } = useDatamuse(query);
-    const { hasAccess, remaining, limit, current, isUnlimited, isLoaded } = useEntitlements('search');
+    // Fix #10: Only fetch Datamuse suggestions for English (it's an English-only API)
+    const { suggestions, isLoading } = useDatamuse(selectedLanguage === 'English' ? query : '');
+    const { hasAccess, remaining, limit, isUnlimited, isLoaded } = useEntitlements('search');
     const isAnonymous = useAuthStore((s) => s.status) !== 'authenticated';
 
-    // Cooldown for limit toast (prevent spam, allow re-showing after 5s)
+    // Cooldowns to prevent toast spam
     const lastLimitToast = useRef(0);
+    const lastCloseToast = useRef(0); // Fix #5
 
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -94,36 +126,31 @@ export function SearchBar() {
     const storeCategory = useSearchStore(s => s.category);
     const { setLanguage: setStoreLanguage, setCategory: setStoreCategory } = useSearchStore();
 
-    // Sync local language state to store if they differ
+    // Fix #7: Store is single source of truth for categories — derive local state from store
+    // This eliminates the two-way sync loop (Effect A ↔ Effect B)
+    const selectedCategories = useMemo(() => {
+        if (!storeCategory) return ['All'];
+        return storeCategory.split(',');
+    }, [storeCategory]);
+
+    const setSelectedCategories = useCallback((cats: string[]) => {
+        setStoreCategory(cats.includes('All') || cats.length === 0 ? null : cats.join(','));
+    }, [setStoreCategory]);
+
+    // Sync local language state from store (e.g. when URL navigation changes language)
     useEffect(() => {
         if (storeLanguage && storeLanguage.toLowerCase() !== selectedLanguage.toLowerCase()) {
-            // Capitalize for UI
             const capitalized = storeLanguage.charAt(0).toUpperCase() + storeLanguage.slice(1);
             setSelectedLanguage(capitalized);
         }
     }, [storeLanguage, selectedLanguage]);
-
-    // Sync selected categories to global store
-    useEffect(() => {
-        const cats = selectedCategories.includes('All') ? null : selectedCategories.join(',')
-        setStoreCategory(cats)
-    }, [selectedCategories, setStoreCategory])
-
-    // Sync local category state from store
-    useEffect(() => {
-        if (storeCategory) {
-            setSelectedCategories(storeCategory.split(','));
-        } else {
-            setSelectedCategories(['All']);
-        }
-    }, [storeCategory]);
 
     // Reset searching state on path change
     useEffect(() => {
         setIsSearching(false);
     }, [pathname]);
 
-    // Load recent searches
+    // Load recent searches from localStorage on mount
     useEffect(() => {
         try {
             const stored = localStorage.getItem('recent_searches');
@@ -131,7 +158,12 @@ export function SearchBar() {
         } catch { }
     }, []);
 
-    // Click outside to close recent
+    // Reset activeIndex when query or suggestions change (stale highlight prevention)
+    useEffect(() => {
+        setActiveIndex(-1);
+    }, [query, suggestions]);
+
+    // Click outside to close suggestions panel
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -143,12 +175,27 @@ export function SearchBar() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Fix #2: Build a unified navigable list for keyboard arrow navigation
+    // Order: suggestions first (English only), then recent searches
+    const navItems = useMemo(() => {
+        const items: Array<{ type: 'suggestion' | 'recent'; value: string }> = [];
+        if (selectedLanguage === 'English' && query.length >= 2 && !isLoading) {
+            suggestions.forEach(s => items.push({ type: 'suggestion', value: s.word }));
+        }
+        recentSearches.slice(0, 3).forEach(r => items.push({ type: 'recent', value: r }));
+        return items;
+    }, [suggestions, recentSearches, query.length, isLoading, selectedLanguage]);
+
+    // Number of suggestion entries in navItems (for highlight offset calculation)
+    const suggCountInNav = selectedLanguage === 'English' && query.length >= 2 && !isLoading
+        ? suggestions.length
+        : 0;
+
     const toggleCategory = (cat: string) => {
         if (cat === 'All') {
             setSelectedCategories(['All']);
             return;
         }
-
         let newCats = selectedCategories.includes('All') ? [] : [...selectedCategories];
         if (newCats.includes(cat)) {
             newCats = newCats.filter(c => c !== cat);
@@ -159,9 +206,7 @@ export function SearchBar() {
         setSelectedCategories(newCats);
     };
 
-    const isCategorySelected = (cat: string) => {
-        return selectedCategories.includes(cat);
-    }
+    const isCategorySelected = (cat: string) => selectedCategories.includes(cat);
 
     const getCategoryLabel = () => {
         if (selectedCategories.includes('All')) return 'All';
@@ -201,7 +246,7 @@ export function SearchBar() {
         } else {
             toastManager.add({
                 title: `Daily search limit reached (${limit}/today)`,
-                description: 'Resets at the end of the month sign up for more',
+                description: 'Resets at the end of the month — upgrade for more',
                 type: 'warning',
             });
         }
@@ -214,23 +259,30 @@ export function SearchBar() {
         }
     }, [isLoaded, hasAccess, isUnlimited, showLimitToast]);
 
-    const handleSearch = (searchQuery?: string) => {
+    const handleSearch = useCallback((searchQuery?: string) => {
         const q = searchQuery || query;
         if (!q.trim()) return;
 
-        // "Getting close" warning
-        if (!isUnlimited && remaining <= 3 && remaining > 0) {
-            toastManager.add({
-                title: `${remaining} search${remaining === 1 ? '' : 'es'} remaining today`,
-                description: isAnonymous ? 'Sign up for more' : 'Upgrade for unlimited',
-                type: 'info',
-            });
+        // Fix #4: Guard against access bypass via keyboard Enter
+        if (!hasAccess) {
+            showLimitToast();
+            return;
         }
 
-        // Use the selected language (lowercase) for the URL path
-        const lang = selectedLanguage.toLowerCase();
+        // Fix #5: "Getting close" warning with cooldown to prevent spam
+        if (!isUnlimited && remaining <= 3 && remaining > 0) {
+            const now = Date.now();
+            if (now - lastCloseToast.current >= 5000) {
+                lastCloseToast.current = now;
+                toastManager.add({
+                    title: `${remaining} search${remaining === 1 ? '' : 'es'} remaining today`,
+                    description: isAnonymous ? 'Sign up for more' : 'Upgrade for unlimited',
+                    type: 'info',
+                });
+            }
+        }
 
-        // Build query params including categories
+        const lang = selectedLanguage.toLowerCase();
         const params = new URLSearchParams();
         const cats = selectedCategories.includes('All') ? null : selectedCategories.join(',');
         if (cats) params.set('category', cats);
@@ -238,32 +290,32 @@ export function SearchBar() {
         const targetPath = `/search/${encodeURIComponent(q.trim())}/${lang}`;
         const targetUrl = params.toString() ? `${targetPath}?${params.toString()}` : targetPath;
 
-        if (pathname === decodeURIComponent(targetPath) || pathname === targetPath) {
-            router.push(targetUrl);
-            return;
-        }
-
+        // Fix #9: Always run full flow — no silent early return for same-path searches
         saveToRecent(q);
         setShowRecent(false);
         setIsSearching(true);
         router.push(targetUrl);
-    };
+
+        // Fix #6: Safety reset in case router.push doesn't trigger a pathname change
+        setTimeout(() => setIsSearching(false), 8000);
+    }, [query, hasAccess, isUnlimited, remaining, isAnonymous, selectedLanguage, selectedCategories, router, showLimitToast]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            if (suggestions.length > 0) {
-                setActiveIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : 0));
+            // Fix #2: Navigate unified navItems list
+            if (navItems.length > 0 && showRecent) {
+                setActiveIndex(prev => (prev < navItems.length - 1 ? prev + 1 : 0));
             }
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            if (suggestions.length > 0) {
-                setActiveIndex(prev => (prev > 0 ? prev - 1 : suggestions.length - 1));
+            if (navItems.length > 0 && showRecent) {
+                setActiveIndex(prev => (prev > 0 ? prev - 1 : navItems.length - 1));
             }
         } else if (e.key === 'Enter') {
-            if (activeIndex >= 0 && suggestions[activeIndex]) {
+            if (activeIndex >= 0 && navItems[activeIndex]) {
                 e.preventDefault();
-                const selected = suggestions[activeIndex].word;
+                const selected = navItems[activeIndex].value;
                 setQuery(selected);
                 handleSearch(selected);
                 setActiveIndex(-1);
@@ -273,16 +325,21 @@ export function SearchBar() {
         } else if (e.key === 'Escape') {
             setActiveIndex(-1);
             setShowRecent(false);
-            // Optional: blur input if desired, or just close dropdowns
+            // Fix #13: Also blur input on Escape
+            inputRef.current?.blur();
         }
     };
+
+    // Whether the suggestions panel has content to show
+    const hasSuggestions = selectedLanguage === 'English' && query.length >= 2 && (suggestions.length > 0 || isLoading);
+    const panelVisible = showRecent && !isSearching && (recentSearches.length > 0 || hasSuggestions);
 
     return (
         <div className="w-full max-w-4xl flex items-center gap-4 relative z-30" ref={containerRef}>
             <div className="flex-1">
                 <div className={cn(
                     "group relative rounded-xl transition-all duration-300 ease-in-out border border-primary/40 overflow-hidden",
-                    showRecent && recentSearches.length > 0
+                    panelVisible
                         ? "rounded-b-none"
                         : "hover:-translate-y-0.5"
                 )}>
@@ -300,9 +357,8 @@ export function SearchBar() {
                                     )}
                                 >
                                     <div className="flex items-center gap-1 sm:gap-2">
-                                        {/* Animated Filter Icon Replacement */}
                                         <svg
-                                            className={cn("w-4 h-4 transition-colors")}
+                                            className="w-4 h-4 transition-colors"
                                             viewBox="0 0 24 24"
                                             fill="none"
                                             stroke="currentColor"
@@ -344,7 +400,7 @@ export function SearchBar() {
                         {/* Divider */}
                         <div className="w-px h-6 bg-border mx-2 hidden sm:block" />
 
-                        {/* Unified Input Area */}
+                        {/* Input Area */}
                         <div
                             className="flex-1 relative flex items-center min-w-0"
                             onClick={() => {
@@ -353,17 +409,11 @@ export function SearchBar() {
                                 }
                             }}
                         >
-                            {/* Animated placeholder */}
+                            {/* Fix #14: Language-specific animated placeholder */}
                             {!query && (
                                 <div className="pointer-events-none absolute left-3 right-12 flex items-center top-1/2 -translate-y-1/2 overflow-hidden">
                                     <TextType
-                                        text={[
-                                            "hello, how are you today?",
-                                            "مرحبا، أين يمكنني أن أجد محطة المترو؟",
-                                            "guten Tag, ich hätte gerne ein Stück Kuchen",
-                                            "bonjour, pouvez-vous m'aider?",
-                                            "你好，我想学习如何做这道菜",
-                                        ]}
+                                        text={PLACEHOLDERS_BY_LANGUAGE[selectedLanguage] ?? PLACEHOLDERS_BY_LANGUAGE.English}
                                         typingSpeed={75}
                                         pauseDuration={1500}
                                         showCursor={true}
@@ -385,7 +435,8 @@ export function SearchBar() {
                                     setShowRecent(true);
                                 }}
                                 onFocus={() => {
-                                    setShowRecent(true);
+                                    // Fix #11: Don't open suggestions panel when user has no access
+                                    if (hasAccess) setShowRecent(true);
                                 }}
                                 onKeyDown={handleKeyDown}
                                 className={cn(
@@ -394,14 +445,16 @@ export function SearchBar() {
                                 )}
                             />
 
-                            {/* Character limit indicator */}
-                            <div className={cn(
-                                "absolute text-[10px] font-medium pointer-events-none transition-all duration-200",
-                                query.length >= MAX_SEARCH_LENGTH ? "text-red-500 font-bold" : "text-muted-foreground/40",
-                                query && hasAccess ? "right-11" : "right-4"
-                            )}>
-                                {query.length}/{MAX_SEARCH_LENGTH}
-                            </div>
+                            {/* Fix #1: Character counter only visible when user is typing */}
+                            {query.length > 0 && hasAccess && (
+                                <div className={cn(
+                                    "absolute text-[10px] font-medium pointer-events-none transition-all duration-200",
+                                    query.length >= MAX_SEARCH_LENGTH ? "text-red-500 font-bold" : "text-muted-foreground/40",
+                                    "right-11"
+                                )}>
+                                    {query.length}/{MAX_SEARCH_LENGTH}
+                                </div>
+                            )}
 
                             {query && hasAccess && (
                                 <Button
@@ -451,6 +504,9 @@ export function SearchBar() {
                                             if (!lang.available) return;
                                             setSelectedLanguage(lang.value);
                                             setStoreLanguage(lang.value.toLowerCase());
+                                            // Fix #8: Reset categories when switching language
+                                            // (English and non-English have different category sets)
+                                            setSelectedCategories(['All']);
                                         }}
                                         className={cn(
                                             "rounded-lg py-2.5 flex items-center justify-between",
@@ -497,11 +553,11 @@ export function SearchBar() {
             </div>
 
             {/* Unified Suggestions & Recents Panel */}
-            {showRecent && !isSearching && (recentSearches.length > 0 || (query.length >= 2 && (suggestions.length > 0 || isLoading))) && (
+            {panelVisible && (
                 <Card className="absolute top-full left-0 right-0 mt-0 rounded-t-none rounded-b-2xl shadow-xl border-t-0 animate-in fade-in-0 zoom-in-95 z-50 bg-background/95 backdrop-blur-md overflow-hidden">
                     <CardContent className="p-0">
-                        {/* 1. Autocomplete Suggestions */}
-                        {query.length >= 2 && !isSearching && (
+                        {/* 1. Autocomplete Suggestions (English only) */}
+                        {selectedLanguage === 'English' && query.length >= 2 && (
                             <div className="p-1">
                                 {isLoading ? (
                                     <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
@@ -520,6 +576,7 @@ export function SearchBar() {
                                             }}
                                             className={cn(
                                                 "w-full justify-start h-auto py-2.5 px-4 font-normal text-foreground/80 hover:text-primary hover:bg-muted/50 transition-colors",
+                                                // Fix #2: Highlight by unified navItems index
                                                 activeIndex === idx && "bg-muted text-primary"
                                             )}
                                         >
@@ -533,8 +590,8 @@ export function SearchBar() {
                             </div>
                         )}
 
-                        {/* Separator if both exist */}
-                        {query.length >= 2 && suggestions.length > 0 && !isSearching && recentSearches.length > 0 && (
+                        {/* Separator if both sections have content */}
+                        {selectedLanguage === 'English' && query.length >= 2 && suggestions.length > 0 && recentSearches.length > 0 && (
                             <div className="h-px bg-border/50 mx-2 my-1" />
                         )}
 
@@ -544,9 +601,10 @@ export function SearchBar() {
                                 <div className="text-[10px] font-bold text-muted-foreground px-4 py-2 uppercase tracking-wider flex items-center gap-2">
                                     <Clock className="w-3 h-3" /> Recent
                                 </div>
-                                {recentSearches.slice(0, 3).map((search, idx) => (
+                                {/* Fix #3: key by search string, not array index */}
+                                {recentSearches.slice(0, 3).map((search, ridx) => (
                                     <div
-                                        key={idx}
+                                        key={search}
                                         className="relative group block w-full"
                                     >
                                         <Button
@@ -556,7 +614,11 @@ export function SearchBar() {
                                                 handleSearch(search);
                                                 setActiveIndex(-1);
                                             }}
-                                            className="w-full justify-start h-auto py-2 px-4 font-normal text-muted-foreground hover:text-primary pr-8"
+                                            className={cn(
+                                                "w-full justify-start h-auto py-2 px-4 font-normal text-muted-foreground hover:text-primary pr-8",
+                                                // Fix #2: Highlight recents using offset from suggestions
+                                                activeIndex === suggCountInNav + ridx && "bg-muted text-primary"
+                                            )}
                                         >
                                             <ArrowRight className="w-4 h-4 mr-3 opacity-30 group-hover:opacity-100 transition-opacity" />
                                             <span className="flex-1 text-left">{search}</span>
