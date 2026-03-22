@@ -175,6 +175,8 @@ export function AiCompletion({
         switchSession,
         activeSessionId,
         deleteSession,
+        clearHistory,
+        isHistoryLoading,
         branches
     } = useResponseHistory();
 
@@ -418,7 +420,10 @@ export function AiCompletion({
                             activeSessionId={activeSessionId}
                             onSelectSession={handleSessionSelect}
                             onDeleteSession={deleteSession}
+                            onClearAll={clearHistory}
                             currentQuery={query}
+                            isLoading={isLoading}
+                            isHistoryLoading={isHistoryLoading}
                         />
                     </div>
 

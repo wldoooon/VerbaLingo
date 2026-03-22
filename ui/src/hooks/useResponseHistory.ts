@@ -352,6 +352,7 @@ export function useResponseHistory() {
     // Global State (Metadata for Selector)
     sessions: state.sessions,
     activeSessionId: state.activeSessionId,
+    isHistoryLoading: state.isLoading,
 
     // Full Active Session State
     branches,
@@ -371,6 +372,6 @@ export function useResponseHistory() {
     navigateToIndex,
     clearHistory,
     getThreadContext,
-    deleteSession, // Export
+    deleteSession,
   };
 }
