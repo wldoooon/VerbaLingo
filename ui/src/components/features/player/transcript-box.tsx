@@ -80,8 +80,11 @@ export const TranscriptBox = ({
       const prev = trio.prev?.sentence_text || ""
       const curr = trio.active?.sentence_text || ""
       const next = trio.next?.sentence_text || ""
-      const snippet = [prev, curr, next].filter(Boolean).join(" ")
-      onTranscriptDetermined(snippet)
+      const parts: string[] = []
+      if (prev) parts.push(`[Before]: "${prev}"`)
+      if (curr) parts.push(`[★ Now Playing]: "${curr}"`)
+      if (next) parts.push(`[After]: "${next}"`)
+      onTranscriptDetermined(parts.join("\n"))
     }
   }, [trio, onTranscriptDetermined])
 

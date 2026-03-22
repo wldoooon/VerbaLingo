@@ -36,24 +36,42 @@ class GroqService:
         system_content += f"Your student's name is {user_name}. **CRITICAL RULE**: Do NOT greet the user by name in every response. Only use their name naturally on rare occasions (e.g., strong encouragement or initial greetings).\n"
 
         # 2. Inject Context if it exists (Jigsaw Puzzle Architecture)
+        history_messages = []
+
         if context:
             transcript = context.get("transcript", "")
             query = context.get("query", "")
-            
+            history = context.get("history", [])
+
             if transcript or query:
-                system_content += "\n--- REALITY ANCHOR (CONTEXT) ---\n"
+                system_content += "\n--- LEARNING CONTEXT ---\n"
                 if query:
-                    system_content += f"The user's current focus is the word or phrase: '{query}'\n"
+                    system_content += f"The student is currently studying the word or phrase: '{query}'\n"
                     logger.info(f"DEBUG - INJECTED QUERY: {query}")
-                
+
                 if transcript:
-                    system_content += f"LIVE TRANSCRIPT: You have access to the exact sentences the user is currently watching right now. Here they are:\n\"{transcript}\"\n"
+                    system_content += (
+                        f"Here are the transcript sentences from the video clip they are watching right now.\n"
+                        f"The line marked [★ Now Playing] is the exact sentence currently on screen:\n\n"
+                        f"{transcript}\n\n"
+                        f"Use the [★ Now Playing] sentence as the primary anchor for any usage or meaning explanation. "
+                        f"Reference [Before] and [After] only for additional context.\n"
+                    )
                     logger.info(f"DEBUG - INJECTED TRANSCRIPT:\n{transcript}\n")
                 else:
                     logger.warning("DEBUG - TRANSCRIPT WAS EMPTY OR NOT RECEIVED!")
-                    
-                system_content += "--------------------------------\n"
-                system_content += "**CRITICAL RULE**: Never tell the user you don't have the transcript, because it is exactly provided above. However, ONLY reference the transcript if the user specifically asks a question about the video, the speaker, or the exact usage of a word. Otherwise, answer their question normally.\n"
+
+                system_content += "------------------------\n"
+
+            # Build history as real message turns (much better than stuffing into system prompt)
+            if history and isinstance(history, list):
+                for turn in history:
+                    p = turn.get("prompt", "").strip()
+                    r = turn.get("response", "").strip()
+                    if p and r:
+                        history_messages.append({"role": "user", "content": p})
+                        history_messages.append({"role": "assistant", "content": r})
+                logger.info(f"DEBUG - INJECTED {len(history_messages)//2} history turn(s)")
 
         else:
             logger.warning("DEBUG - NO CONTEXT OBJECT RECEIVED FROM FRONTEND!")
@@ -68,6 +86,7 @@ class GroqService:
                         "role": "system",
                         "content": system_content
                     },
+                    *history_messages,
                     {
                         "role": "user",
                         "content": prompt

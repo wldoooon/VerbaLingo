@@ -109,16 +109,20 @@ export function AiCompletion({
         setError(null);
 
         try {
-            // DELETED: getThreadContext - We rely on our dynamic memory pattern now
-            // Send the prompt and the explicit context to the NextJS proxy!
+                // Last 3 Q&A pairs as history for the model (read from ref to avoid stale closure)
+            const history = branchesRef.current
+                .slice(-3)
+                .map(b => ({ prompt: b.prompt, response: b.response }))
+
             const response = await fetch("/api/v1/completion", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     prompt: prompt,
                     context: {
                         query: query,
-                        transcript: contextSnippet
+                        transcript: contextSnippet,
+                        history,
                     }
                 }),
             });
@@ -149,6 +153,7 @@ export function AiCompletion({
 
     const [inputValue, setInputValue] = useState("");
     const currentPromptRef = useRef<string>("");
+    const branchesRef = useRef<{ prompt: string; response: string }[]>([]);
     const responseContainerRef = useRef<HTMLDivElement>(null);
     const scrollContentRef = useRef<HTMLDivElement>(null);
     const [maxResponseHeight, setMaxResponseHeight] = useState<number>(400);
@@ -171,6 +176,9 @@ export function AiCompletion({
         deleteSession,
         branches
     } = useResponseHistory();
+
+    // Keep branchesRef in sync so complete() always reads the latest history
+    branchesRef.current = branches;
 
     // Copy Logic
     const copyButtonRef = useRef<HTMLButtonElement>(null);
