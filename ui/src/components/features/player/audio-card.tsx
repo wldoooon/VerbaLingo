@@ -129,6 +129,7 @@ export default function AudioCard({
     setVolume: setPlayerVolume,
     volume: storedVolume,
     playbackRate: storedRate,
+    player,
   } = usePlayerStore()
 
   // Initialize from persisted store values so they survive tab switches and refreshes
@@ -151,11 +152,6 @@ export default function AudioCard({
     activeLanguage,
     currentClip?.position
   )
-
-  // Sync rate with store
-  useEffect(() => {
-    setPlaybackRate(rate)
-  }, [rate, setPlaybackRate])
 
   // Sync volume with store (also persists via store's setVolume)
   useEffect(() => {
@@ -264,15 +260,17 @@ export default function AudioCard({
     return query && text.toLowerCase().includes(query)
   }), [sentencesInClip, currentClip?.start_time, searchQuery])
 
-  // Auto-play when target sentence is found
+  // Auto-play when target sentence is found.
+  // Also re-runs when `player` becomes non-null so it retries if the transcript
+  // resolved before the YouTube iframe was ready (race condition fix).
   useEffect(() => {
-    if (targetSentence && !hasStartedPlayback.current) {
+    if (targetSentence && !hasStartedPlayback.current && player) {
       const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
       seekTo(startTime)
       play()
       hasStartedPlayback.current = true
     }
-  }, [targetSentence, seekTo, play])
+  }, [targetSentence, player, seekTo, play])
 
   return (
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-6 shadow-2xl", className)}>
@@ -336,7 +334,7 @@ export default function AudioCard({
                 <Button variant="ghost" size="sm" className="h-9 px-2 font-bold text-xs">{rate}x</Button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-4" side="top" align="end">
-                <Slider value={[speeds.indexOf(rate)]} max={speeds.length - 1} step={1} onValueChange={(v) => setRate(speeds[v[0]])} />
+                <Slider value={[speeds.indexOf(rate)]} max={speeds.length - 1} step={1} onValueChange={(v) => { const r = speeds[v[0]]; setRate(r); setPlaybackRate(r) }} />
                 <div className="flex justify-between mt-2 text-[10px] font-bold text-muted-foreground">
                   {speeds.map(s => <span key={s} className={rate === s ? "text-primary" : ""}>{s}</span>)}
                 </div>
@@ -457,7 +455,7 @@ export default function AudioCard({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[320px] p-5 rounded-2xl shadow-xl" align="end">
-              <Slider value={[speeds.indexOf(rate)]} max={speeds.length - 1} step={1} onValueChange={(v) => setRate(speeds[v[0]])} />
+              <Slider value={[speeds.indexOf(rate)]} max={speeds.length - 1} step={1} onValueChange={(v) => { const r = speeds[v[0]]; setRate(r); setPlaybackRate(r) }} />
               <div className="flex justify-between mt-3 text-xs font-bold text-muted-foreground">
                 {speeds.map(s => <span key={s} className={rate === s ? "text-primary" : ""}>{s}x</span>)}
               </div>
