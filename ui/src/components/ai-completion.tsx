@@ -169,6 +169,7 @@ export function AiCompletion({
         addBranch,
         goToPrevious,
         goToNext,
+        navigateToIndex,
         getThreadContext,
         sessions,
         switchSession,
@@ -604,16 +605,10 @@ export function AiCompletion({
                                                     <BranchTimeline
                                                         currentIndex={currentIndex}
                                                         branches={branches}
-                                                        onSelectIndex={(index) => {
-                                                            const diff = index - currentIndex;
-                                                            if (diff > 0) {
-                                                                for (let i = 0; i < diff; i++) goToNext();
-                                                            } else if (diff < 0) {
-                                                                for (let i = 0; i < Math.abs(diff); i++) goToPrevious();
-                                                            }
-                                                        }}
+                                                        onSelectIndex={navigateToIndex}
                                                         onPrevious={goToPrevious}
                                                         onNext={goToNext}
+                                                        isLoading={isLoading}
                                                     />
                                                 </div>
                                             )}
