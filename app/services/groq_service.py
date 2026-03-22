@@ -9,7 +9,7 @@ class GroqService:
     def __init__(self):
         self.api_key = settings.GROQ_API_KEY
         # Keeping your preferred high-speed model
-        self.model = "openai/gpt-oss-20b" 
+        self.model = "openai/gpt-oss-120b" 
         
         if not self.api_key:
             logger.error("CRITICAL: GROQ_API_KEY is missing! AI features will fail.")
@@ -18,7 +18,7 @@ class GroqService:
             self.client = AsyncGroq(api_key=self.api_key)
             logger.info("Groq Engine initialized successfully.")
 
-    async def get_completion_stream(self, prompt: str) -> AsyncIterable[Tuple[str, Optional[int]]]:
+    async def get_completion_stream(self, prompt: str, context: Optional[dict] = None, user_name: Optional[str] = "Student") -> AsyncIterable[Tuple[str, Optional[int]]]:
         """
         Streams AI tokens using an Async Generator.
         Yields (text_chunk, None) during the stream.
@@ -31,15 +31,42 @@ class GroqService:
         logger.info(f"AI Request: {len(prompt)} chars | Model: {self.model}")
         logger.info(f"--- FULL PROMPT FROM UI ---\n{prompt}\n---------------------------")
         
+        # 1. Start building the Dynamic Persona
+        system_content = f"You are PokiSpokey, an elite, unbreakable AI language tutor that understands any language in the world.\n"
+        system_content += f"Your student's name is {user_name}. **CRITICAL RULE**: Do NOT greet the user by name in every response. Only use their name naturally on rare occasions (e.g., strong encouragement or initial greetings).\n"
+
+        # 2. Inject Context if it exists (Jigsaw Puzzle Architecture)
+        if context:
+            transcript = context.get("transcript", "")
+            query = context.get("query", "")
+            
+            if transcript or query:
+                system_content += "\n--- REALITY ANCHOR (CONTEXT) ---\n"
+                if query:
+                    system_content += f"The user's current focus is the word or phrase: '{query}'\n"
+                    logger.info(f"DEBUG - INJECTED QUERY: {query}")
+                
+                if transcript:
+                    system_content += f"LIVE TRANSCRIPT: You have access to the exact sentences the user is currently watching right now. Here they are:\n\"{transcript}\"\n"
+                    logger.info(f"DEBUG - INJECTED TRANSCRIPT:\n{transcript}\n")
+                else:
+                    logger.warning("DEBUG - TRANSCRIPT WAS EMPTY OR NOT RECEIVED!")
+                    
+                system_content += "--------------------------------\n"
+                system_content += "**CRITICAL RULE**: Never tell the user you don't have the transcript, because it is exactly provided above. However, ONLY reference the transcript if the user specifically asks a question about the video, the speaker, or the exact usage of a word. Otherwise, answer their question normally.\n"
+
+        else:
+            logger.warning("DEBUG - NO CONTEXT OBJECT RECEIVED FROM FRONTEND!")
+
+        # 3. Final Output instructions
+        system_content += "\nAnswer the student's question directly and elegantly. Use clean Markdown formatting. Keep your responses conversational, concise, and deeply educational."
+
         try:
             stream = await self.client.chat.completions.create(
                 messages=[
                     {
                         "role": "system",
-                        "content": """You are VerbaLingo AI, an expert language tutor.
-                        Answer the user's question with a medium-length, beautiful explanation.
-                        Use Markdown formatting. Use tables occasionally to compare words, grammar structures, or meanings.
-                        Max 2-3 paragraphs or 1 table. Be direct and highly educational."""
+                        "content": system_content
                     },
                     {
                         "role": "user",

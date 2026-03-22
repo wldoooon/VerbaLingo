@@ -81,7 +81,13 @@ function generateSmartSuggestions(searchWord: string): SmartSuggestion[] {
     ];
 }
 
-export function AiCompletion({ externalPrompt }: { externalPrompt: string | null }) {
+export function AiCompletion({ 
+    externalPrompt, 
+    contextSnippet 
+}: { 
+    externalPrompt: string | null;
+    contextSnippet?: string | null;
+}) {
     const { query } = useSearchStore();
     const router = useRouter();
     const nextSearchParams = useNextSearchParams();
@@ -103,13 +109,18 @@ export function AiCompletion({ externalPrompt }: { externalPrompt: string | null
         setError(null);
 
         try {
-            const context = getThreadContext(2); // Get last 2 branches
-            const fullPrompt = context ? `${context}\n\nUser: ${prompt}` : prompt;
-
+            // DELETED: getThreadContext - We rely on our dynamic memory pattern now
+            // Send the prompt and the explicit context to the NextJS proxy!
             const response = await fetch("/api/v1/completion", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt: fullPrompt }),
+                body: JSON.stringify({ 
+                    prompt: prompt,
+                    context: {
+                        query: query,
+                        transcript: contextSnippet
+                    }
+                }),
             });
 
             if (!response.ok) {

@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt } = await request.json();
+    const { prompt, context } = await request.json();
 
     if (!prompt) {
       return new Response("Prompt is required.", { status: 400 });
@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         prompt: prompt,
+        context: context || null,
       }),
     });
 

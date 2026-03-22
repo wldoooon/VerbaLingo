@@ -59,6 +59,7 @@ export default function RoutedSearchPage() {
   const isAnonymous = authStatus !== "authenticated"
 
   const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
+  const [contextSnippet, setContextSnippet] = useState<string | null>(null)
   const [hasRequested, setHasRequested] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [isAiCollapsed, setIsAiCollapsed] = useState(false)
@@ -245,6 +246,7 @@ export default function RoutedSearchPage() {
                         language={languageParam}
                         isLoading={isLoading || (isFetching && playlist.length === 0)}
                         onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
+                        onTranscriptDetermined={(snippet) => setContextSnippet(snippet)}
                       />
                     ) : (
                       <div className="w-full rounded-3xl bg-card p-4 sm:p-6 shadow-2xl space-y-5">
@@ -299,7 +301,7 @@ export default function RoutedSearchPage() {
                           </div>
                         </div>
                       ) : (
-                        <AiCompletion externalPrompt={externalPrompt} />
+                        <AiCompletion externalPrompt={externalPrompt} contextSnippet={contextSnippet} />
                       )}
                     </div>
                   </div>
@@ -342,7 +344,7 @@ export default function RoutedSearchPage() {
 
                         <div className="h-full overflow-hidden">
                           <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
-                            <AiCompletion externalPrompt={externalPrompt} />
+                            <AiCompletion externalPrompt={externalPrompt} contextSnippet={contextSnippet} />
                           </div>
                         </div>
                       </>

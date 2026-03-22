@@ -92,8 +92,12 @@ export default function AudioCard({
   searchQuery = "",
   language: propLanguage,
   isLoading: isParentLoading,
-  onExplainWordPrompt
-}: AudioCardProps & { onExplainWordPrompt?: (prompt: string) => void }) {
+  onExplainWordPrompt,
+  onTranscriptDetermined
+}: AudioCardProps & { 
+  onExplainWordPrompt?: (prompt: string) => void,
+  onTranscriptDetermined?: (snippet: string) => void 
+}) {
   const [rate, setRate] = useState(defaultRate)
   const [volume, setVolume] = useState(100)
   const router = useRouter()
@@ -257,8 +261,6 @@ export default function AudioCard({
       hasStartedPlayback.current = true
     }
   }, [targetSentence, seekTo, play])
-
-  // Removed Scrolling logic - switched to Single Sentence Transitions
 
   return (
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-6 shadow-2xl", className)}>
@@ -439,6 +441,7 @@ export default function AudioCard({
           const prompt = `Explain the meaning and nuance of the word "${word}" specifically in this sentence. Focus on how it is used here, any implied tone or register, and give 2-3 additional example sentences with similar usage.\n\nSentence: "${sentence}"`
           onExplainWordPrompt?.(prompt)
         }}
+        onTranscriptDetermined={onTranscriptDetermined}
       />
     </div >
   )
