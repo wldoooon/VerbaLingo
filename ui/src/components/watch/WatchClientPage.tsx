@@ -62,6 +62,7 @@ export default function WatchClientPage({ word }: { word: string }) {
     const playlist = data?.hits || []
 
     const [externalPrompt, setExternalPrompt] = useState<string | null>(null)
+    const [contextSnippet, setContextSnippet] = useState<string | null>(null)
     const [isAiCollapsed, setIsAiCollapsed] = useState(false)
     const [mobileTab, setMobileTab] = useState<"player" | "ai">("player")
 
@@ -115,6 +116,7 @@ export default function WatchClientPage({ word }: { word: string }) {
                                 totalItems={data?.total}
                                 searchQuery={decodeURIComponent(word)}
                                 onExplainWordPrompt={setExternalPrompt}
+                                onTranscriptDetermined={setContextSnippet}
                             />
                         </Suspense>
                     </div>
@@ -123,7 +125,7 @@ export default function WatchClientPage({ word }: { word: string }) {
                     <div className={`xl:hidden ${mobileTab !== "ai" ? "hidden" : ""}`}>
                         <div className="h-[calc(100vh-10rem)] overflow-hidden bg-card">
                             <Suspense fallback={<AiCompletionSkeleton />}>
-                                <AiCompletion externalPrompt={externalPrompt} />
+                                <AiCompletion externalPrompt={externalPrompt} contextSnippet={contextSnippet} />
                             </Suspense>
                         </div>
                     </div>
@@ -155,7 +157,7 @@ export default function WatchClientPage({ word }: { word: string }) {
                                 <PanelRightClose className="h-4 w-4" />
                             </button>
                             <Suspense fallback={<AiCompletionSkeleton />}>
-                                <AiCompletion externalPrompt={externalPrompt} />
+                                <AiCompletion externalPrompt={externalPrompt} contextSnippet={contextSnippet} />
                             </Suspense>
                         </div>
                     </div>

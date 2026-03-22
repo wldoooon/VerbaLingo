@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import { usePlayerStore } from "@/stores/use-player-store"
@@ -20,6 +20,7 @@ type TranscriptBoxProps = {
   isTranscriptLoading: boolean
   onSearchWord?: (word: string) => void
   onExplainWordInContext?: (payload: { word: string; sentence: string }) => void
+  onTranscriptDetermined?: (snippet: string) => void
 }
 
 export const TranscriptBox = ({
@@ -28,6 +29,7 @@ export const TranscriptBox = ({
   isTranscriptLoading,
   onSearchWord,
   onExplainWordInContext,
+  onTranscriptDetermined,
 }: TranscriptBoxProps) => {
   // Zustand selector: only triggers re-render when the sentence INDEX changes.
   // Handles gaps between sentences by returning the most recently passed sentence
@@ -71,6 +73,20 @@ export const TranscriptBox = ({
       next: sentences[idx + 1],
     }
   }, [activeIdx, sentences])
+
+  // Broadcast the live-updating context snippet up to the AI
+  useEffect(() => {
+    if (trio && onTranscriptDetermined) {
+      const prev = trio.prev?.sentence_text || ""
+      const curr = trio.active?.sentence_text || ""
+      const next = trio.next?.sentence_text || ""
+      const parts: string[] = []
+      if (prev) parts.push(`[Before]: "${prev}"`)
+      if (curr) parts.push(`[★ Now Playing]: "${curr}"`)
+      if (next) parts.push(`[After]: "${next}"`)
+      onTranscriptDetermined(parts.join("\n"))
+    }
+  }, [trio, onTranscriptDetermined])
 
   return (
     <div className="relative mt-1 h-[180px] flex items-center justify-center overflow-hidden">

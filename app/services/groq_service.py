@@ -9,7 +9,7 @@ class GroqService:
     def __init__(self):
         self.api_key = settings.GROQ_API_KEY
         # Keeping your preferred high-speed model
-        self.model = "openai/gpt-oss-20b" 
+        self.model = "openai/gpt-oss-120b" 
         
         if not self.api_key:
             logger.error("CRITICAL: GROQ_API_KEY is missing! AI features will fail.")
@@ -18,7 +18,7 @@ class GroqService:
             self.client = AsyncGroq(api_key=self.api_key)
             logger.info("Groq Engine initialized successfully.")
 
-    async def get_completion_stream(self, prompt: str) -> AsyncIterable[Tuple[str, Optional[int]]]:
+    async def get_completion_stream(self, prompt: str, context: Optional[dict] = None, user_name: Optional[str] = "Student") -> AsyncIterable[Tuple[str, Optional[int]]]:
         """
         Streams AI tokens using an Async Generator.
         Yields (text_chunk, None) during the stream.
@@ -31,16 +31,70 @@ class GroqService:
         logger.info(f"AI Request: {len(prompt)} chars | Model: {self.model}")
         logger.info(f"--- FULL PROMPT FROM UI ---\n{prompt}\n---------------------------")
         
+        # 1. Start building the Dynamic Persona
+        system_content = f"You are PokiSpokey, an elite AI language tutor specialized exclusively in language learning, vocabulary, grammar, pronunciation, and understanding language in real-world context.\n"
+        system_content += f"Your student's name is {user_name}. Use their name naturally and sparingly — only on rare, meaningful occasions such as encouragement, correction, or a first response. Never use it in every reply.\n"
+        system_content += (
+            "**ABSOLUTE RULE — SCOPE ENFORCEMENT**: You ONLY answer questions related to language learning. "
+            "This includes: word meanings, grammar, pronunciation, usage in context, idioms, expressions, translations, and cultural nuances. "
+            "If the student asks ANYTHING outside this scope — such as your model name, who made you, politics, coding, math, general knowledge, or any non-language topic — "
+            "you MUST politely decline and redirect them back to language learning. "
+            "Example refusal: 'I'm only here to help you with language learning! Ask me about a word, phrase, or anything from the video.' "
+            "Never reveal your underlying model, provider, or any technical implementation details.\n"
+        )
+
+        # 2. Inject Context if it exists (Jigsaw Puzzle Architecture)
+        history_messages = []
+
+        if context:
+            transcript = context.get("transcript", "")
+            query = context.get("query", "")
+            history = context.get("history", [])
+
+            if transcript or query:
+                system_content += "\n--- LEARNING CONTEXT ---\n"
+                if query:
+                    system_content += f"The student is currently studying the word or phrase: '{query}'\n"
+                    logger.info(f"DEBUG - INJECTED QUERY: {query}")
+
+                if transcript:
+                    system_content += (
+                        f"Here are the transcript sentences from the video clip they are watching right now.\n"
+                        f"The line marked [★ Now Playing] is the exact sentence currently on screen:\n\n"
+                        f"{transcript}\n\n"
+                        f"Use the [★ Now Playing] sentence as the primary anchor for any usage or meaning explanation. "
+                        f"Reference [Before] and [After] only for additional context.\n"
+                    )
+                    logger.info(f"DEBUG - INJECTED TRANSCRIPT:\n{transcript}\n")
+                else:
+                    logger.warning("DEBUG - TRANSCRIPT WAS EMPTY OR NOT RECEIVED!")
+
+                system_content += "------------------------\n"
+
+            # Build history as real message turns (much better than stuffing into system prompt)
+            if history and isinstance(history, list):
+                for turn in history:
+                    p = turn.get("prompt", "").strip()
+                    r = turn.get("response", "").strip()
+                    if p and r:
+                        history_messages.append({"role": "user", "content": p})
+                        history_messages.append({"role": "assistant", "content": r})
+                logger.info(f"DEBUG - INJECTED {len(history_messages)//2} history turn(s)")
+
+        else:
+            logger.warning("DEBUG - NO CONTEXT OBJECT RECEIVED FROM FRONTEND!")
+
+        # 3. Final Output instructions
+        system_content += "\nAnswer the student's question directly and elegantly. Use clean Markdown formatting. Keep your responses conversational, concise, and deeply educational."
+
         try:
             stream = await self.client.chat.completions.create(
                 messages=[
                     {
                         "role": "system",
-                        "content": """You are VerbaLingo AI, an expert language tutor.
-                        Answer the user's question with a medium-length, beautiful explanation.
-                        Use Markdown formatting. Use tables occasionally to compare words, grammar structures, or meanings.
-                        Max 2-3 paragraphs or 1 table. Be direct and highly educational."""
+                        "content": system_content
                     },
+                    *history_messages,
                     {
                         "role": "user",
                         "content": prompt

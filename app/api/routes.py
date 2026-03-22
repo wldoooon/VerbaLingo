@@ -41,7 +41,16 @@ async def completion(
 
     async def stream_and_deduct():
         total_tokens_used = 0
-        async for chunk_data, tokens in groq.get_completion_stream(body.prompt):
+        
+        # We extract the user's name (fallback to their email if they don't have a full name)
+        user_name = current_user.full_name or current_user.email.split('@')[0]
+        
+        # Pass the prompt, context, and user_name to the service
+        async for chunk_data, tokens in groq.get_completion_stream(
+            prompt=body.prompt, 
+            context=body.context,
+            user_name=user_name
+        ):
             if tokens is not None:
                 total_tokens_used = tokens
             if chunk_data:
