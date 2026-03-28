@@ -30,6 +30,7 @@ const AiCompletion = dynamic(() => import("@/components/ai-completion").then(mod
 // Lightweight — no need to lazy-load
 import { SearchLimitWall } from "@/components/features/search-limit-wall"
 import { NoResults } from "@/components/features/search/no-results"
+import { PlayerErrorBoundary } from "@/components/PlayerErrorBoundary"
 
 export default function RoutedSearchPage() {
   const params = useParams<{ q: string; language: string }>()
@@ -215,12 +216,14 @@ export default function RoutedSearchPage() {
                   {/* Sticky Header Layer for Mobile */}
                   <div className="xl:relative sticky top-0 z-40 bg-background/95 backdrop-blur-sm xl:bg-transparent xl:backdrop-blur-none px-4 pt-3 pb-2 sm:px-6">
                     {playlist.length > 0 ? (
-                      <VideoPlayerCard
-                        key={`${q}-${languageParam}`}
-                        playlist={playlist}
-                        isFetching={isFetching || isFetchingNextPage}
-                        aggregations={aggregations}
-                      />
+                      <PlayerErrorBoundary>
+                        <VideoPlayerCard
+                          key={`${q}-${languageParam}`}
+                          playlist={playlist}
+                          isFetching={isFetching || isFetchingNextPage}
+                          aggregations={aggregations}
+                        />
+                      </PlayerErrorBoundary>
                     ) : (
                       <div className="space-y-3">
                         {/* Facet chips skeleton */}
