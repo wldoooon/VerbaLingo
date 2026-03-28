@@ -14,6 +14,7 @@ import { YouTubeErrorSuppressor } from "@/components/YouTubeErrorSuppressor";
 import { BetaBanner } from "@/components/BetaBanner";
 import { CookieBanner } from "@/components/CookieBanner";
 import FooterWrapper from "@/components/FooterWrapper";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -87,6 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </ToastProvider>
           </QueryProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
