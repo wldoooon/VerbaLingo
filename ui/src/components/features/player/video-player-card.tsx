@@ -78,6 +78,28 @@ export default function VideoPlayerCard({
   const playerMountTimeRef = useRef<number>(performance.now())
   // Tracks whether the active player is playing — background turbo buffer waits for this
   const activeIsPlayingRef = useRef(false)
+  // Stall / unavailable clip detection
+  const hasEverPlayedRef = useRef(false)
+  const stallTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const consecutiveAutoSkipsRef = useRef(0)
+
+  const clearStallTimer = () => {
+    if (stallTimerRef.current) {
+      clearTimeout(stallTimerRef.current)
+      stallTimerRef.current = null
+    }
+  }
+
+  const startStallTimer = () => {
+    clearStallTimer()
+    stallTimerRef.current = setTimeout(() => {
+      if (!mountedRef.current) return
+      consecutiveAutoSkipsRef.current += 1
+      if (consecutiveAutoSkipsRef.current <= 5) {
+        usePlayerStore.getState().nextVideo()
+      }
+    }, 3000)
+  }
 
   /**
    * Safe wrapper for all YouTube player calls.
@@ -104,6 +126,9 @@ export default function VideoPlayerCard({
     // Always update the active player ref in store when it shifts
     setPlayer(currentActive)
     activeIsPlayingRef.current = false
+    // Reset stall detection for the incoming clip
+    hasEverPlayedRef.current = false
+    clearStallTimer()
 
     const syncSinglePlayer = (key: 'A' | 'B', player: YouTubePlayer | null) => {
       if (!player) return
@@ -177,6 +202,10 @@ export default function VideoPlayerCard({
         cancelAnimationFrame(rafRef.current)
         rafRef.current = null
       }
+      if (stallTimerRef.current) {
+        clearTimeout(stallTimerRef.current)
+        stallTimerRef.current = null
+      }
       playerARef.current = null
       playerBRef.current = null
       setPlayer(null)
@@ -203,6 +232,9 @@ export default function VideoPlayerCard({
 
     if (isNowPlaying) {
       activeIsPlayingRef.current = true
+      hasEverPlayedRef.current = true
+      consecutiveAutoSkipsRef.current = 0
+      clearStallTimer()
       // Upgrade to HD once the clip is actually playing — buffer at medium first for speed
       try {
         if (typeof event.target.setPlaybackQuality === 'function') {
@@ -211,10 +243,30 @@ export default function VideoPlayerCard({
       } catch {}
     }
 
+    // Stall detection — only when the clip hasn't played yet (avoids triggering on user pause)
+    if (!hasEverPlayedRef.current) {
+      if (event.data === -1 || event.data === 3 || event.data === 2) {
+        // unstarted / buffering / paused-before-play → start stall timer
+        startStallTimer()
+      }
+    }
+
     setPlayerState({ isPlaying: isNowPlaying })
 
     if (isNowPlaying) startPolling()
     else stopPolling()
+  }
+
+  const onVideoError = (event: { data: number }, key: 'A' | 'B') => {
+    if (key !== activeKey) return
+    // 100 = removed/not found, 101/150 = private/not embeddable
+    if ([100, 101, 150].includes(event.data)) {
+      clearStallTimer()
+      consecutiveAutoSkipsRef.current += 1
+      if (consecutiveAutoSkipsRef.current <= 5) {
+        usePlayerStore.getState().nextVideo()
+      }
+    }
   }
 
   // Effect: Recycled players must be manually seeked when their video changes.
@@ -353,6 +405,7 @@ export default function VideoPlayerCard({
               opts={optsA}
               onReady={(e) => onReady(e, 'A')}
               onStateChange={(e) => onStateChange(e, 'A')}
+              onError={(e) => onVideoError(e, 'A')}
               className="w-full h-full"
               iframeClassName="w-full h-full border-none"
             />
@@ -368,6 +421,7 @@ export default function VideoPlayerCard({
               opts={optsB}
               onReady={(e) => onReady(e, 'B')}
               onStateChange={(e) => onStateChange(e, 'B')}
+              onError={(e) => onVideoError(e, 'B')}
               className="w-full h-full"
               iframeClassName="w-full h-full border-none"
             />
