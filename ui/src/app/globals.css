@@ -292,3 +292,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes progress-fill {
+  from { width: 0% }
+  to   { width: 100% }
+}

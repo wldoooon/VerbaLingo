@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Activity, MessageSquare, Layers, Database, TrendingUp, Quote } from 'lucide-react';
+import { Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Activity, MessageSquare, Layers, Database, TrendingUp, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -300,69 +300,115 @@ export function Hero() {
           {/* Right Column: Optimized 2D Carousel */}
           <AnimatedContent distance={0} duration={1.5} delay={0.6} className="w-full">
             <div
-              className="relative h-[420px] sm:h-[520px] xl:h-[650px] w-full flex items-center justify-center mt-8 xl:mt-0"
-              style={{ contain: 'layout style paint' }}
+              className="flex flex-col items-center gap-5 mt-8 xl:mt-0"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
-              {categories.map((cat, index) => {
-                const { isActive, translateX, opacity, zIndex, scale, hidden } = cardStyles[index];
+              {/* Cards */}
+              <div
+                className="relative h-[380px] sm:h-[460px] xl:h-[540px] w-full flex items-center justify-center"
+                style={{ contain: 'layout style paint' }}
+              >
+                {categories.map((cat, index) => {
+                  const { isActive, translateX, opacity, zIndex, scale, hidden } = cardStyles[index];
 
-                if (hidden) return null;
+                  if (hidden) return null;
 
-                return (
-                  <div
-                    key={cat.id}
-                    onClick={() => setActiveCategory(index)}
-                    className="absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer"
-                    style={{
-                      transform: `translateX(${translateX}px) scale(${scale})`,
-                      opacity,
-                      zIndex,
-                      willChange: isActive ? 'transform' : 'auto',
-                    }}
-                  >
+                  return (
                     <div
-                      className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'}`}
+                      key={cat.id}
+                      onClick={() => setActiveCategory(index)}
+                      className="absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer"
+                      style={{
+                        transform: `translateX(${translateX}px) scale(${scale})`,
+                        opacity,
+                        zIndex,
+                        willChange: isActive ? 'transform' : 'auto',
+                      }}
                     >
-                      {/* Image Background */}
-                      <div className="absolute inset-0">
-                        <Image
-                          src={cat.image}
-                          alt={cat.label}
-                          fill
-                          placeholder="blur"
-                          blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
-                          className="object-cover"
-                          sizes="(max-width: 768px) 100vw, 400px"
-                          priority={isActive}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/90" />
-                      </div>
+                      <div
+                        className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'}`}
+                      >
+                        {/* Auto-progress bar on active card */}
+                        {isActive && (
+                          <div className="absolute top-0 left-0 right-0 h-[3px] z-20 bg-border/30">
+                            <div
+                              key={activeCategory}
+                              className="h-full bg-primary rounded-full"
+                              style={{ animation: isPaused ? 'none' : 'progress-fill 5s linear forwards' }}
+                            />
+                          </div>
+                        )}
 
-                      {/* Top Badge: Clip Count */}
-                      <div className="absolute top-4 right-4 bg-muted/80 border border-border/20 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                        <span className="text-xs font-bold text-foreground tracking-wide">{cat.count} Clips</span>
-                      </div>
-
-                      {/* Bottom Content */}
-                      <div className="absolute bottom-0 left-0 right-0 p-7">
-                        <div className="w-13 h-13 bg-black/30 rounded-2xl flex items-center justify-center mb-4 border border-white/10 text-white shadow-lg">
-                          <cat.icon className="w-6 h-6" />
+                        {/* Image Background */}
+                        <div className="absolute inset-0">
+                          <Image
+                            src={cat.image}
+                            alt={cat.label}
+                            fill
+                            placeholder="blur"
+                            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 400px"
+                            priority={isActive}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/90" />
                         </div>
-                        <h3 className="text-2xl font-bold text-white mb-1">{cat.label}</h3>
-                        <p className="text-sm text-slate-300 font-medium">{cat.description}</p>
-                      </div>
 
-                      {/* Active border glow */}
-                      {isActive && (
-                        <div className="absolute inset-0 border-2 border-primary/20 rounded-[1.5rem] sm:rounded-[2rem] pointer-events-none" />
-                      )}
+                        {/* Top Badge: Clip Count */}
+                        <div className="absolute top-4 right-4 bg-muted/80 border border-border/20 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg">
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                          <span className="text-xs font-bold text-foreground tracking-wide">{cat.count} Clips</span>
+                        </div>
+
+                        {/* Bottom Content */}
+                        <div className="absolute bottom-0 left-0 right-0 p-7">
+                          <div className="w-13 h-13 bg-black/30 rounded-2xl flex items-center justify-center mb-4 border border-white/10 text-white shadow-lg">
+                            <cat.icon className="w-6 h-6" />
+                          </div>
+                          <h3 className="text-2xl font-bold text-white mb-1">{cat.label}</h3>
+                          <p className="text-sm text-slate-300 font-medium">{cat.description}</p>
+                        </div>
+
+                        {/* Active border glow */}
+                        {isActive && (
+                          <div className="absolute inset-0 border-2 border-primary/20 rounded-[1.5rem] sm:rounded-[2rem] pointer-events-none" />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+
+              {/* Controls Row: prev · dots · next */}
+              <div className="flex items-center gap-4 relative z-10">
+                <button
+                  onClick={() => setActiveCategory((prev) => (prev - 1 + categories.length) % categories.length)}
+                  className="w-8 h-8 rounded-full border border-border/60 bg-background/60 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all active:scale-90"
+                  aria-label="Previous"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-center gap-2">
+                  {categories.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveCategory(i)}
+                      className={`rounded-full transition-all duration-300 ${i === activeCategory ? 'w-5 h-2 bg-primary' : 'w-2 h-2 bg-border hover:bg-muted-foreground'}`}
+                      aria-label={`Go to slide ${i + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setActiveCategory((prev) => (prev + 1) % categories.length)}
+                  className="w-8 h-8 rounded-full border border-border/60 bg-background/60 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all active:scale-90"
+                  aria-label="Next"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </AnimatedContent>
         </div>
