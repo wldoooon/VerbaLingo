@@ -264,54 +264,24 @@ export function Hero() {
 
             <AnimatedContent distance={20} direction="vertical" duration={0.8} delay={0.6}>
               {/* Library Scale Metrics Strip */}
-              <div className="flex flex-col gap-6 mt-2">
-                <div className="flex items-center gap-4">
-                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
-                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-50">Library Scale</span>
-                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
+              <div className="mt-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-px flex-1 bg-border/50" />
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Library Scale</span>
+                  <div className="h-px flex-1 bg-border/50" />
                 </div>
 
-                <div className="flex flex-wrap sm:flex-nowrap justify-between gap-6 sm:gap-4 px-2">
-                  <div className="flex flex-col gap-2 group cursor-default w-full sm:w-1/3">
-                    <div className="flex items-center gap-2 text-primary">
-                      <Globe className="w-4 h-4" />
-                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Global Languages</span>
+                <div className="grid grid-cols-3 divide-x divide-border/50 border border-border/50 rounded-2xl overflow-hidden">
+                  {[
+                    { value: '3+', label: 'Languages' },
+                    { value: '6+', label: 'Categories' },
+                    { value: '14.2M', label: 'Indexed Clips' },
+                  ].map(({ value, label }) => (
+                    <div key={label} className="flex flex-col items-center py-5 px-3 group cursor-default hover:bg-muted/30 transition-colors">
+                      <span className="text-2xl sm:text-3xl font-black text-foreground font-mono tracking-tighter group-hover:text-primary transition-colors">{value}</span>
+                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mt-1">{label}</span>
                     </div>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">3+</span>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase">Native dialects</span>
-                    </div>
-                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary/30 w-3/4"></div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2 group cursor-default sm:border-x border-border/50 sm:px-6 w-full sm:w-1/3">
-                    <div className="flex items-center gap-2 text-primary">
-                      <Layers className="w-4 h-4" />
-                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Active Categories</span>
-                    </div>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">3+</span>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase">Subject areas</span>
-                    </div>
-                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary/30 w-1/2"></div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2 group cursor-default sm:text-right w-full sm:w-1/3">
-                    <div className="flex items-center justify-end gap-2 text-primary">
-                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Contextual Clips</span>
-                    </div>
-                    <div className="flex items-baseline justify-end gap-1.5">
-                      <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">14.2M</span>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase">Indexed frames</span>
-                    </div>
-                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary/30 w-5/6 ml-auto"></div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </AnimatedContent>
