@@ -164,7 +164,7 @@ export function Hero() {
       const opacity = isActive ? 1 : Math.max(0.15, 1 - absOffset * 0.28);
       const zIndex = 10 - absOffset;
       const scale = isActive ? 1 : Math.max(0.75, 0.92 - absOffset * 0.06);
-      const hidden = absOffset >= 3;
+      const hidden = absOffset >= 2;
       return { offset, absOffset, isActive, translateX, opacity, zIndex, scale, hidden };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
