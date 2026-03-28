@@ -267,10 +267,15 @@ export default function VideoPlayerCard({
       const triggerBuffer = () => {
         if (!mountedRef.current) return
         if (key === getLiveActiveKey()) return  // this slot is now active — don't buffer/pause it
-        safeCall(event.target, 'playVideo')
+        // Use the live ref, NOT event.target — the closure target becomes stale after player recycle
+        const liveRef = key === 'A' ? playerARef.current : playerBRef.current
+        safeCall(liveRef, 'playVideo')
         setTimeout(() => {
           if (!mountedRef.current) return
-          if (key !== getLiveActiveKey()) safeCall(event.target, 'pauseVideo')
+          if (key !== getLiveActiveKey()) {
+            const ref = key === 'A' ? playerARef.current : playerBRef.current
+            safeCall(ref, 'pauseVideo')
+          }
         }, 1200)
       }
 
@@ -327,39 +332,46 @@ export default function VideoPlayerCard({
 
   return (
     <div className={className}>
-      <FacetChips
-        aggregations={lastAggregations || aggregations}
-        onSelect={handleFacetSelect}
-        selectedCategory={subCategory}
-        isLoading={isFetching}
-        className="mb-3 -mt-2"
-      />
+      {/* Only show facet chips when a specific category is selected — not for general "all" results */}
+      {category && (
+        <FacetChips
+          aggregations={lastAggregations || aggregations}
+          onSelect={handleFacetSelect}
+          selectedCategory={subCategory}
+          isLoading={isFetching}
+          className="mb-3 -mt-2"
+        />
+      )}
       <div className="relative w-full h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] overflow-hidden rounded-2xl bg-black shadow-inner">
 
         {/* Layer A */}
         <div className={cn("absolute inset-0 w-full h-full transition-opacity duration-300",
           activeKey === 'A' ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none")}>
-          <YouTube
-            videoId={clipA?.video_id || ""}
-            opts={optsA}
-            onReady={(e) => onReady(e, 'A')}
-            onStateChange={(e) => onStateChange(e, 'A')}
-            className="w-full h-full"
-            iframeClassName="w-full h-full border-none"
-          />
+          {clipA?.video_id && (
+            <YouTube
+              videoId={clipA.video_id}
+              opts={optsA}
+              onReady={(e) => onReady(e, 'A')}
+              onStateChange={(e) => onStateChange(e, 'A')}
+              className="w-full h-full"
+              iframeClassName="w-full h-full border-none"
+            />
+          )}
         </div>
 
         {/* Layer B */}
         <div className={cn("absolute inset-0 w-full h-full transition-opacity duration-300",
           activeKey === 'B' ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none")}>
-          <YouTube
-            videoId={clipB?.video_id || ""}
-            opts={optsB}
-            onReady={(e) => onReady(e, 'B')}
-            onStateChange={(e) => onStateChange(e, 'B')}
-            className="w-full h-full"
-            iframeClassName="w-full h-full border-none"
-          />
+          {clipB?.video_id && (
+            <YouTube
+              videoId={clipB.video_id}
+              opts={optsB}
+              onReady={(e) => onReady(e, 'B')}
+              onStateChange={(e) => onStateChange(e, 'B')}
+              className="w-full h-full"
+              iframeClassName="w-full h-full border-none"
+            />
+          )}
         </div>
 
       </div>
