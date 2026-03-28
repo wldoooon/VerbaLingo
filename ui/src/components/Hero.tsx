@@ -309,6 +309,12 @@ export function Hero() {
                 className="relative h-[380px] sm:h-[460px] xl:h-[540px] w-full flex items-center justify-center"
                 style={{ contain: 'layout style paint' }}
               >
+                {/* Bottom fog */}
+                <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent pointer-events-none z-20" />
+                {/* Left fog */}
+                <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-background to-transparent pointer-events-none z-20" />
+                {/* Right fog */}
+                <div className="absolute top-0 right-0 bottom-0 w-24 bg-gradient-to-l from-background to-transparent pointer-events-none z-20" />
                 {categories.map((cat, index) => {
                   const { isActive, translateX, opacity, zIndex, scale, hidden } = cardStyles[index];
 
