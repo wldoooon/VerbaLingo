@@ -1,7 +1,7 @@
 "use client"
 
 import YouTube, { YouTubePlayer } from "react-youtube"
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useMemo } from "react"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
 import { FacetChips } from "@/components/comm/FacetChips"
@@ -73,6 +73,9 @@ export default function VideoPlayerCard({
   const rafRef = useRef<number | null>(null)
   const lastTimeRef = useRef<number>(-1)
   const mountedRef = useRef(true)
+  const playerMountTimeRef = useRef<number>(performance.now())
+  // Tracks whether the active player is playing — background turbo buffer waits for this
+  const activeIsPlayingRef = useRef(false)
 
   /**
    * Safe wrapper for all YouTube player calls.
@@ -98,6 +101,7 @@ export default function VideoPlayerCard({
 
     // Always update the active player ref in store when it shifts
     setPlayer(currentActive)
+    activeIsPlayingRef.current = false
 
     const syncSinglePlayer = (key: 'A' | 'B', player: YouTubePlayer | null) => {
       if (!player) return
@@ -178,6 +182,10 @@ export default function VideoPlayerCard({
   }, [])
 
   const onStateChange = (event: { data: number; target: any }, key: 'A' | 'B') => {
+    const stateNames: Record<string, string> = { '-1': 'unstarted', '0': 'ended', '1': 'playing', '2': 'paused', '3': 'buffering', '5': 'cued' }
+    const stateClip = key === 'A' ? clipA : clipB
+    console.log(`[PERF] player${key} stateChange  state=${stateNames[String(event.data)] ?? event.data}  video=${stateClip?.video_id}  isActive=${key === activeKey}  +${Math.round(performance.now() - playerMountTimeRef.current)}ms`)
+
     if (key !== activeKey) {
       if (event.data === 1) {
         safeCall(event.target, 'mute')
@@ -191,6 +199,16 @@ export default function VideoPlayerCard({
       safeCall(event.target, 'unMute')
     }
 
+    if (isNowPlaying) {
+      activeIsPlayingRef.current = true
+      // Upgrade to HD once the clip is actually playing — buffer at medium first for speed
+      try {
+        if (typeof event.target.setPlaybackQuality === 'function') {
+          event.target.setPlaybackQuality('hd720')
+        }
+      } catch {}
+    }
+
     setPlayerState({ isPlaying: isNowPlaying })
 
     if (isNowPlaying) startPolling()
@@ -201,27 +219,28 @@ export default function VideoPlayerCard({
   useEffect(() => {
     if (clipA) {
       safeCall(playerARef.current, 'seekTo', getClipStart(clipA), true)
-      if (activeKey !== 'A') safeCall(playerARef.current, 'pauseVideo')
+      const liveActiveKey = (['A', 'B'] as const)[usePlayerStore.getState().currentVideoIndex % 2]
+      if (liveActiveKey !== 'A') safeCall(playerARef.current, 'pauseVideo')
     }
   }, [clipA?.video_id])
 
   useEffect(() => {
     if (clipB) {
       safeCall(playerBRef.current, 'seekTo', getClipStart(clipB), true)
-      if (activeKey !== 'B') safeCall(playerBRef.current, 'pauseVideo')
+      const liveActiveKey = (['A', 'B'] as const)[usePlayerStore.getState().currentVideoIndex % 2]
+      if (liveActiveKey !== 'B') safeCall(playerBRef.current, 'pauseVideo')
     }
   }, [clipB?.video_id])
 
 
   const onReady = (event: { target: YouTubePlayer }, key: 'A' | 'B') => {
     if (!event.target) return
-    
+    const readyMs = Math.round(performance.now() - playerMountTimeRef.current)
+    const clip = key === 'A' ? clipA : clipB
+    console.log(`[PERF] player${key} onReady  video=${clip?.video_id}  isActive=${key === activeKey}  +${readyMs}ms since mount`)
+
     if (key === 'A') playerARef.current = event.target
     if (key === 'B') playerBRef.current = event.target
-
-    let clip: any = null
-    if (key === 'A') clip = clipA
-    if (key === 'B') clip = clipB
 
     if (clip) {
       safeCall(event.target, 'seekTo', getClipStart(clip), true)
@@ -235,27 +254,37 @@ export default function VideoPlayerCard({
         }
       } catch { }
       if (!isMuted) safeCall(event.target, 'unMute')
-      // Force high quality on active player
-      try { 
-        if (typeof event.target.setPlaybackQuality === 'function') {
-          event.target.setPlaybackQuality('hd720') 
-        }
-      } catch (e) { }
     } else {
       safeCall(event.target, 'mute')
-      // TURBO BUFFER: Play for 1.2s in background then pause.
-      // This forces YouTube to load the actual video data into the browser cache.
-      safeCall(event.target, 'playVideo')
-      setTimeout(() => {
+      // TURBO BUFFER: wait until active player is playing before buffering background,
+      // so we don't compete for bandwidth during the active player's critical load window.
+      // Always read activeKey from store (fresh) to avoid stale closure bugs when the
+      // user navigates to the next clip while a setTimeout is in flight.
+      const getLiveActiveKey = () => (['A', 'B'] as const)[usePlayerStore.getState().currentVideoIndex % 2]
+
+      const triggerBuffer = () => {
         if (!mountedRef.current) return
-        if (key !== activeKey) {
-          safeCall(event.target, 'pauseVideo')
-        }
-      }, 1200)
+        if (key === getLiveActiveKey()) return  // this slot is now active — don't buffer/pause it
+        safeCall(event.target, 'playVideo')
+        setTimeout(() => {
+          if (!mountedRef.current) return
+          if (key !== getLiveActiveKey()) safeCall(event.target, 'pauseVideo')
+        }, 1200)
+      }
+
+      const poll = setInterval(() => {
+        if (!mountedRef.current) { clearInterval(poll); return }
+        if (activeIsPlayingRef.current) { clearInterval(poll); triggerBuffer() }
+      }, 300)
+      // Fallback: start after 6s regardless so background is still cached if active stalls
+      setTimeout(() => { clearInterval(poll); triggerBuffer() }, 6000)
     }
   }
 
-  const getOpts = (clip: any) => ({
+  // Memoized per video_id — stable reference prevents react-youtube from
+  // destroying and recreating the iframe on every render (fixes double onReady).
+  // Start at medium quality so YouTube buffers faster; upgrade to hd720 once playing.
+  const buildOpts = (clip: any) => ({
     height: "100%",
     width: "100%",
     playerVars: {
@@ -273,10 +302,15 @@ export default function VideoPlayerCard({
       loop: 1,
       playlist: clip?.video_id,
       origin: typeof window !== "undefined" ? window.location.origin : "",
-      vq: 'hd720', // Hint for HD
+      vq: 'medium',
     },
     loading: "eager",
   } as const)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const optsA = useMemo(() => buildOpts(clipA), [clipA?.video_id])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const optsB = useMemo(() => buildOpts(clipB), [clipB?.video_id])
 
   // Handle facet selection
   const handleFacetSelect = (facet: string) => {
@@ -305,7 +339,7 @@ export default function VideoPlayerCard({
           activeKey === 'A' ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none")}>
           <YouTube
             videoId={clipA?.video_id || ""}
-            opts={getOpts(clipA)}
+            opts={optsA}
             onReady={(e) => onReady(e, 'A')}
             onStateChange={(e) => onStateChange(e, 'A')}
             className="w-full h-full"
@@ -318,7 +352,7 @@ export default function VideoPlayerCard({
           activeKey === 'B' ? "z-10 opacity-100" : "z-0 opacity-0 pointer-events-none")}>
           <YouTube
             videoId={clipB?.video_id || ""}
-            opts={getOpts(clipB)}
+            opts={optsB}
             onReady={(e) => onReady(e, 'B')}
             onStateChange={(e) => onStateChange(e, 'B')}
             className="w-full h-full"

@@ -152,20 +152,20 @@ export function Hero() {
     return diff;
   };
 
-  // Memoize all card style calculations — only recomputes when activeCategory changes
+  // Optimized: pure 2D transforms (translateX + scale only).
+  // No perspective / rotateY / translateZ — eliminates GPU layer explosion on low-spec devices.
+  // willChange is applied only to the active card, not all visible cards.
   const cardStyles = useMemo(() => {
     return categories.map((_, index) => {
       const offset = getOffset(index);
       const absOffset = Math.abs(offset);
       const isActive = offset === 0;
-      const translateX = `calc(${offset} * clamp(50px, 8vw, 110px))`;
-      const translateZ = absOffset * -80;
-      const rotateY = offset * -12;
+      const translateX = offset * 110; // px per offset unit (matches old clamp max)
       const opacity = isActive ? 1 : Math.max(0.15, 1 - absOffset * 0.28);
       const zIndex = 10 - absOffset;
       const scale = isActive ? 1 : Math.max(0.75, 0.92 - absOffset * 0.06);
       const hidden = absOffset >= 3;
-      return { offset, absOffset, isActive, translateX, translateZ, rotateY, opacity, zIndex, scale, hidden };
+      return { offset, absOffset, isActive, translateX, opacity, zIndex, scale, hidden };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCategory]);
@@ -319,16 +319,16 @@ export function Hero() {
             {/* Removed: Start Exploring & Trusted By */}
           </div>
 
-          {/* Right Column: Curved Carousel (Preserved & Merged) */}
+          {/* Right Column: Optimized 2D Carousel */}
           <AnimatedContent distance={0} duration={1.5} delay={0.6} className="w-full">
             <div
-              className="relative h-[420px] sm:h-[520px] xl:h-[650px] w-full flex items-center justify-center perspective-[800px] xl:perspective-[1000px] mt-8 xl:mt-0"
-              style={{ transformStyle: 'preserve-3d' }}
+              className="relative h-[420px] sm:h-[520px] xl:h-[650px] w-full flex items-center justify-center mt-8 xl:mt-0"
+              style={{ contain: 'layout style paint' }}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
               {categories.map((cat, index) => {
-                const { isActive, translateX, translateZ, rotateY, opacity, zIndex, scale, hidden } = cardStyles[index];
+                const { isActive, translateX, opacity, zIndex, scale, hidden } = cardStyles[index];
 
                 if (hidden) return null;
 
@@ -336,27 +336,26 @@ export function Hero() {
                   <div
                     key={cat.id}
                     onClick={() => setActiveCategory(index)}
-                    className="absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer [backface-visibility:hidden]"
+                    className="absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer"
                     style={{
-                      transform: `translateX(${translateX}) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+                      transform: `translateX(${translateX}px) scale(${scale})`,
                       opacity,
                       zIndex,
-                      willChange: 'transform, opacity',
+                      willChange: isActive ? 'transform' : 'auto',
                     }}
                   >
                     <div
-                      className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card group transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'} isolate`}
-                      style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
+                      className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'}`}
                     >
                       {/* Image Background */}
-                      <div className="absolute inset-0 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
+                      <div className="absolute inset-0">
                         <Image
                           src={cat.image}
                           alt={cat.label}
                           fill
                           placeholder="blur"
                           blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
-                          className="object-cover transition-transform duration-700 group-hover:scale-110"
+                          className="object-cover"
                           sizes="(max-width: 768px) 100vw, 400px"
                           priority={isActive}
                         />
@@ -364,22 +363,24 @@ export function Hero() {
                       </div>
 
                       {/* Top Badge: Clip Count */}
-                      <div className="absolute top-4 right-4 bg-muted/90 backdrop-blur-md border border-border/20 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg">
+                      <div className="absolute top-4 right-4 bg-muted/80 border border-border/20 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                         <span className="text-xs font-bold text-foreground tracking-wide">{cat.count} Clips</span>
                       </div>
 
                       {/* Bottom Content */}
-                      <div className="absolute bottom-0 left-0 right-0 p-7 transform transition-transform duration-500">
-                        <div className="w-13 h-13 bg-muted/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/10 text-white shadow-lg">
+                      <div className="absolute bottom-0 left-0 right-0 p-7">
+                        <div className="w-13 h-13 bg-black/30 rounded-2xl flex items-center justify-center mb-4 border border-white/10 text-white shadow-lg">
                           <cat.icon className="w-6 h-6" />
                         </div>
                         <h3 className="text-2xl font-bold text-white mb-1">{cat.label}</h3>
                         <p className="text-sm text-slate-300 font-medium">{cat.description}</p>
                       </div>
 
-                      {/* Hover Border Glow */}
-                      <div className={`absolute inset-0 border-2 border-transparent transition-all duration-500 rounded-[1.5rem] sm:rounded-[2rem] ${isActive ? 'border-primary/20' : 'group-hover:border-primary/20'}`} />
+                      {/* Active border glow */}
+                      {isActive && (
+                        <div className="absolute inset-0 border-2 border-primary/20 rounded-[1.5rem] sm:rounded-[2rem] pointer-events-none" />
+                      )}
                     </div>
                   </div>
                 );
