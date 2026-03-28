@@ -73,6 +73,54 @@ function useSpamGuard(clickWindowMs = 2000, clickLimit = 5, cooldownSeconds = 5)
 }
 
 
+// ── Speed Picker ────────────────────────────────────────────────────────────
+const SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
+
+function SpeedPicker({ currentRate, onSelect }: { currentRate: number; onSelect: (s: number) => void }) {
+  const MIN_H = 14
+  const MAX_H = 56
+  return (
+    <div className="flex flex-col gap-4 p-1">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Playback Speed</span>
+        <span className="text-base font-black text-primary font-mono tabular-nums">{currentRate}x</span>
+      </div>
+
+      {/* Bars + labels */}
+      <div className="flex items-end gap-1">
+        {SPEEDS.map((s) => {
+          const isActive = currentRate === s
+          const h = Math.round(MIN_H + (s / 2) * (MAX_H - MIN_H))
+          return (
+            <button
+              key={s}
+              onClick={() => onSelect(s)}
+              className="flex flex-col items-center gap-2 flex-1 group cursor-pointer"
+            >
+              <div
+                className={cn(
+                  "w-full rounded-sm transition-all duration-150",
+                  isActive
+                    ? "bg-primary"
+                    : "bg-muted-foreground/20 group-hover:bg-muted-foreground/50"
+                )}
+                style={{ height: h }}
+              />
+              <span className={cn(
+                "text-[9px] font-bold leading-none transition-colors whitespace-nowrap",
+                isActive ? "text-primary" : "text-muted-foreground/60 group-hover:text-foreground"
+              )}>
+                {s}x
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 type AudioCardProps = {
   currentClip: Clips | undefined
   playlist: Clips[]
@@ -99,7 +147,7 @@ export default function AudioCard({
   onExplainWordPrompt?: (prompt: string) => void,
   onTranscriptDetermined?: (snippet: string) => void
 }) {
-  const speeds = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
+  const speeds = SPEEDS
 
   // Separate popovers for mobile and desktop to avoid state conflicts on resize
   const [mobileSpeedOpen, setMobileSpeedOpen] = useState(false)
@@ -357,11 +405,8 @@ export default function AudioCard({
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-9 px-2 font-bold text-xs">{rate}x</Button>
               </PopoverTrigger>
-              <PopoverContent className="w-64 p-4" side="top" align="end">
-                <Slider value={[speeds.indexOf(rate)]} max={speeds.length - 1} step={1} onValueChange={(v) => { const r = speeds[v[0]]; setRate(r); setPlaybackRate(r) }} />
-                <div className="flex justify-between mt-2 text-[10px] font-bold text-muted-foreground">
-                  {speeds.map(s => <span key={s} className={rate === s ? "text-primary" : ""}>{s}</span>)}
-                </div>
+              <PopoverContent className="w-[260px] p-4 rounded-2xl" side="top" align="end">
+                <SpeedPicker currentRate={rate} onSelect={(r) => { setRate(r); setPlaybackRate(r) }} />
               </PopoverContent>
             </Popover>
           </div>
@@ -478,11 +523,8 @@ export default function AudioCard({
                 <span className="font-semibold">{rate}x</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[320px] p-5 rounded-2xl shadow-xl" align="end">
-              <Slider value={[speeds.indexOf(rate)]} max={speeds.length - 1} step={1} onValueChange={(v) => { const r = speeds[v[0]]; setRate(r); setPlaybackRate(r) }} />
-              <div className="flex justify-between mt-3 text-xs font-bold text-muted-foreground">
-                {speeds.map(s => <span key={s} className={rate === s ? "text-primary" : ""}>{s}x</span>)}
-              </div>
+            <PopoverContent className="w-[280px] p-4 rounded-2xl shadow-xl" align="end">
+              <SpeedPicker currentRate={rate} onSelect={(r) => { setRate(r); setPlaybackRate(r) }} />
             </PopoverContent>
           </Popover>
         </div>
