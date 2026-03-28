@@ -34,9 +34,17 @@ export const SentenceGroup = memo(({
           // FALLBACK: When word-level timestamps are missing, split sentence_text
           // into individual words and distribute the sentence's time range evenly.
           // This ensures every clip is clickable, highlightable, and visible.
+          // Detect real word-level data: words must be single tokens (no spaces in text)
+          // Manticore sometimes stores the entire sentence as a single "word" entry —
+          // those have spaces in their text and must be treated as no word-level data.
+          const hasWordLevelData = rawWords.length > 0 &&
+            rawWords.every(w => w.text && !w.text.trim().includes(' ')) &&
+            rawWords.some(w => w.start > 0 || w.end > 0)
+
           let words: Word[] = rawWords
-          if (words.length === 0 && sentence.sentence_text) {
-            const textParts = sentence.sentence_text.split(/\s+/).filter(t => t.length > 0)
+          if (!hasWordLevelData && sentence.sentence_text) {
+            const cleanText = sentence.sentence_text.replace(/<[^>]*>/g, '')
+            const textParts = cleanText.split(/\s+/).filter(t => t.length > 0)
             const duration = sentence.end_time - sentence.start_time
             const wordDuration = textParts.length > 0 ? duration / textParts.length : duration
             words = textParts.map((text, i) => ({
@@ -46,47 +54,18 @@ export const SentenceGroup = memo(({
             }))
           }
 
-          // For no-timestamp (fallback) clips: match the query as a phrase within
-          // the sentence, then record which word indices fall inside the match range.
-          // This avoids false positives (e.g. "of" highlighted everywhere) and
-          // correctly highlights multi-word queries like "no way" or "hang on".
-          const isFallback = rawWords.length === 0 && !!sentence.sentence_text
-          const phraseHighlightSet = new Set<number>()
-          if (isFallback && query.length > 0 && sentence.sentence_text) {
-            const punct = /[.,!?;:()\[\]{}"']/g
-            const sentenceClean = sentence.sentence_text.toLowerCase().replace(punct, '')
-            const queryClean = query.replace(punct, '').trim()
-            const matchStart = sentenceClean.indexOf(queryClean)
-            if (matchStart >= 0) {
-              const matchEnd = matchStart + queryClean.length
-              let charPos = 0
-              sentenceClean.split(/\s+/).filter(t => t.length > 0).forEach((word, i) => {
-                const wordStart = sentenceClean.indexOf(word, charPos)
-                const wordEnd = wordStart + word.length
-                charPos = wordEnd
-                if (wordStart < matchEnd && wordEnd > matchStart) {
-                  phraseHighlightSet.add(i)
-                }
-              })
-            }
-          }
+          const queryParts = query.split(/\s+/).filter(part => part.length > 0)
+          const punctuationRegex = /[.,!?;:()\[\]{}"']/g
 
           return (
             <span key={`${sentence.start_time}-${sIdx}`}>
               {words.map((w, wi) => {
                 const wordText = (w.text || "").trim()
-
-                const isSearchMatch = isFallback
-                  ? phraseHighlightSet.has(wi)
-                  : (() => {
-                      const queryParts = query.split(/\s+/).filter(part => part.length > 0)
-                      const punctuationRegex = /[.,!?;:()\[\]{}"']/g
-                      const cleanWord = wordText.toLowerCase().replace(punctuationRegex, '')
-                      return queryParts.length > 0 && queryParts.some(part => {
-                        const cleanPart = part.toLowerCase().replace(punctuationRegex, '')
-                        return cleanWord.length > 0 && cleanPart.length > 0 && cleanWord === cleanPart
-                      })
-                    })()
+                const cleanWord = wordText.toLowerCase().replace(punctuationRegex, '')
+                const isSearchMatch = queryParts.length > 0 && queryParts.some(part => {
+                  const cleanPart = part.toLowerCase().replace(punctuationRegex, '')
+                  return cleanWord.length > 0 && cleanPart.length > 0 && cleanWord === cleanPart
+                })
 
                 return (
                   <TranscriptWord

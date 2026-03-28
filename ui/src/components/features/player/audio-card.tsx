@@ -147,6 +147,14 @@ export default function AudioCard({
     playlist.length > 0
 
   // Fetch transcript — guard against undefined clip to avoid empty-ID requests
+  const transcriptFetchStart = useRef<number>(performance.now())
+  useEffect(() => {
+    if (currentClip?.video_id) {
+      transcriptFetchStart.current = performance.now()
+      console.log(`[PERF] transcript REQUESTED  video=${currentClip.video_id}  idx=${currentVideoIndex}`)
+    }
+  }, [currentClip?.video_id, currentVideoIndex])
+
   const { data: transcriptData, isPending: isTranscriptLoading } = useTranscript(
     !isParentLoading && !!currentClip ? (currentClip.video_id || "") : "",
     activeLanguage,
@@ -201,6 +209,15 @@ export default function AudioCard({
     window.addEventListener("keydown", handleKey)
     return () => window.removeEventListener("keydown", handleKey)
   }, [])
+
+  // Log when transcript data arrives
+  useEffect(() => {
+    if (transcriptData && currentClip?.video_id) {
+      const ms = Math.round(performance.now() - transcriptFetchStart.current)
+      const cached = ms < 10 // came from React Query cache
+      console.log(`[PERF] transcript ARRIVED  video=${currentClip.video_id}  sentences=${transcriptData.sentences?.length ?? 0}  +${ms}ms${cached ? ' (CACHE HIT)' : ''}`)
+    }
+  }, [transcriptData, currentClip?.video_id])
 
   // Clean word timestamps to prevent "ghost highlights"
   const sanitizedSentences = useMemo(() => {
@@ -260,12 +277,19 @@ export default function AudioCard({
     return query && text.toLowerCase().includes(query)
   }), [sentencesInClip, currentClip?.start_time, searchQuery])
 
+  useEffect(() => {
+    if (targetSentence && currentClip?.video_id) {
+      console.log(`[PERF] targetSentence FOUND  video=${currentClip.video_id}  start=${targetSentence.start_time}  playerReady=${!!player}  +${Math.round(performance.now() - transcriptFetchStart.current)}ms since transcript req`)
+    }
+  }, [targetSentence, currentClip?.video_id])
+
   // Auto-play when target sentence is found.
   // Also re-runs when `player` becomes non-null so it retries if the transcript
   // resolved before the YouTube iframe was ready (race condition fix).
   useEffect(() => {
     if (targetSentence && !hasStartedPlayback.current && player) {
       const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
+      console.log(`[PERF] AUTOPLAY triggered  video=${currentClip?.video_id}  seekTo=${startTime.toFixed(2)}`)
       seekTo(startTime)
       play()
       hasStartedPlayback.current = true

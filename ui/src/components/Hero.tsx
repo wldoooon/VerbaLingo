@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Activity, MessageSquare, Layers, Database, TrendingUp, Quote } from 'lucide-react';
+import { Sparkles, Globe, PlayCircle, Film, Tv, Mic, MonitorPlay, ArrowRight, Users, Newspaper, Video, Activity, MessageSquare, Layers, Database, TrendingUp, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
@@ -152,20 +152,20 @@ export function Hero() {
     return diff;
   };
 
-  // Memoize all card style calculations — only recomputes when activeCategory changes
+  // Optimized: pure 2D transforms (translateX + scale only).
+  // No perspective / rotateY / translateZ — eliminates GPU layer explosion on low-spec devices.
+  // willChange is applied only to the active card, not all visible cards.
   const cardStyles = useMemo(() => {
     return categories.map((_, index) => {
       const offset = getOffset(index);
       const absOffset = Math.abs(offset);
       const isActive = offset === 0;
-      const translateX = `calc(${offset} * clamp(50px, 8vw, 110px))`;
-      const translateZ = absOffset * -80;
-      const rotateY = offset * -12;
+      const translateX = offset * 110; // px per offset unit (matches old clamp max)
       const opacity = isActive ? 1 : Math.max(0.15, 1 - absOffset * 0.28);
       const zIndex = 10 - absOffset;
       const scale = isActive ? 1 : Math.max(0.75, 0.92 - absOffset * 0.06);
-      const hidden = absOffset >= 3;
-      return { offset, absOffset, isActive, translateX, translateZ, rotateY, opacity, zIndex, scale, hidden };
+      const hidden = absOffset >= 2;
+      return { offset, absOffset, isActive, translateX, opacity, zIndex, scale, hidden };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCategory]);
@@ -264,54 +264,32 @@ export function Hero() {
 
             <AnimatedContent distance={20} direction="vertical" duration={0.8} delay={0.6}>
               {/* Library Scale Metrics Strip */}
-              <div className="flex flex-col gap-6 mt-2">
-                <div className="flex items-center gap-4">
-                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
-                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] opacity-50">Library Scale</span>
-                  <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-border to-transparent"></div>
+              <div className="mt-2">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-px flex-1 bg-border/50" />
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Library Scale</span>
+                  <div className="h-px flex-1 bg-border/50" />
                 </div>
 
-                <div className="flex flex-wrap sm:flex-nowrap justify-between gap-6 sm:gap-4 px-2">
-                  <div className="flex flex-col gap-2 group cursor-default w-full sm:w-1/3">
-                    <div className="flex items-center gap-2 text-primary">
-                      <Globe className="w-4 h-4" />
-                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Global Languages</span>
-                    </div>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">3+</span>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase">Native dialects</span>
-                    </div>
-                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary/30 w-3/4"></div>
-                    </div>
-                  </div>
+                <div className="grid grid-cols-3 divide-x divide-border/50 border border-border/50 rounded-2xl overflow-hidden">
+                  {[
+                    { value: '3+', label: 'Languages', icon: Globe, sub: 'Native dialects', live: false },
+                    { value: '6+', label: 'Categories', icon: Layers, sub: 'Content types', live: false },
+                    { value: '14.2M', label: 'Indexed Clips', icon: Database, sub: 'Video frames', live: true },
+                  ].map(({ value, label, icon: Icon, sub, live }) => (
+                    <div key={label} className="relative flex flex-col items-center py-5 px-3 group cursor-default hover:bg-muted/30 transition-colors overflow-hidden">
+                      {/* top accent bar slides in on hover */}
+                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
 
-                  <div className="flex flex-col gap-2 group cursor-default sm:border-x border-border/50 sm:px-6 w-full sm:w-1/3">
-                    <div className="flex items-center gap-2 text-primary">
-                      <Layers className="w-4 h-4" />
-                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Active Categories</span>
+                      <Icon className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary transition-colors mb-2" />
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-2xl sm:text-3xl font-black text-foreground font-mono tracking-tighter group-hover:text-primary transition-colors">{value}</span>
+                        {live && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />}
+                      </div>
+                      <span className="text-[10px] font-bold text-foreground/80 uppercase tracking-wide mt-0.5">{label}</span>
+                      <span className="text-[9px] text-muted-foreground/60 mt-0.5">{sub}</span>
                     </div>
-                    <div className="flex items-baseline gap-1.5">
-                      <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">3+</span>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase">Subject areas</span>
-                    </div>
-                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary/30 w-1/2"></div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2 group cursor-default sm:text-right w-full sm:w-1/3">
-                    <div className="flex items-center justify-end gap-2 text-primary">
-                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Contextual Clips</span>
-                    </div>
-                    <div className="flex items-baseline justify-end gap-1.5">
-                      <span className="text-4xl font-black text-foreground tracking-tighter font-mono group-hover:text-primary transition-colors">14.2M</span>
-                      <span className="text-[10px] font-bold text-muted-foreground uppercase">Indexed frames</span>
-                    </div>
-                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                      <div className="h-full bg-primary/30 w-5/6 ml-auto"></div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </AnimatedContent>
@@ -319,71 +297,124 @@ export function Hero() {
             {/* Removed: Start Exploring & Trusted By */}
           </div>
 
-          {/* Right Column: Curved Carousel (Preserved & Merged) */}
+          {/* Right Column: Optimized 2D Carousel */}
           <AnimatedContent distance={0} duration={1.5} delay={0.6} className="w-full">
             <div
-              className="relative h-[420px] sm:h-[520px] xl:h-[650px] w-full flex items-center justify-center perspective-[800px] xl:perspective-[1000px] mt-8 xl:mt-0"
-              style={{ transformStyle: 'preserve-3d' }}
+              className="flex flex-col items-center gap-5 mt-8 xl:mt-0"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
-              {categories.map((cat, index) => {
-                const { isActive, translateX, translateZ, rotateY, opacity, zIndex, scale, hidden } = cardStyles[index];
+              {/* Cards */}
+              <div
+                className="relative h-[380px] sm:h-[460px] xl:h-[540px] w-full flex items-center justify-center"
+                style={{ contain: 'layout style paint' }}
+              >
+                {/* Bottom fog */}
+                <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent pointer-events-none z-20" />
+                {/* Left fog */}
+                <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-background to-transparent pointer-events-none z-20" />
+                {/* Right fog */}
+                <div className="absolute top-0 right-0 bottom-0 w-24 bg-gradient-to-l from-background to-transparent pointer-events-none z-20" />
+                {categories.map((cat, index) => {
+                  const { isActive, translateX, opacity, zIndex, scale, hidden } = cardStyles[index];
 
-                if (hidden) return null;
+                  if (hidden) return null;
 
-                return (
-                  <div
-                    key={cat.id}
-                    onClick={() => setActiveCategory(index)}
-                    className="absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer [backface-visibility:hidden]"
-                    style={{
-                      transform: `translateX(${translateX}) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
-                      opacity,
-                      zIndex,
-                      willChange: 'transform, opacity',
-                    }}
-                  >
+                  return (
                     <div
-                      className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card group transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'} isolate`}
-                      style={{ WebkitMaskImage: '-webkit-radial-gradient(white, black)' }}
+                      key={cat.id}
+                      onClick={() => setActiveCategory(index)}
+                      className="absolute w-[min(280px,75vw)] sm:w-[min(340px,80vw)] xl:w-[400px] h-[380px] sm:h-[460px] xl:h-[540px] transition-[transform,opacity] duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] cursor-pointer"
+                      style={{
+                        transform: `translateX(${translateX}px) scale(${scale})`,
+                        opacity,
+                        zIndex,
+                        willChange: isActive ? 'transform' : 'auto',
+                      }}
                     >
-                      {/* Image Background */}
-                      <div className="absolute inset-0 rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden">
-                        <Image
-                          src={cat.image}
-                          alt={cat.label}
-                          fill
-                          placeholder="blur"
-                          blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
-                          className="object-cover transition-transform duration-700 group-hover:scale-110"
-                          sizes="(max-width: 768px) 100vw, 400px"
-                          priority={isActive}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/90" />
-                      </div>
+                      <div
+                        className={`relative w-full h-full rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden border shadow-2xl bg-card transition-colors duration-500 ${isActive ? 'border-primary/50' : 'border-border/50'}`}
+                      >
+                        {/* Auto-progress bar on active card */}
+                        {isActive && (
+                          <div className="absolute top-0 left-0 right-0 h-[3px] z-20 bg-border/30">
+                            <div
+                              key={activeCategory}
+                              className="h-full bg-primary rounded-full"
+                              style={{ animation: isPaused ? 'none' : 'progress-fill 5s linear forwards' }}
+                            />
+                          </div>
+                        )}
 
-                      {/* Top Badge: Clip Count */}
-                      <div className="absolute top-4 right-4 bg-muted/90 backdrop-blur-md border border-border/20 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                        <span className="text-xs font-bold text-foreground tracking-wide">{cat.count} Clips</span>
-                      </div>
-
-                      {/* Bottom Content */}
-                      <div className="absolute bottom-0 left-0 right-0 p-7 transform transition-transform duration-500">
-                        <div className="w-13 h-13 bg-muted/10 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/10 text-white shadow-lg">
-                          <cat.icon className="w-6 h-6" />
+                        {/* Image Background */}
+                        <div className="absolute inset-0">
+                          <Image
+                            src={cat.image}
+                            alt={cat.label}
+                            fill
+                            placeholder="blur"
+                            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 400px"
+                            priority={isActive}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/90" />
                         </div>
-                        <h3 className="text-2xl font-bold text-white mb-1">{cat.label}</h3>
-                        <p className="text-sm text-slate-300 font-medium">{cat.description}</p>
-                      </div>
 
-                      {/* Hover Border Glow */}
-                      <div className={`absolute inset-0 border-2 border-transparent transition-all duration-500 rounded-[1.5rem] sm:rounded-[2rem] ${isActive ? 'border-primary/20' : 'group-hover:border-primary/20'}`} />
+                        {/* Top Badge: Clip Count */}
+                        <div className="absolute top-4 right-4 bg-muted/80 border border-border/20 px-3 py-1.5 rounded-full flex items-center space-x-1.5 shadow-lg">
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                          <span className="text-xs font-bold text-foreground tracking-wide">{cat.count} Clips</span>
+                        </div>
+
+                        {/* Bottom Content */}
+                        <div className="absolute bottom-0 left-0 right-0 p-7">
+                          <div className="w-13 h-13 bg-black/30 rounded-2xl flex items-center justify-center mb-4 border border-white/10 text-white shadow-lg">
+                            <cat.icon className="w-6 h-6" />
+                          </div>
+                          <h3 className="text-2xl font-bold text-white mb-1">{cat.label}</h3>
+                          <p className="text-sm text-slate-300 font-medium">{cat.description}</p>
+                        </div>
+
+                        {/* Active border glow */}
+                        {isActive && (
+                          <div className="absolute inset-0 border-2 border-primary/20 rounded-[1.5rem] sm:rounded-[2rem] pointer-events-none" />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+
+              {/* Controls Row: prev · dots · next */}
+              <div className="flex items-center gap-4 relative z-10">
+                <button
+                  onClick={() => setActiveCategory((prev) => (prev - 1 + categories.length) % categories.length)}
+                  className="w-8 h-8 rounded-full border border-border/60 bg-background/60 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all active:scale-90"
+                  aria-label="Previous"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                <div className="flex items-center gap-2">
+                  {categories.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveCategory(i)}
+                      className={`rounded-full transition-all duration-300 ${i === activeCategory ? 'w-5 h-2 bg-primary' : 'w-2 h-2 bg-border hover:bg-muted-foreground'}`}
+                      aria-label={`Go to slide ${i + 1}`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => setActiveCategory((prev) => (prev + 1) % categories.length)}
+                  className="w-8 h-8 rounded-full border border-border/60 bg-background/60 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all active:scale-90"
+                  aria-label="Next"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </AnimatedContent>
         </div>

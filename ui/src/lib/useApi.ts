@@ -29,9 +29,12 @@ export const fetchSearchResults = async (
     params.append("sub_category", subCategory);
   }
 
+  const t0 = performance.now();
   const response = await apiClient.get<SearchResponse>(
     `/api/v1/search?${params.toString()}`,
   );
+  const ms = Math.round(performance.now() - t0);
+  console.log(`[PERF] search API  q="${query}" page=${pageParam}  → ${ms}ms  hits=${response.data?.hits?.length ?? 0}  total=${response.data?.total ?? 0}`);
   return response.data;
 };
 
@@ -95,9 +98,12 @@ export const fetchTranscript = async (
   if (centerPosition !== undefined) {
     params.append("center_position", centerPosition.toString());
   }
+  const t0 = performance.now();
   const response = await apiClient.get<TranscriptResponse>(
     `/api/v1/videos/${videoId}/transcript?${params.toString()}`,
   );
+  const ms = Math.round(performance.now() - t0);
+  console.log(`[PERF] transcript  video=${videoId}  → ${ms}ms  sentences=${response.data?.sentences?.length ?? 0}`);
   return response.data;
 };
 
@@ -131,9 +137,9 @@ export const useTranscriptPrefetch = (
   useEffect(() => {
     if (!playlist || playlist.length === 0) return;
 
-    // Prefetch the next 2 clips
+    // Prefetch current + next 2 clips (i=0 = current clip, so AudioCard gets a cache hit)
     const prefetchCount = 2;
-    for (let i = 1; i <= prefetchCount; i++) {
+    for (let i = 0; i <= prefetchCount; i++) {
         const nextIndex = currentIndex + i;
         if (nextIndex < playlist.length) {
             const nextClip = playlist[nextIndex];
