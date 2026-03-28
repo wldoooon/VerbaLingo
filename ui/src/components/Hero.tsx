@@ -273,13 +273,21 @@ export function Hero() {
 
                 <div className="grid grid-cols-3 divide-x divide-border/50 border border-border/50 rounded-2xl overflow-hidden">
                   {[
-                    { value: '3+', label: 'Languages' },
-                    { value: '6+', label: 'Categories' },
-                    { value: '14.2M', label: 'Indexed Clips' },
-                  ].map(({ value, label }) => (
-                    <div key={label} className="flex flex-col items-center py-5 px-3 group cursor-default hover:bg-muted/30 transition-colors">
-                      <span className="text-2xl sm:text-3xl font-black text-foreground font-mono tracking-tighter group-hover:text-primary transition-colors">{value}</span>
-                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mt-1">{label}</span>
+                    { value: '3+', label: 'Languages', icon: Globe, sub: 'Native dialects', live: false },
+                    { value: '6+', label: 'Categories', icon: Layers, sub: 'Content types', live: false },
+                    { value: '14.2M', label: 'Indexed Clips', icon: Database, sub: 'Video frames', live: true },
+                  ].map(({ value, label, icon: Icon, sub, live }) => (
+                    <div key={label} className="relative flex flex-col items-center py-5 px-3 group cursor-default hover:bg-muted/30 transition-colors overflow-hidden">
+                      {/* top accent bar slides in on hover */}
+                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
+
+                      <Icon className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary transition-colors mb-2" />
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-2xl sm:text-3xl font-black text-foreground font-mono tracking-tighter group-hover:text-primary transition-colors">{value}</span>
+                        {live && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />}
+                      </div>
+                      <span className="text-[10px] font-bold text-foreground/80 uppercase tracking-wide mt-0.5">{label}</span>
+                      <span className="text-[9px] text-muted-foreground/60 mt-0.5">{sub}</span>
                     </div>
                   ))}
                 </div>
