@@ -55,18 +55,22 @@ apiClient.interceptors.response.use(
 
     if (error.response) {
       // 1. Rate Limit Tracking from Headers
-      const limit = error.response.headers["ratelimit-limit"];
-      const remaining = error.response.headers["ratelimit-remaining"];
-      const policy = error.response.headers["ratelimit-policy"];
+      // Skip 401 responses: they carry guest-tier limits and would corrupt the
+      // authenticated user's usage state, causing false rate-limit blocks.
+      if (error.response.status !== 401) {
+        const limit = error.response.headers["ratelimit-limit"];
+        const remaining = error.response.headers["ratelimit-remaining"];
+        const policy = error.response.headers["ratelimit-policy"];
 
-      if (limit && remaining && policy) {
-        const feature = policy.split(";")[0];
-        if (feature) {
-          useUsageStore.getState().updateUsage(feature, {
-            limit: parseInt(limit, 10),
-            remaining: parseInt(remaining, 10),
-            current: parseInt(limit, 10) - parseInt(remaining, 10),
-          });
+        if (limit && remaining && policy) {
+          const feature = policy.split(";")[0];
+          if (feature) {
+            useUsageStore.getState().updateUsage(feature, {
+              limit: parseInt(limit, 10),
+              remaining: parseInt(remaining, 10),
+              current: parseInt(limit, 10) - parseInt(remaining, 10),
+            });
+          }
         }
       }
 
