@@ -50,9 +50,11 @@ export default function VideoPlayerCard({
   // Tracking for logic isolation
   const lastSeekedClipId = useRef<string | null>(null)
 
-  // Sync aggregations only when there is no sub-category (to keep "all chips" context)
+  // Sync aggregations only when there is no sub-category AND the result is non-empty.
+  // Guarding against empty {} prevents a deselect-refetch from wiping lastAggregations
+  // during the transitional moment when TanStack Query clears the previous page data.
   useEffect(() => {
-    if (aggregations && !subCategory) {
+    if (aggregations && !subCategory && Object.keys(aggregations).length > 0) {
       setLastAggregations(aggregations);
     }
   }, [aggregations, subCategory, setLastAggregations]);
