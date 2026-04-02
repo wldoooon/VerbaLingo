@@ -4,13 +4,6 @@ import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { Clips, TranscriptResponse, SearchResponse } from "@/lib/types";
 import { apiClient } from "@/lib/apiClient";
 
-type TranslateResponse = {
-  original: string;
-  translated: string;
-  source: string;
-  target: string;
-};
-
 export const fetchSearchResults = async (
   query: string,
   language: string,
@@ -154,33 +147,80 @@ export const useTranscriptPrefetch = (
   }, [currentIndex, playlist, language, queryClient]);
 };
 
-// Translate a single text using the backend proxy (FastAPI -> LibreTranslate)
-const fetchTranslate = async (
-  text: string,
-  source: string = "en",
-  target: string = "ar",
-) => {
-  const params = new URLSearchParams();
-  params.append("text", text);
-  params.append("source", source);
-  params.append("target", target);
+// ── Translation ─────────────────────────────────────────────────────────────
 
-  const response = await apiClient.get<TranslateResponse>(
-    `/api/v1/translate?${params.toString()}`,
+type TranslateBatchResponse = {
+  translations: string[];
+  source_lang: string;
+};
+
+export const fetchTranslateBatch = async (
+  sentences: string[],
+  targetLang: string,
+  sourceLang: string = "auto",
+): Promise<TranslateBatchResponse> => {
+  const response = await apiClient.post<TranslateBatchResponse>(
+    "/api/v1/translate",
+    { sentences, target_lang: targetLang, source_lang: sourceLang },
   );
   return response.data;
 };
 
-export const useTranslate = (
-  text: string,
-  source: string = "en",
-  target: string = "ar",
+/**
+ * Batch-translate all sentences for a clip in one API call.
+ * Cache key includes position so same video at different timestamps gets its own cache entry.
+ * staleTime: Infinity — translations never change.
+ */
+export const useTranslateBatch = (
+  sentences: { sentence_text: string; start_time: number }[],
+  videoId: string,
+  position: number | undefined,
+  targetLang: string | null,
 ) => {
-  return useQuery<TranslateResponse, Error>({
-    queryKey: ["translate", text, source, target],
-    queryFn: () => fetchTranslate(text, source, target),
-    enabled: !!text && text.trim().length > 0,
-    staleTime: 1000 * 60 * 60, // 1 hour
-    gcTime: 1000 * 60 * 60 * 6, // 6 hours
+  const sentenceTexts = sentences.map((s) => s.sentence_text);
+
+  return useQuery<TranslateBatchResponse, Error>({
+    queryKey: ["translation", videoId, position, targetLang],
+    queryFn: () => fetchTranslateBatch(sentenceTexts, targetLang!, "auto"),
+    enabled: !!videoId && !!targetLang && sentences.length > 0,
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 30,
   });
+};
+
+/**
+ * Prefetch translations for the next 2 clips, piggybacking on already-cached transcripts.
+ * Mirrors useTranscriptPrefetch — call both together whenever currentIndex changes.
+ */
+export const useTranslationPrefetch = (
+  playlist: any[],
+  currentIndex: number,
+  targetLang: string | null,
+  language: string = "english",
+) => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!playlist || playlist.length === 0 || !targetLang) return;
+
+    const prefetchCount = 2;
+    for (let i = 0; i <= prefetchCount; i++) {
+      const nextIndex = currentIndex + i;
+      if (nextIndex >= playlist.length) continue;
+
+      const clip = playlist[nextIndex];
+      const transcriptData = queryClient.getQueryData<TranscriptResponse>([
+        "transcript", clip.video_id, language, clip.position,
+      ]);
+
+      if (!transcriptData?.sentences?.length) continue;
+
+      const sentenceTexts = transcriptData.sentences.map((s) => s.sentence_text);
+      queryClient.prefetchQuery({
+        queryKey: ["translation", clip.video_id, clip.position, targetLang],
+        queryFn: () => fetchTranslateBatch(sentenceTexts, targetLang, "auto"),
+        staleTime: Infinity,
+      });
+    }
+  }, [currentIndex, playlist, targetLang, language, queryClient]);
 };

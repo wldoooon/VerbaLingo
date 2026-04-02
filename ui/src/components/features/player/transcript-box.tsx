@@ -18,6 +18,7 @@ type TranscriptBoxProps = {
   sentences: Sentence[]
   searchQuery: string
   isTranscriptLoading: boolean
+  translatedMap?: Record<number, string>
   onSearchWord?: (word: string) => void
   onExplainWordInContext?: (payload: { word: string; sentence: string }) => void
   onTranscriptDetermined?: (snippet: string) => void
@@ -27,6 +28,7 @@ export const TranscriptBox = ({
   sentences,
   searchQuery,
   isTranscriptLoading,
+  translatedMap,
   onSearchWord,
   onExplainWordInContext,
   onTranscriptDetermined,
@@ -71,6 +73,7 @@ export const TranscriptBox = ({
       prev: sentences[idx - 1],
       active,
       next: sentences[idx + 1],
+      activeIdx: idx,
     }
   }, [activeIdx, sentences])
 
@@ -89,7 +92,7 @@ export const TranscriptBox = ({
   }, [trio, onTranscriptDetermined])
 
   return (
-    <div className="relative mt-1 h-[180px] flex items-center justify-center overflow-hidden">
+    <div className="relative mt-1 min-h-[180px] flex items-center justify-center overflow-hidden">
       {/* Simple, clean brand background */}
 
       <div className="relative w-full px-4">
@@ -126,14 +129,21 @@ export const TranscriptBox = ({
                 )}
               </div>
 
-              {/* ACTIVE FOCUS */}
-              <div className="opacity-100 scale-100 shadow-sm transition-all duration-300">
-                <SentenceGroup
-                  group={[trio.active]}
-                  searchQuery={searchQuery}
-                  onSearchWord={onSearchWord}
-                  onExplainWordInContext={onExplainWordInContext}
-                />
+              {/* ACTIVE FOCUS + translation directly below */}
+              <div className="flex flex-col items-center gap-1">
+                <div className="opacity-100 scale-100 shadow-sm transition-all duration-300">
+                  <SentenceGroup
+                    group={[trio.active]}
+                    searchQuery={searchQuery}
+                    onSearchWord={onSearchWord}
+                    onExplainWordInContext={onExplainWordInContext}
+                  />
+                </div>
+                {translatedMap?.[trio.activeIdx] && (
+                  <p className="text-xs sm:text-sm text-muted-foreground/60 italic text-center px-4 leading-snug">
+                    {translatedMap[trio.activeIdx]}
+                  </p>
+                )}
               </div>
 
               {/* Next Context */}

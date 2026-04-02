@@ -12,11 +12,12 @@ import {
   RotateCcw,
   Volume2,
   Repeat,
-  Gauge
+  Gauge,
+  Globe,
 } from "lucide-react"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
-import { useTranscript } from "@/lib/useApi"
+import { useTranscript, useTranslateBatch, useTranslationPrefetch } from "@/lib/useApi"
 import { useRouter } from "next/navigation"
 import type { TranscriptSentence, Clips } from "@/lib/types"
 import { formatTime } from "@/lib/player-utils"
@@ -121,6 +122,63 @@ function SpeedPicker({ currentRate, onSelect }: { currentRate: number; onSelect:
 }
 // ────────────────────────────────────────────────────────────────────────────
 
+const TRANSLATION_LANGUAGES = [
+  { code: "ar", label: "Arabic" },
+  { code: "fr", label: "French" },
+  { code: "es", label: "Spanish" },
+  { code: "de", label: "German" },
+  { code: "tr", label: "Turkish" },
+  { code: "pt", label: "Portuguese" },
+  { code: "ru", label: "Russian" },
+  { code: "zh-CN", label: "Chinese" },
+  { code: "ja", label: "Japanese" },
+  { code: "hi", label: "Hindi" },
+  { code: "ko", label: "Korean" },
+  { code: "vi", label: "Vietnamese" },
+]
+
+function TranslationPicker({
+  current,
+  onSelect,
+}: {
+  current: string | null
+  onSelect: (code: string | null) => void
+}) {
+  return (
+    <div className="flex flex-col gap-3 p-1">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Translate to</span>
+        {current && (
+          <button
+            onClick={() => onSelect(null)}
+            className="text-[10px] font-bold text-destructive hover:underline"
+          >
+            Off
+          </button>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-1">
+        {TRANSLATION_LANGUAGES.map((lang) => (
+          <button
+            key={lang.code}
+            onClick={() => onSelect(current === lang.code ? null : lang.code)}
+            className={cn(
+              "text-left px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors",
+              current === lang.code
+                ? "bg-primary text-primary-foreground"
+                : "hover:bg-muted text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {lang.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+
 type AudioCardProps = {
   currentClip: Clips | undefined
   playlist: Clips[]
@@ -152,6 +210,8 @@ export default function AudioCard({
   // Separate popovers for mobile and desktop to avoid state conflicts on resize
   const [mobileSpeedOpen, setMobileSpeedOpen] = useState(false)
   const [desktopSpeedOpen, setDesktopSpeedOpen] = useState(false)
+  const [mobileTranslationOpen, setMobileTranslationOpen] = useState(false)
+  const [desktopTranslationOpen, setDesktopTranslationOpen] = useState(false)
 
   // Countdown for Next Button (5s Strategy)
   const [nextCooldown, setNextCooldown] = useState(0)
@@ -186,7 +246,7 @@ export default function AudioCard({
 
   const router = useRouter()
 
-  const { setQuery, setCategory, language: storeLanguage } = useSearchStore()
+  const { setQuery, setCategory, language: storeLanguage, translationLang, setTranslationLang } = useSearchStore()
   const activeLanguage = propLanguage || storeLanguage || "english"
 
   // True end of playlist — all clips loaded AND at last one
@@ -291,6 +351,26 @@ export default function AudioCard({
   }, [transcriptData])
 
   const sentencesInClip = sanitizedSentences
+
+  // Translate all sentences in one batch call — result cached forever by React Query
+  const { data: translationData } = useTranslateBatch(
+    sentencesInClip,
+    currentClip?.video_id || "",
+    currentClip?.position,
+    translationLang,
+  )
+
+  // Prefetch translations for next 2 clips whenever index or language changes
+  useTranslationPrefetch(playlist, currentVideoIndex, translationLang, activeLanguage)
+
+  // Map index → translated text — index is stable and avoids float key issues
+  const translatedMap = useMemo(() => {
+    if (!translationData?.translations || !sentencesInClip.length) return {}
+    return Object.fromEntries(
+      translationData.translations.map((t, i) => [i, t])
+    )
+  }, [translationData, sentencesInClip])
+
   const hasStartedPlayback = useRef(false)
 
   // Reset playback flags when the clip changes — use currentVideoIndex so duplicate
@@ -409,6 +489,20 @@ export default function AudioCard({
                 <SpeedPicker currentRate={rate} onSelect={(r) => { setRate(r); setPlaybackRate(r) }} />
               </PopoverContent>
             </Popover>
+            <Popover open={mobileTranslationOpen} onOpenChange={setMobileTranslationOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("h-9 w-9", translationLang ? "text-primary" : "")}
+                >
+                  <Globe size={16} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[220px] p-4 rounded-2xl" side="top" align="end">
+                <TranslationPicker current={translationLang} onSelect={setTranslationLang} />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
@@ -514,8 +608,27 @@ export default function AudioCard({
           </div>
         </div>
 
-        {/* Speed control — separate state from mobile popover */}
-        <div className="flex items-center gap-4 flex-1 max-w-[180px] justify-end">
+        {/* Speed + Translation controls */}
+        <div className="flex items-center gap-2 flex-1 max-w-[220px] justify-end">
+          <Popover open={desktopTranslationOpen} onOpenChange={setDesktopTranslationOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("gap-2 cursor-pointer", translationLang ? "text-primary" : "")}
+              >
+                <Globe size={18} />
+                <span className="font-semibold text-xs">
+                  {translationLang
+                    ? TRANSLATION_LANGUAGES.find(l => l.code === translationLang)?.label ?? translationLang
+                    : "Translate"}
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[220px] p-4 rounded-2xl shadow-xl" align="end">
+              <TranslationPicker current={translationLang} onSelect={setTranslationLang} />
+            </PopoverContent>
+          </Popover>
           <Popover open={desktopSpeedOpen} onOpenChange={setDesktopSpeedOpen}>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2 cursor-pointer">
@@ -534,6 +647,7 @@ export default function AudioCard({
         sentences={sentencesInClip}
         searchQuery={searchQuery}
         isTranscriptLoading={isTranscriptLoading}
+        translatedMap={translatedMap}
         onSearchWord={(word) => {
           const clean = word.trim()
           if (!clean) return
