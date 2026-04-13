@@ -6,17 +6,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { ContactMorphSurface } from "@/components/ui/contact-morph-surface"
-import { HelpCircle } from "lucide-react"
+import { PlusIcon, MinusIcon } from "lucide-react"
 import ShinyText from "./ShinyText"
 import AnimatedContent from "./AnimatedContent"
-import { Carter_One } from 'next/font/google';
 import { cn } from '@/lib/utils';
-
-const carterOne = Carter_One({ weight: '400', subsets: ['latin'] });
 
 const faqData = [
   {
@@ -85,7 +80,7 @@ export function Faq() {
               {/* Header */}
               <div className="space-y-4 flex flex-col items-center text-center lg:items-start lg:text-left">
 
-                <h2 className={cn("text-[clamp(2.5rem,7vw,3.5rem)] font-black leading-tight", carterOne.className)}>
+                <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight">
                   <ShinyText
                     text="Got questions?"
                     speed={2}
@@ -114,49 +109,50 @@ export function Faq() {
           </AnimatedContent>
 
           {/* Right Column — Accordion */}
-          <Card className="border-none shadow-none bg-transparent rounded-2xl overflow-hidden">
-            <CardContent className="p-0">
-              <Accordion type="single" collapsible className="w-full">
-                {faqData.map((item, index) => (
-                  <AnimatedContent
-                    key={index}
-                    distance={40}
-                    direction="vertical"
-                    delay={0.15 * index}
-                    duration={0.7}
-                    threshold={0.05}
+          <div className="w-full">
+            <Accordion type="single" collapsible defaultValue="item-0" className="w-full flex flex-col gap-4">
+              {faqData.map((item, index) => (
+                <AnimatedContent
+                  key={index}
+                  distance={40}
+                  direction="vertical"
+                  delay={0.1 * index}
+                  duration={0.7}
+                  threshold={0.05}
+                >
+                  <AccordionItem
+                    value={`item-${index}`}
+                    className="border border-border rounded-2xl flex flex-col group/item data-[state=open]:bg-muted/40 data-[state=open]:border-border/50 transition-all"
                   >
-                    <AccordionItem
-                      value={`item-${index}`}
-                      className="border-b border-border/40 last:border-b-0 px-6 md:px-8 transition-colors"
-                    >
-                      <AccordionTrigger className="hover:no-underline py-6 gap-4 cursor-pointer [&>svg]:shrink-0 [&>svg]:text-muted-foreground">
-                        <div className="flex flex-col items-center justify-center flex-1 w-full gap-4 text-center">
-                          <span className="text-base md:text-lg font-semibold text-foreground leading-snug w-full">
-                            {item.question}
-                          </span>
-                          <Separator className="w-3/4 bg-border/50 h-[1px]" />
+                    <AccordionTrigger className="px-6 py-5 items-center text-base md:text-lg font-semibold hover:no-underline [&>svg]:hidden cursor-pointer group/trigger">
+                      <div className="flex gap-6 items-center text-left flex-1">
+                        <span className="text-muted-foreground tabular-nums shrink-0">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <span className="leading-snug">
+                          {item.question}
+                        </span>
+                      </div>
+                      <PlusIcon className="w-5 h-5 shrink-0 text-muted-foreground group-data-[state=open]/trigger:hidden transition-transform duration-300" />
+                      <MinusIcon className="w-5 h-5 shrink-0 text-muted-foreground hidden group-data-[state=open]/trigger:inline transition-transform duration-300" />
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 pb-6 ps-[76px]">
+                      <div className="space-y-4">
+                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                          {item.answer}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-widest rounded-md px-2 py-0.5 border-border/50 text-muted-foreground">
+                            {item.tag}
+                          </Badge>
                         </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="pb-6 pt-0">
-                        <div className="flex items-start gap-3">
-                          <Separator orientation="vertical" className="h-auto self-stretch w-0.5 bg-primary/30 rounded-full" />
-                          <div className="space-y-3 flex-1">
-                            <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                              {item.answer}
-                            </p>
-                            <Badge variant="outline" className="text-[10px] font-medium rounded-md">
-                              {item.tag}
-                            </Badge>
-                          </div>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </AnimatedContent>
-                ))}
-              </Accordion>
-            </CardContent>
-          </Card>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </AnimatedContent>
+              ))}
+            </Accordion>
+          </div>
 
           {/* Mobile Contact CTA (Shown under Accordion) */}
           <div className="lg:hidden flex justify-center w-full mt-2">
@@ -171,4 +167,3 @@ export function Faq() {
     </section>
   )
 }
-

@@ -4,6 +4,7 @@ import React from 'react';
 import { Search, Bot, Mic, Globe, Sparkles } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import AnimatedContent from "./AnimatedContent";
+import ArticlePreviewCard from "./shadcn-space/card/card-01";
 import { Carter_One } from 'next/font/google';
 import { cn } from '@/lib/utils';
 
@@ -104,6 +105,11 @@ export function Features() {
               <h3 className="text-lg font-bold text-foreground mb-1">Global Library</h3>
               <p className="text-muted-foreground text-sm">Content from 50+ countries and cultures.</p>
             </div>
+          </AnimatedContent>
+
+          {/* New Block - Article Preview */}
+          <AnimatedContent distance={60} delay={0.5}>
+            <ArticlePreviewCard />
           </AnimatedContent>
 
         </div>
