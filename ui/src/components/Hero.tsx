@@ -168,7 +168,7 @@ export function Hero() {
       const opacity = isActive ? 1 : Math.max(0.15, 1 - absOffset * 0.28);
       const zIndex = 10 - absOffset;
       const scale = isActive ? 1 : Math.max(0.75, 0.92 - absOffset * 0.06);
-      const hidden = absOffset >= 2;
+      const hidden = absOffset >= 3;
       return { offset, absOffset, isActive, translateX, opacity, zIndex, scale, hidden };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -303,18 +303,12 @@ export function Hero() {
 
           {/* Right Column: Optimized 2D Carousel */}
           <AnimatedContent distance={0} duration={1.5} delay={0.6} className="w-full">
-            <div
-              className="flex flex-col items-center gap-5 mt-8 xl:mt-0"
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-            >
+            <div className="flex flex-col items-center gap-5 mt-8 xl:mt-0">
               {/* Cards */}
               <div
                 className="relative h-[380px] sm:h-[460px] xl:h-[540px] w-full flex items-center justify-center"
                 style={{ contain: 'layout style paint' }}
               >
-                {/* Bottom fog */}
-                <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent pointer-events-none z-20" />
                 {/* Left fog */}
                 <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-background to-transparent pointer-events-none z-20" />
                 {/* Right fog */}
