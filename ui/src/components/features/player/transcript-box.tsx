@@ -18,6 +18,7 @@ type TranscriptBoxProps = {
   sentences: Sentence[]
   searchQuery: string
   isTranscriptLoading: boolean
+  isTranslationLoading?: boolean
   translatedMap?: Record<number, string>
   onSearchWord?: (word: string) => void
   onExplainWordInContext?: (payload: { word: string; sentence: string }) => void
@@ -28,6 +29,7 @@ export const TranscriptBox = ({
   sentences,
   searchQuery,
   isTranscriptLoading,
+  isTranslationLoading,
   translatedMap,
   onSearchWord,
   onExplainWordInContext,
@@ -130,7 +132,7 @@ export const TranscriptBox = ({
               </div>
 
               {/* ACTIVE FOCUS + translation directly below */}
-              <div className="flex flex-col items-center gap-1">
+              <div className="flex flex-col items-center gap-2">
                 <div className="opacity-100 scale-100 shadow-sm transition-all duration-300">
                   <SentenceGroup
                     group={[trio.active]}
@@ -139,11 +141,13 @@ export const TranscriptBox = ({
                     onExplainWordInContext={onExplainWordInContext}
                   />
                 </div>
-                {translatedMap?.[trio.activeIdx] && (
-                  <p className="text-xs sm:text-sm text-muted-foreground/60 italic text-center px-4 leading-snug">
+                {isTranslationLoading ? (
+                  <Skeleton className="h-5 w-2/3 rounded-full opacity-40" />
+                ) : translatedMap?.[trio.activeIdx] ? (
+                  <p className="text-base sm:text-xl font-medium text-muted-foreground/70 text-center px-4 leading-snug">
                     {translatedMap[trio.activeIdx]}
                   </p>
-                )}
+                ) : null}
               </div>
 
               {/* Next Context */}

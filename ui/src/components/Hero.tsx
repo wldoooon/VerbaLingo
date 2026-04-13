@@ -10,6 +10,10 @@ import { useTheme } from "next-themes";
 import { Features } from "./Features";
 import AnimatedContent from "./AnimatedContent";
 import { useSearchStore } from "@/stores/use-search-store";
+import { Carter_One } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const carterOne = Carter_One({ weight: '400', subsets: ['latin'] });
 
 const categories = [
   {
@@ -184,7 +188,7 @@ export function Hero() {
 
 
             <AnimatedContent distance={40} direction="vertical" duration={1} delay={0.1}>
-              <h1 className="text-[clamp(3.5rem,8vw,4.5rem)] lg:text-7xl font-black text-foreground tracking-tighter leading-[0.85] mb-6 relative inline-block w-fit">
+              <h1 className={cn("text-[clamp(3.5rem,8vw,4.5rem)] lg:text-7xl font-black text-foreground tracking-tighter leading-[0.85] mb-6 relative inline-block w-fit", carterOne.className)}>
                 {/* Mascot Behind Text - Anchored together using 'em' scaling */}
                 <span
                   className="absolute -z-10 opacity-80 pointer-events-none transition-transform duration-1000 group-hover:scale-105 inline-block"
@@ -208,8 +212,8 @@ export function Hero() {
             </AnimatedContent>
 
             <AnimatedContent distance={30} direction="vertical" duration={0.8} delay={0.25}>
-              <p className="text-lg text-muted-foreground mb-10 max-w-lg leading-relaxed font-medium border-l-2 border-primary/30 pl-6">
-                Bridge the gap between dictionary definitions and native fluency. Our engine indexes <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">14.2M video frames</span>, paired with an <span className="text-foreground font-bold">AI Assistant</span> you can ask anything about usage, tone, and cultural nuance.
+              <p className="text-lg text-muted-foreground mb-10 max-w-lg leading-relaxed font-medium">
+                Learning from a dictionary is hard because it doesn't show you how people actually talk in the real world. We make it easy by showing you more than <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">14.2 million real video clips</span> from movies, TV shows, and interviews.
               </p>
             </AnimatedContent>
 

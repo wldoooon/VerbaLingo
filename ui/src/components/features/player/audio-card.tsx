@@ -353,7 +353,7 @@ export default function AudioCard({
   const sentencesInClip = sanitizedSentences
 
   // Translate all sentences in one batch call — result cached forever by React Query
-  const { data: translationData } = useTranslateBatch(
+  const { data: translationData, isPending: isTranslationLoading } = useTranslateBatch(
     sentencesInClip,
     currentClip?.video_id || "",
     currentClip?.position,
@@ -647,6 +647,7 @@ export default function AudioCard({
         sentences={sentencesInClip}
         searchQuery={searchQuery}
         isTranscriptLoading={isTranscriptLoading}
+        isTranslationLoading={!!translationLang && isTranslationLoading}
         translatedMap={translatedMap}
         onSearchWord={(word) => {
           const clean = word.trim()

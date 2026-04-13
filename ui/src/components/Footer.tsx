@@ -104,8 +104,7 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Separator dot */}
-            <span className="text-muted-foreground/40">·</span>
+           
 
           </div>
         </div>
