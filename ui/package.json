@@ -17,6 +17,8 @@
     "@heroui/scroll-shadow": "^2.3.17",
     "@heroui/tabs": "^2.2.29",
     "@hookform/resolvers": "^5.2.2",
+    "@hugeicons/core-free-icons": "^4.1.1",
+    "@hugeicons/react": "^1.1.6",
     "@icons-pack/react-simple-icons": "^13.7.0",
     "@mantine/hooks": "^8.3.3",
     "@phosphor-icons/react": "^2.1.10",

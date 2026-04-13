@@ -35,8 +35,8 @@ const ArticlePreviewCard = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className='relative h-48 w-full overflow-hidden'>
             <img
-              src='/MoviesCollection.jpg'
-              alt='Learning from movies'
+              src='https://images.shadcnspace.com/assets/blog/blog-img12.jpg'
+              alt='Learning context'
               className='w-full h-full object-cover'
             />
             <div className='absolute inset-0 bg-gradient-to-t from-background/80 to-transparent' />

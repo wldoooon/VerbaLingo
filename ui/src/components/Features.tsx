@@ -5,6 +5,7 @@ import { Search, Bot, Mic, Globe, Sparkles } from 'lucide-react';
 import { Skeleton } from "@/components/ui/skeleton";
 import AnimatedContent from "./AnimatedContent";
 import ArticlePreviewCard from "./shadcn-space/card/card-01";
+import MagnifiedBento from "./magnified-bento";
 import { Carter_One } from 'next/font/google';
 import { cn } from '@/lib/utils';
 
@@ -81,30 +82,9 @@ export function Features() {
             </div>
           </AnimatedContent>
 
-          {/* Medium Block - Pronunciation */}
-          <AnimatedContent distance={60} delay={0.3}>
-            <div className="bg-card/50 border border-border/50 rounded-[2.5rem] p-10 hover:bg-muted/50 transition-all group h-full">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <Mic className="w-5 h-5 text-primary group-hover:text-primary-foreground" />
-                </div>
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-1">Pronunciation</h3>
-              <p className="text-muted-foreground text-sm">Compare your voice with native speakers.</p>
-            </div>
-          </AnimatedContent>
-
-          {/* Medium Block - Global */}
-          <AnimatedContent distance={60} delay={0.4}>
-            <div className="bg-card/50 border border-border/50 rounded-[2.5rem] p-10 hover:bg-muted/50 transition-all group h-full">
-              <div className="flex items-start justify-between mb-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <Globe className="w-5 h-5 text-primary group-hover:text-primary-foreground" />
-                </div>
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-1">Global Library</h3>
-              <p className="text-muted-foreground text-sm">Content from 50+ countries and cultures.</p>
-            </div>
+          {/* Medium Block - Magnified Bento Context */}
+          <AnimatedContent distance={60} delay={0.3} className="lg:col-span-2">
+            <MagnifiedBento />
           </AnimatedContent>
 
           {/* New Block - Article Preview */}
