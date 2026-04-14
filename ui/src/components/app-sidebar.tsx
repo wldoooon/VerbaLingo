@@ -1,6 +1,6 @@
 "use client";
 
-import { LogoIcon } from "@/components/logo";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
 	Sidebar,
@@ -22,9 +22,9 @@ export function AppSidebar() {
 		<Sidebar collapsible="icon" variant="floating">
 			<SidebarHeader className="h-14 justify-center">
 				<SidebarMenuButton asChild>
-					<a href="#link">
-						<LogoIcon />
-						<span className="font-medium">Efferd</span>
+					<a href="/">
+						<Image src="/main_logo.png" alt="PokiSpokey" width={34} height={34} className="size-11" />
+						<span className="font-medium">PokiSpokey</span>
 					</a>
 				</SidebarMenuButton>
 			</SidebarHeader>
