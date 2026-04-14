@@ -10,9 +10,26 @@ import { NavUser } from "@/components/nav-user";
 import { BellIcon } from "lucide-react";
 import { SearchBar } from "@/components/comm/SearchBar";
 
+import { useState, useCallback, useEffect } from "react";
+import { useTheme } from "next-themes";
+import { ThemeToggleButton, useThemeTransition } from "@/components/ui/shadcn-io/theme-toggle-button";
+
 const activeItem = navLinks.find((item) => item.isActive);
 
 export function AppHeader() {
+	const { theme, setTheme } = useTheme();
+	const { startTransition } = useThemeTransition();
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => setMounted(true), []);
+
+	const handleThemeToggle = useCallback(() => {
+		const newTheme = theme === 'dark' ? 'light' : 'dark';
+		startTransition(() => {
+			setTheme(newTheme);
+		});
+	}, [theme, setTheme, startTransition]);
+
 	return (
 		<header
 			className={cn(
@@ -33,6 +50,15 @@ export function AppHeader() {
             </div>
 
 			<div className="flex items-center gap-3">
+				{mounted && (
+					<ThemeToggleButton
+						theme={theme as 'light' | 'dark'}
+						onClick={handleThemeToggle}
+						variant="circle"
+						start="top-right"
+						className="h-9 w-9 mr-1"
+					/>
+				)}
 				<Button aria-label="Notifications" size="icon" variant="ghost">
 					<BellIcon
 					/>
