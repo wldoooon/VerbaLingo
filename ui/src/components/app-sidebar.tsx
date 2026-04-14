@@ -1,117 +1,80 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import { LogoIcon } from "@/components/logo";
+import { Button } from "@/components/ui/button";
 import {
-  Compass,
-  GraduationCap,
-  BookmarkIcon,
-  CreditCard,
-  ChevronRight,
-} from "lucide-react"
+	Sidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarGroup,
+	SidebarHeader,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { NavGroup } from "@/components/nav-group";
+import { footerNavLinks, navGroups } from "@/components/app-shared";
+import { LatestChange } from "@/components/latest-change";
+import { PlusIcon, SearchIcon } from "lucide-react";
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  SidebarRail,
-} from "@/components/ui/sidebar"
-import { Badge } from "@/components/ui/badge"
-import { FilterTree } from "@/components/FilterTree"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-
-import { UsageSection } from "@/components/UsageSection"
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Compass className="size-5" />
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold text-base">Pokispokey</span>
-                  <span className="text-sm">v1.0.0</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-sm">Platform</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton isActive={true} tooltip="Discover" className="h-10 text-base">
-                  <Compass className="size-5" />
-                  <span>Discover</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <Collapsible asChild defaultOpen={true} className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="Study Hub" className="h-10 text-base">
-                      <GraduationCap className="size-5" />
-                      <span>Study Hub</span>
-                      <ChevronRight className="ml-auto size-5 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild className="opacity-70 cursor-not-allowed h-9 text-sm">
-                          <span className="flex items-center gap-2 w-full">
-                            <BookmarkIcon className="size-4" />
-                            <span>Saved Words</span>
-                            <Badge variant="secondary" className="ml-auto text-[10px] h-5 px-1.5">Soon</Badge>
-                          </span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton asChild className="opacity-70 cursor-not-allowed h-9 text-sm">
-                          <span className="flex items-center gap-2 w-full">
-                            <CreditCard className="size-4" />
-                            <span>Flash Card</span>
-                            <Badge variant="secondary" className="ml-auto text-[10px] h-5 px-1.5">Soon</Badge>
-                          </span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className="flex-1 overflow-hidden">
-          <SidebarGroupLabel className="text-sm">Filters</SidebarGroupLabel>
-          <SidebarGroupContent className="h-full">
-            <div className="px-2 h-full">
-              <FilterTree />
-            </div>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <UsageSection />
-      </SidebarContent>
-      <SidebarRail />
-    </Sidebar>
-  )
+export function AppSidebar() {
+	return (
+		<Sidebar collapsible="icon" variant="floating">
+			<SidebarHeader className="h-14 justify-center">
+				<SidebarMenuButton asChild>
+					<a href="#link">
+						<LogoIcon />
+						<span className="font-medium">Efferd</span>
+					</a>
+				</SidebarMenuButton>
+			</SidebarHeader>
+			<SidebarContent>
+				<SidebarGroup>
+					<SidebarMenuItem className="flex items-center gap-2">
+						<SidebarMenuButton
+							className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+							tooltip="Add product"
+						>
+							<PlusIcon
+							/>
+							<span>Add product</span>
+						</SidebarMenuButton>
+						<Button
+							aria-label="Search store"
+							className="size-8 group-data-[collapsible=icon]:opacity-0"
+							size="icon"
+							variant="outline"
+						>
+							<SearchIcon
+							/>
+							<span className="sr-only">Search store</span>
+						</Button>
+					</SidebarMenuItem>
+				</SidebarGroup>
+				{navGroups.map((group, index) => (
+					<NavGroup key={`sidebar-group-${index}`} {...group} />
+				))}
+			</SidebarContent>
+			<SidebarFooter>
+				<LatestChange />
+				<SidebarMenu className="mt-2">
+					{footerNavLinks.map((item) => (
+						<SidebarMenuItem key={item.title}>
+							<SidebarMenuButton
+								asChild
+								className="text-muted-foreground"
+								isActive={item.isActive}
+								size="sm"
+							>
+								<a href={item.path}>
+									{item.icon}
+									<span>{item.title}</span>
+								</a>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					))}
+				</SidebarMenu>
+			</SidebarFooter>
+		</Sidebar>
+	);
 }
-

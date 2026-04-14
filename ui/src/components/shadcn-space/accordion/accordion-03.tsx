@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Accordion,
   AccordionContent,
@@ -27,7 +29,7 @@ const FAQ_DATA = [
 
 const AccordionFaqDemo = () => (
   <div className="flex items-center justify-center w-full max-w-lg">
-    <Accordion defaultValue={["item-0"]} className="w-full flex flex-col gap-4">
+    <Accordion type="multiple" defaultValue={["item-0"]} className="w-full flex flex-col gap-4">
       {FAQ_DATA.map((faq, index) => (
         <AccordionItem
           key={`item-${index}`}
@@ -39,7 +41,7 @@ const AccordionFaqDemo = () => (
             index === 2 && "delay-300"
           )}
         >
-          <AccordionTrigger className="px-4 py-3 items-center text-base font-semibold hover:no-underline **:data-[slot=accordion-trigger-icon]:hidden cursor-pointer">
+          <AccordionTrigger className="px-4 py-3 items-center text-base font-semibold hover:no-underline [&_[data-slot=accordion-trigger-icon]]:hidden cursor-pointer">
             <div className="flex gap-6 items-center text-left">
               <span className="text-muted-foreground tabular-nums shrink-0">
                 {String(index + 1).padStart(2, "0")}

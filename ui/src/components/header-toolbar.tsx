@@ -24,7 +24,7 @@ import { useLogoutMutation } from "@/lib/authHooks"
 
 import { AuthDialog } from "@/components/auth-dialog"
 
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 
 
 
@@ -115,6 +115,7 @@ export function HeaderToolbar({
 
 
 
+    <TooltipProvider>
     <div className="flex items-center gap-1 sm:gap-2">
 
 
@@ -261,6 +262,7 @@ export function HeaderToolbar({
       </div>
 
     </div>
+    </TooltipProvider>
 
   )
 

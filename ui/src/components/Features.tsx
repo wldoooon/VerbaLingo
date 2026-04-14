@@ -14,21 +14,21 @@ const carterOne = Carter_One({ weight: '400', subsets: ['latin'] });
 export function Features() {
   return (
     <div id="features" className="py-20 relative overflow-hidden">
-      <div className="max-w-[1300px] mx-auto px-6 lg:px-12">
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
 
         {/* Animated Header */}
         <AnimatedContent distance={40} direction="vertical" duration={0.8} threshold={0.2}>
-          <div className="text-center mb-16 max-w-2xl mx-auto">
-            <h2 className={cn("text-[clamp(2rem,7vw,3.5rem)] font-black text-foreground mb-4 tracking-tight leading-tight", carterOne.className)}>
+          <div className="text-center mb-20 max-w-3xl mx-auto">
+            <h2 className={cn("text-[clamp(2.5rem,7vw,4rem)] font-black text-foreground mb-6 tracking-tight leading-tight", carterOne.className)}>
               Everything you need to fluency
             </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed">
+            <p className="text-muted-foreground text-xl leading-relaxed">
               Our engine combines four powerful technologies to create the ultimate immersion experience.
             </p>
           </div>
         </AnimatedContent>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
 
           {/* Large Block - Search Context */}
           <AnimatedContent distance={60} delay={0.1} className="lg:col-span-2 lg:row-span-2">
