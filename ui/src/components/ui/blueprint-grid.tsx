@@ -73,7 +73,7 @@ export function BlueprintBox({
 			{dotted && (
 				<div className="absolute size-1 bg-border/40 rounded-full" />
 			)}
-			
+
 			{/* Allow pushing actual content (text, icons, forms) above the dot */}
 			<div className="relative z-10 w-full h-full">{children}</div>
 		</div>
