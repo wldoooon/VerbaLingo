@@ -1,3 +1,7 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { DecorIcon } from "@/components/ui/decor-icon";
 import { ThumbProgressCarousel } from "@/components/ui/thumb-progress-carousel";
@@ -23,7 +27,16 @@ const carouselItems = [
 		image: "/Cartoon_Picture.jpg",
 		title: "Animation Studio",
 	},
-]; export function DashboardSkeleton() {
+]; 
+
+export function DashboardSkeleton() {
+	const { resolvedTheme } = useTheme();
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
 	return (
 		<div
 			className={cn(
@@ -75,7 +88,16 @@ const carouselItems = [
 							<BlueprintBox rowSpan={3} shaded>
 							</BlueprintBox>
 							<BlueprintBox colSpan={7} rowSpan={3} dotted={false} className="px-8 border-b-primary/10">
-								<div className="flex flex-col items-start justify-center h-full w-full">
+								<div className="flex flex-col items-start justify-center h-full w-full relative">
+									{mounted && (
+										<div className="absolute -right-10 sm:-right-20 md:-right-32 top-1/2 -translate-y-1/2 w-52 sm:w-64 md:w-80 opacity-80 pointer-events-none z-2">
+											<img 
+												src={resolvedTheme === 'dark' ? "/sleeping_cat.png" : "/cat_logo3.png"} 
+												alt="Mascot" 
+												className="w-full h-full object-contain"
+											/>
+										</div>
+									)}
 
 									<h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground drop-shadow-sm leading-tight text-left">
 										<div>Hear exactly how they</div>
