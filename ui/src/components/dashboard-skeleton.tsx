@@ -21,7 +21,7 @@ const carouselItems = [
 		image: "/Cartoon_Picture.jpg",
 		title: "Animation Studio",
 	},
-];export function DashboardSkeleton() {
+]; export function DashboardSkeleton() {
 	return (
 		<div
 			className={cn(
@@ -70,18 +70,16 @@ const carouselItems = [
 							</BlueprintBox>
 
 							{/* ====== ROW 2, 3, 4 (Hero Title: spans 3 rows height) ====== */}
-							<BlueprintBox rowSpan={3}>
-							</BlueprintBox>
 							<BlueprintBox rowSpan={3} shaded>
 							</BlueprintBox>
-							<BlueprintBox colSpan={6} rowSpan={3} dotted={false} className="px-4 border-b-primary/10">
-								<div className="flex flex-col items-center justify-center h-full w-full">
+							<BlueprintBox colSpan={7} rowSpan={3} dotted={false} className="px-8 border-b-primary/10">
+								<div className="flex flex-col items-start justify-center h-full w-full">
 									<div className="inline-flex items-center gap-1.5 rounded-none border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium mb-4 text-primary uppercase tracking-widest">
 										<Sparkles className="w-3 h-3" />
 										<span>Pronunciation</span>
 									</div>
-									<h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground drop-shadow-sm leading-tight text-center">
-										Master languages<br/>with <span className="text-primary italic font-serif opacity-90">real context</span>
+									<h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground drop-shadow-sm leading-tight text-left">
+										Hear exactly how they<br />speak <span className="text-primary italic font-serif opacity-90">English</span>
 									</h1>
 								</div>
 							</BlueprintBox>
@@ -140,13 +138,12 @@ const carouselItems = [
 													{/* Floating Language Tags */}
 													<div className="z-10 bg-background/90 text-foreground text-[10px] sm:text-xs font-mono px-4 py-3 rounded-none shadow-sm opacity-95 backdrop-blur-md flex items-center gap-4 transition-all">
 														<img src={lang.icon} alt={lang.name} className="w-12 h-auto max-h-8 object-contain" />
-														<span className={`font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r opacity-90 ${
-															lang.name === "FRANÇAIS" ? "from-blue-800 via-slate-500 to-red-700" :
-															lang.name === "ENGLISH" ? "from-blue-800 via-slate-500 to-red-700" :
-															lang.name === "ESPAÑOL" ? "from-red-700 via-amber-600 to-red-700" :
-															lang.name === "DEUTSCH" ? "from-zinc-950 via-red-800 to-amber-600" :
-															""
-														}`}>
+														<span className={`font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r opacity-90 ${lang.name === "FRANÇAIS" ? "from-blue-800 via-slate-500 to-red-700" :
+																lang.name === "ENGLISH" ? "from-blue-800 via-slate-500 to-red-700" :
+																	lang.name === "ESPAÑOL" ? "from-red-700 via-amber-600 to-red-700" :
+																		lang.name === "DEUTSCH" ? "from-zinc-950 via-red-800 to-amber-600" :
+																			""
+															}`}>
 															{lang.name}
 														</span>
 													</div>
@@ -181,9 +178,9 @@ const carouselItems = [
 						))}
 					</BlueprintGrid>
 				</div>
-                <div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
-                    Feature 1
-                </div>
+				<div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
+					Feature 1
+				</div>
 				<DecorIcon className="size-5 text-muted-foreground" position="top-left" />
 				<DecorIcon className="size-5 text-muted-foreground" position="top-right" />
 				<DecorIcon className="size-5 text-muted-foreground" position="bottom-left" />
@@ -200,9 +197,9 @@ const carouselItems = [
 						))}
 					</BlueprintGrid>
 				</div>
-                <div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
-                    Feature 2
-                </div>
+				<div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
+					Feature 2
+				</div>
 			</div>
 
 			{/* --- Card 4: Bottom Row - Third Box --- */}
@@ -214,9 +211,9 @@ const carouselItems = [
 						))}
 					</BlueprintGrid>
 				</div>
-                <div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
-                    Feature 3
-                </div>
+				<div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
+					Feature 3
+				</div>
 			</div>
 
 			{/* --- Card 5: Bottom Row - Fourth Box --- */}
@@ -228,9 +225,9 @@ const carouselItems = [
 						))}
 					</BlueprintGrid>
 				</div>
-                <div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
-                    Feature 4
-                </div>
+				<div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
+					Feature 4
+				</div>
 			</div>
 		</div>
 	);
