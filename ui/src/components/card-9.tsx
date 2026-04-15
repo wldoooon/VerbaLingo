@@ -21,26 +21,31 @@ const Ellipses = () => {
 };
 
 const Container = ({ children }: { children: React.ReactNode }) => (
-    <div className="relative w-full rounded-lg border px-4 sm:px-6 md:px-8">
-        <div className="absolute left-0 top-4 z-0 h-px w-full bg-border sm:top-6 md:top-8"></div>
-        <div className="absolute bottom-4 left-0 z-0 h-px w-full bg-border sm:bottom-6 md:bottom-8"></div>
-        <div className="relative w-full border-x">
-            <Ellipses />
-            <div className="relative z-20 mx-auto py-8">{children}</div>
-        </div>
-    </div>
+	<div className="relative w-full h-full rounded-2xl border bg-background/50 px-4">
+		<div className="absolute left-0 top-3 z-0 h-px w-full bg-border/20"></div>
+		<div className="absolute bottom-3 left-0 z-0 h-px w-full bg-border/20"></div>
+		<div className="relative h-full border-x border-border/10">
+			<Ellipses />
+			<div className="relative z-20 mx-auto py-2 h-full flex flex-col justify-center">{children}</div>
+		</div>
+	</div>
 );
 //======================================
-export const Card_9 = () => {
+export const Card_9 = ({ 
+    children = Placeholder.content 
+}: { 
+    children?: React.ReactNode 
+}) => {
 	return (
 		<Container>
-			<div className="w-full p-2">
-                <Card className="border-none shadow-none">
-				<CardHeader>
-					<CardTitle>{Placeholder.title}</CardTitle>
-				</CardHeader>
-				<CardContent>{Placeholder.content}</CardContent>
-                </Card>
+			<div className="w-full h-full p-2 overflow-visible">
+				<Card className="border-none shadow-none bg-transparent h-full flex flex-col justify-center">
+					<CardContent className="p-0 leading-tight h-full flex items-center justify-center text-center">
+                        <div className="w-full">
+                            {children}
+                        </div>
+                    </CardContent>
+				</Card>
 			</div>
 		</Container>
 	);

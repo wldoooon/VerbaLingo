@@ -4,6 +4,8 @@ import { ThumbProgressCarousel } from "@/components/ui/thumb-progress-carousel";
 import { CarouselCard } from "@/components/carousel-card";
 import { BlueprintGrid, BlueprintBox } from "@/components/ui/blueprint-grid";
 import { Globe, AudioLines, Sparkles, Mic } from "lucide-react";
+import { GooeyText } from "@/components/ui/gooey-text-morphing";
+import { Card_9 } from "@/components/card-9";
 
 const carouselItems = [
 	{
@@ -74,12 +76,21 @@ const carouselItems = [
 							</BlueprintBox>
 							<BlueprintBox colSpan={7} rowSpan={3} dotted={false} className="px-8 border-b-primary/10">
 								<div className="flex flex-col items-start justify-center h-full w-full">
-									<div className="inline-flex items-center gap-1.5 rounded-none border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium mb-4 text-primary uppercase tracking-widest">
-										<Sparkles className="w-3 h-3" />
-										<span>Pronunciation</span>
-									</div>
+
 									<h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground drop-shadow-sm leading-tight text-left">
-										Hear exactly how they<br />speak <span className="text-primary italic font-serif opacity-90">English</span>
+										<div>Hear exactly how they</div>
+										<div className="flex items-center gap-3 mt-1">
+											<span>speak</span>
+											<div className="relative min-w-[180px] sm:min-w-[240px] h-[1.1em] flex items-center">
+												<GooeyText
+													texts={["English", "Spanish", "French", "German"]}
+													morphTime={2}
+													cooldownTime={1}
+													className="w-full h-full"
+													textClassName="text-3xl sm:text-4xl md:text-5xl font-serif italic text-primary opacity-90 leading-none"
+												/>
+											</div>
+										</div>
 									</h1>
 								</div>
 							</BlueprintBox>
@@ -94,10 +105,12 @@ const carouselItems = [
 									<AudioLines className="w-8 h-8 text-primary absolute animate-pulse" />
 								</div>
 							</BlueprintBox>
-							<BlueprintBox colSpan={6} rowSpan={2} dotted={false} className="px-6 bg-muted/5">
-								<p className="text-muted-foreground font-medium leading-relaxed text-center h-full flex items-center justify-center text-xs sm:text-sm md:text-base">
-									Search over 100,000+ authentic YouTube videos to hear exactly how native speakers pronounce any word or phrase in real life.
-								</p>
+							<BlueprintBox colSpan={6} rowSpan={2} dotted={false} className="p-0 border-none">
+								<Card_9>
+									<p className="text-muted-foreground font-medium leading-tight text-center text-xs sm:text-sm">
+										Over <span className="text-primary font-bold">100,000+ authentic</span> YouTube videos to master native pronunciation in any context.
+									</p>
+								</Card_9>
 							</BlueprintBox>
 							<BlueprintBox colSpan={2} rowSpan={2} shaded>
 							</BlueprintBox>
@@ -139,10 +152,10 @@ const carouselItems = [
 													<div className="z-10 bg-background/90 text-foreground text-[10px] sm:text-xs font-mono px-4 py-3 rounded-none shadow-sm opacity-95 backdrop-blur-md flex items-center gap-4 transition-all">
 														<img src={lang.icon} alt={lang.name} className="w-12 h-auto max-h-8 object-contain" />
 														<span className={`font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r opacity-90 ${lang.name === "FRANÇAIS" ? "from-blue-800 via-slate-500 to-red-700" :
-																lang.name === "ENGLISH" ? "from-blue-800 via-slate-500 to-red-700" :
-																	lang.name === "ESPAÑOL" ? "from-red-700 via-amber-600 to-red-700" :
-																		lang.name === "DEUTSCH" ? "from-zinc-950 via-red-800 to-amber-600" :
-																			""
+															lang.name === "ENGLISH" ? "from-blue-800 via-slate-500 to-red-700" :
+																lang.name === "ESPAÑOL" ? "from-red-700 via-amber-600 to-red-700" :
+																	lang.name === "DEUTSCH" ? "from-zinc-950 via-red-800 to-amber-600" :
+																		""
 															}`}>
 															{lang.name}
 														</span>
