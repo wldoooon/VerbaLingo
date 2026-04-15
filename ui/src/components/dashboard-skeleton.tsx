@@ -27,7 +27,7 @@ const carouselItems = [
 		image: "/Cartoon_Picture.jpg",
 		title: "Animation Studio",
 	},
-]; 
+];
 
 export function DashboardSkeleton() {
 	const { resolvedTheme } = useTheme();
@@ -72,10 +72,6 @@ export function DashboardSkeleton() {
 							<BlueprintBox>
 							</BlueprintBox>
 							<BlueprintBox colSpan={4} dotted={false} className="bg-primary/5">
-								<div className="flex items-center justify-center gap-2 sm:gap-3 w-full h-full text-[10px] sm:text-xs font-mono text-muted-foreground">
-									<Globe className="w-3 h-3 text-primary" />
-									<span className="truncate px-2">English • Spanish • French • +50</span>
-								</div>
 							</BlueprintBox>
 							<BlueprintBox>
 							</BlueprintBox>
@@ -109,7 +105,7 @@ export function DashboardSkeleton() {
 													morphTime={2}
 													cooldownTime={1}
 													className="w-full h-full"
-													textClassName="text-3xl sm:text-4xl md:text-5xl font-serif italic text-primary opacity-90 leading-none"
+													textClassName="text-3xl sm:text-4xl md:text-5xl font-serif italic text-orange-500 opacity-90 leading-none"
 												/>
 											</div>
 										</div>
