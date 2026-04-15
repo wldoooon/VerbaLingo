@@ -41,7 +41,7 @@ export function DashboardSkeleton() {
 		<div
 			className={cn(
 				"grid grid-cols-2 lg:grid-cols-4 gap-0",
-				"*:min-h-48 *:w-full *:bg-transparent *:border-b *:border-r *:border-border *:dark:bg-transparent border-t border-l"
+				"*:min-h-48 *:w-full *:bg-transparent *:border-b *:border-r *:border-border/20 *:dark:bg-transparent border-t border-l border-border/20"
 			)}
 		>
 			{/* --- Card 1: Top Hero Section (Split horizontally with NO gap) --- */}
@@ -53,13 +53,13 @@ export function DashboardSkeleton() {
 				<DecorIcon className="size-5 text-muted-foreground" position="bottom-right" />
 
 				{/* --- Bleeding Grid Lines (Outer Edges) --- */}
-				<div className="pointer-events-none absolute -top-[1px] -inset-x-[100px] h-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -bottom-[1px] -inset-x-[100px] h-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -left-[1px] -inset-y-[50px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -right-[1px] -inset-y-[50px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
+				<div className="pointer-events-none absolute -top-[1px] -inset-x-[100px] h-[1px] bg-border/20" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
+				<div className="pointer-events-none absolute -bottom-[1px] -inset-x-[100px] h-[1px] bg-border/20" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
+				<div className="pointer-events-none absolute -left-[1px] -inset-y-[50px] w-[1px] bg-border/20" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
+				<div className="pointer-events-none absolute -right-[1px] -inset-y-[50px] w-[1px] bg-border/20" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
 
 				{/* Content Wrappers (So you can put stuff in left/right independently) */}
-				<div className="relative z-10 w-full min-h-[450px] overflow-hidden flex flex-col items-center justify-center p-6 border-transparent border-r border-border border-b sm:border-b-0">
+				<div className="relative z-10 w-full min-h-[450px] overflow-hidden flex flex-col items-center justify-center p-6 border-transparent border-r border-border/20 border-b sm:border-b-0">
 					{/* Background Blueprint Grid completely filling the left side */}
 					<div className="absolute w-full h-full inset-0 z-0 pointer-events-none">
 						{/* 10 columns on desktop, 64px boxes. */}
@@ -192,7 +192,7 @@ export function DashboardSkeleton() {
 						</BlueprintGrid>
 					</div>
 				</div>
-				<div className="relative flex-1 z-10 w-full border-t lg:border-t-0 border-border lg:border-l p-2 sm:p-2 flex flex-col">
+				<div className="relative flex-1 z-10 w-full border-t lg:border-t-0 border-border/20 lg:border-l p-2 sm:p-2 flex flex-col">
 					<CarouselCard>
 						<ThumbProgressCarousel items={carouselItems} />
 					</CarouselCard>
