@@ -121,7 +121,7 @@ const carouselItems = [
 										100% { transform: translateX(-50%); }
 									}
 									.animate-blueprint {
-										animation: blueprint-marquee 20s linear infinite;
+										animation: blueprint-marquee 35s linear infinite;
 									}
 								`}</style>
 
@@ -130,21 +130,25 @@ const carouselItems = [
 									{/* The Belt (Repeated twice to loop seamlessly) */}
 									{[0, 1].map((copy) => (
 										<div key={copy} className="flex h-full shrink-0">
-											{[1, 2, 3, 2, 1, 3].map((val, idx) => (
-												<div key={`${copy}-${idx}`} className="w-[128px] h-full border-r border-border/40 shrink-0 relative flex items-center justify-center">
-													{/* Inner 2x2 grid lines mimicking BlueprintGrid cells */}
-													<div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
-														<div className="border-r border-b border-border/20"></div>
-														<div className="border-b border-border/20 bg-primary/[0.02]"></div>
-														<div className="border-r border-border/20"></div>
-														<div className={val === 2 ? "bg-primary/5" : ""}></div>
-													</div>
-													
-													{/* Floating Tech Data Labels */}
-													<div className="z-10 bg-background/90 border border-primary/20 text-primary text-[10px] font-mono px-2 py-0.5 rounded shadow-sm opacity-80 backdrop-blur-sm">
-														{val === 1 && "SYS_RDY"}
-														{val === 2 && "ACTV_NODE"}
-														{val === 3 && "AWAIT"}
+											{[
+												{ name: "ENGLISH", icon: "/countries/English.png" },
+												{ name: "ESPAÑOL", icon: "/countries/spain.png" },
+												{ name: "DEUTSCH", icon: "/countries/germany.png" },
+												{ name: "FRANÇAIS", icon: "/countries/france.png" }
+											].map((lang, idx) => (
+												<div key={`${copy}-${idx}`} className="w-[192px] h-full border-r border-border/40 shrink-0 relative flex items-center justify-center">
+													{/* Floating Language Tags */}
+													<div className="z-10 bg-background/90 text-foreground text-[10px] sm:text-xs font-mono px-4 py-3 rounded-none shadow-sm opacity-95 backdrop-blur-md flex items-center gap-4 transition-all">
+														<img src={lang.icon} alt={lang.name} className="w-12 h-auto max-h-8 object-contain" />
+														<span className={`font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r opacity-90 ${
+															lang.name === "FRANÇAIS" ? "from-blue-800 via-slate-500 to-red-700" :
+															lang.name === "ENGLISH" ? "from-blue-800 via-slate-500 to-red-700" :
+															lang.name === "ESPAÑOL" ? "from-red-700 via-amber-600 to-red-700" :
+															lang.name === "DEUTSCH" ? "from-zinc-950 via-red-800 to-amber-600" :
+															""
+														}`}>
+															{lang.name}
+														</span>
 													</div>
 												</div>
 											))}
