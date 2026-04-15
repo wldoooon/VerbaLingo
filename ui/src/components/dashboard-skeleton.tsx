@@ -105,14 +105,16 @@ const carouselItems = [
 							</BlueprintBox>
 
 							{/* ====== ROW 7 (Empty spacer + decorative) ====== */}
-							<BlueprintBox colSpan={4} rowSpan={2} shaded className="bg-primary/5">
-								<div className="w-full h-full flex justify-end items-end p-2 hidden sm:flex">
-									<Mic className="w-4 h-4 text-primary/40" />
+							<BlueprintBox colSpan={2} rowSpan={2} dotted={false} className="relative">
+								<div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center">
+									<p className="text-xs sm:text-sm font-medium text-foreground tracking-tight leading-relaxed">
+										Supporting <span className="text-primary">50+ languages</span> in real contexts
+									</p>
 								</div>
 							</BlueprintBox>
 
-							{/* --- FIRECRAWL ANIMATED MARQUEE LANE (Spans Cols 5-10, Rows 7-8) --- */}
-							<BlueprintBox colSpan={6} rowSpan={2} dotted={false} className="p-0 overflow-hidden relative border-l-0">
+							{/* --- FIRECRAWL ANIMATED MARQUEE LANE (Spans Cols 3-10, Rows 7-8) --- */}
+							<BlueprintBox colSpan={8} rowSpan={2} dotted={false} className="p-0 overflow-hidden relative border-l-0">
 								<style>{`
 									@keyframes blueprint-marquee {
 										0% { transform: translateX(0%); }
