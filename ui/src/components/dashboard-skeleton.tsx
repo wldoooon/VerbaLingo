@@ -50,22 +50,30 @@ const carouselItems = [
 						{/* 10 columns on desktop, 64px boxes. */}
 						<BlueprintGrid columns={10} cellSize="64px" className="border-none w-full h-full min-h-[500px]">
 							{/* ====== ROW 1 ====== */}
-							<BlueprintBox shaded />
-							<BlueprintBox />
-							<BlueprintBox />
+							<BlueprintBox shaded>
+							</BlueprintBox>
+							<BlueprintBox>
+							</BlueprintBox>
+							<BlueprintBox>
+							</BlueprintBox>
 							<BlueprintBox colSpan={4} dotted={false} className="bg-primary/5">
 								<div className="flex items-center justify-center gap-2 sm:gap-3 w-full h-full text-[10px] sm:text-xs font-mono text-muted-foreground">
 									<Globe className="w-3 h-3 text-primary" />
 									<span className="truncate px-2">English • Spanish • French • +50</span>
 								</div>
 							</BlueprintBox>
-							<BlueprintBox />
-							<BlueprintBox shaded />
-							<BlueprintBox />
+							<BlueprintBox>
+							</BlueprintBox>
+							<BlueprintBox shaded>
+							</BlueprintBox>
+							<BlueprintBox>
+							</BlueprintBox>
 
 							{/* ====== ROW 2, 3, 4 (Hero Title: spans 3 rows height) ====== */}
-							<BlueprintBox rowSpan={3} />
-							<BlueprintBox rowSpan={3} shaded />
+							<BlueprintBox rowSpan={3}>
+							</BlueprintBox>
+							<BlueprintBox rowSpan={3} shaded>
+							</BlueprintBox>
 							<BlueprintBox colSpan={6} rowSpan={3} dotted={false} className="px-4 border-b-primary/10">
 								<div className="flex flex-col items-center justify-center h-full w-full">
 									<div className="inline-flex items-center gap-1.5 rounded-none border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium mb-4 text-primary uppercase tracking-widest">
@@ -77,8 +85,10 @@ const carouselItems = [
 									</h1>
 								</div>
 							</BlueprintBox>
-							<BlueprintBox rowSpan={3} />
-							<BlueprintBox rowSpan={3} shaded />
+							<BlueprintBox rowSpan={3}>
+							</BlueprintBox>
+							<BlueprintBox rowSpan={3} shaded>
+							</BlueprintBox>
 
 							{/* ====== ROW 5, 6 (Subtitle & Audio graphic: spans 2 rows) ====== */}
 							<BlueprintBox colSpan={2} rowSpan={2} dotted={false}>
@@ -91,25 +101,45 @@ const carouselItems = [
 									Search over 100,000+ authentic YouTube videos to hear exactly how native speakers pronounce any word or phrase in real life.
 								</p>
 							</BlueprintBox>
-							<BlueprintBox colSpan={2} rowSpan={2} shaded />
+							<BlueprintBox colSpan={2} rowSpan={2} shaded>
+							</BlueprintBox>
 
 							{/* ====== ROW 7 (Empty spacer + decorative) ====== */}
-							<BlueprintBox shaded />
-							<BlueprintBox />
-							<BlueprintBox colSpan={2} dotted={false} className="bg-primary/5 justify-end items-end p-2 hidden sm:flex">
-								<Mic className="w-4 h-4 text-primary/40" />
+							<BlueprintBox colSpan={4} rowSpan={2} shaded className="bg-primary/5">
+								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">16-27</span>
+								<div className="w-full h-full flex justify-end items-end p-2 hidden sm:flex">
+									<Mic className="w-4 h-4 text-primary/40" />
+								</div>
 							</BlueprintBox>
 							{/* Fallback for smaller screens if colSpan goes weird, but grid handles it securely */}
-							<BlueprintBox colSpan={2} className="sm:hidden" />
-							<BlueprintBox colSpan={2} />
-							<BlueprintBox />
-							<BlueprintBox shaded />
-							<BlueprintBox />
-							<BlueprintBox />
+							<BlueprintBox colSpan={2} className="sm:hidden">
+								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">19</span>
+							</BlueprintBox>
+							<BlueprintBox colSpan={2}>
+								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">20</span>
+							</BlueprintBox>
+							<BlueprintBox>
+								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">21</span>
+							</BlueprintBox>
+							<BlueprintBox shaded>
+								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">22</span>
+							</BlueprintBox>
+							<BlueprintBox>
+								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">23</span>
+							</BlueprintBox>
+							<BlueprintBox>
+								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">24</span>
+							</BlueprintBox>
 
 							{/* Overflow Safety Net: Just in case the screen is super tall, fill the rest */}
-							{Array.from({ length: 30 }).map((_, i) => (
-								<BlueprintBox key={`overflow-${i}`} className="border-border/40" shaded={i % 7 === 0} />
+							{Array.from({ length: 26 }).map((_, i) => (
+								<BlueprintBox key={`overflow-${i}`} className="border-border/40" shaded={i % 7 === 0}>
+									{29 + i <= 44 && (
+										<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">
+											{29 + i}
+										</span>
+									)}
+								</BlueprintBox>
 							))}
 						</BlueprintGrid>
 					</div>
