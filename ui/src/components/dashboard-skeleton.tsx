@@ -25,12 +25,12 @@ const carouselItems = [
 	return (
 		<div
 			className={cn(
-				"grid grid-cols-2 gap-4 lg:grid-cols-4",
-				"*:min-h-48 *:w-full *:bg-muted *:border *:border-border *:dark:bg-muted/50"
+				"grid grid-cols-2 lg:grid-cols-4 gap-0",
+				"*:min-h-48 *:w-full *:bg-transparent *:border-b *:border-r *:border-border *:dark:bg-transparent border-t border-l"
 			)}
 		>
 			{/* --- Card 1: Top Hero Section (Split horizontally with NO gap) --- */}
-			<div className="relative col-span-2 min-h-114! lg:col-span-4 flex flex-col lg:flex-row" >
+			<div className="relative col-span-2 min-h-114! lg:col-span-4 grid grid-cols-1 lg:grid-cols-2 gap-0" >
 				{/* The Outer Corners */}
 				<DecorIcon className="size-5 text-muted-foreground" position="top-left" />
 				<DecorIcon className="size-5 text-muted-foreground" position="top-right" />
@@ -44,7 +44,7 @@ const carouselItems = [
 				<div className="pointer-events-none absolute -right-[1px] -inset-y-[50px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
 
 				{/* Content Wrappers (So you can put stuff in left/right independently) */}
-				<div className="relative flex-1 z-10 w-full min-h-[450px] overflow-hidden flex flex-col items-center justify-center p-6 border-transparent">
+				<div className="relative z-10 w-full min-h-[450px] overflow-hidden flex flex-col items-center justify-center p-6 border-transparent border-r border-border border-b sm:border-b-0">
 					{/* Background Blueprint Grid completely filling the left side */}
 					<div className="absolute w-full h-full inset-0 z-0 pointer-events-none">
 						{/* 10 columns on desktop, 64px boxes. */}
@@ -122,40 +122,65 @@ const carouselItems = [
 			</div>
 
 			{/* --- Card 2: Bottom Row - First Box --- */}
-			<div className="relative">
+			<div className="relative overflow-hidden flex items-center justify-center">
+				<div className="absolute inset-0 z-0 pointer-events-none">
+					{/* 5 columns because 25% width == exactly half of the 10-column Left Hero! */}
+					<BlueprintGrid columns={5} cellSize="64px" className="border-none">
+						{Array.from({ length: 25 }).map((_, i) => (
+							<BlueprintBox key={i} className="border-border/20" shaded={[2, 11].includes(i)} />
+						))}
+					</BlueprintGrid>
+				</div>
+                <div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
+                    Feature 1
+                </div>
 				<DecorIcon className="size-5 text-muted-foreground" position="top-left" />
 				<DecorIcon className="size-5 text-muted-foreground" position="top-right" />
 				<DecorIcon className="size-5 text-muted-foreground" position="bottom-left" />
 				<DecorIcon className="size-5 text-muted-foreground" position="bottom-right" />
-
-				<div className="pointer-events-none absolute -top-[1px] -inset-x-[100px] h-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -bottom-[1px] -inset-x-[100px] h-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -left-[1px] -inset-y-[0px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -right-[1px] -inset-y-[50px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
+				{/* Fading borders omitted for brevity, but architectural corners remain */}
 			</div>
 
 			{/* --- Card 3: Bottom Row - Second Box --- */}
-			<div className="relative" >
-				<div className="pointer-events-none absolute -top-[1px] -inset-x-[50px] h-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -bottom-[1px] -inset-x-[50px] h-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -left-[1px] -inset-y-[50px] -bottom-[100px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -right-[1px] -inset-y-[400px] -bottom-[50px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
+			<div className="relative overflow-hidden flex items-center justify-center" >
+				<div className="absolute inset-0 z-0 pointer-events-none">
+					<BlueprintGrid columns={5} cellSize="64px" className="border-none">
+						{Array.from({ length: 25 }).map((_, i) => (
+							<BlueprintBox key={i} className="border-border/20" shaded={[7, 18].includes(i)} />
+						))}
+					</BlueprintGrid>
+				</div>
+                <div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
+                    Feature 2
+                </div>
 			</div>
 
 			{/* --- Card 4: Bottom Row - Third Box --- */}
-			<div className="relative" >
-				<div className="pointer-events-none absolute -top-[1px] -inset-x-[50px] h-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -bottom-[1px] -inset-x-[50px] h-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -left-[1px] -inset-y-[400px] -bottom-[50px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -right-[1px] -inset-y-[50px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
+			<div className="relative overflow-hidden flex items-center justify-center" >
+				<div className="absolute inset-0 z-0 pointer-events-none">
+					<BlueprintGrid columns={5} cellSize="64px" className="border-none">
+						{Array.from({ length: 25 }).map((_, i) => (
+							<BlueprintBox key={i} className="border-border/20" shaded={[3, 14].includes(i)} />
+						))}
+					</BlueprintGrid>
+				</div>
+                <div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
+                    Feature 3
+                </div>
 			</div>
 
 			{/* --- Card 5: Bottom Row - Fourth Box --- */}
-			<div className="relative" >
-				<div className="pointer-events-none absolute -top-[1px] -inset-x-[50px] h-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -bottom-[1px] -inset-x-[50px] h-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -left-[1px] -inset-y-[50px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -right-[1px] -inset-y-[50px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
+			<div className="relative overflow-hidden flex items-center justify-center" >
+				<div className="absolute inset-0 z-0 pointer-events-none">
+					<BlueprintGrid columns={5} cellSize="64px" className="border-none">
+						{Array.from({ length: 25 }).map((_, i) => (
+							<BlueprintBox key={i} className="border-border/20" shaded={[9, 12].includes(i)} />
+						))}
+					</BlueprintGrid>
+				</div>
+                <div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
+                    Feature 4
+                </div>
 			</div>
 		</div>
 	);
