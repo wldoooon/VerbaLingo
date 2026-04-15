@@ -106,40 +106,54 @@ const carouselItems = [
 
 							{/* ====== ROW 7 (Empty spacer + decorative) ====== */}
 							<BlueprintBox colSpan={4} rowSpan={2} shaded className="bg-primary/5">
-								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">16-27</span>
 								<div className="w-full h-full flex justify-end items-end p-2 hidden sm:flex">
 									<Mic className="w-4 h-4 text-primary/40" />
 								</div>
 							</BlueprintBox>
-							{/* Fallback for smaller screens if colSpan goes weird, but grid handles it securely */}
-							<BlueprintBox colSpan={2} className="sm:hidden">
-								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">19</span>
-							</BlueprintBox>
-							<BlueprintBox colSpan={2}>
-								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">20</span>
-							</BlueprintBox>
-							<BlueprintBox>
-								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">21</span>
-							</BlueprintBox>
-							<BlueprintBox shaded>
-								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">22</span>
-							</BlueprintBox>
-							<BlueprintBox>
-								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">23</span>
-							</BlueprintBox>
-							<BlueprintBox>
-								<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">24</span>
+
+							{/* --- FIRECRAWL ANIMATED MARQUEE LANE (Spans Cols 5-10, Rows 7-8) --- */}
+							<BlueprintBox colSpan={6} rowSpan={2} dotted={false} className="p-0 overflow-hidden relative border-l-0">
+								<style>{`
+									@keyframes blueprint-marquee {
+										0% { transform: translateX(0%); }
+										100% { transform: translateX(-50%); }
+									}
+									.animate-blueprint {
+										animation: blueprint-marquee 20s linear infinite;
+									}
+								`}</style>
+
+								{/* Infinite scrolling wide container */}
+								<div className="flex w-max h-full animate-blueprint">
+									{/* The Belt (Repeated twice to loop seamlessly) */}
+									{[0, 1].map((copy) => (
+										<div key={copy} className="flex h-full shrink-0">
+											{[1, 2, 3, 2, 1, 3].map((val, idx) => (
+												<div key={`${copy}-${idx}`} className="w-[128px] h-full border-r border-border/40 shrink-0 relative flex items-center justify-center">
+													{/* Inner 2x2 grid lines mimicking BlueprintGrid cells */}
+													<div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
+														<div className="border-r border-b border-border/20"></div>
+														<div className="border-b border-border/20 bg-primary/[0.02]"></div>
+														<div className="border-r border-border/20"></div>
+														<div className={val === 2 ? "bg-primary/5" : ""}></div>
+													</div>
+													
+													{/* Floating Tech Data Labels */}
+													<div className="z-10 bg-background/90 border border-primary/20 text-primary text-[10px] font-mono px-2 py-0.5 rounded shadow-sm opacity-80 backdrop-blur-sm">
+														{val === 1 && "SYS_RDY"}
+														{val === 2 && "ACTV_NODE"}
+														{val === 3 && "AWAIT"}
+													</div>
+												</div>
+											))}
+										</div>
+									))}
+								</div>
 							</BlueprintBox>
 
 							{/* Overflow Safety Net: Just in case the screen is super tall, fill the rest */}
 							{Array.from({ length: 26 }).map((_, i) => (
-								<BlueprintBox key={`overflow-${i}`} className="border-border/40" shaded={i % 7 === 0}>
-									{29 + i <= 44 && (
-										<span className="absolute top-1 left-1 text-primary text-xs font-mono font-bold z-50 bg-background/80 px-1 border border-primary/20">
-											{29 + i}
-										</span>
-									)}
-								</BlueprintBox>
+								<BlueprintBox key={`overflow-${i}`} className="border-border/40" shaded={i % 7 === 0} />
 							))}
 						</BlueprintGrid>
 					</div>
