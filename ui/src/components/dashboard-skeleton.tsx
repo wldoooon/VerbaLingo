@@ -1,6 +1,9 @@
 import { cn } from "@/lib/utils";
 import { DecorIcon } from "@/components/ui/decor-icon";
 import { ThumbProgressCarousel } from "@/components/ui/thumb-progress-carousel";
+import { CarouselCard } from "@/components/carousel-card";
+import { BlueprintGrid, BlueprintBox } from "@/components/ui/blueprint-grid";
+import { Globe, AudioLines, Sparkles, Mic } from "lucide-react";
 
 const carouselItems = [
 	{
@@ -41,15 +44,80 @@ const carouselItems = [
 				<div className="pointer-events-none absolute -right-[1px] -inset-y-[50px] w-[1px] bg-border" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
 
 				{/* Content Wrappers (So you can put stuff in left/right independently) */}
-				<div className="flex-1 p-6 z-10 w-full">
-					{/* Put Left Content Here */}
+				<div className="relative flex-1 z-10 w-full min-h-[450px] overflow-hidden flex flex-col items-center justify-center p-6 border-transparent">
+					{/* Background Blueprint Grid completely filling the left side */}
+					<div className="absolute w-full h-full inset-0 z-0 pointer-events-none">
+						{/* 10 columns on desktop, 64px boxes. */}
+						<BlueprintGrid columns={10} cellSize="64px" className="border-none w-full h-full min-h-[500px]">
+							{/* ====== ROW 1 ====== */}
+							<BlueprintBox shaded />
+							<BlueprintBox />
+							<BlueprintBox />
+							<BlueprintBox colSpan={4} dotted={false} className="bg-primary/5">
+								<div className="flex items-center justify-center gap-2 sm:gap-3 w-full h-full text-[10px] sm:text-xs font-mono text-muted-foreground">
+									<Globe className="w-3 h-3 text-primary" />
+									<span className="truncate px-2">English • Spanish • French • +50</span>
+								</div>
+							</BlueprintBox>
+							<BlueprintBox />
+							<BlueprintBox shaded />
+							<BlueprintBox />
+
+							{/* ====== ROW 2, 3, 4 (Hero Title: spans 3 rows height) ====== */}
+							<BlueprintBox rowSpan={3} />
+							<BlueprintBox rowSpan={3} shaded />
+							<BlueprintBox colSpan={6} rowSpan={3} dotted={false} className="px-4 border-b-primary/10">
+								<div className="flex flex-col items-center justify-center h-full w-full">
+									<div className="inline-flex items-center gap-1.5 rounded-none border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-medium mb-4 text-primary uppercase tracking-widest">
+										<Sparkles className="w-3 h-3" />
+										<span>Pronunciation</span>
+									</div>
+									<h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-foreground drop-shadow-sm leading-tight text-center">
+										Master languages<br/>with <span className="text-primary italic font-serif opacity-90">real context</span>
+									</h1>
+								</div>
+							</BlueprintBox>
+							<BlueprintBox rowSpan={3} />
+							<BlueprintBox rowSpan={3} shaded />
+
+							{/* ====== ROW 5, 6 (Subtitle & Audio graphic: spans 2 rows) ====== */}
+							<BlueprintBox colSpan={2} rowSpan={2} dotted={false}>
+								<div className="flex items-center justify-center w-full h-full opacity-40 relative">
+									<AudioLines className="w-8 h-8 text-primary absolute animate-pulse" />
+								</div>
+							</BlueprintBox>
+							<BlueprintBox colSpan={6} rowSpan={2} dotted={false} className="px-6 bg-muted/5">
+								<p className="text-muted-foreground font-medium leading-relaxed text-center h-full flex items-center justify-center text-xs sm:text-sm md:text-base">
+									Search over 100,000+ authentic YouTube videos to hear exactly how native speakers pronounce any word or phrase in real life.
+								</p>
+							</BlueprintBox>
+							<BlueprintBox colSpan={2} rowSpan={2} shaded />
+
+							{/* ====== ROW 7 (Empty spacer + decorative) ====== */}
+							<BlueprintBox shaded />
+							<BlueprintBox />
+							<BlueprintBox colSpan={2} dotted={false} className="bg-primary/5 justify-end items-end p-2 hidden sm:flex">
+								<Mic className="w-4 h-4 text-primary/40" />
+							</BlueprintBox>
+							{/* Fallback for smaller screens if colSpan goes weird, but grid handles it securely */}
+							<BlueprintBox colSpan={2} className="sm:hidden" />
+							<BlueprintBox colSpan={2} />
+							<BlueprintBox />
+							<BlueprintBox shaded />
+							<BlueprintBox />
+							<BlueprintBox />
+
+							{/* Overflow Safety Net: Just in case the screen is super tall, fill the rest */}
+							{Array.from({ length: 30 }).map((_, i) => (
+								<BlueprintBox key={`overflow-${i}`} className="border-border/40" shaded={i % 7 === 0} />
+							))}
+						</BlueprintGrid>
+					</div>
 				</div>
 				<div className="relative flex-1 z-10 w-full border-t lg:border-t-0 border-border lg:border-l p-2 sm:p-2 flex flex-col">
-					<div className="flex-1 w-full relative rounded-2xl overflow-hidden shadow-sm shadow-foreground/5 border border-border/70 dark:border-border/40">
-						<div className="absolute inset-0">
-							<ThumbProgressCarousel items={carouselItems} />
-						</div>
-					</div>
+					<CarouselCard>
+						<ThumbProgressCarousel items={carouselItems} />
+					</CarouselCard>
 				</div>
 			</div>
 
