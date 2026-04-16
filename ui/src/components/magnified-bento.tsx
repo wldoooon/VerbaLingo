@@ -132,7 +132,7 @@ const MagnifiedBento = () => {
                   {[...row, ...row, ...row].map((item, idx) => (
                     <div
                       key={`${item.id}-${idx}-reveal`}
-                      className="flex gap-2 bg-background whitespace-nowrap w-fit text-foreground p-2 px-3 items-center border border-primary/20 shadow-sm rounded-full text-xs scale-125 ml-6"
+                      className="flex gap-2 bg-background whitespace-nowrap w-fit text-foreground p-2 px-3 items-center border border-primary/20 shadow-sm rounded-full text-xs scale-125"
                     >
                       <HugeiconsIcon
                         icon={item.icon}
