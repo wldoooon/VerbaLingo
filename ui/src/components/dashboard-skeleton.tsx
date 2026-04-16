@@ -204,6 +204,8 @@ export function DashboardSkeleton() {
 			{/* --- Huge Main Title Hero (Split into 3 Boxes: 1 - 2 - 1) --- */}
 			{/* Left Flank (Hidden on Mobile) */}
 			<div className="hidden lg:block col-span-1 relative min-h-[500px] lg:min-h-[600px] bg-background border-r border-border/40">
+				{/* Mask out the parent container's left border for just this section */}
+				<div className="absolute top-0 bottom-0 -left-[1px] w-[2px] bg-background z-20" />
 				<div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 			</div>
 
@@ -225,7 +227,7 @@ export function DashboardSkeleton() {
 			</div>
 
 			{/* Right Flank (Hidden on Mobile) */}
-			<div className="hidden lg:block col-span-1 relative min-h-[500px] lg:min-h-[600px] bg-background">
+			<div className="hidden lg:block col-span-1 relative min-h-[500px] lg:min-h-[600px] bg-background" style={{ borderRightColor: "transparent" }}>
 				<div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 			</div>
 
