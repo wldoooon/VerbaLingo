@@ -195,10 +195,11 @@ export function DashboardSkeleton() {
 				</div>
 			</div>
 
-			{/* --- Spacer Section (Full width, no center split) --- */}
+			{/* --- Spacer Row 1 (Full width, no center split) --- */}
 			<div className="col-span-2 lg:col-span-4" style={{ minHeight: "128px" }} />
 
-			
+			{/* --- Spacer Row 2 (50% split, restoring the vertical line) --- */}
+			<div className="col-span-1 lg:col-span-2" style={{ minHeight: "64px" }} />
 			<div className="col-span-1 lg:col-span-2" style={{ minHeight: "64px" }} />
 
 			{/* --- Huge Main Title Hero (Full Width) --- */}
