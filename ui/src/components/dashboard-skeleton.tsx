@@ -275,18 +275,18 @@ export function DashboardSkeleton() {
 					</div>
 
 					{/* Feature 2: Article Preview Feature */}
-					<div className="relative flex flex-col items-center justify-center p-4 min-h-80 border-b lg:border-b-0 lg:border-r border-border/40 hover:bg-muted/5 transition-colors group overflow-hidden bg-background/50 backdrop-blur-sm">
+					<div className="relative flex flex-col items-center justify-center min-h-80 border-b lg:border-b-0 lg:border-r border-border/40 hover:bg-muted/5 transition-colors group overflow-hidden bg-background/50 backdrop-blur-sm">
 						<div 
-							className="w-full h-full flex items-center justify-center transform scale-[0.8] xl:scale-[0.85] origin-top transition-transform duration-700 ease-out group-hover:scale-[0.9] group-hover:-translate-y-1"
+							className="w-full h-full flex items-center justify-center transform scale-[0.85] xl:scale-[0.95]"
 						>
 							<ArticlePreviewCard />
 						</div>
 					</div>
 
 					{/* Feature 3 & 4: Magnified Bento Feature */}
-					<div className="relative col-span-1 sm:col-span-2 min-h-80 p-4 flex flex-col items-center justify-center border-b lg:border-b-0 border-border/40 hover:bg-muted/5 transition-colors group overflow-hidden">
+					<div className="relative col-span-1 sm:col-span-2 min-h-80 flex flex-col items-center justify-center border-b lg:border-b-0 border-border/40 hover:bg-muted/5 transition-colors group overflow-hidden">
 						<div 
-							className="w-full h-full flex items-center justify-center transform scale-[0.85] lg:scale-[0.9] origin-top transition-transform duration-700 ease-out group-hover:scale-[0.94]"
+							className="w-full h-full flex items-center justify-center"
 						>
 							<MagnifiedBento />
 						</div>

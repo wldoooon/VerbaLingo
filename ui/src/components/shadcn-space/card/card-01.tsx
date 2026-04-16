@@ -39,7 +39,6 @@ const ArticlePreviewCard = () => {
               alt='Learning context'
               className='w-full h-full object-cover'
             />
-            <div className='absolute inset-0 bg-gradient-to-t from-background/80 to-transparent' />
           </motion.div>
 
           {/* Content Area */}

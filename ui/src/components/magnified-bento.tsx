@@ -49,7 +49,7 @@ const CONFIG = {
   title: "Deep Context Engine",
   description:
     "Our engine indexes millions of video frames to show you exactly how words are used in real conversations, not just textbooks.",
-  containerHeight: "h-[200px] sm:h-[280px]",
+  containerHeight: "h-full min-h-80 w-full",
   lensSize: 92,
 };
 
@@ -62,12 +62,12 @@ const MagnifiedBento = () => {
   const inverseMask = useMotionTemplate`radial-gradient(circle 30px at calc(50% + ${lensX}px - 10px) calc(50% + ${lensY}px - 10px), transparent 100%, black 100%)`;
 
   return (
-    <div className="flex items-center justify-center w-full not-prose h-full">
-      <div className="group relative w-full h-full overflow-hidden rounded-[2.5rem] border border-border/50 bg-card/50 backdrop-blur-sm p-1.5 sm:p-2 shadow-2xl shadow-primary/5 transition-all duration-500 hover:shadow-primary/10 hover:-translate-y-1">
+    <div className="flex items-center justify-center w-full not-prose h-full bg-transparent">
+      <div className="group relative w-full h-full overflow-hidden rounded-none bg-transparent transition-all duration-500">
         <div
           ref={containerRef}
           className={cn(
-            "relative w-full overflow-hidden rounded-[2rem] bg-muted/30",
+            "relative w-full overflow-hidden rounded-none bg-transparent",
             CONFIG.containerHeight
           )}
         >
@@ -167,14 +167,6 @@ const MagnifiedBento = () => {
           <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-linear-to-l from-background to-transparent z-20"></div>
         </div>
 
-        <div className="p-6 sm:p-8">
-          <h3 className="text-xl font-bold tracking-tight text-foreground">
-            {CONFIG.title}
-          </h3>
-          <p className="mt-2 text-sm font-medium leading-relaxed text-muted-foreground">
-            {CONFIG.description}
-          </p>
-        </div>
       </div>
     </div>
   );
