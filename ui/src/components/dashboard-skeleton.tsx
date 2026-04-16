@@ -62,7 +62,7 @@ export function DashboardSkeleton() {
 				<div className="pointer-events-none absolute -right-[1px] -inset-y-[50px] w-[1px] bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
 
 				{/* Content Wrappers (So you can put stuff in left/right independently) */}
-				<div className="relative z-10 w-full min-h-[450px] overflow-hidden flex flex-col items-center justify-center p-6 border-transparent border-r border-border/40 border-b-0">
+				<div className="relative z-10 w-full min-h-[512px] overflow-hidden flex flex-col items-center justify-center p-6 border-transparent border-r border-border/40 border-b-0">
 					{/* Background Blueprint Grid completely filling the left side */}
 					<div className="absolute w-full h-full inset-0 z-0 pointer-events-none">
 						{/* 10 columns on desktop, 64px boxes. */}

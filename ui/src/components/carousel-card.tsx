@@ -14,12 +14,13 @@ const Ellipses = () => {
 };
 
 const Container = ({ children }: { children: React.ReactNode }) => (
-    <div className="relative w-full rounded-lg border px-4 sm:px-6 md:px-8 h-full flex flex-col">
+    <div className="relative w-full rounded-2xl border px-4 sm:px-6 md:px-8 h-full flex flex-col">
         <div className="absolute left-0 top-4 z-0 h-px w-full bg-border sm:top-6 md:top-8"></div>
         <div className="absolute bottom-4 left-0 z-0 h-px w-full bg-border sm:bottom-6 md:bottom-8"></div>
         <div className="relative w-full border-x flex-1 flex flex-col">
             <Ellipses />
-            <div className="relative z-20 flex-1 w-full h-full flex flex-col p-4 sm:p-6 md:p-8">{children}</div>
+            {/* Reduced internal padding to push Carousel closer to the inner frame lines */}
+            <div className="relative z-20 flex-1 w-full h-full flex flex-col p-2 sm:p-2 md:p-3">{children}</div>
         </div>
     </div>
 );
@@ -27,7 +28,7 @@ const Container = ({ children }: { children: React.ReactNode }) => (
 export const CarouselCard = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<Container>
-			<div className="flex-1 w-full relative rounded-2xl overflow-hidden shadow-sm shadow-foreground/5 border border-border/70 dark:border-border/40 min-h-[450px]">
+			<div className="flex-1 w-full relative rounded-2xl overflow-hidden shadow-sm shadow-foreground/5 border border-border/70 dark:border-border/40 min-h-[400px]">
                 <div className="absolute inset-0">
 				    {children}
                 </div>

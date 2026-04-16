@@ -107,13 +107,6 @@ export function ThumbProgressCarousel({
                   className='object-cover transition-transform duration-700 ease-in-out group-hover:scale-105'
                   priority
                 />
-                <div className='absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent pointer-events-none' />
-
-                <div className='absolute bottom-32 left-8 md:left-12 max-w-lg pointer-events-none'>
-                  <h2 className='text-3xl md:text-5xl font-bold text-foreground tracking-tight drop-shadow-lg z-10'>
-                    {item.title}
-                  </h2>
-                </div>
               </div>
             </CarouselItem>
           ))}
