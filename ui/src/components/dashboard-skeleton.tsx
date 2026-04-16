@@ -195,29 +195,26 @@ export function DashboardSkeleton() {
 				</div>
 			</div>
 
-			{/* --- Spacer Row 1 (Full width, no center split) --- */}
-			<div className="col-span-2 lg:col-span-4" style={{ minHeight: "128px" }} />
+
 
 			{/* --- Spacer Row 2 (50% split, restoring the vertical line) --- */}
-			<div className="col-span-1 lg:col-span-2" style={{ minHeight: "64px" }} />
-			<div className="col-span-1 lg:col-span-2" style={{ minHeight: "64px" }} />
+			<div className="col-span-1 lg:col-span-2" style={{ minHeight: "128px" }} />
+			<div className="col-span-1 lg:col-span-2" style={{ minHeight: "128px" }} />
 
-			{/* --- Huge Main Title Hero (Full Width) --- */}
-			<div className="col-span-2 lg:col-span-4 relative min-h-[500px] lg:min-h-[600px] flex flex-col items-center justify-center text-center px-4 py-20 overflow-hidden bg-background">
+			{/* --- Huge Main Title Hero (Split into 3 Boxes: 1 - 2 - 1) --- */}
+			{/* Left Flank (Hidden on Mobile) */}
+			<div className="hidden lg:block col-span-1 relative min-h-[500px] lg:min-h-[600px] bg-background border-r border-border/40">
+				<div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+			</div>
+
+			{/* Center Content Box */}
+			<div className="col-span-2 lg:col-span-2 relative min-h-[500px] lg:min-h-[600px] flex flex-col items-center justify-center text-center px-4 py-20 overflow-hidden bg-background">
 				{/* Background Blueprint Dot matrix exactly like Firecrawl */}
 				<div className="absolute inset-0 z-0 pointer-events-none opacity-20" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 				
 				<div className="relative z-10 flex flex-col items-center max-w-4xl mx-auto">
-					<div className="flex items-center gap-2 sm:gap-3 px-3 py-1.5 bg-background shadow-sm border border-border text-[10px] sm:text-xs font-mono tracking-wider font-bold mb-10 text-foreground/80">
-						<span className="text-muted-foreground/60">//</span>
-						<div className="size-4 bg-orange-500 flex items-center justify-center rounded-sm">
-							<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-						</div>
-						<span className="uppercase">Learner First</span>
-						<span className="text-muted-foreground/60">\\</span>
-					</div>
 					
-					<h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-medium tracking-tight text-foreground mb-6 leading-[1.05]">
+					<h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-medium tracking-tight text-foreground mb-6 leading-[1.05]">
 						Start <span className="font-extrabold text-orange-500">speaking</span> today
 					</h2>
 					
@@ -225,6 +222,11 @@ export function DashboardSkeleton() {
 						The acoustic infrastructure layer that helps you listen,<br className="hidden md:block"/> practice, and perfect pronunciation from the live web.
 					</p>
 				</div>
+			</div>
+
+			{/* Right Flank (Hidden on Mobile) */}
+			<div className="hidden lg:block col-span-1 relative min-h-[500px] lg:min-h-[600px] bg-background">
+				<div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 			</div>
 
 			{/* --- Bottom Row: Unified Feature Section --- */}
