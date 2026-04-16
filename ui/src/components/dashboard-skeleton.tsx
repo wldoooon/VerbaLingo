@@ -199,65 +199,49 @@ export function DashboardSkeleton() {
 				</div>
 			</div>
 
-			{/* --- Card 2: Bottom Row - First Box --- */}
-			<div className="relative overflow-hidden flex items-center justify-center">
+			{/* --- Bottom Row: Unified Feature Section --- */}
+			<div className="relative col-span-2 lg:col-span-4 min-h-80 flex flex-col overflow-hidden">
+				{/* Unified continuous background grid for all 4 features to prevent grid line conflicts */}
 				<div className="absolute inset-0 z-0 pointer-events-none">
-					{/* 5 columns because 25% width == exactly half of the 10-column Left Hero! */}
-					<BlueprintGrid columns={5} cellSize="64px" className="border-none">
-						{Array.from({ length: 25 }).map((_, i) => (
-							<BlueprintBox key={i} className="border-border/20" shaded={[2, 11].includes(i)} />
+					{/* 20 columns perfectly tiling across the entire 100% width */}
+					<BlueprintGrid columns={20} cellSize="64px" className="border-none bg-transparent">
+						{Array.from({ length: 120 }).map((_, i) => (
+							<BlueprintBox key={i} className="border-border/20" shaded={[2, 11, 7, 18, 3, 14, 9, 12, 22, 31, 27, 38, 23, 34, 29, 32].includes(i)} />
 						))}
 					</BlueprintGrid>
 				</div>
-				<div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
-					Feature 1
-				</div>
-				<DecorIcon className="size-5 text-muted-foreground" position="top-left" />
-				<DecorIcon className="size-5 text-muted-foreground" position="top-right" />
-				<DecorIcon className="size-5 text-muted-foreground" position="bottom-left" />
-				<DecorIcon className="size-5 text-muted-foreground" position="bottom-right" />
-				{/* Fading borders omitted for brevity, but architectural corners remain */}
-			</div>
+                
+                {/* Overlaying the 4 feature cards on top of the continuous grid */}
+				<div className="relative z-10 w-full h-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                    
+					{/* Feature 1 */}
+					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 sm:border-r border-border/20 hover:bg-muted/5 transition-colors group">
+						<DecorIcon className="size-5 text-border absolute top-0 left-0 -translate-x-[1px] -translate-y-[1px]" position="top-left" />
+						<DecorIcon className="size-5 text-border absolute top-0 right-0 translate-x-[1px] -translate-y-[1px]" position="top-right" />
+						<DecorIcon className="size-5 text-border absolute bottom-0 left-0 -translate-x-[1px] translate-y-[1px]" position="bottom-left" />
+						<DecorIcon className="size-5 text-border absolute bottom-0 right-0 translate-x-[1px] translate-y-[1px]" position="bottom-right" />
+                        <h3 className="text-xl font-bold tracking-tight text-foreground mb-3 group-hover:text-orange-500 transition-colors">Acoustic Analysis</h3>
+                        <p className="text-sm text-muted-foreground max-w-[200px]">Deep frequency scanning isolates phonetic structures naturally.</p>
+					</div>
 
-			{/* --- Card 3: Bottom Row - Second Box --- */}
-			<div className="relative overflow-hidden flex items-center justify-center" >
-				<div className="absolute inset-0 z-0 pointer-events-none">
-					<BlueprintGrid columns={5} cellSize="64px" className="border-none">
-						{Array.from({ length: 25 }).map((_, i) => (
-							<BlueprintBox key={i} className="border-border/20" shaded={[7, 18].includes(i)} />
-						))}
-					</BlueprintGrid>
-				</div>
-				<div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
-					Feature 2
-				</div>
-			</div>
+					{/* Feature 2 */}
+					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 lg:border-r border-border/20 hover:bg-muted/5 transition-colors group">
+                        <h3 className="text-xl font-bold tracking-tight text-foreground mb-3 group-hover:text-orange-500 transition-colors">AI Context Engine</h3>
+                        <p className="text-sm text-muted-foreground max-w-[200px]">Understand cultural nuances and local slang automatically.</p>
+					</div>
 
-			{/* --- Card 4: Bottom Row - Third Box --- */}
-			<div className="relative overflow-hidden flex items-center justify-center" >
-				<div className="absolute inset-0 z-0 pointer-events-none">
-					<BlueprintGrid columns={5} cellSize="64px" className="border-none">
-						{Array.from({ length: 25 }).map((_, i) => (
-							<BlueprintBox key={i} className="border-border/20" shaded={[3, 14].includes(i)} />
-						))}
-					</BlueprintGrid>
-				</div>
-				<div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
-					Feature 3
-				</div>
-			</div>
+					{/* Feature 3 */}
+					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 sm:border-r border-border/20 hover:bg-muted/5 transition-colors group">
+                        <h3 className="text-xl font-bold tracking-tight text-foreground mb-3 group-hover:text-orange-500 transition-colors">Shadowing Mode</h3>
+                        <p className="text-sm text-muted-foreground max-w-[200px]">Practice your pronunciation and get confidence scores instantly.</p>
+					</div>
 
-			{/* --- Card 5: Bottom Row - Fourth Box --- */}
-			<div className="relative overflow-hidden flex items-center justify-center" >
-				<div className="absolute inset-0 z-0 pointer-events-none">
-					<BlueprintGrid columns={5} cellSize="64px" className="border-none">
-						{Array.from({ length: 25 }).map((_, i) => (
-							<BlueprintBox key={i} className="border-border/20" shaded={[9, 12].includes(i)} />
-						))}
-					</BlueprintGrid>
-				</div>
-				<div className="relative z-10 p-4 w-full h-full text-center text-muted-foreground flex items-center justify-center">
-					Feature 4
+					{/* Feature 4 */}
+					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground hover:bg-muted/5 transition-colors group">
+                        <h3 className="text-xl font-bold tracking-tight text-foreground mb-3 group-hover:text-orange-500 transition-colors">Global Vocabulary</h3>
+                        <p className="text-sm text-muted-foreground max-w-[200px]">Discover how terms are spoken across multiple regional accents.</p>
+					</div>
+
 				</div>
 			</div>
 		</div>
