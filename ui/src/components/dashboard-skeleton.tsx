@@ -211,8 +211,20 @@ export function DashboardSkeleton() {
 
 			{/* Center Content Box */}
 			<div className="col-span-2 lg:col-span-2 relative min-h-[500px] lg:min-h-[600px] flex flex-col items-center justify-center text-center px-4 py-20 overflow-hidden bg-background">
-				{/* Background Blueprint Dot matrix exactly like Firecrawl */}
-				<div className="absolute inset-0 z-0 pointer-events-none opacity-20" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+				{/* Architectural Grid Background (fading bottom-out from center) */}
+				<div 
+					className="absolute inset-0 z-0 pointer-events-none" 
+					style={{ 
+						WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)", 
+						maskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)" 
+					}}
+				>
+					<BlueprintGrid columns={10} cellSize="64px" className="border-none bg-transparent h-full">
+						{Array.from({ length: 100 }).map((_, i) => (
+							<BlueprintBox key={i} className="border-border/40" shaded={[5, 12, 17, 24, 33].includes(i)} />
+						))}
+					</BlueprintGrid>
+				</div>
 				
 				<div className="relative z-10 flex flex-col items-center max-w-4xl mx-auto">
 					
