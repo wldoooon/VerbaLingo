@@ -10,6 +10,8 @@ import { BlueprintGrid, BlueprintBox } from "@/components/ui/blueprint-grid";
 import { Globe, AudioLines, Sparkles, Mic } from "lucide-react";
 import { GooeyText } from "@/components/ui/gooey-text-morphing";
 import { Card_9 } from "@/components/card-9";
+import ArticlePreviewCard from "./shadcn-space/card/card-01";
+import MagnifiedBento from "./magnified-bento";
 
 const carouselItems = [
 	{
@@ -246,7 +248,10 @@ export function DashboardSkeleton() {
 			{/* --- Bottom Row: Unified Feature Section --- */}
 			<div className="relative col-span-2 lg:col-span-4 min-h-80 flex flex-col overflow-hidden border-t border-border/40">
 				{/* Unified continuous background grid for all 4 features to prevent grid line conflicts */}
-				<div className="absolute inset-0 z-0 pointer-events-none">
+				<div 
+					className="absolute inset-0 z-0 pointer-events-none"
+					style={{ WebkitMaskImage: "linear-gradient(to bottom, black 70%, transparent 100%)", maskImage: "linear-gradient(to bottom, black 70%, transparent 100%)" }}
+				>
 					{/* 20 columns perfectly tiling across the entire 100% width */}
 					<BlueprintGrid columns={20} cellSize="64px" className="border-none bg-transparent">
 						{Array.from({ length: 120 }).map((_, i) => (
@@ -254,38 +259,38 @@ export function DashboardSkeleton() {
 						))}
 					</BlueprintGrid>
 				</div>
-                
-                {/* Overlaying the 4 feature cards on top of the continuous grid */}
-				<div className="relative z-10 w-full h-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                    
-					{/* Feature 1 */}
-					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 sm:border-r border-border/40 hover:bg-muted/5 transition-colors group">
-						<DecorIcon className="size-5 text-border absolute top-0 left-0 -translate-x-[1px] -translate-y-[1px]" position="top-left" />
-						<DecorIcon className="size-5 text-border absolute top-0 right-0 translate-x-[1px] -translate-y-[1px]" position="top-right" />
-						<DecorIcon className="size-5 text-border absolute bottom-0 left-0 -translate-x-[1px] translate-y-[1px]" position="bottom-left" />
-						<DecorIcon className="size-5 text-border absolute bottom-0 right-0 translate-x-[1px] translate-y-[1px]" position="bottom-right" />
-                        <h3 className="text-xl font-bold tracking-tight text-foreground mb-3 group-hover:text-orange-500 transition-colors">Acoustic Analysis</h3>
-                        <p className="text-sm text-muted-foreground max-w-[200px]">Deep frequency scanning isolates phonetic structures naturally.</p>
+				{/* Overlaying the feature columns on top of the continuous grid */}
+				<div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 flex-1">
+					{/* Feature 1: Context Engine Text */}
+					<div className="relative p-8 min-h-80 flex flex-col justify-between text-left text-foreground border-b lg:border-b-0 lg:border-r border-border/40 hover:bg-muted/5 transition-colors group">
+						<div className="flex flex-col h-full w-full">
+							<div className="mb-4 text-orange-500">
+								<Globe className="size-8 group-hover:scale-110 transition-transform duration-500" strokeWidth={1.5} />
+							</div>
+							<h3 className="text-xl font-bold mb-3 tracking-tight text-foreground group-hover:text-orange-500 transition-colors">Context Engine</h3>
+							<p className="text-sm text-foreground/70 leading-relaxed font-medium">
+								Don't just find definitions. Find moments. Our engine scans millions of videos to find the exact millisecond a word is spoken, giving you 360° understanding of tone and situation.
+							</p>
+						</div>
 					</div>
 
-					{/* Feature 2 */}
-					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 lg:border-r border-border/40 hover:bg-muted/5 transition-colors group">
-                        <h3 className="text-xl font-bold tracking-tight text-foreground mb-3 group-hover:text-orange-500 transition-colors">AI Context Engine</h3>
-                        <p className="text-sm text-muted-foreground max-w-[200px]">Understand cultural nuances and local slang automatically.</p>
+					{/* Feature 2: Article Preview Feature */}
+					<div className="relative flex flex-col items-center justify-center p-4 min-h-80 border-b lg:border-b-0 lg:border-r border-border/40 hover:bg-muted/5 transition-colors group overflow-hidden bg-background/50 backdrop-blur-sm">
+						<div 
+							className="w-full h-full flex items-center justify-center transform scale-[0.8] xl:scale-[0.85] origin-top transition-transform duration-700 ease-out group-hover:scale-[0.9] group-hover:-translate-y-1"
+						>
+							<ArticlePreviewCard />
+						</div>
 					</div>
 
-					{/* Feature 3 */}
-					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 sm:border-r border-border/40 hover:bg-muted/5 transition-colors group">
-                        <h3 className="text-xl font-bold tracking-tight text-foreground mb-3 group-hover:text-orange-500 transition-colors">Shadowing Mode</h3>
-                        <p className="text-sm text-muted-foreground max-w-[200px]">Practice your pronunciation and get confidence scores instantly.</p>
+					{/* Feature 3 & 4: Magnified Bento Feature */}
+					<div className="relative col-span-1 sm:col-span-2 min-h-80 p-4 flex flex-col items-center justify-center border-b lg:border-b-0 border-border/40 hover:bg-muted/5 transition-colors group overflow-hidden">
+						<div 
+							className="w-full h-full flex items-center justify-center transform scale-[0.85] lg:scale-[0.9] origin-top transition-transform duration-700 ease-out group-hover:scale-[0.94]"
+						>
+							<MagnifiedBento />
+						</div>
 					</div>
-
-					{/* Feature 4 */}
-					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground hover:bg-muted/5 transition-colors group">
-                        <h3 className="text-xl font-bold tracking-tight text-foreground mb-3 group-hover:text-orange-500 transition-colors">Global Vocabulary</h3>
-                        <p className="text-sm text-muted-foreground max-w-[200px]">Discover how terms are spoken across multiple regional accents.</p>
-					</div>
-
 				</div>
 			</div>
 		</div>
