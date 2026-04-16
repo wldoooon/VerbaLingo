@@ -20,7 +20,7 @@ export function BlueprintGrid({
 	return (
 		<div
 			className={cn(
-				"grid w-full h-full border-t border-l border-border/20 overflow-hidden bg-background",
+				"grid w-full h-full border-t border-l border-border/40 overflow-hidden bg-background",
 				className
 			)}
 			style={{
@@ -58,7 +58,7 @@ export function BlueprintBox({
 	return (
 		<div
 			className={cn(
-				"relative border-r border-b border-border/20 flex flex-col items-center justify-center transition-colors duration-500",
+				"relative border-r border-b border-border/40 flex flex-col items-center justify-center transition-colors duration-500",
 				shaded && "bg-muted/30 dark:bg-muted/10", // The firecrawl "data processing block" look
 				className
 			)}

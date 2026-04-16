@@ -41,7 +41,7 @@ export function DashboardSkeleton() {
 		<div
 			className={cn(
 				"grid grid-cols-2 lg:grid-cols-4 gap-0",
-				"*:min-h-48 *:w-full *:bg-transparent *:border-b *:border-r *:border-border/20 *:dark:bg-transparent border-t border-l border-border/20"
+				"*:min-h-48 *:w-full *:bg-transparent *:border-b *:border-r *:border-border/40 *:dark:bg-transparent border-t border-l border-border/40"
 			)}
 		>
 			{/* --- Card 1: Top Hero Section (Split horizontally with NO gap) --- */}
@@ -53,13 +53,13 @@ export function DashboardSkeleton() {
 				<DecorIcon className="size-5 text-muted-foreground" position="bottom-right" />
 
 				{/* --- Bleeding Grid Lines (Outer Edges) --- */}
-				<div className="pointer-events-none absolute -top-[1px] -inset-x-[100px] h-[1px] bg-border/20" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -bottom-[1px] -inset-x-[100px] h-[1px] bg-border/20" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -left-[1px] -inset-y-[50px] w-[1px] bg-border/20" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="pointer-events-none absolute -right-[1px] -inset-y-[50px] w-[1px] bg-border/20" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
+				<div className="pointer-events-none absolute -top-[1px] -inset-x-[100px] h-[1px] bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
+				<div className="pointer-events-none absolute -bottom-[1px] -inset-x-[100px] h-[1px] bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
+				<div className="pointer-events-none absolute -left-[1px] -inset-y-[50px] w-[1px] bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
+				<div className="pointer-events-none absolute -right-[1px] -inset-y-[50px] w-[1px] bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }} />
 
 				{/* Content Wrappers (So you can put stuff in left/right independently) */}
-				<div className="relative z-10 w-full min-h-[450px] overflow-hidden flex flex-col items-center justify-center p-6 border-transparent border-r border-border/20 border-b sm:border-b-0">
+				<div className="relative z-10 w-full min-h-[450px] overflow-hidden flex flex-col items-center justify-center p-6 border-transparent border-r border-border/40 border-b-0">
 					{/* Background Blueprint Grid completely filling the left side */}
 					<div className="absolute w-full h-full inset-0 z-0 pointer-events-none">
 						{/* 10 columns on desktop, 64px boxes. */}
@@ -185,28 +185,55 @@ export function DashboardSkeleton() {
 								</div>
 							</BlueprintBox>
 
-							{/* Overflow Safety Net: Just in case the screen is super tall, fill the rest */}
-							{Array.from({ length: 26 }).map((_, i) => (
-								<BlueprintBox key={`overflow-${i}`} className="border-border/40" shaded={i % 7 === 0} />
-							))}
 						</BlueprintGrid>
 					</div>
 				</div>
-				<div className="relative flex-1 z-10 w-full border-t lg:border-t-0 border-border/20 lg:border-l p-2 sm:p-2 flex flex-col">
+				<div className="relative flex-1 z-10 w-full border-t lg:border-t-0 p-2 sm:p-2 flex flex-col">
 					<CarouselCard>
 						<ThumbProgressCarousel items={carouselItems} />
 					</CarouselCard>
 				</div>
 			</div>
 
+			{/* --- Spacer Section (Full width, no center split) --- */}
+			<div className="col-span-2 lg:col-span-4" style={{ minHeight: "128px" }} />
+
+			
+			<div className="col-span-1 lg:col-span-2" style={{ minHeight: "64px" }} />
+
+			{/* --- Huge Main Title Hero (Full Width) --- */}
+			<div className="col-span-2 lg:col-span-4 relative min-h-[500px] lg:min-h-[600px] flex flex-col items-center justify-center text-center px-4 py-20 overflow-hidden bg-background">
+				{/* Background Blueprint Dot matrix exactly like Firecrawl */}
+				<div className="absolute inset-0 z-0 pointer-events-none opacity-20" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+				
+				<div className="relative z-10 flex flex-col items-center max-w-4xl mx-auto">
+					<div className="flex items-center gap-2 sm:gap-3 px-3 py-1.5 bg-background shadow-sm border border-border text-[10px] sm:text-xs font-mono tracking-wider font-bold mb-10 text-foreground/80">
+						<span className="text-muted-foreground/60">//</span>
+						<div className="size-4 bg-orange-500 flex items-center justify-center rounded-sm">
+							<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+						</div>
+						<span className="uppercase">Learner First</span>
+						<span className="text-muted-foreground/60">\\</span>
+					</div>
+					
+					<h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-medium tracking-tight text-foreground mb-6 leading-[1.05]">
+						Start <span className="font-extrabold text-orange-500">speaking</span> today
+					</h2>
+					
+					<p className="text-base sm:text-lg md:text-xl text-foreground/80 font-medium max-w-2xl mx-auto leading-relaxed mt-4">
+						The acoustic infrastructure layer that helps you listen,<br className="hidden md:block"/> practice, and perfect pronunciation from the live web.
+					</p>
+				</div>
+			</div>
+
 			{/* --- Bottom Row: Unified Feature Section --- */}
-			<div className="relative col-span-2 lg:col-span-4 min-h-80 flex flex-col overflow-hidden">
+			<div className="relative col-span-2 lg:col-span-4 min-h-80 flex flex-col overflow-hidden border-t border-border/40">
 				{/* Unified continuous background grid for all 4 features to prevent grid line conflicts */}
 				<div className="absolute inset-0 z-0 pointer-events-none">
 					{/* 20 columns perfectly tiling across the entire 100% width */}
 					<BlueprintGrid columns={20} cellSize="64px" className="border-none bg-transparent">
 						{Array.from({ length: 120 }).map((_, i) => (
-							<BlueprintBox key={i} className="border-border/20" shaded={[2, 11, 7, 18, 3, 14, 9, 12, 22, 31, 27, 38, 23, 34, 29, 32].includes(i)} />
+							<BlueprintBox key={i} className="border-border/40" shaded={[2, 11, 7, 18, 3, 14, 9, 12, 22, 31, 27, 38, 23, 34, 29, 32].includes(i)} />
 						))}
 					</BlueprintGrid>
 				</div>
@@ -215,7 +242,7 @@ export function DashboardSkeleton() {
 				<div className="relative z-10 w-full h-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                     
 					{/* Feature 1 */}
-					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 sm:border-r border-border/20 hover:bg-muted/5 transition-colors group">
+					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 sm:border-r border-border/40 hover:bg-muted/5 transition-colors group">
 						<DecorIcon className="size-5 text-border absolute top-0 left-0 -translate-x-[1px] -translate-y-[1px]" position="top-left" />
 						<DecorIcon className="size-5 text-border absolute top-0 right-0 translate-x-[1px] -translate-y-[1px]" position="top-right" />
 						<DecorIcon className="size-5 text-border absolute bottom-0 left-0 -translate-x-[1px] translate-y-[1px]" position="bottom-left" />
@@ -225,13 +252,13 @@ export function DashboardSkeleton() {
 					</div>
 
 					{/* Feature 2 */}
-					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 lg:border-r border-border/20 hover:bg-muted/5 transition-colors group">
+					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 lg:border-r border-border/40 hover:bg-muted/5 transition-colors group">
                         <h3 className="text-xl font-bold tracking-tight text-foreground mb-3 group-hover:text-orange-500 transition-colors">AI Context Engine</h3>
                         <p className="text-sm text-muted-foreground max-w-[200px]">Understand cultural nuances and local slang automatically.</p>
 					</div>
 
 					{/* Feature 3 */}
-					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 sm:border-r border-border/20 hover:bg-muted/5 transition-colors group">
+					<div className="relative p-6 min-h-80 flex flex-col items-center justify-center text-center text-muted-foreground border-b lg:border-b-0 sm:border-r border-border/40 hover:bg-muted/5 transition-colors group">
                         <h3 className="text-xl font-bold tracking-tight text-foreground mb-3 group-hover:text-orange-500 transition-colors">Shadowing Mode</h3>
                         <p className="text-sm text-muted-foreground max-w-[200px]">Practice your pronunciation and get confidence scores instantly.</p>
 					</div>
