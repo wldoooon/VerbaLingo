@@ -203,14 +203,14 @@ export function DashboardSkeleton() {
 
 			{/* --- Huge Main Title Hero (Split into 3 Boxes: 1 - 2 - 1) --- */}
 			{/* Left Flank (Hidden on Mobile) */}
-			<div className="hidden lg:block col-span-1 relative min-h-[500px] lg:min-h-[600px] bg-background border-r border-border/40">
+			<div className="hidden lg:block col-span-1 relative min-h-[350px] lg:min-h-[400px] bg-background border-r border-border/40">
 				{/* Mask out the parent container's left border for just this section */}
 				<div className="absolute top-0 bottom-0 -left-[1px] w-[2px] bg-background z-20" />
 				<div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 			</div>
 
 			{/* Center Content Box */}
-			<div className="col-span-2 lg:col-span-2 relative min-h-[500px] lg:min-h-[600px] flex flex-col items-center justify-center text-center px-4 py-20 overflow-hidden bg-background">
+			<div className="col-span-2 lg:col-span-2 relative min-h-[350px] lg:min-h-[400px] flex flex-col items-center justify-center text-center px-4 py-12 overflow-hidden bg-background">
 				{/* Architectural Grid Background (fading bottom-out from center) */}
 				<div 
 					className="absolute inset-0 z-0 pointer-events-none" 
@@ -228,18 +228,18 @@ export function DashboardSkeleton() {
 				
 				<div className="relative z-10 flex flex-col items-center max-w-4xl mx-auto">
 					
-					<h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-medium tracking-tight text-foreground mb-6 leading-[1.05]">
+					<h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-foreground mb-4 leading-[1.05]">
 						Start <span className="font-extrabold text-orange-500">speaking</span> today
 					</h2>
 					
-					<p className="text-base sm:text-lg md:text-xl text-foreground/80 font-medium max-w-2xl mx-auto leading-relaxed mt-4">
+					<p className="text-sm sm:text-base md:text-lg text-foreground/80 font-medium max-w-2xl mx-auto leading-relaxed mt-2">
 						The acoustic infrastructure layer that helps you listen,<br className="hidden md:block"/> practice, and perfect pronunciation from the live web.
 					</p>
 				</div>
 			</div>
 
 			{/* Right Flank (Hidden on Mobile) */}
-			<div className="hidden lg:block col-span-1 relative min-h-[500px] lg:min-h-[600px] bg-background" style={{ borderRightColor: "transparent" }}>
+			<div className="hidden lg:block col-span-1 relative min-h-[350px] lg:min-h-[400px] bg-background" style={{ borderRightColor: "transparent" }}>
 				<div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 			</div>
 
