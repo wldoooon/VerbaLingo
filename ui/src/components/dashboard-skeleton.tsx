@@ -12,6 +12,7 @@ import { GooeyText } from "@/components/ui/gooey-text-morphing";
 import { Card_9 } from "@/components/card-9";
 import ArticlePreviewCard from "./shadcn-space/card/card-01";
 import MagnifiedBento from "./magnified-bento";
+import { LogoCloud } from "@/components/logo-cloud";
 
 const carouselItems = [
 	{
@@ -201,7 +202,11 @@ export function DashboardSkeleton() {
 
 			{/* --- Spacer Row 2 (50% split, restoring the vertical line) --- */}
 			<div className="col-span-1 lg:col-span-2" style={{ minHeight: "128px" }} />
-			<div className="col-span-1 lg:col-span-2" style={{ minHeight: "128px" }} />
+			<div className="col-span-1 lg:col-span-2 flex items-stretch justify-stretch w-full h-full" style={{ minHeight: "128px" }}>
+				<div className="w-full h-full">
+					<LogoCloud />
+				</div>
+			</div>
 
 			{/* --- Huge Main Title Hero (Split into 3 Boxes: 1 - 2 - 1) --- */}
 			{/* Left Flank (Hidden on Mobile) */}

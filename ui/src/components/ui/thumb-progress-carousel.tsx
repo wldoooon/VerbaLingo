@@ -119,45 +119,6 @@ export function ThumbProgressCarousel({
           ))}
         </CarouselContent>
       </Carousel>
-
-      <div className='absolute bottom-8 left-8 md:left-12 flex gap-3 z-10'>
-        {items.map((item, index) => {
-          const isActive = current === index;
-
-          return (
-            <button
-              key={item.id}
-              onClick={() => onThumbClick(index)}
-              className={cn(
-                'relative h-14 w-14 md:h-20 md:w-20 rounded-lg overflow-hidden border-2 transition-all duration-300 ease-out',
-                isActive
-                  ? 'border-primary border-4 shadow-lg scale-110'
-                  : 'border-white/20 opacity-70 hover:opacity-100 hover:scale-105'
-              )}
-            >
-              <Image
-                src={item.image}
-                alt={`Go to slide ${index + 1}`}
-                fill
-                className='object-cover'
-              />
-
-              {isActive && (
-                <div className='absolute inset-0 bg-black/40'>
-                  <div
-                    className='h-full bg-primary/80 absolute left-0 top-0 transition-all ease-linear'
-                    style={{
-                      width: `${progress}%`,
-                      // GOTCHA: Disable transition when resetting to 0 to prevent the bar from "sliding backward" visibly.
-                      transitionDuration: progress === 0 ? '0ms' : '50ms',
-                    }}
-                  />
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
     </div>
   );
 }
