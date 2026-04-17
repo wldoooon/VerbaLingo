@@ -286,10 +286,10 @@ export function DashboardSkeleton() {
 							const legoColors = [
 								"bg-muted/5", 
 								"bg-muted/20", 
-								"bg-background/80", 
-								"bg-muted/10", 
+								"bg-muted/8", 
+								"bg-muted/12", 
 								"bg-muted/30",
-								"bg-white/40"
+								"bg-muted/15"
 							];
 							const colorClass = legoColors[(i * 7) % legoColors.length];
 							
