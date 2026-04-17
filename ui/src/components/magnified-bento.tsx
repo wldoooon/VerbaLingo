@@ -23,25 +23,25 @@ import { cn } from "@/lib/utils";
 
 const TAG_ROWS = [
   [
-    { id: "context", icon: Search01Icon, label: "Real Context" },
-    { id: "native", icon: CpuIcon, label: "Native Clips" },
-    { id: "slang", icon: FlashIcon, label: "Slang & Idioms" },
-    { id: "hollywood", icon: HierarchyIcon, label: "Hollywood English" },
-    { id: "natural", icon: RotateLeftIcon, label: "Natural Flow" },
+    { id: "en-1", label: "How's it going?" },
+    { id: "es-1", label: "¡Hola! ¿Qué tal?" },
+    { id: "fr-1", label: "Ça va ?" },
+    { id: "ar-1", label: "أهلا وسهلا" },
+    { id: "ru-1", label: "Привет" },
   ],
   [
-    { id: "podcasts", icon: SmartPhone01Icon, label: "Podcasts" },
-    { id: "shows", icon: UserGroupIcon, label: "TV Shows" },
-    { id: "docs", icon: DatabaseIcon, label: "Documentaries" },
-    { id: "interviews", icon: UserIcon, label: "Interviews" },
-    { id: "news", icon: Link01Icon, label: "News & Media" },
+    { id: "zh-1", label: "你好" },
+    { id: "en-2", label: "No worries" },
+    { id: "es-2", label: "Muchas gracias" },
+    { id: "ar-2", label: "كيف حالك؟" },
+    { id: "fr-2", label: "Merci beaucoup" },
   ],
   [
-    { id: "french", icon: Chart01Icon, label: "French Mastery" },
-    { id: "german", icon: CodeIcon, label: "German Context" },
-    { id: "spanish", icon: Settings02Icon, label: "Spanish Discovery" },
-    { id: "global", icon: CloudIcon, label: "Global Content" },
-    { id: "secure", icon: LockIcon, label: "Secure Learning" },
+    { id: "ru-2", label: "Как дела?" },
+    { id: "zh-2", label: "谢谢" },
+    { id: "en-3", label: "Talk soon" },
+    { id: "es-3", label: "Hasta luego" },
+    { id: "ar-3", label: "شكرا جزيلا" },
   ],
 ];
 
@@ -88,7 +88,7 @@ const MagnifiedBento = () => {
                         : ["-33.333%", "0%"],
                   }}
                   transition={{
-                    duration: 25,
+                    duration: 35, // Slower for longer text
                     ease: "linear",
                     repeat: Infinity,
                   }}
@@ -96,9 +96,8 @@ const MagnifiedBento = () => {
                   {[...row, ...row, ...row].map((item, idx) => (
                     <div
                       key={`${item.id}-${idx}`}
-                      className="flex gap-2 bg-background/50 backdrop-blur-sm whitespace-nowrap w-fit text-muted-foreground p-2 px-3 items-center border border-border/50 rounded-full text-xs"
+                      className="flex gap-2 bg-background/50 backdrop-blur-sm whitespace-nowrap w-fit text-muted-foreground p-2 px-4 items-center border border-border/50 rounded-full text-xs shadow-xs"
                     >
-                      <HugeiconsIcon icon={item.icon} size={14} />
                       <span>{item.label}</span>
                     </div>
                   ))}
@@ -124,7 +123,7 @@ const MagnifiedBento = () => {
                         : ["-33.333%", "0%"],
                   }}
                   transition={{
-                    duration: 25,
+                    duration: 35, // Slower for longer text
                     ease: "linear",
                     repeat: Infinity,
                   }}
@@ -132,13 +131,8 @@ const MagnifiedBento = () => {
                   {[...row, ...row, ...row].map((item, idx) => (
                     <div
                       key={`${item.id}-${idx}-reveal`}
-                      className="flex gap-2 bg-background whitespace-nowrap w-fit text-foreground p-2 px-3 items-center border border-primary/20 shadow-sm rounded-full text-xs scale-125"
+                      className="flex gap-2 bg-background whitespace-nowrap w-fit text-foreground p-2 px-4 items-center border border-primary/20 shadow-sm rounded-full text-sm scale-110"
                     >
-                      <HugeiconsIcon
-                        icon={item.icon}
-                        size={14}
-                        className="text-primary"
-                      />
                       <span className="font-medium text-primary">
                         {item.label}
                       </span>
