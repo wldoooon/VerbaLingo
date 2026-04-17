@@ -70,21 +70,21 @@ export function DashboardSkeleton() {
 					<div className="absolute w-full h-full inset-0 z-0 pointer-events-none">
 						{/* 10 columns on desktop, 64px boxes. */}
 						<BlueprintGrid columns={10} cellSize="64px" className="border-none w-full h-full min-h-[500px]">
-							{/* ====== ROW 1 ====== */}
-							<BlueprintBox shaded>
-							</BlueprintBox>
-							<BlueprintBox>
-							</BlueprintBox>
-							<BlueprintBox>
-							</BlueprintBox>
-							<BlueprintBox colSpan={4} dotted={false} className="bg-primary/5">
-							</BlueprintBox>
-							<BlueprintBox>
-							</BlueprintBox>
-							<BlueprintBox shaded>
-							</BlueprintBox>
-							<BlueprintBox>
-							</BlueprintBox>
+						{/* ====== ROW 1 ====== */}
+						<BlueprintBox shaded>
+						</BlueprintBox>
+						<BlueprintBox>
+						</BlueprintBox>
+						<BlueprintBox shaded>
+						</BlueprintBox>
+						<BlueprintBox colSpan={4} shaded className="bg-muted/40">
+						</BlueprintBox>
+						<BlueprintBox>
+						</BlueprintBox>
+						<BlueprintBox shaded>
+						</BlueprintBox>
+						<BlueprintBox>
+						</BlueprintBox>
 
 							{/* ====== ROW 2, 3, 4 (Hero Title: spans 3 rows height) ====== */}
 							<BlueprintBox rowSpan={3} shaded>
@@ -206,8 +206,10 @@ export function DashboardSkeleton() {
 			{/* --- Spacer Row 2 (50% split, restoring the vertical line) --- */}
 			<div className="col-span-1 lg:col-span-2 relative border-r border-border/40 overflow-hidden" style={{ minHeight: "128px" }}>
 				{/* Background Blueprint Grid (Solid, No Fade) */}
-				<div className="absolute inset-0 z-0 pointer-events-none">
-					<BlueprintGrid columns={10} cellSize="64px" className="border-none h-full bg-transparent">
+				<div 
+					className="absolute inset-0 z-0 pointer-events-none"
+				>
+					<BlueprintGrid columns={10} cellSize="1fr" className="border-none h-full bg-transparent">
 						{Array.from({ length: 20 }).map((_, i) => (
 							<BlueprintBox key={i} className="border-border/40" shaded={i === 2 || i === 7} />
 						))}
@@ -221,8 +223,16 @@ export function DashboardSkeleton() {
 					<span className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 mt-2">Section</span>
 				</div>
 			</div>
-			<div className="col-span-1 lg:col-span-2 flex items-stretch justify-stretch w-full h-full" style={{ minHeight: "128px" }}>
-				<div className="w-full h-full">
+			<div className="col-span-1 lg:col-span-2 flex items-stretch justify-stretch w-full h-full relative overflow-hidden" style={{ minHeight: "128px" }}>
+				{/* Background Blueprint Grid (Continuity) */}
+				<div className="absolute inset-0 z-0 pointer-events-none">
+					<BlueprintGrid columns={10} cellSize="1fr" className="border-none h-full bg-transparent border-l-0">
+						{Array.from({ length: 20 }).map((_, i) => (
+							<BlueprintBox key={i} className="border-border/40" />
+						))}
+					</BlueprintGrid>
+				</div>
+				<div className="w-full h-full relative z-10">
 					<LogoCloud />
 				</div>
 			</div>
