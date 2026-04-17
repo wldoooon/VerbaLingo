@@ -133,12 +133,14 @@ export function FaqBoxComponent() {
 				</Empty>
 			)}
 
-			<div className="flex items-center px-4 py-6 lg:px-6">
+			<div className="flex items-center px-4 py-8 lg:px-6">
 				<p className="text-muted-foreground">
-					Can't find what you're looking for?{" "}
-					<a className="text-primary hover:underline" href="#">
-						Contact Us
-					</a>
+					Can&apos;t find what you&apos;re looking for?{" "}
+					<HighlightText variant="circle" color="primary" className="mx-1 font-bold">
+						<a className="text-primary hover:text-orange-600 transition-colors" href="#">
+							Contact Us
+						</a>
+					</HighlightText>
 				</p>
 			</div>
 		</div>
