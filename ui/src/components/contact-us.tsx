@@ -32,7 +32,7 @@ export function ContactUs() {
 	return (
 		<div className="mx-auto min-h-screen w-full max-w-6xl md:border-x bg-background relative">
 			{/* --- Vertical Dotted Decoration --- */}
-			<div className="absolute left-12 top-0 bottom-0 w-px border-l border-dotted border-border/40 hidden md:block pointer-events-none" />
+			<div className="absolute left-12 top-0 bottom-0 w-px border-l border-dotted border-foreground/20 hidden md:block pointer-events-none" />
 
 			{/* --- Header Section --- */}
 			<div className="px-6 py-16 lg:pl-24 lg:pr-12">
@@ -115,12 +115,13 @@ export function ContactUs() {
 				{/* Right Column: Contact Form */}
 				<div className="p-8 lg:pl-20 lg:pr-12 border-t lg:border-t-0 lg:border-l border-border/40 bg-muted/5 relative">
 					{/* --- Vertical Dotted Decoration for Form --- */}
-					<div className="absolute left-8 top-0 bottom-0 w-px border-l border-dotted border-border/40 hidden md:block pointer-events-none" />
+					<div className="absolute left-8 top-0 bottom-0 w-px border-l border-dotted border-foreground/20 hidden md:block pointer-events-none" />
 
-					<div className="max-w-xl">
-						<h3 className="text-2xl font-bold mb-2">Send a message</h3>
-						<div className="w-full h-px border-t border-dotted border-border/40 mb-2" />
-						<p className="text-sm text-muted-foreground mb-10">
+					<div className="max-w-xl relative">
+						<h3 className="text-2xl font-bold">Send a message</h3>
+						{/* Expanded horizontal line with better spacing from the text */}
+						<div className="absolute -left-12 right-0 h-px border-t border-dotted border-foreground/20 top-10" />
+						<p className="text-sm text-muted-foreground mb-10 mt-12">
 							Fill out the form below and our team will get back to you shortly.
 						</p>
 
