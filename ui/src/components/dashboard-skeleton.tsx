@@ -204,14 +204,29 @@ export function DashboardSkeleton() {
 
 
 			{/* --- Spacer Row 2 (50% split, restoring the vertical line) --- */}
-			<div className="col-span-1 lg:col-span-2" style={{ minHeight: "128px" }} />
+			<div className="col-span-1 lg:col-span-2 relative border-r border-border/40 overflow-hidden" style={{ minHeight: "128px" }}>
+				{/* Background Blueprint Grid (Solid, No Fade) */}
+				<div className="absolute inset-0 z-0 pointer-events-none">
+					<BlueprintGrid columns={10} cellSize="64px" className="border-none h-full bg-transparent">
+						{Array.from({ length: 20 }).map((_, i) => (
+							<BlueprintBox key={i} className="border-border/40" shaded={i === 2 || i === 7} />
+						))}
+					</BlueprintGrid>
+				</div>
+
+				{/* Section Number Decoration in the spacer box */}
+				<div className="absolute top-6 left-10 flex flex-col items-start z-10">
+					<span className="text-5xl font-bold text-foreground/10 font-mono tracking-tighter select-none">01</span>
+					<div className="w-8 h-px bg-border/60 mt-1" />
+					<span className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 mt-2">Section</span>
+				</div>
+			</div>
 			<div className="col-span-1 lg:col-span-2 flex items-stretch justify-stretch w-full h-full" style={{ minHeight: "128px" }}>
 				<div className="w-full h-full">
 					<LogoCloud />
 				</div>
 			</div>
 
-			{/* --- Huge Main Title Hero (Split into 3 Boxes: 1 - 2 - 1) --- */}
 			{/* Left Flank (Hidden on Mobile) */}
 			<div className="hidden lg:block col-span-1 relative min-h-[350px] lg:min-h-[400px] bg-background border-r border-border/40">
 				{/* Mask out the parent container's left border for just this section */}
@@ -235,15 +250,14 @@ export function DashboardSkeleton() {
 						))}
 					</BlueprintGrid>
 				</div>
-				
 				<div className="relative z-10 flex flex-col items-center max-w-4xl mx-auto">
-					
+
 					<h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-foreground mb-4 leading-[1.05]">
 						Start <span className="font-extrabold text-orange-500">speaking</span> today
 					</h2>
-					
+
 					<p className="text-sm sm:text-base md:text-lg text-foreground/80 font-medium max-w-2xl mx-auto leading-relaxed mt-2">
-						The acoustic infrastructure layer that helps you listen,<br className="hidden md:block"/> practice, and perfect pronunciation from the live web.
+						The acoustic infrastructure layer that helps you listen,<br className="hidden md:block" /> practice, and perfect pronunciation from the live web.
 					</p>
 				</div>
 			</div>
@@ -256,7 +270,7 @@ export function DashboardSkeleton() {
 			{/* --- Bottom Row: Unified Feature Section --- */}
 			<div className="relative col-span-2 lg:col-span-4 min-h-80 flex flex-col overflow-hidden border-t border-border/40">
 				{/* Unified continuous background grid for all 4 features to prevent grid line conflicts */}
-				<div 
+				<div
 					className="absolute inset-0 z-0 pointer-events-none"
 					style={{ WebkitMaskImage: "linear-gradient(to bottom, black 70%, transparent 100%)", maskImage: "linear-gradient(to bottom, black 70%, transparent 100%)" }}
 				>
@@ -284,7 +298,7 @@ export function DashboardSkeleton() {
 
 					{/* Feature 2: Article Preview Feature */}
 					<div className="relative flex flex-col items-center justify-center min-h-80 border-b lg:border-b-0 lg:border-r border-border/40 hover:bg-muted/5 transition-colors group overflow-hidden bg-background/50 backdrop-blur-sm">
-						<div 
+						<div
 							className="w-full h-full flex items-center justify-center transform scale-[0.85] xl:scale-[0.95]"
 						>
 							<ArticlePreviewCard />
@@ -293,7 +307,7 @@ export function DashboardSkeleton() {
 
 					{/* Feature 3 & 4: Magnified Bento Feature */}
 					<div className="relative col-span-1 sm:col-span-2 min-h-80 flex flex-col items-center justify-center border-b lg:border-b-0 border-border/40 hover:bg-muted/5 transition-colors group overflow-hidden">
-						<div 
+						<div
 							className="w-full h-full flex items-center justify-center"
 						>
 							<MagnifiedBento />
