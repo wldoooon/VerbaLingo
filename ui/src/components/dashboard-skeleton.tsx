@@ -233,13 +233,28 @@ export function DashboardSkeleton() {
 
 			{/* Left Flank (Hidden on Mobile) */}
 			<div className="hidden lg:block col-span-1 relative min-h-[350px] lg:min-h-[400px] bg-background border-r border-border/40">
-				{/* Mask out the parent container's left border for just this section */}
-				<div className="absolute top-0 bottom-0 -left-[1px] w-[2px] bg-background z-20" />
+				{/* Mask out the parent container's left border for just this section (Exposing the top half) */}
+				<div className="absolute top-1/2 bottom-0 -left-[1px] w-[2px] bg-background z-20" />
 				<div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
 			</div>
 
 			{/* Center Content Box */}
-			<div className="col-span-2 lg:col-span-2 relative min-h-[350px] lg:min-h-[400px] flex flex-col items-center justify-center text-center px-4 py-12 overflow-hidden bg-background">
+			<div className="col-span-2 lg:col-span-2 relative min-h-[350px] lg:min-h-[400px] flex flex-col items-center justify-center text-center px-4 py-12 bg-background">
+				{/* Ultra-Long Faded Horizontal Lines (Elevated to overflow past the box boundaries) */}
+				<div className="absolute inset-0 z-0 pointer-events-none overflow-visible">
+					{Array.from({ length: 15 }).map((_, i) => (
+						<div 
+							key={i}
+							className="absolute left-1/2 -translate-x-1/2 w-[150%] h-px bg-border/30"
+							style={{ 
+								top: `${i * 64}px`,
+								maskImage: "linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)",
+								WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)"
+							}}
+						/>
+					))}
+				</div>
+
 				{/* Architectural Grid Background (fading bottom-out from center) */}
 				<div
 					className="absolute inset-0 z-0 pointer-events-none"
@@ -248,9 +263,13 @@ export function DashboardSkeleton() {
 						maskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)"
 					}}
 				>
-					<BlueprintGrid columns={10} cellSize="64px" className="border-none bg-transparent h-full">
+					<BlueprintGrid columns={10} cellSize="64px" className="border-none bg-transparent h-full !overflow-visible">
 						{Array.from({ length: 100 }).map((_, i) => (
-							<BlueprintBox key={i} className="border-border/40" shaded={[5, 12, 17, 24, 33].includes(i)} />
+							<BlueprintBox 
+								key={i} 
+								className="border-none border-r border-border/40" 
+								shaded={[5, 12, 17, 24, 33].includes(i)} 
+							/>
 						))}
 					</BlueprintGrid>
 				</div>
@@ -284,21 +303,21 @@ export function DashboardSkeleton() {
 						{Array.from({ length: 120 }).map((_, i) => {
 							// Varying "lego" colors: mix of whites and grays
 							const legoColors = [
-								"bg-muted/5", 
-								"bg-muted/20", 
-								"bg-muted/8", 
-								"bg-muted/12", 
+								"bg-muted/5",
+								"bg-muted/20",
+								"bg-muted/8",
+								"bg-muted/12",
 								"bg-muted/30",
 								"bg-muted/15"
 							];
 							const colorClass = legoColors[(i * 7) % legoColors.length];
-							
+
 							return (
-								<BlueprintBox 
-									key={i} 
+								<BlueprintBox
+									key={i}
 									dotted={false}
-									className={cn("rounded-[2px] border-none", colorClass)} 
-									shaded={[2, 11, 7, 18, 3, 14, 9, 12, 22, 31, 27, 38, 23, 34, 29, 32].includes(i)} 
+									className={cn("rounded-[2px] border-none", colorClass)}
+									shaded={[2, 11, 7, 18, 3, 14, 9, 12, 22, 31, 27, 38, 23, 34, 29, 32].includes(i)}
 								/>
 							);
 						})}
