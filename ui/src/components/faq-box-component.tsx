@@ -1,6 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { HighlightText } from "@/components/ui/highlight-text";
+import { motion } from "motion/react";
 
 import React from "react";
 import { FullWidthDivider } from "@/components/ui/full-width-divider";
@@ -133,15 +134,37 @@ export function FaqBoxComponent() {
 				</Empty>
 			)}
 
-			<div className="flex items-center px-4 py-8 lg:px-6">
-				<p className="text-muted-foreground">
-					Can&apos;t find what you&apos;re looking for?{" "}
-					<HighlightText variant="circle" color="primary" className="mx-1 font-bold">
-						<a className="text-primary hover:text-orange-600 transition-colors" href="#">
-							Contact Us
-						</a>
-					</HighlightText>
-				</p>
+			<div className="flex items-center px-4 py-10 lg:px-6">
+				<div className="flex items-center gap-3">
+					<p className="text-muted-foreground">
+						Can&apos;t find what you&apos;re looking for?{" "}
+						<HighlightText variant="circle" color="primary" className="mx-1 font-bold">
+							<a className="text-primary hover:text-orange-600 transition-colors" href="#">
+								Contact Us
+							</a>
+						</HighlightText>
+					</p>
+					
+					<motion.svg
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						className="text-orange-500 drop-shadow-sm ml-1"
+					>
+						<motion.path
+							d="M12 4 Q13 12 12 20 M12 20 L7 15 M12 20 L17 15"
+							stroke="currentColor"
+							strokeWidth="2.5"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							initial={{ pathLength: 0, opacity: 0 }}
+							whileInView={{ pathLength: 1, opacity: 1 }}
+							viewport={{ once: true }}
+							transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+						/>
+					</motion.svg>
+				</div>
 			</div>
 		</div>
 	);
