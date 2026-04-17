@@ -8,7 +8,7 @@ import { XIcon } from "lucide-react";
 const latestChange = {
 	badge: "UPDATE",
 	title: "Smarter shipping quotes",
-	description: "Real-time rates at checkout now.", // TIP: Use a single line of text for the description. (max 5 words)
+	description: "Real-time rates at checkout now.",
 	readMore: { href: "#", label: "Changelog" },
 } as const;
 
@@ -22,33 +22,43 @@ export function LatestChange() {
 	return (
 		<div
 			className={cn(
-				"rounded-lg group/latest-change size-full min-h-27 justify-center border bg-background",
-				"relative flex size-full flex-col gap-1 overflow-hidden px-4 pt-3 pb-1 *:text-nowrap",
+				"rounded-xl group/latest-change w-full flex flex-col overflow-hidden border bg-background/50 backdrop-blur-sm shadow-sm",
 				"transition-opacity group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0"
 			)}
 		>
-			<span className="font-light font-mono text-[10px] text-muted-foreground">
-				{latestChange.badge}
-			</span>
-			<p className="font-medium text-xs">{latestChange.title}</p>
-			<span className="text-[10px] text-muted-foreground">
-				{latestChange.description}
-			</span>
+			<div className="relative w-full h-24 overflow-hidden border-b border-border/40">
+				<img 
+					src="/orange-picture.jpg" 
+					alt="Update background" 
+					className="w-full h-full object-cover transition-transform duration-500"
+				/>
+				<span className="absolute bottom-2 left-3 px-1.5 py-0.5 rounded-sm bg-orange-500 text-[9px] font-bold text-white uppercase tracking-wider">
+					{latestChange.badge}
+				</span>
+			</div>
+			
+			<div className="flex flex-col gap-1 p-3 pt-4">
+				<p className="font-bold text-xs tracking-tight text-foreground">{latestChange.title}</p>
+				<span className="text-[10px] text-muted-foreground leading-tight whitespace-normal">
+					{latestChange.description}
+				</span>
+				<Button
+					asChild
+					className="w-max px-0 font-bold text-[10px] text-orange-500 hover:text-orange-600 transition-colors h-7"
+					size="sm"
+					variant="link"
+				>
+					<a href={latestChange.readMore.href}>{latestChange.readMore.label}</a>
+				</Button>
+			</div>
+
 			<Button
-				asChild
-				className="w-max px-0 font-light text-xs"
-				size="sm"
-				variant="link"
-			>
-				<a href={latestChange.readMore.href}>{latestChange.readMore.label}</a>
-			</Button>
-			<Button
-				className="absolute top-2 right-2 z-10 size-6 rounded-full opacity-0 transition-opacity group-hover/latest-change:opacity-100"
+				className="absolute top-2 right-2 z-20 size-6 rounded-full bg-background/50 backdrop-blur-md opacity-0 transition-opacity group-hover/latest-change:opacity-100"
 				onClick={() => setIsOpen(false)}
 				size="icon-sm"
 				variant="ghost"
 			>
-				<XIcon className="size-3.5 text-muted-foreground" />{" "}
+				<XIcon className="size-3.5 text-muted-foreground" />
 			</Button>
 		</div>
 	);
