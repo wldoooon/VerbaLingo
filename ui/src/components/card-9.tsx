@@ -1,48 +1,38 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BlueprintGrid, BlueprintBox } from "@/components/ui/blueprint-grid";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Placeholder = {
 	title: <div className="bg-secondary h-8 max-w-40 w-full rounded-md" />,
 	content: <div className="bg-secondary h-20 w-full rounded-md" />,
 };
 
-const Ellipses = () => {
-	const sharedClasses =
-		"rounded-full outline outline-8 sm:my-6 md:my-8 size-1 my-4 outline-background bg-foreground";
-	return (
-		<div className="absolute z-0 grid h-full w-full items-center gap-8 lg:grid-cols-2">
-			<div className="absolute z-0 grid h-full w-full grid-cols-2 place-content-between">
-				<div className={`${sharedClasses} -mx-[2.5px]`}></div>
-				<div className={`${sharedClasses} -mx-[2px] place-self-end`}></div>
-				<div className={`${sharedClasses} -mx-[2.5px]`}></div>
-				<div className={`${sharedClasses} -mx-[2px] place-self-end`}></div>
-			</div>
-		</div>
-	);
-};
+// Ellipses removed to clear corner dots as requested
 
 const Container = ({ children }: { children: React.ReactNode }) => (
-	<div className="relative w-full h-full rounded-none border bg-background/50 px-4 overflow-hidden">
-		{/* Architectural Micro-Grid Background with Fading */}
+	<div className="relative w-full h-full rounded-none border-b border-border/40 bg-transparent px-4 overflow-hidden">
+		{/* Architectural Grid Background aligned with master grid */}
 		<div 
-			className="absolute inset-0 z-0 pointer-events-none opacity-[0.25]"
+			className="absolute inset-0 z-0 pointer-events-none opacity-100"
 			style={{
 				WebkitMaskImage: "linear-gradient(to bottom right, black 0%, transparent 80%)",
 				maskImage: "linear-gradient(to bottom right, black 0%, transparent 80%)"
 			}}
 		>
-			<div className="grid grid-cols-12 h-full w-full border-l border-t border-border/20">
-				{Array.from({ length: 96 }).map((_, i) => (
-					<div key={i} className="border-r border-b border-border/20 h-4 min-h-[16px] flex items-center justify-center">
-						{i % 7 === 0 && <div className="size-1 rounded-full bg-border/40" />}
-					</div>
+			<BlueprintGrid columns={12} cellSize="64px" className="border-none bg-transparent">
+				{Array.from({ length: 48 }).map((_, i) => (
+					<BlueprintBox 
+						key={i} 
+						dotted={false} 
+						className="border-border/40" 
+						shaded={i % 7 === 0} 
+					/>
 				))}
-			</div>
+			</BlueprintGrid>
 		</div>
 
 		<div className="absolute left-0 top-3 z-0 h-px w-full bg-border/20"></div>
 		<div className="absolute bottom-3 left-0 z-0 h-px w-full bg-border/20"></div>
 		<div className="relative h-full border-x border-border/10">
-			<Ellipses />
 			<div className="relative z-20 mx-auto py-2 h-full flex flex-col justify-center">{children}</div>
 		</div>
 	</div>

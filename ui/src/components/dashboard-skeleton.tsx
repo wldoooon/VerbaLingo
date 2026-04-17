@@ -10,6 +10,7 @@ import { BlueprintGrid, BlueprintBox } from "@/components/ui/blueprint-grid";
 import { Globe, AudioLines, Sparkles, Mic } from "lucide-react";
 import { GooeyText } from "@/components/ui/gooey-text-morphing";
 import { Card_9 } from "@/components/card-9";
+import { HighlightText } from "@/components/ui/highlight-text";
 import ArticlePreviewCard from "./shadcn-space/card/card-01";
 import MagnifiedBento from "./magnified-bento";
 import { LogoCloud } from "@/components/logo-cloud";
@@ -127,7 +128,7 @@ export function DashboardSkeleton() {
 							<BlueprintBox colSpan={8} rowSpan={2} dotted={false} className="p-0 border-none !items-start !justify-start">
 								<Card_9>
 									<p className="text-muted-foreground font-medium leading-tight text-left text-xs sm:text-sm">
-										Over <span className="text-primary font-bold">100,000+ authentic</span> YouTube videos to master native pronunciation in any context.
+										Over <HighlightText variant="underline" color="primary" className="mx-1 font-bold italic">100,000+ authentic YouTube videos</HighlightText> to master native pronunciation in any context.
 									</p>
 								</Card_9>
 							</BlueprintBox>
