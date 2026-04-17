@@ -13,6 +13,7 @@ import { Card_9 } from "@/components/card-9";
 import ArticlePreviewCard from "./shadcn-space/card/card-01";
 import MagnifiedBento from "./magnified-bento";
 import { LogoCloud } from "@/components/logo-cloud";
+import { FaqBoxComponent } from "@/components/faq-box-component";
 
 const carouselItems = [
 	{
@@ -297,6 +298,11 @@ export function DashboardSkeleton() {
 						</div>
 					</div>
 				</div>
+			</div>
+
+			{/* --- FAQ Section --- */}
+			<div className="col-span-2 lg:col-span-4 border-t border-border/40 bg-background">
+				<FaqBoxComponent />
 			</div>
 		</div>
 	);
