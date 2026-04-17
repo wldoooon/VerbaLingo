@@ -21,7 +21,24 @@ const Ellipses = () => {
 };
 
 const Container = ({ children }: { children: React.ReactNode }) => (
-	<div className="relative w-full h-full rounded-2xl border bg-background/50 px-4">
+	<div className="relative w-full h-full rounded-none border bg-background/50 px-4 overflow-hidden">
+		{/* Architectural Micro-Grid Background with Fading */}
+		<div 
+			className="absolute inset-0 z-0 pointer-events-none opacity-[0.25]"
+			style={{
+				WebkitMaskImage: "linear-gradient(to bottom right, black 0%, transparent 80%)",
+				maskImage: "linear-gradient(to bottom right, black 0%, transparent 80%)"
+			}}
+		>
+			<div className="grid grid-cols-12 h-full w-full border-l border-t border-border/20">
+				{Array.from({ length: 96 }).map((_, i) => (
+					<div key={i} className="border-r border-b border-border/20 h-4 min-h-[16px] flex items-center justify-center">
+						{i % 7 === 0 && <div className="size-1 rounded-full bg-border/40" />}
+					</div>
+				))}
+			</div>
+		</div>
+
 		<div className="absolute left-0 top-3 z-0 h-px w-full bg-border/20"></div>
 		<div className="absolute bottom-3 left-0 z-0 h-px w-full bg-border/20"></div>
 		<div className="relative h-full border-x border-border/10">

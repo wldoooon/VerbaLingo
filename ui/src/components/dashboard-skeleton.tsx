@@ -123,15 +123,10 @@ export function DashboardSkeleton() {
 							<BlueprintBox rowSpan={3} shaded>
 							</BlueprintBox>
 
-							{/* ====== ROW 5, 6 (Subtitle & Audio graphic: spans 2 rows) ====== */}
-							<BlueprintBox colSpan={2} rowSpan={2} dotted={false}>
-								<div className="flex items-center justify-center w-full h-full opacity-40 relative">
-									<AudioLines className="w-8 h-8 text-primary absolute animate-pulse" />
-								</div>
-							</BlueprintBox>
-							<BlueprintBox colSpan={6} rowSpan={2} dotted={false} className="p-0 border-none">
+							{/* Expanded Text Blueprint Card (Replacing the icon box) */}
+							<BlueprintBox colSpan={8} rowSpan={2} dotted={false} className="p-0 border-none !items-start !justify-start">
 								<Card_9>
-									<p className="text-muted-foreground font-medium leading-tight text-center text-xs sm:text-sm">
+									<p className="text-muted-foreground font-medium leading-tight text-left text-xs sm:text-sm">
 										Over <span className="text-primary font-bold">100,000+ authentic</span> YouTube videos to master native pronunciation in any context.
 									</p>
 								</Card_9>
