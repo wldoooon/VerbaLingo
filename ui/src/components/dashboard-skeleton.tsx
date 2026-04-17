@@ -36,15 +36,36 @@ const carouselItems = [
 	},
 ];
 
+import { AnimatePresence, motion } from "motion/react";
+import { Loader2 } from "lucide-react";
+
 export function DashboardSkeleton() {
 	const { resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
+	const [isPageLoading, setIsPageLoading] = useState(true);
 
 	useEffect(() => {
 		setMounted(true);
+		// Simulate page load
+		const timer = setTimeout(() => {
+			setIsPageLoading(false);
+		}, 1000);
+		return () => clearTimeout(timer);
 	}, []);
 
 	return (
+		<>
+			<AnimatePresence mode="wait">
+				{isPageLoading && (
+					<motion.div
+						key="preloader"
+						exit={{ opacity: 0, transition: { duration: 0.3 } }}
+						className="fixed inset-0 z-[100] flex items-center justify-center bg-background"
+					>
+						<Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+					</motion.div>
+				)}
+			</AnimatePresence>
 		<div
 			className={cn(
 				"grid grid-cols-2 lg:grid-cols-4 gap-0",
@@ -173,9 +194,9 @@ export function DashboardSkeleton() {
 														<img src={lang.icon} alt={lang.name} className="w-12 h-auto max-h-8 object-contain" />
 														<span className={`font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r opacity-90 ${lang.name === "FRANÇAIS" ? "from-blue-800 via-slate-500 to-red-700" :
 															lang.name === "ENGLISH" ? "from-blue-800 via-slate-500 to-red-700" :
-																lang.name === "ESPAÑOL" ? "from-red-700 via-amber-600 to-red-700" :
-																	lang.name === "DEUTSCH" ? "from-zinc-950 via-red-800 to-amber-600" :
-																		""
+															lang.name === "ESPAÑOL" ? "from-red-700 via-amber-600 to-red-700" :
+															lang.name === "DEUTSCH" ? "from-zinc-950 via-red-800 to-amber-600" :
+															""
 															}`}>
 															{lang.name}
 														</span>
@@ -368,8 +389,7 @@ export function DashboardSkeleton() {
 			<div className="col-span-2 lg:col-span-4 pt-10">
 				<Footer />
 			</div>
-		</div>
+			</div>
+		</>
 	);
 }
-
-

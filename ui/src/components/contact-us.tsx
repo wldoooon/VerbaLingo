@@ -29,8 +29,10 @@ import {
 } from "lucide-react";
 
 import { HighlightText } from "@/components/ui/highlight-text";
+import { EclipseButton } from "@/components/satisui/eclipse-button";
 
 export function ContactUs() {
+	const [isLoading, setIsLoading] = React.useState(false);
 	return (
 		<div className="mx-auto min-h-screen w-full max-w-6xl md:border-x bg-background relative">
 			{/* --- Vertical Dotted Decoration --- */}
@@ -192,9 +194,20 @@ export function ContactUs() {
 							</div>
 
 							{/* Submit Button */}
-							<Button className="w-full h-12 text-black font-bold text-base rounded-2xl bg-amber-500 hover:bg-amber-600 transition-colors mt-4">
-								Submit
-							</Button>
+							<div className="pt-4">
+								<EclipseButton
+									onClick={(e) => {
+										e.preventDefault();
+										setIsLoading(true);
+										setTimeout(() => setIsLoading(false), 2500);
+									}}
+									isLoading={isLoading}
+									variant="orange"
+									text={isLoading ? "Sending Message..." : "Send Message"}
+									className="w-full h-14 rounded-2xl text-base shadow-lg"
+									leftIcon={!isLoading && <MessageCircle className="w-5 h-5" />}
+								/>
+							</div>
 						</form>
 					</div>
 				</div>
