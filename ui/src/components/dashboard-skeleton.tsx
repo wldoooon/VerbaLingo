@@ -14,6 +14,7 @@ import ArticlePreviewCard from "./shadcn-space/card/card-01";
 import MagnifiedBento from "./magnified-bento";
 import { LogoCloud } from "@/components/logo-cloud";
 import { FaqBoxComponent } from "@/components/faq-box-component";
+import { ContactUs } from "@/components/contact-us";
 
 const carouselItems = [
 	{
@@ -303,6 +304,11 @@ export function DashboardSkeleton() {
 			{/* --- FAQ Section --- */}
 			<div className="col-span-2 lg:col-span-4 border-t border-border/40 bg-background">
 				<FaqBoxComponent />
+			</div>
+
+			{/* --- Contact Us Section --- */}
+			<div className="col-span-2 lg:col-span-4 border-t border-border/40 bg-background">
+				<ContactUs />
 			</div>
 		</div>
 	);
