@@ -1,94 +1,117 @@
-import { DecorIcon } from "@/components/ui/decor-icon";
-import { Badge } from "@/components/ui/badge";
+import { FullWidthDivider } from "@/components/ui/full-width-divider";
 import { Button } from "@/components/ui/button";
-import { ShieldCheckIcon } from "lucide-react";
+import { CheckIcon } from "lucide-react";
+
+type PricingPlan = {
+	name: string;
+	price: string;
+	period?: string;
+	description: string;
+	href?: string;
+	featuresTitle: string;
+	features: string[];
+	isPopular?: boolean;
+};
+
+const pricingPlans: PricingPlan[] = [
+	{
+		name: "STARTER",
+		price: "Free",
+		description: "For early-stage startups",
+		featuresTitle: "FREE, FOREVER:",
+		features: [
+			"10 customers",
+			"10 documents",
+			"10 invoices",
+			"Auto-updated taxes",
+		],
+		href: "#",
+	},
+	{
+		name: "SCALE",
+		isPopular: true,
+		href: "#",
+		price: "$8",
+		period: "month",
+		description: "For fast-growing teams",
+		featuresTitle: "EVERYTHING IN STARTER, PLUS:",
+		features: [
+			"20 customers",
+			"25 documents",
+			"30 invoices",
+			"Auto-updated taxes",
+			"Cloud Sync",
+		],
+	},
+];
 
 export function PricingSection() {
 	return (
-		<section className="w-full space-y-5">
-			<div className="mx-auto max-w-lg">
-				<div className="flex justify-center">
-					<div className="rounded-md border px-4 py-1 text-sm">Pricing</div>
-				</div>
-				<h2 className="mt-4 text-center font-bold text-2xl tracking-tight md:text-3xl">
-					Pricing Based on Your Success
-				</h2>
-				<p className="mt-2 text-center text-muted-foreground text-sm md:text-base">
-					We offer a single price for all our services. We believe that pricing
-					is a critical component of any successful business.
-				</p>
-			</div>
+		<section className="mx-auto min-h-screen max-w-5xl place-content-center border-x py-4">
+			<div className="relative">
+				<FullWidthDivider position="top" />
+				<FullWidthDivider position="bottom" />
 
-			<div className="mx-auto w-full max-w-2xl space-y-2">
-				<div className="relative grid border bg-background p-4 shadow-xs md:grid-cols-2">
-					<DecorIcon className="size-3" position="top-left" />
-					<DecorIcon className="size-3" position="top-right" />
-					<DecorIcon className="size-3" position="bottom-left" />
-					<DecorIcon className="size-3" position="bottom-right" />
-
-					<div className="w-full px-4 pt-5 pb-4">
-						<div className="space-y-1">
-							<div className="flex items-center justify-between">
-								<h3 className="font-semibold leading-none">Monthly</h3>
-								<div className="flex items-center gap-x-1">
-									<span className="text-muted-foreground text-sm line-through">
-										$8.99
-									</span>
-									<Badge variant="secondary">11% off</Badge>
-								</div>
-							</div>
-							<p className="text-muted-foreground text-sm">
-								Best value for growing businesses!
-							</p>
-						</div>
-						<div className="mt-10 space-y-4">
-							<div className="flex items-end gap-0.5 text-muted-foreground text-xl">
-								<span>$</span>
-								<span className="-mb-0.5 font-extrabold text-4xl text-foreground tracking-tighter md:text-4xl">
-									7.99
-								</span>
-								<span>/month</span>
-							</div>
-							<Button asChild className="w-full" variant="outline">
-								<a href="#">Start Your Journey</a>
-							</Button>
-						</div>
+				<div className="grid grid-cols-1 gap-px bg-border md:grid-cols-2 lg:grid-cols-4">
+					<div className="flex flex-col bg-background p-8 md:col-span-2">
+						<p className="mb-6 text-muted-foreground text-sm uppercase tracking-wider">
+							PRICING
+						</p>
+						<h1 className="font-bold text-3xl leading-tight md:text-5xl">
+							Pricing that doesn't suck
+						</h1>
 					</div>
-					<div className="relative w-full rounded-md border bg-card p-4 shadow dark:bg-card/80">
-						<div className="space-y-1">
-							<div className="flex items-center justify-between">
-								<h3 className="font-semibold leading-none">Yearly</h3>
-								<div className="flex items-center gap-x-1">
-									<span className="text-muted-foreground text-sm line-through">
-										$8.99
-									</span>
-									<Badge>22% off</Badge>
-								</div>
-							</div>
-							<p className="text-muted-foreground text-sm">
-								Unlock savings with an annual commitment!
-							</p>
-						</div>
-						<div className="mt-10 space-y-4">
-							<div className="flex items-end text-muted-foreground text-xl">
-								<span>$</span>
-								<span className="-mb-0.5 font-extrabold text-4xl text-foreground tracking-tighter md:text-4xl">
-									6.99
-								</span>
-								<span>/month</span>
-							</div>
-							<Button asChild className="w-full">
-								<a href="#">Get Started Now</a>
-							</Button>
-						</div>
-					</div>
-				</div>
 
-				<div className="flex items-center justify-center gap-x-2 text-muted-foreground text-sm">
-					<ShieldCheckIcon className="size-4" />
-					<span>Access to all features with no hidden fees</span>
+					{pricingPlans.map((plan) => (
+						<PricingCard key={plan.name} plan={plan} />
+					))}
 				</div>
 			</div>
 		</section>
+	);
+}
+
+function PricingCard({ plan }: { plan: PricingPlan }) {
+	return (
+		<div className="flex flex-col bg-background *:px-4 *:py-6">
+			<div className="border-b">
+				<p className="mb-6 text-muted-foreground text-sm uppercase tracking-wider">
+					{plan.name}
+				</p>
+				<div className="mb-2 flex items-baseline gap-2">
+					<h2 className="font-bold text-4xl">{plan.price}</h2>
+					{plan.period && (
+						<span className="text-muted-foreground text-xs">
+							/ {plan.period}
+						</span>
+					)}
+				</div>
+				<p className="mb-8 line-clamp-1 text-muted-foreground">
+					{plan.description}
+				</p>
+
+				<Button
+					asChild
+					className="w-full"
+					variant={plan.isPopular ? "default" : "outline"}
+				>
+					<a href={plan.href}>Get started</a>
+				</Button>
+			</div>
+
+			<div className="space-y-3 text-muted-foreground text-sm">
+				<p className="mb-6 text-xs uppercase">{plan.featuresTitle}</p>
+
+				{plan.features.map((feature) => (
+					<p
+						className="flex items-center gap-2 text-foreground/80"
+						key={feature}
+					>
+						<CheckIcon className="size-4" />
+						{feature}
+					</p>
+				))}
+			</div>
+		</div>
 	);
 }
