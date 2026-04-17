@@ -271,8 +271,8 @@ export function DashboardSkeleton() {
 				</div>
 				<div className="relative z-10 flex flex-col items-center max-w-4xl mx-auto">
 
-					<h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-foreground mb-4 leading-[1.05]">
-						Start <span className="font-extrabold text-orange-500">speaking</span> today
+					<h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-foreground mb-4 leading-[1.3] py-2">
+						Start <HighlightText variant="underline" color="primary" className="font-extrabold italic text-orange-500">speaking</HighlightText> today
 					</h2>
 
 					<p className="text-sm sm:text-base md:text-lg text-foreground/80 font-medium max-w-2xl mx-auto leading-relaxed mt-2">

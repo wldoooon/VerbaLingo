@@ -1,5 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
+import { HighlightText } from "@/components/ui/highlight-text";
 
 import React from "react";
 import { FullWidthDivider } from "@/components/ui/full-width-divider";
@@ -48,8 +49,8 @@ export function FaqBoxComponent() {
 	return (
 		<div className="mx-auto min-h-screen w-full max-w-3xl md:border-x">
 			<div className="px-4 py-16 lg:px-6">
-				<h1 className="mb-4 font-semibold text-3xl md:text-4xl">
-					Frequently Asked Questions
+				<h1 className="mb-4 font-semibold text-3xl md:text-4xl leading-relaxed">
+					Frequently Asked <HighlightText variant="underline" color="primary" className="font-bold italic text-orange-500">Questions</HighlightText>
 				</h1>
 				<p className="mb-8 max-w-2xl text-muted-foreground">
 					Find answers to common questions about Efferd. Can't find what you're

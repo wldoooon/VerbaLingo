@@ -28,6 +28,8 @@ import {
 	X,
 } from "lucide-react";
 
+import { HighlightText } from "@/components/ui/highlight-text";
+
 export function ContactUs() {
 	return (
 		<div className="mx-auto min-h-screen w-full max-w-6xl md:border-x bg-background relative">
@@ -36,7 +38,9 @@ export function ContactUs() {
 
 			{/* --- Header Section --- */}
 			<div className="px-6 py-16 lg:pl-24 lg:pr-12">
-				<h1 className="text-4xl font-bold tracking-tight mb-4">Let&apos;s Talk</h1>
+				<h1 className="text-4xl font-bold tracking-tight mb-4 leading-relaxed">
+					Let&apos;s <HighlightText variant="underline" color="primary" className="font-bold italic text-orange-500">Talk</HighlightText>
+				</h1>
 				<p className="text-muted-foreground max-w-2xl">
 					Need support or have a question about Efferd? We&apos;re here to help.
 				</p>
