@@ -30,9 +30,12 @@ import {
 
 export function ContactUs() {
 	return (
-		<div className="mx-auto min-h-screen w-full max-w-6xl md:border-x bg-background">
+		<div className="mx-auto min-h-screen w-full max-w-6xl md:border-x bg-background relative">
+			{/* --- Vertical Dotted Decoration --- */}
+			<div className="absolute left-12 top-0 bottom-0 w-px border-l border-dotted border-border/40 hidden md:block pointer-events-none" />
+
 			{/* --- Header Section --- */}
-			<div className="px-6 py-16 lg:px-12">
+			<div className="px-6 py-16 lg:pl-24 lg:pr-12">
 				<h1 className="text-4xl font-bold tracking-tight mb-4">Let&apos;s Talk</h1>
 				<p className="text-muted-foreground max-w-2xl">
 					Need support or have a question about Efferd? We&apos;re here to help.
@@ -44,7 +47,7 @@ export function ContactUs() {
 			{/* --- Middle Row: Chat & Demo --- */}
 			<div className="grid grid-cols-1 md:grid-cols-2">
 				{/* Chat Section */}
-				<div className="p-8 lg:p-12 border-b md:border-r border-border/40 hover:bg-muted/5 transition-colors group">
+				<div className="p-8 lg:pl-24 lg:pr-12 border-b md:border-r border-border/40 hover:bg-muted/5 transition-colors group">
 					<div className="flex items-start justify-between mb-8">
 						<div>
 							<h3 className="text-xl font-bold mb-2">Chat with us</h3>
@@ -75,7 +78,7 @@ export function ContactUs() {
 			{/* --- Bottom Section: Info & Form --- */}
 			<div className="grid grid-cols-1 lg:grid-cols-[1fr_2fr]">
 				{/* Left Column: Contact Info */}
-				<div className="p-8 lg:p-12 space-y-12">
+				<div className="p-8 lg:pl-24 lg:pr-12 space-y-12">
 					{/* Email */}
 					<div>
 						<h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Email</h4>
@@ -110,9 +113,13 @@ export function ContactUs() {
 				</div>
 
 				{/* Right Column: Contact Form */}
-				<div className="p-8 lg:p-12 border-t lg:border-t-0 lg:border-l border-border/40 bg-muted/5">
+				<div className="p-8 lg:pl-20 lg:pr-12 border-t lg:border-t-0 lg:border-l border-border/40 bg-muted/5 relative">
+					{/* --- Vertical Dotted Decoration for Form --- */}
+					<div className="absolute left-8 top-0 bottom-0 w-px border-l border-dotted border-border/40 hidden md:block pointer-events-none" />
+
 					<div className="max-w-xl">
 						<h3 className="text-2xl font-bold mb-2">Send a message</h3>
+						<div className="w-full h-px border-t border-dotted border-border/40 mb-2" />
 						<p className="text-sm text-muted-foreground mb-10">
 							Fill out the form below and our team will get back to you shortly.
 						</p>
