@@ -70,21 +70,21 @@ export function DashboardSkeleton() {
 					<div className="absolute w-full h-full inset-0 z-0 pointer-events-none">
 						{/* 10 columns on desktop, 64px boxes. */}
 						<BlueprintGrid columns={10} cellSize="64px" className="border-none w-full h-full min-h-[500px]">
-						{/* ====== ROW 1 ====== */}
-						<BlueprintBox shaded>
-						</BlueprintBox>
-						<BlueprintBox>
-						</BlueprintBox>
-						<BlueprintBox shaded>
-						</BlueprintBox>
-						<BlueprintBox colSpan={4} shaded className="bg-muted/40">
-						</BlueprintBox>
-						<BlueprintBox>
-						</BlueprintBox>
-						<BlueprintBox shaded>
-						</BlueprintBox>
-						<BlueprintBox>
-						</BlueprintBox>
+							{/* ====== ROW 1 ====== */}
+							<BlueprintBox shaded>
+							</BlueprintBox>
+							<BlueprintBox>
+							</BlueprintBox>
+							<BlueprintBox shaded>
+							</BlueprintBox>
+							<BlueprintBox colSpan={4} shaded className="bg-muted/40">
+							</BlueprintBox>
+							<BlueprintBox>
+							</BlueprintBox>
+							<BlueprintBox shaded>
+							</BlueprintBox>
+							<BlueprintBox>
+							</BlueprintBox>
 
 							{/* ====== ROW 2, 3, 4 (Hero Title: spans 3 rows height) ====== */}
 							<BlueprintBox rowSpan={3} shaded>
@@ -206,7 +206,7 @@ export function DashboardSkeleton() {
 			{/* --- Spacer Row 2 (50% split, restoring the vertical line) --- */}
 			<div className="col-span-1 lg:col-span-2 relative border-r border-border/40 overflow-hidden" style={{ minHeight: "128px" }}>
 				{/* Background Blueprint Grid (Solid, No Fade) */}
-				<div 
+				<div
 					className="absolute inset-0 z-0 pointer-events-none"
 				>
 					<BlueprintGrid columns={10} cellSize="1fr" className="border-none h-full bg-transparent">
@@ -216,12 +216,6 @@ export function DashboardSkeleton() {
 					</BlueprintGrid>
 				</div>
 
-				{/* Section Number Decoration in the spacer box */}
-				<div className="absolute top-6 left-10 flex flex-col items-start z-10">
-					<span className="text-5xl font-bold text-foreground/10 font-mono tracking-tighter select-none">01</span>
-					<div className="w-8 h-px bg-border/60 mt-1" />
-					<span className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 mt-2">Section</span>
-				</div>
 			</div>
 			<div className="col-span-1 lg:col-span-2 flex items-stretch justify-stretch w-full h-full relative overflow-hidden" style={{ minHeight: "128px" }}>
 				{/* Background Blueprint Grid (Continuity) */}
@@ -247,11 +241,11 @@ export function DashboardSkeleton() {
 			{/* Center Content Box */}
 			<div className="col-span-2 lg:col-span-2 relative min-h-[350px] lg:min-h-[400px] flex flex-col items-center justify-center text-center px-4 py-12 overflow-hidden bg-background">
 				{/* Architectural Grid Background (fading bottom-out from center) */}
-				<div 
-					className="absolute inset-0 z-0 pointer-events-none" 
-					style={{ 
-						WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)", 
-						maskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)" 
+				<div
+					className="absolute inset-0 z-0 pointer-events-none"
+					style={{
+						WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)",
+						maskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)"
 					}}
 				>
 					<BlueprintGrid columns={10} cellSize="64px" className="border-none bg-transparent h-full">
@@ -285,10 +279,29 @@ export function DashboardSkeleton() {
 					style={{ WebkitMaskImage: "linear-gradient(to bottom, black 70%, transparent 100%)", maskImage: "linear-gradient(to bottom, black 70%, transparent 100%)" }}
 				>
 					{/* 20 columns perfectly tiling across the entire 100% width */}
-					<BlueprintGrid columns={20} cellSize="64px" className="border-none bg-transparent">
-						{Array.from({ length: 120 }).map((_, i) => (
-							<BlueprintBox key={i} className="border-border/40" shaded={[2, 11, 7, 18, 3, 14, 9, 12, 22, 31, 27, 38, 23, 34, 29, 32].includes(i)} />
-						))}
+					{/* 20 columns perfectly tiling across the entire 100% width with a gap and rounded corners */}
+					<BlueprintGrid columns={20} cellSize="64px" className="border-none bg-transparent gap-1.5 p-1.5">
+						{Array.from({ length: 120 }).map((_, i) => {
+							// Varying "lego" colors: mix of whites and grays
+							const legoColors = [
+								"bg-muted/5", 
+								"bg-muted/20", 
+								"bg-background/80", 
+								"bg-muted/10", 
+								"bg-muted/30",
+								"bg-white/40"
+							];
+							const colorClass = legoColors[(i * 7) % legoColors.length];
+							
+							return (
+								<BlueprintBox 
+									key={i} 
+									dotted={false}
+									className={cn("rounded-[2px] border-none", colorClass)} 
+									shaded={[2, 11, 7, 18, 3, 14, 9, 12, 22, 31, 27, 38, 23, 34, 29, 32].includes(i)} 
+								/>
+							);
+						})}
 					</BlueprintGrid>
 				</div>
 				{/* Overlaying the feature columns on top of the continuous grid */}
