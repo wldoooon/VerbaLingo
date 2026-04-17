@@ -19,68 +19,43 @@ export const navGroups: SidebarNavGroup[] = [
 		label: "Overview",
 		items: [
 			{
-				title: "Dashboard",
-				path: "#/dashboard",
+				title: "Home",
+				path: "#/",
 				icon: (
 					<LayoutGridIcon
 					/>
 				),
 				isActive: true,
-			},
-			{
-				title: "Sales",
-				path: "#/sales",
-				icon: (
-					<BarChart3Icon
-					/>
-				),
+				subItems: [
+					{ title: "Features", path: "#features" },
+					{ title: "FAQ", path: "#faq" },
+					{ title: "Contact Us", path: "#contact" },
+				],
 			},
 		],
 	},
 	{
-		label: "Store",
+		label: "General",
 		items: [
 			{
-				title: "Orders",
-				path: "#/orders",
-				icon: (
-					<ShoppingCartIcon
-					/>
-				),
-				subItems: [
-					{ title: "All orders", path: "#/orders/all" },
-					{ title: "Unfulfilled", path: "#/orders/unfulfilled" },
-					{ title: "Returns", path: "#/orders/returns" },
-				],
+				title: "Pricing",
+				path: "#/pricing",
+				icon: <BarChart3Icon />,
 			},
 			{
-				title: "Products",
-				path: "#/products",
-				icon: (
-					<FileTextIcon
-					/>
-				),
-				subItems: [
-					{ title: "Catalog", path: "#/products/catalog" },
-					{ title: "Inventory", path: "#/products/inventory" },
-					{ title: "Collections", path: "#/products/collections" },
-				],
+				title: "Changelog",
+				path: "#/changelog",
+				icon: <FileTextIcon />,
 			},
 			{
-				title: "Customers",
-				path: "#/customers",
-				icon: (
-					<UsersIcon
-					/>
-				),
+				title: "Support",
+				path: "#/support",
+				icon: <HelpCircleIcon />,
 			},
 			{
-				title: "Marketing",
-				path: "#/marketing",
-				icon: (
-					<MegaphoneIcon
-					/>
-				),
+				title: "Feedback",
+				path: "#/feedback",
+				icon: <MegaphoneIcon />,
 			},
 		],
 	},
@@ -88,19 +63,9 @@ export const navGroups: SidebarNavGroup[] = [
 		label: "Settings",
 		items: [
 			{
-				title: "Store settings",
-				path: "#/store-settings",
-				icon: (
-					<SettingsIcon
-					/>
-				),
-				subItems: [
-					{ title: "Store profile", path: "#/store-settings/profile" },
-					{ title: "Shipping & delivery", path: "#/store-settings/shipping" },
-					{ title: "Payments", path: "#/store-settings/payments" },
-					{ title: "Staff", path: "#/store-settings/staff" },
-					{ title: "Apps", path: "#/store-settings/apps" },
-				],
+				title: "Profile",
+				path: "#/profile",
+				icon: <UsersIcon />,
 			},
 		],
 	},
