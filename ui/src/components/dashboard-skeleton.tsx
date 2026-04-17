@@ -15,6 +15,7 @@ import MagnifiedBento from "./magnified-bento";
 import { LogoCloud } from "@/components/logo-cloud";
 import { FaqBoxComponent } from "@/components/faq-box-component";
 import { ContactUs } from "@/components/contact-us";
+import { Footer } from "@/components/Footer";
 
 const carouselItems = [
 	{
@@ -309,6 +310,11 @@ export function DashboardSkeleton() {
 			{/* --- Contact Us Section --- */}
 			<div className="col-span-2 lg:col-span-4 border-t border-border/40 bg-background">
 				<ContactUs />
+			</div>
+
+			{/* --- Footer Section --- */}
+			<div className="col-span-2 lg:col-span-4 pt-10">
+				<Footer />
 			</div>
 		</div>
 	);
