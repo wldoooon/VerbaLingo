@@ -1,13 +1,22 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { FullWidthDivider } from "@/components/ui/full-width-divider";
 import { Button } from "@/components/ui/button";
 import { CheckIcon } from "lucide-react";
 import { DecorIcon } from "@/components/ui/decor-icon";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
+import { NumberCounter } from "@/components/ui/number-counter";
+
+type FREQUENCY = "monthly" | "yearly";
 
 type PricingPlan = {
 	name: string;
-	price: string;
+	price: {
+		monthly: number;
+		yearly: number;
+	};
 	period?: string;
 	description: string;
 	href?: string;
@@ -19,7 +28,7 @@ type PricingPlan = {
 const pricingPlans: PricingPlan[] = [
 	{
 		name: "FREE STARTER",
-		price: "Free",
+		price: { monthly: 0, yearly: 0 },
 		description: "Explore the app and enjoy free AIword lookups.",
 		featuresTitle: "CORE ACCESS:",
 		features: [
@@ -31,7 +40,7 @@ const pricingPlans: PricingPlan[] = [
 	},
 	{
 		name: "BASIC",
-		price: "$4.99",
+		price: { monthly: 4.99, yearly: 4.15 },
 		period: "month",
 		description: "For regular learners who want more AI power.",
 		featuresTitle: "EVERYTHING IN FREE, PLUS:",
@@ -46,7 +55,7 @@ const pricingPlans: PricingPlan[] = [
 		name: "PRO",
 		isPopular: true,
 		href: "#",
-		price: "$8.99",
+		price: { monthly: 8.99, yearly: 7.49 },
 		period: "month",
 		description: "The sweet spot for serious students.",
 		featuresTitle: "EVERYTHING IN BASIC, PLUS:",
@@ -59,7 +68,7 @@ const pricingPlans: PricingPlan[] = [
 	{
 		name: "MAX",
 		href: "#",
-		price: "$14.99",
+		price: { monthly: 14.99, yearly: 12.49 },
 		period: "month",
 		description: "For dedicated power learners.",
 		featuresTitle: "EVERYTHING IN PRO, PLUS:",
@@ -72,7 +81,7 @@ const pricingPlans: PricingPlan[] = [
 	{
 		name: "UNLIMITED",
 		href: "#",
-		price: "$18.99",
+		price: { monthly: 18.99, yearly: 15.82 },
 		period: "month",
 		description: "The ultimate language immersion experience.",
 		featuresTitle: "NO LIMITS, PLUS:",
@@ -85,13 +94,41 @@ const pricingPlans: PricingPlan[] = [
 ];
 
 export function PricingSection() {
+	const [frequency, setFrequency] = useState<FREQUENCY>("monthly");
+
 	return (
-		<section className="mx-auto min-h-screen max-w-screen-2xl place-content-center border-x border-t border-border/40 py-4 relative">
+		<section className="mx-auto min-h-screen max-w-screen-2xl place-content-center border-x border-t border-border/40 py-12 relative overflow-hidden">
 			{/* --- Architectural Corners --- */}
 			<DecorIcon className="size-5 text-muted-foreground/40" position="top-left" />
 			<DecorIcon className="size-5 text-muted-foreground/40" position="top-right" />
 			<DecorIcon className="size-5 text-muted-foreground/40" position="bottom-left" />
 			<DecorIcon className="size-5 text-muted-foreground/40" position="bottom-right" />
+
+			<div className="mb-12 flex justify-center">
+				<div className="flex w-fit rounded-lg border bg-background p-1.5 shadow-sm relative">
+					{(["monthly", "yearly"] as const).map((freq) => (
+						<button
+							key={freq}
+							onClick={() => setFrequency(freq)}
+							className="relative px-6 py-2 text-xs font-bold uppercase tracking-widest transition-colors z-10"
+						>
+							<span className={cn(
+								"relative z-10",
+								frequency === freq ? "text-foreground" : "text-muted-foreground"
+							)}>
+								{freq}
+							</span>
+							{frequency === freq && (
+								<motion.div
+									layoutId="active-freq"
+									className="absolute inset-0 z-0 bg-muted/40 rounded-md border"
+									transition={{ type: "spring", stiffness: 400, damping: 30 }}
+								/>
+							)}
+						</button>
+					))}
+				</div>
+			</div>
 
 			<div className="relative">
 				<FullWidthDivider position="top" />
@@ -103,12 +140,12 @@ export function PricingSection() {
 							BLUEPRINT ACCESS
 						</p>
 						<h1 className="font-bold text-3xl leading-tight md:text-5xl">
-							Engineering Tiers that scale
+							Engineering Tiers
 						</h1>
 					</div>
 
 					{pricingPlans.map((plan) => (
-						<PricingCard key={plan.name} plan={plan} />
+						<PricingCard key={plan.name} plan={plan} frequency={frequency} />
 					))}
 
 					{/* Comparison Rows */}
@@ -154,24 +191,40 @@ const comparisonFeatures = [
 	{ name: "Dedicated Nodes", values: [false, false, false, false, true] },
 ];
 
-function PricingCard({ plan }: { plan: PricingPlan }) {
+function PricingCard({ plan, frequency }: { plan: PricingPlan; frequency: FREQUENCY }) {
+	const currentPrice = plan.price[frequency];
+
 	return (
 		<div className="flex flex-col bg-background *:px-4 *:py-6">
-			<div className="border-b">
-				<p className="mb-6 text-muted-foreground text-sm uppercase tracking-wider">
-					{plan.name}
-				</p>
-				<div className="mb-2 flex items-baseline gap-2">
-					<h2 className="font-bold text-4xl">{plan.price}</h2>
-					{plan.period && (
-						<span className="text-muted-foreground text-xs">
-							/ {plan.period}
-						</span>
-					)}
+			<div className="border-b min-h-[160px] flex flex-col justify-between">
+				<div>
+					<p className="mb-6 text-muted-foreground text-sm uppercase tracking-wider">
+						{plan.name}
+					</p>
+					<div className="mb-2 flex items-baseline gap-2 h-10 overflow-hidden">
+						{plan.price.monthly !== plan.price.yearly ? (
+							<NumberCounter
+								value={currentPrice}
+								decimals={currentPrice % 1 === 0 ? 0 : 2}
+								prefix="$"
+								duration={1.9}
+								className="font-bold text-4xl tabular-nums"
+							/>
+						) : (
+							<h2 className="font-bold text-4xl">
+								{currentPrice === 0 ? "Free" : `$${currentPrice}`}
+							</h2>
+						)}
+						{plan.period && (
+							<span className="text-muted-foreground text-xs uppercase block self-end pb-1">
+								/ {plan.period}
+							</span>
+						)}
+					</div>
+					<p className="mb-8 line-clamp-1 text-muted-foreground">
+						{plan.description}
+					</p>
 				</div>
-				<p className="mb-8 line-clamp-1 text-muted-foreground">
-					{plan.description}
-				</p>
 
 				<Button
 					asChild
