@@ -18,7 +18,6 @@ type PricingPlan = {
 		yearly: number;
 	};
 	period?: string;
-	description: string;
 	href?: string;
 	featuresTitle: string;
 	features: string[];
@@ -29,12 +28,10 @@ const pricingPlans: PricingPlan[] = [
 	{
 		name: "FREE STARTER",
 		price: { monthly: 0, yearly: 0 },
-		description: "Explore the app and enjoy free AIword lookups.",
 		featuresTitle: "CORE ACCESS:",
 		features: [
 			"100 searches / month",
 			"50,000 AI credits",
-			"Word lookup & context",
 		],
 		href: "#",
 	},
@@ -42,12 +39,10 @@ const pricingPlans: PricingPlan[] = [
 		name: "BASIC",
 		price: { monthly: 4.99, yearly: 4.15 },
 		period: "month",
-		description: "For regular learners who want more AI power.",
 		featuresTitle: "EVERYTHING IN FREE, PLUS:",
 		features: [
 			"500 searches / month",
 			"800,000 AI credits",
-			"Advanced AI explanations",
 		],
 		href: "#",
 	},
@@ -57,12 +52,10 @@ const pricingPlans: PricingPlan[] = [
 		href: "#",
 		price: { monthly: 8.99, yearly: 7.49 },
 		period: "month",
-		description: "The sweet spot for serious students.",
 		featuresTitle: "EVERYTHING IN BASIC, PLUS:",
 		features: [
 			"2,000 searches / month",
 			"5,000,000 AI credits",
-			"Advanced analytics",
 		],
 	},
 	{
@@ -70,12 +63,10 @@ const pricingPlans: PricingPlan[] = [
 		href: "#",
 		price: { monthly: 14.99, yearly: 12.49 },
 		period: "month",
-		description: "For dedicated power learners.",
 		featuresTitle: "EVERYTHING IN PRO, PLUS:",
 		features: [
 			"Unlimited searches",
 			"15,000,000 AI credits",
-			"Priority support",
 		],
 	},
 	{
@@ -83,12 +74,10 @@ const pricingPlans: PricingPlan[] = [
 		href: "#",
 		price: { monthly: 18.99, yearly: 15.82 },
 		period: "month",
-		description: "The ultimate language immersion experience.",
 		featuresTitle: "NO LIMITS, PLUS:",
 		features: [
 			"Unlimited searches",
 			"Unlimited AI credits",
-			"Dedicated support channel",
 		],
 	},
 ];
