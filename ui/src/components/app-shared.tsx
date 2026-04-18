@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { LayoutGridIcon, BarChart3Icon, ShoppingCartIcon, FileTextIcon, UsersIcon, MegaphoneIcon, SettingsIcon, HelpCircleIcon, ActivityIcon } from "lucide-react";
+import { LayoutGridIcon, BarChart3Icon, FileTextIcon, UsersIcon, MegaphoneIcon, HelpCircleIcon, ShieldIcon, ScaleIcon } from "lucide-react";
 
 export type SidebarNavItem = {
 	title: string;
@@ -21,10 +21,7 @@ export const navGroups: SidebarNavGroup[] = [
 			{
 				title: "Home",
 				path: "#/",
-				icon: (
-					<LayoutGridIcon
-					/>
-				),
+				icon: <LayoutGridIcon />,
 				isActive: true,
 				subItems: [
 					{ title: "Features", path: "#features" },
@@ -73,20 +70,14 @@ export const navGroups: SidebarNavGroup[] = [
 
 export const footerNavLinks: SidebarNavItem[] = [
 	{
-		title: "Seller help",
-		path: "#/seller-help",
-		icon: (
-			<HelpCircleIcon
-			/>
-		),
+		title: "Privacy Policy",
+		path: "#/privacy",
+		icon: <ShieldIcon />,
 	},
 	{
-		title: "Platform status",
-		path: "#/status",
-		icon: (
-			<ActivityIcon
-			/>
-		),
+		title: "Terms of services",
+		path: "#/terms",
+		icon: <ScaleIcon />,
 	},
 ];
 

@@ -170,13 +170,13 @@ export function PricingSection() {
 }
 
 const comparisonFeatures = [
-	{ name: "Daily Context Scans", values: ["10", "Unlimited", "Unlimited", "Unlimited", "Unlimited"] },
-	{ name: "Phrase Archives", values: ["5 Units", "Infinite", "Infinite", "Infinite", "Infinite"] },
-	{ name: "Acoustic Engine", values: ["Std", "Pro", "Pro", "Research", "Industrial"] },
-	{ name: "Shadowing Lab", values: [false, true, true, true, true] },
-	{ name: "Pattern Detection", values: [false, true, true, true, true] },
-	{ name: "Diagnostic Export", values: [false, false, true, true, true] },
-	{ name: "Team Sub-Hubs", values: [false, false, false, true, true] },
+	{ name: "Monthly Search Queries", values: ["100", "500", "2,000", "Unlimited", "Unlimited"] },
+	{ name: "AI credits", values: ["50k", "800k", "5M", "15M", "Unlimited"] },
+	{ name: "Word Context Engine", values: [true, true, true, true, true] },
+	{ name: "AI Immersion Logic", values: ["Basic", "Advanced", "Advanced", "Research", "Research"] },
+	{ name: "Acoustic Shadowing", values: [false, true, true, true, true] },
+	{ name: "Pattern Detection", values: [false, false, true, true, true] },
+	{ name: "Immersion Analytics", values: [false, false, true, true, true] },
 	{ name: "Dedicated Nodes", values: [false, false, false, false, true] },
 ];
 
@@ -210,9 +210,6 @@ function PricingCard({ plan, frequency }: { plan: PricingPlan; frequency: FREQUE
 							</span>
 						)}
 					</div>
-					<p className="mb-8 line-clamp-1 text-muted-foreground">
-						{plan.description}
-					</p>
 				</div>
 
 				<Button
