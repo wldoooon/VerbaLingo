@@ -54,7 +54,7 @@ export function FaqBoxComponent() {
 					Frequently Asked <HighlightText variant="underline" color="primary" className="font-bold italic text-orange-500">Questions</HighlightText>
 				</h1>
 				<p className="mb-8 max-w-2xl text-muted-foreground">
-					Find answers to common questions about Efferd. Can't find what you're
+					Find answers to common questions about MiniYouGlish. Can't find what you're
 					looking for? Our support team is here to help.
 				</p>
 
@@ -174,64 +174,64 @@ const faqs = [
 	{
 		id: 1,
 		category: "getting-started",
-		title: "How do I create my first project?",
+		title: "How do I perform my first word lookup?",
 		content:
-			'Click the "New Project" button in your dashboard, choose a template or start from scratch, customize your project name and settings, and you\'ll be ready to start building in seconds.',
+			'Type any word or expression into the main search bar on your dashboard. Our engine will instantly scan 14.2 million video frames to find every instance where native speakers use that exact term in context.',
 	},
 	{
 		id: 2,
 		category: "getting-started",
-		title: "What are the system requirements?",
+		title: "Is MiniYouGlish supported on mobile?",
 		content:
-			"Efferd works on any modern web browser including Chrome, Firefox, Safari, and Edge. No special software installation is required—just visit our platform and log in.",
+			"Yes. MiniYouGlish is fully responsive and optimized for all modern mobile browsers. You can watch clips, read transcripts, and chat with your AI Tutor on any device without installing an app.",
 	},
 	{
 		id: 3,
 		category: "features",
-		title: "Can I use Efferd for team collaboration?",
+		title: "What makes MiniYouGlish better than a translator?",
 		content:
-			"Absolutely! Invite team members, set role-based permissions, leave comments on components, and track changes in real-time. Our collaboration features are built for teams of all sizes.",
+			"Translators give you abstract definitions. MiniYouGlish gives you the 'Acoustic Signature'—real people using the word with emotion, cultural nuance, and authentic speed. It's the difference between reading about a language and hearing it live.",
 	},
 	{
 		id: 4,
 		category: "features",
-		title: "Is there a component library?",
+		title: "How does the AI Tutor help me?",
 		content:
-			"Yes, Efferd includes a comprehensive library of pre-built, customizable components. You can also create your own reusable components and share them across your projects.",
+			"The AI Tutor lives right inside the video player. It knows exactly which clip you're watching and can explain slang, grammar structures, or cultural references specific to that moment in real-time.",
 	},
 	{
 		id: 5,
 		category: "features",
-		title: "Do you support custom integrations?",
+		title: "What categories of videos are available?",
 		content:
-			"We support integrations with GitHub, GitLab, Figma, Slack, and major cloud providers. For custom integrations, contact our support team to discuss your needs.",
+			"Our index covers over 14 million frames from Movies, Podcasts, News, and Cartoons. You can filter your results to focus on formal business speech or casual everyday conversations.",
 	},
 	{
 		id: 6,
 		category: "billing",
 		title: "What payment methods do you accept?",
 		content:
-			"We accept all major credit cards, PayPal, and bank transfers for annual plans. Invoicing is available for enterprise customers.",
+			"We accept all major credit cards and digital wallets through our secure payments partner, Polar. Your data is encrypted and handled according to the highest industry standards.",
 	},
 	{
 		id: 7,
 		category: "billing",
-		title: "Can I change my plan anytime?",
+		title: "Can I cancel my membership anytime?",
 		content:
-			"Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate your billing accordingly.",
+			"Yes. We offer a true 'Blueprint' experience—total transparency with no lock-in contracts. You can upgrade, downgrade, or cancel your plan at any time directly from your profile settings.",
 	},
 	{
 		id: 8,
 		category: "support",
-		title: "How do I report a bug?",
+		title: "How do I report a technical issue?",
 		content:
-			"Use the in-app feedback button or email support@efferd.com with details about the issue. Our team typically responds within 24 hours.",
+			"Use the 'Contact Us' link at the bottom of the page or in the sidebar. Our engineering team monitors support tickets and typically responds within one business day.",
 	},
 	{
 		id: 9,
 		category: "support",
-		title: "Do you offer training or onboarding?",
+		title: "Do you offer onboarding for new users?",
 		content:
-			"We provide video tutorials, documentation, and live webinars. Premium plans include personalized onboarding sessions with our support team.",
+			"Every Free Starter account includes access to our onboarding documentation and contextual tooltips that guide you through your first 100 searches and 50,000 AI credits.",
 	},
 ];
