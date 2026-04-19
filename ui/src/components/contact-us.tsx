@@ -61,23 +61,17 @@ export function ContactUs() {
 						</div>
 						<MessageCircle className="size-6 text-muted-foreground group-hover:text-primary transition-colors" />
 					</div>
-					<Button variant="outline" className="rounded-full px-6">
-						Start Live Chat
-					</Button>
 				</div>
 
 				{/* Try Efferd Section */}
 				<div className="p-8 lg:p-12 border-b border-border/40 hover:bg-muted/5 transition-colors group">
 					<div className="flex items-start justify-between mb-8">
 						<div>
-							<h3 className="text-xl font-bold mb-2">Try Efferd</h3>
-							<p className="text-sm text-muted-foreground">See how Efferd can transform your product&apos;s UI.</p>
+							<h3 className="text-xl font-bold mb-2">Try PokiSpokey</h3>
+							<p className="text-sm text-muted-foreground">See how PokiSpokey can help you to speak.</p>
 						</div>
 						<Video className="size-6 text-muted-foreground group-hover:text-primary transition-colors" />
 					</div>
-					<Button variant="outline" className="rounded-full px-6">
-						Book a demo
-					</Button>
 				</div>
 			</div>
 
@@ -88,22 +82,7 @@ export function ContactUs() {
 					{/* Email */}
 					<div>
 						<h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Email</h4>
-						<p className="text-sm font-medium hover:text-primary cursor-pointer transition-colors">mail@efferd.com</p>
-					</div>
-
-					{/* Phone */}
-					<div>
-						<h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Phone</h4>
-						<p className="text-sm font-medium hover:text-primary cursor-pointer transition-colors">+1 (234) 567-890</p>
-					</div>
-
-					{/* Office */}
-					<div>
-						<h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Office</h4>
-						<p className="text-sm text-muted-foreground leading-relaxed">
-							123 Innovation Drive,<br />
-							San Francisco, CA 94107
-						</p>
+						<p className="text-sm font-medium hover:text-primary cursor-pointer transition-colors">support@pokispokey.com</p>
 					</div>
 
 					{/* Socials */}
@@ -111,8 +90,6 @@ export function ContactUs() {
 						<h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Socials</h4>
 						<div className="flex items-center gap-5">
 							<Linkedin className="size-5 text-muted-foreground hover:text-foreground cursor-pointer transition-colors" />
-							<Youtube className="size-5 text-muted-foreground hover:text-foreground cursor-pointer transition-colors" />
-							<Github className="size-5 text-muted-foreground hover:text-foreground cursor-pointer transition-colors" />
 							<Twitter className="size-5 text-muted-foreground hover:text-foreground cursor-pointer transition-colors" />
 						</div>
 					</div>
@@ -146,38 +123,10 @@ export function ContactUs() {
 
 							{/* Work Email */}
 							<div className="space-y-2">
-								<Label htmlFor="email">Work Email</Label>
+								<Label htmlFor="email">Email</Label>
 								<Input id="email" type="email" placeholder="johndoe@example.com" className="rounded-xl bg-background" />
 							</div>
 
-							{/* Phone (Optional) */}
-							<div className="space-y-2">
-								<Label htmlFor="phone">Phone (Optional)</Label>
-								<Input id="phone" type="tel" placeholder="+1 (555) 123-4567" className="rounded-xl bg-background" />
-							</div>
-
-							{/* Company Info */}
-							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-								<div className="space-y-2">
-									<Label htmlFor="website">Company Website</Label>
-									<Input id="website" placeholder="https://example.com" className="rounded-xl bg-background" />
-								</div>
-								<div className="space-y-2">
-									<Label htmlFor="company-size">Company Size</Label>
-									<Select>
-										<SelectTrigger id="company-size" className="rounded-xl bg-background w-full">
-											<SelectValue placeholder="Select a value" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="1-10">1-10 employees</SelectItem>
-											<SelectItem value="11-50">11-50 employees</SelectItem>
-											<SelectItem value="51-200">51-200 employees</SelectItem>
-											<SelectItem value="201-500">201-500 employees</SelectItem>
-											<SelectItem value="500+">500+ employees</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-							</div>
 
 							{/* Message */}
 							<div className="space-y-2">

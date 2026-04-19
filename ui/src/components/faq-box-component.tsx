@@ -54,7 +54,7 @@ export function FaqBoxComponent() {
 					Frequently Asked <HighlightText variant="underline" color="primary" className="font-bold italic text-orange-500">Questions</HighlightText>
 				</h1>
 				<p className="mb-8 max-w-2xl text-muted-foreground">
-					Find answers to common questions about MiniYouGlish. Can't find what you're
+					Find answers to common questions about PokiSpokey. Can't find what you're
 					looking for? Our support team is here to help.
 				</p>
 
@@ -181,16 +181,16 @@ const faqs = [
 	{
 		id: 2,
 		category: "getting-started",
-		title: "Is MiniYouGlish supported on mobile?",
+		title: "Is PokiSpokey supported on mobile?",
 		content:
-			"Yes. MiniYouGlish is fully responsive and optimized for all modern mobile browsers. You can watch clips, read transcripts, and chat with your AI Tutor on any device without installing an app.",
+			"Yes. PokiSpokey is fully responsive and optimized for all modern mobile browsers. You can watch clips, read transcripts, and chat with your AI Tutor on any device without installing an app.",
 	},
 	{
 		id: 3,
 		category: "features",
-		title: "What makes MiniYouGlish better than a translator?",
+		title: "What makes PokiSpokey better than a translator?",
 		content:
-			"Translators give you abstract definitions. MiniYouGlish gives you the 'Acoustic Signature'—real people using the word with emotion, cultural nuance, and authentic speed. It's the difference between reading about a language and hearing it live.",
+			"Translators give you abstract definitions. PokiSpokey gives you the 'Acoustic Signature'—real people using the word with emotion, cultural nuance, and authentic speed. It's the difference between reading about a language and hearing it live.",
 	},
 	{
 		id: 4,
