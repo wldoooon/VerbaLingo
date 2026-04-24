@@ -18,7 +18,6 @@ export default function PrivacyPage() {
           <DecorIcon position="top-right" />
           <DecorIcon position="bottom-left" />
           <DecorIcon position="bottom-right" />
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-orange-500 mb-4">Legal</p>
           <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-foreground mb-4">
             Privacy Policy
           </h1>

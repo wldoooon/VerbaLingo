@@ -1,10 +1,10 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, Tag, Calendar } from 'lucide-react';
+import { DecorIcon } from '@/components/ui/decor-icon';
+import { Tag, Calendar } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// Data structure for your releases
 const releases = [
     {
         version: "v1.6.0",
@@ -12,7 +12,7 @@ const releases = [
         title: "No More Double Counting",
         description: "We overhauled how search usage is tracked so you never get charged twice for the same lookup. This update also brings major stability improvements to the video player and transcript sync.",
         changes: [
-            { type: "fix", description: "Searching the same word or phrase within one hour (refresh, back-navigation, re-typing) no longer deducts from your monthly quota a second time." },
+            { type: "fix", description: "Searching the same word or phrase within one hour no longer deducts from your monthly quota a second time." },
             { type: "fix", description: "Transcript box no longer vibrates or jumps between sentences during playback. Sync logic was rewritten with a sticky 'last passed sentence' engine." },
         ]
     },
@@ -23,7 +23,7 @@ const releases = [
         description: "Search results now feel instant.",
         changes: [
             { type: "feat", description: "Player component chunks are now pre-fetched on page load so video playback starts immediately when results arrive." },
-            { type: "fix", description: "Search bar no longer triggers conflicting route prefetches on focus, which was causing App Router internal state corruption on fast tab switches." },
+            { type: "fix", description: "Search bar no longer triggers conflicting route prefetches on focus, causing App Router internal state corruption on fast tab switches." },
         ]
     },
     {
@@ -51,120 +51,131 @@ const releases = [
     {
         version: "v1.3.0",
         date: "January 28, 2026",
-        title: "Ai Credits Economy & Subscription Tiers",
-        description: "We launched the full subscription model with five tiers, a ai credits-based AI token economy, and real-time usage tracking synced to your account.",
+        title: "AI Credits Economy & Subscription Tiers",
+        description: "We launched the full subscription model with five tiers, an AI credits-based token economy, and real-time usage tracking synced to your account.",
         changes: [
-            { type: "feat", description: "Introduced AI credits each AI Assistant response deducts credits based on response length. All plans start with a generous credits balance." },
+            { type: "feat", description: "Introduced AI credits — each AI Assistant response deducts credits based on response length." },
             { type: "feat", description: "Launched five subscription tiers: Free, Basic ($4.99/mo), Pro ($8.99/mo), Premium ($14.99/mo), and Max ($18.99/mo)." },
         ]
     },
 ];
 
-
+function SideBox({ index, isLast, circle }: { index: number; isLast?: boolean; circle?: boolean }) {
+    return (
+        <div className={cn(
+            "border-r border-b border-border/40 relative hidden md:block",
+            index % 2 !== 0 && "bg-muted/20 dark:bg-muted/5"
+        )}>
+            {/* continuous vertical line */}
+            <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-px bg-border/50" />
+            {/* stop line at bottom of last row */}
+            {isLast && (
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-px h-1/2 bg-background" />
+            )}
+            {/* circle node */}
+            {circle && (
+                <div className={cn(
+                    "absolute top-8 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-background z-10",
+                    index === 0
+                        ? "border-2 border-orange-500"
+                        : "border border-border"
+                )} />
+            )}
+        </div>
+    );
+}
 
 export default function ChangelogPage() {
     return (
-        <div className="min-h-screen bg-background text-foreground pt-14 lg:pt-0">
-            <main className="max-w-6xl mx-auto px-6 lg:px-12 py-24">
-                {/* Hero Section */}
-                <div className="mb-20">
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="text-5xl lg:text-7xl font-bold tracking-tighter text-foreground mb-6"
-                    >
+        <div className="py-10 px-4">
+            <div className="max-w-5xl mx-auto border-t border-l border-border/40 grid grid-cols-1 md:grid-cols-[72px_1fr_72px]">
+
+                {/* ── Header row ── */}
+                {/* left */}
+                <div className="border-r border-b border-border/40 bg-muted/20 dark:bg-muted/5 hidden md:block" />
+                {/* center */}
+                <div className="relative border-r border-b border-border/40 px-10 py-14">
+                    <DecorIcon position="top-left" />
+                    <DecorIcon position="top-right" />
+                    <DecorIcon position="bottom-left" />
+                    <DecorIcon position="bottom-right" />
+                    <p className="text-xs font-bold uppercase tracking-[0.25em] text-orange-500 mb-4">Updates</p>
+                    <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-foreground mb-4">
                         Changelog
-                    </motion.h1>
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-xl text-muted-foreground max-w-2xl leading-relaxed"
-                    >
-                        New updates and improvements to VerbaLingo. We ship frequently — here's everything we've built so far.
-                    </motion.p>
-
+                    </h1>
+                    <p className="text-muted-foreground max-w-xl leading-relaxed">
+                        New updates and improvements to PokiSpokey. We ship frequently — here's everything we've built so far.
+                    </p>
                 </div>
+                {/* right */}
+                <div className="border-r border-b border-border/40 bg-muted/20 dark:bg-muted/5 hidden md:block" />
 
-                {/* Timeline */}
-                <div className="relative">
-                    {/* Continuous Timeline Line */}
-                    <div className="absolute top-3 bottom-0 left-3 md:left-[240px] w-px bg-border"></div>
+                {/* ── Release rows ── */}
+                {releases.map((release, index) => {
+                    const isLast = index === releases.length - 1;
+                    const shaded = index % 2 !== 0;
+                    return (
+                        <React.Fragment key={release.version}>
+                            {/* Left side box */}
+                            <SideBox index={index} isLast={isLast} circle />
 
-                    <div className="space-y-16">
-                        {releases.map((release, index) => (
-                            <motion.div
-                                key={release.version}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-100px" }}
-                                transition={{ duration: 0.5, delay: index * 0.1 }}
-                                className="relative md:flex"
-                            >
-                                {/* Desktop Date Column */}
-                                <div className="hidden md:block w-[240px] shrink-0 text-right pt-2 pr-12">
-                                    <div className="sticky top-24">
-                                        <time className="text-sm font-medium text-muted-foreground block mb-1">{release.date}</time>
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted border border-border text-xs font-mono font-medium text-foreground">
-                                            <Tag className="w-3 h-3" />
-                                            {release.version}
-                                        </div>
-                                    </div>
+                            {/* Center content */}
+                            <div className={cn(
+                                "relative border-r border-b border-border/40 px-8 py-8",
+                                shaded && "bg-muted/20 dark:bg-muted/5"
+                            )}>
+                                {isLast && <DecorIcon position="bottom-left" />}
+                                {isLast && <DecorIcon position="bottom-right" />}
+
+                                {/* Version + date */}
+                                <div className="flex flex-wrap items-center gap-3 mb-4">
+                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted border border-border text-xs font-mono font-semibold text-foreground">
+                                        <Tag className="w-3 h-3" />
+                                        {release.version}
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                                        <Calendar className="w-3 h-3" />
+                                        {release.date}
+                                    </span>
                                 </div>
 
-                                {/* Timeline Node */}
-                                <div className="absolute left-3 md:left-[240px] top-3 w-4 h-4 bg-card border-4 border-primary rounded-full ring-4 ring-background -translate-x-1/2 z-10"></div>
-
-                                {/* Content Column */}
-                                <div className="pl-10 md:pl-12 flex-1">
-                                    {/* Mobile Date (hidden on desktop) */}
-                                    <div className="md:hidden mb-4 pt-1">
-                                        <time className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-2">
-                                            <Calendar className="w-4 h-4" />
-                                            {release.date}
-                                        </time>
-                                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted border border-border text-xs font-mono font-medium text-foreground">
-                                            <Tag className="w-3 h-3" />
-                                            {release.version}
+                                {/* Title */}
+                                <h2 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
+                                    {(release as any).flag && (
+                                        <div className="w-5 h-5 rounded-full overflow-hidden border border-border flex-shrink-0">
+                                            <img src={(release as any).flag} alt="flag" className="w-full h-full object-cover" />
                                         </div>
-                                    </div>
+                                    )}
+                                    {release.title}
+                                </h2>
 
-                                    <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-sm">
-                                        <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4 tracking-tight flex items-center gap-3">
-                                            {(release as any).flag && (
-                                                <div className="w-7 h-7 rounded-full overflow-hidden shadow-sm border border-border flex-shrink-0">
-                                                    <img src={(release as any).flag} alt="flag" className="w-full h-full object-cover" />
-                                                </div>
-                                            )}
-                                            {release.title}
-                                        </h2>
+                                {/* Description */}
+                                {release.description && (
+                                    <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+                                        {release.description}
+                                    </p>
+                                )}
 
-                                        {release.description && (
-                                            <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-3xl">
-                                                {release.description}
-                                            </p>
-                                        )}
-
-                                        <div className="space-y-4">
-                                            {release.changes.map((change, changeIndex) => (
-                                                <div key={changeIndex} className="flex items-start gap-4">
-                                                    <div className="mt-2.5 flex-shrink-0">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-foreground/40"></div>
-                                                    </div>
-                                                    <p className="text-foreground/80 leading-relaxed flex-1">
-                                                        {change.description}
-                                                    </p>
-                                                </div>
-                                            ))}
+                                {/* Changes */}
+                                <div className="space-y-2.5">
+                                    {release.changes.map((change, i) => (
+                                        <div key={i} className="flex items-start gap-3">
+                                            <span className="mt-0.5 shrink-0 inline-flex px-2 py-0.5 rounded border border-border bg-muted text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                                {change.type}
+                                            </span>
+                                            <p className="text-sm text-muted-foreground leading-relaxed">{change.description}</p>
                                         </div>
-                                    </div>
+                                    ))}
                                 </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </main>
+                            </div>
+
+                            {/* Right side box */}
+                            <SideBox index={index} isLast={isLast} circle={false} />
+                        </React.Fragment>
+                    );
+                })}
+
+            </div>
         </div>
     );
 }
