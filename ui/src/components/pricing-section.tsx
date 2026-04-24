@@ -100,7 +100,10 @@ function PricingCard({ plan, frequency }: { plan: PricingPlan; frequency: FREQUE
 	const isAnimated = plan.price.monthly !== plan.price.yearly;
 
 	return (
-		<div className="relative border-r border-b border-border/40 flex flex-col">
+		<div className={cn(
+			"relative border-r border-b border-border/40 flex flex-col",
+			plan.isPopular && "bg-[radial-gradient(60%_55%_at_85%_0%,rgba(255,255,255,0.06),transparent)] dark:bg-[radial-gradient(60%_55%_at_85%_0%,--theme(--color-foreground/.1),transparent)]"
+		)}>
 			{/* recommended corner badge */}
 			{plan.isPopular && (
 				<div className="absolute -top-px right-4 z-10">
@@ -251,7 +254,6 @@ export function PricingSection() {
 					{/* section label */}
 					<div className="relative border-r border-b border-border/40 px-8 py-6 bg-muted/20 dark:bg-muted/5">
 						<DecorIcon position="top-left" />
-						<p className="text-[10px] font-bold uppercase tracking-[0.2em] text-orange-500 mb-1">Details</p>
 						<h2 className="text-lg font-black text-foreground">Compare plans</h2>
 					</div>
 					{/* plan name headers */}
