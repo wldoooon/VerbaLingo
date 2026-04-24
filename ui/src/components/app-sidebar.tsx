@@ -34,7 +34,7 @@ export function AppSidebar() {
 				<div className="absolute -top-[1px] -inset-x-12 h-px bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
 				<div className="absolute -bottom-[1px] -inset-x-12 h-px bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
 			</div>
-			<SidebarHeader className="h-14 justify-center">
+			<SidebarHeader className="h-14 justify-center border-b border-border/40">
 				<SidebarMenuButton asChild>
 					<a href="/">
 						<Image src="/main_logo.png" alt="PokiSpokey" width={34} height={34} className="size-11" />
@@ -69,7 +69,7 @@ export function AppSidebar() {
 					<NavGroup key={`sidebar-group-${index}`} {...group} />
 				))}
 			</SidebarContent>
-			<SidebarFooter>
+			<SidebarFooter className="border-t border-border/40">
 				<LatestChange />
 				<SidebarMenu className="mt-2">
 					{footerNavLinks.map((item) => (

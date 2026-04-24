@@ -17,9 +17,9 @@ export function Footer() {
 				<div className="absolute inset-x-0 h-px w-full bg-border" />
 				<div className="grid max-w-5xl grid-cols-6 gap-6 p-4">
 					<div className="col-span-6 flex flex-col gap-4 pt-5 md:col-span-4">
-						<a className="flex items-center gap-2 w-max" href="/">
+						<a className="flex items-center w-max" href="/">
 							<img src="/main_logo.png" className="h-15" alt="PokiSpokey" />
-							<span style={pacifico.style} className="text-xl text-foreground">
+							<span style={pacifico.style} className="text-xl text-foreground tracking-widest">
 								<span className="text-orange-500">Poki</span>Spokey
 							</span>
 						</a>

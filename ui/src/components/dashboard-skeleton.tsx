@@ -16,7 +16,6 @@ import MagnifiedBento from "./magnified-bento";
 import { LogoCloud } from "@/components/logo-cloud";
 import { FaqBoxComponent } from "@/components/faq-box-component";
 import { ContactUs } from "@/components/contact-us";
-import { Footer } from "@/components/Footer";
 
 const carouselItems = [
 	{
@@ -88,6 +87,9 @@ export function DashboardSkeleton() {
 
 				{/* Content Wrappers (So you can put stuff in left/right independently) */}
 				<div className="relative z-10 w-full min-h-[512px] overflow-hidden flex flex-col items-center justify-center p-6 border-transparent border-r border-border/40 border-b-0">
+					{/* Top-left glow overlay — sits above the opaque BlueprintGrid */}
+					<div className="absolute inset-0 z-[5] pointer-events-none bg-[radial-gradient(45%_50%_at_0%_0%,rgba(255,255,255,0.09),transparent)] dark:bg-[radial-gradient(45%_50%_at_0%_0%,rgba(255,255,255,0.05),transparent)]" />
+
 					{/* Background Blueprint Grid completely filling the left side */}
 					<div className="absolute w-full h-full inset-0 z-0 pointer-events-none">
 						{/* 10 columns on desktop, 64px boxes. */}
@@ -385,11 +387,7 @@ export function DashboardSkeleton() {
 				<ContactUs />
 			</div>
 
-			{/* --- Footer Section --- */}
-			<div className="col-span-2 lg:col-span-4 pt-10">
-				<Footer />
-			</div>
-			</div>
+</div>
 		</>
 	);
 }

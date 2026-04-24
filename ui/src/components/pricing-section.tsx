@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CheckIcon, Zap, Globe2, LayoutGrid, Layers, ShieldCheck, RefreshCw, XCircle } from "lucide-react";
+import { CheckIcon, BadgeCheck, Zap, Globe2, LayoutGrid, Layers, ShieldCheck, RefreshCw, XCircle } from "lucide-react";
 import { DecorIcon } from "@/components/ui/decor-icon";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { NumberCounter } from "@/components/ui/number-counter";
+import { ShimmeringText } from "@/components/ui/shimmering-text";
 
 type FREQUENCY = "monthly" | "yearly";
 
@@ -76,19 +77,37 @@ const comparisonFeatures = [
 
 
 
-/* ── Ruler side box ─────────────────────────────────────────────────── */
-function RulerBox({ className }: { className?: string }) {
+/* ── Continuous ruler column ────────────────────────────────────────── */
+function RulerCol({ right = false }: { right?: boolean }) {
 	return (
-		<div className={cn("border-r border-b border-border/40 relative hidden lg:block overflow-hidden", className)}>
-			<div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-px bg-border/40" />
-			{Array.from({ length: 12 }).map((_, i) => (
+		<div className={cn(
+			"border-b border-border/40 relative hidden lg:block overflow-hidden",
+			right ? "border-l border-r border-border/40" : "border-r border-border/40"
+		)}>
+			{/* main vertical line */}
+			<div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-border/40" />
+			{/* tick marks evenly distributed */}
+			{Array.from({ length: 24 }).map((_, i) => (
 				<div
 					key={i}
 					className="absolute left-0 right-0 flex justify-center"
-					style={{ top: `${(i + 1) * (100 / 13)}%` }}
+					style={{ top: `${(i + 1) * (100 / 25)}%` }}
 				>
-					<div className={cn("h-px bg-border/50", i % 3 === 2 ? "w-4" : "w-2")} />
+					<div className={cn(
+						"h-px bg-border/50",
+						i % 5 === 4 ? "w-8" : i % 2 === 1 ? "w-4" : "w-2"
+					)} />
 				</div>
+			))}
+			{/* coordinate labels at major ticks */}
+			{[0, 25, 50, 75].map((pct) => (
+				<span
+					key={pct}
+					className="absolute left-1/2 -translate-x-1/2 font-mono text-[8px] text-muted-foreground/20 select-none"
+					style={{ top: `${pct}%` }}
+				>
+					{String(pct).padStart(2, "0")}
+				</span>
 			))}
 		</div>
 	);
@@ -108,21 +127,24 @@ function PricingCard({ plan, frequency }: { plan: PricingPlan; frequency: FREQUE
 			{plan.isPopular && (
 				<div className="absolute -top-px right-4 z-10">
 					<div className="bg-background border border-border/60 border-t-0 rounded-b-md px-3 py-1 flex items-center gap-1.5">
-						<div className="w-1 h-1 rounded-full bg-orange-500" />
-						<span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-							Recommended
-						</span>
+						<ShimmeringText
+							text="Recommended"
+							duration={2.5}
+							repeatDelay={1.5}
+							spread={3}
+							className="text-[10px] font-bold uppercase tracking-widest"
+						/>
 					</div>
 				</div>
 			)}
 
 			{/* plan name */}
-			<div className="border-b border-border/40 px-6 pt-7 pb-5">
-				<p className="text-xs text-muted-foreground uppercase tracking-widest">{plan.name}</p>
+			<div className="border-b border-border/40 px-6 pt-10 pb-6">
+				<p className="text-sm font-black text-foreground uppercase tracking-widest">{plan.name}</p>
 			</div>
 
 			{/* price */}
-			<div className="border-b border-border/40 px-6 py-6">
+			<div className="border-b border-border/40 px-6 py-8">
 				<div className="flex items-baseline gap-1 mb-0.5">
 					{isAnimated ? (
 						<NumberCounter
@@ -145,22 +167,22 @@ function PricingCard({ plan, frequency }: { plan: PricingPlan; frequency: FREQUE
 			</div>
 
 			{/* features */}
-			<div className="px-6 py-5 flex-1">
+			<div className="px-6 py-8 flex-1">
 				<p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-4">
 					{plan.featuresTitle}
 				</p>
 				<div className="space-y-2.5">
 					{plan.features.map((f) => (
 						<div key={f} className="flex items-center gap-2">
-							<CheckIcon className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
-							<span className="text-xs text-foreground/80">{f}</span>
+							<BadgeCheck className="w-4 h-4 shrink-0 text-muted-foreground/50" />
+							<span className="text-sm font-medium text-foreground">{f}</span>
 						</div>
 					))}
 				</div>
 			</div>
 
 			{/* CTA */}
-			<div className="px-6 pb-7">
+			<div className="px-6 pb-10">
 				<Button
 					asChild
 					size="sm"
@@ -184,20 +206,23 @@ export function PricingSection() {
 	const [frequency, setFrequency] = useState<FREQUENCY>("monthly");
 
 	return (
-		<div className="py-10 px-4">
-			<div className="max-w-6xl mx-auto border-t border-l border-border/40">
+		<div className="py-10 border-t border-l border-border/40">
+			{/* 3-col outer grid: ruler | content | ruler — rulers stretch full height */}
+			<div className="grid grid-cols-1 lg:grid-cols-[140px_1fr_140px]">
 
-				{/* ── HEADER ROW ─────────────────────────────────── */}
-				<div className="grid grid-cols-1 lg:grid-cols-[56px_1fr_56px]">
-					<RulerBox />
+				<RulerCol />
 
+				{/* ── CENTER CONTENT ─────────────────────────────── */}
+				<div>
+
+					{/* HEADER */}
 					<div className="relative border-r border-b border-border/40 px-10 py-16 text-center">
 						<DecorIcon position="top-left" />
 						<DecorIcon position="top-right" />
 						<DecorIcon position="bottom-left" />
 						<DecorIcon position="bottom-right" />
 
-
+					
 						<p className="text-xs font-bold uppercase tracking-[0.25em] text-orange-500 mb-3">Pricing</p>
 						<h1 className="text-4xl lg:text-5xl font-black tracking-tight text-foreground mb-4">
 							Fuel your language journey.
@@ -237,96 +262,38 @@ export function PricingSection() {
 						</div>
 					</div>
 
-					<RulerBox />
-				</div>
-
-
-
-				{/* ── PRICING CARDS ──────────────────────────────── */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-					{pricingPlans.map((plan) => (
-						<PricingCard key={plan.name} plan={plan} frequency={frequency} />
-					))}
-				</div>
-
-				{/* ── COMPARISON HEADER ──────────────────────────── */}
-				<div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr]">
-					{/* section label */}
-					<div className="relative border-r border-b border-border/40 px-8 py-6 bg-muted/20 dark:bg-muted/5">
-						<DecorIcon position="top-left" />
-						<h2 className="text-lg font-black text-foreground">Compare plans</h2>
+					{/* PRICING CARDS */}
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 border-r border-border/40">
+						{pricingPlans.map((plan) => (
+							<PricingCard key={plan.name} plan={plan} frequency={frequency} />
+						))}
 					</div>
-					{/* plan name headers */}
-					{pricingPlans.map((plan) => (
-						<div key={plan.name} className={cn(
-							"border-r border-b border-border/40 px-4 py-6 hidden lg:flex items-center justify-center bg-muted/20 dark:bg-muted/5",
-							plan.isPopular && "bg-orange-500/[0.04]"
-						)}>
-							<span className={cn(
-								"text-[10px] font-black uppercase tracking-widest",
-								plan.isPopular ? "text-orange-500" : "text-muted-foreground"
-							)}>
-								{plan.name}
-							</span>
-						</div>
-					))}
-				</div>
 
-				{/* ── COMPARISON ROWS ────────────────────────────── */}
-				{comparisonFeatures.map((feature, i) => (
-					<div
-						key={feature.name}
-						className={cn(
-							"grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] border-b border-border/40",
-							i % 2 !== 0 && "bg-muted/20 dark:bg-muted/5"
-						)}
-					>
-						<div className="relative border-r border-border/40 px-8 py-4 flex items-center">
-							{i === comparisonFeatures.length - 1 && <DecorIcon position="bottom-left" />}
-							<span className="text-sm text-foreground/80 font-medium">{feature.name}</span>
-						</div>
-						{feature.values.map((val, idx) => (
-							<div key={idx} className={cn(
-								"border-r border-border/40 flex items-center justify-center px-4 py-4",
-								pricingPlans[idx]?.isPopular && "bg-orange-500/[0.03]"
+
+					{/* TRUST FOOTER */}
+					<div className="grid grid-cols-1 md:grid-cols-3">
+						{[
+							{ title: "Secure Payments", desc: "All transactions handled securely by Polar." },
+							{ title: "Cancel Anytime", desc: "No lock-in. Stop your plan whenever you want." },
+							{ title: "Sparks Reset Monthly", desc: "AI credits refresh automatically each billing cycle." },
+						].map((item, i) => (
+							<div key={item.title} className={cn(
+								"relative border-r border-b border-border/40 px-8 py-7 flex items-start gap-4",
+								i === 1 && "bg-muted/20 dark:bg-muted/5"
 							)}>
-								{typeof val === "boolean" ? (
-									val ? (
-										<div className="w-5 h-5 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center">
-											<CheckIcon className="w-3 h-3 text-orange-500" />
-										</div>
-									) : (
-										<div className="w-1.5 h-1.5 rounded-full bg-border" />
-									)
-								) : (
-									<span className="text-xs text-muted-foreground font-medium">{val}</span>
-								)}
+								{i === 0 && <DecorIcon position="bottom-left" />}
+								{i === 2 && <DecorIcon position="bottom-right" />}
+								<div>
+									<p className="font-bold text-sm text-foreground mb-0.5">{item.title}</p>
+									<p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+								</div>
 							</div>
 						))}
 					</div>
-				))}
 
-				{/* ── TRUST FOOTER ───────────────────────────────── */}
-				<div className="grid grid-cols-1 md:grid-cols-3">
-					{[
-						{ icon: ShieldCheck, title: "Secure Payments", desc: "All transactions handled securely by Polar." },
-						{ icon: XCircle, title: "Cancel Anytime", desc: "No lock-in. Stop your plan whenever you want." },
-						{ icon: RefreshCw, title: "Sparks Reset Monthly", desc: "AI credits refresh automatically each billing cycle." },
-					].map((item, i) => (
-						<div key={item.title} className={cn(
-							"relative border-r border-b border-border/40 px-8 py-7 flex items-start gap-4",
-							i === 1 && "bg-muted/20 dark:bg-muted/5"
-						)}>
-							{i === 0 && <DecorIcon position="bottom-left" />}
-							{i === 2 && <DecorIcon position="bottom-right" />}
-							<item.icon className="w-4 h-4 text-orange-500 mt-0.5 shrink-0" />
-							<div>
-								<p className="font-bold text-sm text-foreground mb-0.5">{item.title}</p>
-								<p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
-							</div>
-						</div>
-					))}
 				</div>
+
+				<RulerCol right />
 
 			</div>
 		</div>
