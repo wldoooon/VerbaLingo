@@ -20,14 +20,9 @@ export const navGroups: SidebarNavGroup[] = [
 		items: [
 			{
 				title: "Home",
-				path: "#/",
+				path: "/",
 				icon: <LayoutGridIcon />,
 				isActive: true,
-				subItems: [
-					{ title: "Features", path: "#features" },
-					{ title: "FAQ", path: "#faq" },
-					{ title: "Contact Us", path: "#contact" },
-				],
 			},
 		],
 	},
@@ -36,22 +31,22 @@ export const navGroups: SidebarNavGroup[] = [
 		items: [
 			{
 				title: "Pricing",
-				path: "#/pricing",
+				path: "/pricing",
 				icon: <BarChart3Icon />,
 			},
 			{
 				title: "Changelog",
-				path: "#/changelog",
+				path: "/changelog",
 				icon: <FileTextIcon />,
 			},
 			{
 				title: "Support",
-				path: "#/support",
+				path: "#",
 				icon: <HelpCircleIcon />,
 			},
 			{
 				title: "Feedback",
-				path: "#/feedback",
+				path: "#",
 				icon: <MegaphoneIcon />,
 			},
 		],
@@ -61,7 +56,7 @@ export const navGroups: SidebarNavGroup[] = [
 		items: [
 			{
 				title: "Profile",
-				path: "#/profile",
+				path: "#",
 				icon: <UsersIcon />,
 			},
 		],
@@ -71,12 +66,12 @@ export const navGroups: SidebarNavGroup[] = [
 export const footerNavLinks: SidebarNavItem[] = [
 	{
 		title: "Privacy Policy",
-		path: "#/privacy",
+		path: "/privacy",
 		icon: <ShieldIcon />,
 	},
 	{
-		title: "Terms of services",
-		path: "#/terms",
+		title: "Terms of Service",
+		path: "/terms",
 		icon: <ScaleIcon />,
 	},
 ];

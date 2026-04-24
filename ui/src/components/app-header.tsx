@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
@@ -9,6 +10,8 @@ import { navLinks } from "@/components/app-shared";
 import { NavUser } from "@/components/nav-user";
 import { BellIcon } from "lucide-react";
 import { SearchBar } from "@/components/comm/SearchBar";
+import { AuthDialog } from "@/components/auth-dialog";
+import { useAuthStore } from "@/stores/auth-store";
 
 import { useState, useCallback, useEffect } from "react";
 import { useTheme } from "next-themes";
@@ -20,6 +23,7 @@ export function AppHeader() {
 	const { theme, setTheme } = useTheme();
 	const { startTransition } = useThemeTransition();
 	const [mounted, setMounted] = useState(false);
+	const authStatus = useAuthStore((s) => s.status);
 
 	useEffect(() => setMounted(true), []);
 
@@ -60,14 +64,33 @@ export function AppHeader() {
 					/>
 				)}
 				<Button aria-label="Notifications" size="icon" variant="ghost">
-					<BellIcon
-					/>
+					<BellIcon />
 				</Button>
 				<Separator
 					className="h-4 data-[orientation=vertical]:self-center"
 					orientation="vertical"
 				/>
-				<NavUser />
+				{authStatus === "guest" ? (
+					<div className="flex items-center gap-2">
+						<AuthDialog defaultTab="login">
+							<Button variant="ghost" size="sm" className="font-medium">
+								Sign in
+							</Button>
+						</AuthDialog>
+						<AuthDialog defaultTab="signup">
+							<Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white font-medium">
+								Get Started
+							</Button>
+						</AuthDialog>
+					</div>
+				) : authStatus === "authenticated" ? (
+					<NavUser />
+				) : (
+					<div className="flex items-center gap-2">
+						<Skeleton className="h-8 w-16 rounded-md" />
+						<Skeleton className="h-8 w-24 rounded-md" />
+					</div>
+				)}
 			</div>
 		</header>
 	);

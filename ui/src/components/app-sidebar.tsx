@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
 	Sidebar,
@@ -79,10 +80,10 @@ export function AppSidebar() {
 								isActive={item.isActive}
 								size="sm"
 							>
-								<a href={item.path}>
+								<Link href={item.path ?? "#"}>
 									{item.icon}
 									<span>{item.title}</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					))}
