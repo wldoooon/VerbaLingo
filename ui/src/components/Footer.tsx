@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { GithubIcon, InstagramIcon, LinkedinIcon, YoutubeIcon } from "lucide-react";
-import { Pacifico } from "next/font/google";
+import { Ranchers } from "next/font/google";
 
-const pacifico = Pacifico({ weight: "400", subsets: ["latin"] });
+const pacifico = Ranchers({ weight: "400", subsets: ["latin"] });
 
 export function Footer() {
 	return (
@@ -18,13 +18,13 @@ export function Footer() {
 				<div className="grid max-w-5xl grid-cols-6 gap-6 p-4">
 					<div className="col-span-6 flex flex-col gap-4 pt-5 md:col-span-4">
 						<a className="flex items-center gap-2 w-max" href="/">
-							<img src="/main_logo.png" className="h-7" alt="PokiSpokey" />
-							<span className={cn(pacifico.className, "text-xl text-foreground")}>
-								PokiSpokey
+							<img src="/main_logo.png" className="h-15" alt="PokiSpokey" />
+							<span style={pacifico.style} className="text-xl text-foreground">
+								<span className="text-orange-500">Poki</span>Spokey
 							</span>
 						</a>
 						<p className="max-w-sm text-balance text-muted-foreground text-sm">
-							Master any language by hearing it in real context — movies, podcasts, shows, and more.
+							Master any language by hearing it in real context from movies, podcasts, shows, and more.
 						</p>
 						<div className="flex gap-2">
 							{socialLinks.map((item, index) => (
@@ -126,34 +126,13 @@ const product = [
 const socialLinks = [
 	{
 		icon: (
-			<GithubIcon
-			/>
-		),
-		link: "#",
-	},
-	{
-		icon: (
 			<InstagramIcon
 			/>
 		),
 		link: "#",
 	},
 	{
-		icon: (
-			<LinkedinIcon
-			/>
-		),
-		link: "#",
-	},
-	{
 		icon: <XIcon />,
-		link: "#",
-	},
-	{
-		icon: (
-			<YoutubeIcon
-			/>
-		),
 		link: "#",
 	},
 ];
