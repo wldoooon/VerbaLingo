@@ -44,10 +44,10 @@ export function AppHeader() {
 				/>
 				<AppBreadcrumbs page={activeItem} />
 			</div>
-            
-            <div className="flex-1 flex justify-center px-4 max-w-4xl">
-                <SearchBar />
-            </div>
+
+			<div className="flex-1 flex justify-center px-4 max-w-4xl">
+				<SearchBar />
+			</div>
 
 			<div className="flex items-center gap-3">
 				{mounted && (

@@ -21,14 +21,14 @@ function getClipStart(clip: any): number {
 // autoplay+mute+playsinline: required for iOS inline muted autoplay.
 // origin: must match window.location.origin to avoid Safari cross-origin errors.
 const PLAYER_VARS = {
-  autoplay:       1,
-  playsinline:    1,
-  mute:           1,
+  autoplay: 1,
+  playsinline: 1,
+  mute: 1,
   modestbranding: 1,
-  rel:            0,
-  controls:       0,
-  disablekb:      1,
-  fs:             0,
+  rel: 0,
+  controls: 0,
+  disablekb: 1,
+  fs: 0,
   iv_load_policy: 3,
   cc_load_policy: 0,
   origin: typeof window !== "undefined" ? window.location.origin : "",
@@ -116,7 +116,7 @@ export default function VideoPlayerCard({
   const safeCall = (player: YTPlayer | null, fn: string, ...args: any[]) => {
     try {
       if (player && typeof (player as any)[fn] === 'function') {
-        ;(player as any)[fn](...args)
+        ; (player as any)[fn](...args)
       } else if (player) {
         console.warn(`[VPC] safeCall: method "${fn}" not available on player`)
       }
@@ -243,7 +243,7 @@ export default function VideoPlayerCard({
         if (typeof event.target.setPlaybackQuality === 'function') {
           event.target.setPlaybackQuality('hd720')
         }
-      } catch {}
+      } catch { }
     }
 
     // Stall detection — only before first play (avoids triggering on user-pause)

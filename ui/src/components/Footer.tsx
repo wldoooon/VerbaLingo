@@ -1,7 +1,9 @@
 import { cn } from "@/lib/utils";
-import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
-import { FacebookIcon, GithubIcon, InstagramIcon, LinkedinIcon, YoutubeIcon } from "lucide-react";
+import { GithubIcon, InstagramIcon, LinkedinIcon, YoutubeIcon } from "lucide-react";
+import { Pacifico } from "next/font/google";
+
+const pacifico = Pacifico({ weight: "400", subsets: ["latin"] });
 
 export function Footer() {
 	return (
@@ -15,11 +17,14 @@ export function Footer() {
 				<div className="absolute inset-x-0 h-px w-full bg-border" />
 				<div className="grid max-w-5xl grid-cols-6 gap-6 p-4">
 					<div className="col-span-6 flex flex-col gap-4 pt-5 md:col-span-4">
-						<a className="w-max" href="#">
-							<Logo className="h-5" />
+						<a className="flex items-center gap-2 w-max" href="/">
+							<img src="/main_logo.png" className="h-7" alt="PokiSpokey" />
+							<span className={cn(pacifico.className, "text-xl text-foreground")}>
+								PokiSpokey
+							</span>
 						</a>
 						<p className="max-w-sm text-balance text-muted-foreground text-sm">
-							Beautify your app with efferd.
+							Master any language by hearing it in real context — movies, podcasts, shows, and more.
 						</p>
 						<div className="flex gap-2">
 							{socialLinks.map((item, index) => (
@@ -37,9 +42,9 @@ export function Footer() {
 						</div>
 					</div>
 					<div className="col-span-3 w-full md:col-span-1">
-						<span className="text-muted-foreground text-xs">Resources</span>
+						<span className="text-muted-foreground text-xs">Product</span>
 						<div className="mt-2 flex flex-col gap-2">
-							{resources.map(({ href, title }) => (
+							{product.map(({ href, title }) => (
 								<a
 									className="w-max text-sm hover:underline"
 									href={href}
@@ -68,7 +73,7 @@ export function Footer() {
 				<div className="absolute inset-x-0 h-px w-full bg-border" />
 				<div className="flex max-w-4xl flex-col justify-between gap-2 py-4">
 					<p className="text-center font-light text-muted-foreground text-sm">
-						&copy; {new Date().getFullYear()} efferd, All rights reserved
+						&copy; {new Date().getFullYear()} PokiSpokey, All rights reserved
 					</p>
 				</div>
 			</div>
@@ -82,14 +87,6 @@ const company = [
 		href: "#",
 	},
 	{
-		title: "Careers",
-		href: "#",
-	},
-	{
-		title: "Brand assets",
-		href: "#",
-	},
-	{
 		title: "Privacy Policy",
 		href: "#",
 	},
@@ -97,39 +94,36 @@ const company = [
 		title: "Terms of Service",
 		href: "#",
 	},
+	{
+		title: "Contact",
+		href: "#",
+	},
 ];
 
-const resources = [
+const product = [
 	{
-		title: "Blog",
+		title: "Pricing",
+		href: "/pricing",
+	},
+	{
+		title: "How it Works",
+		href: "#how-it-works",
+	},
+	{
+		title: "FAQ",
+		href: "#faq",
+	},
+	{
+		title: "Chrome Extension",
 		href: "#",
 	},
 	{
 		title: "Help Center",
 		href: "#",
 	},
-	{
-		title: "Contact Support",
-		href: "#",
-	},
-	{
-		title: "Community",
-		href: "#",
-	},
-	{
-		title: "Security",
-		href: "#",
-	},
 ];
 
 const socialLinks = [
-	{
-		icon: (
-			<FacebookIcon
-			/>
-		),
-		link: "#",
-	},
 	{
 		icon: (
 			<GithubIcon

@@ -1,108 +1,91 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { DecorIcon } from "@/components/ui/decor-icon";
+import {
+	Clapperboard,
+	Mic2,
+	Wand2,
+	Presentation,
+	Newspaper,
+	Tv2,
+	Users,
+	BookOpen,
+} from "lucide-react";
 
-type Logo = {
-	src: string;
-	alt: string;
+type Category = {
+	label: string;
+	icon: React.ElementType;
 };
+
+const CATEGORIES: Category[] = [
+	{ label: "Movies", icon: Clapperboard },
+	{ label: "Podcasts", icon: Mic2 },
+	{ label: "Cartoons", icon: Wand2 },
+	{ label: "Talks", icon: Presentation },
+	{ label: "News", icon: Newspaper },
+	{ label: "Shows", icon: Tv2 },
+	{ label: "Interviews", icon: Users },
+	{ label: "Documentaries", icon: BookOpen },
+];
+
+const shadedIndices = new Set([0, 2, 5, 7]);
 
 export function LogoCloud() {
 	return (
 		<div className="grid grid-cols-2 border md:grid-cols-4">
-			<LogoCard
-				className="relative border-r border-b bg-secondary dark:bg-secondary/30"
-				logo={{
-					src: "https://storage.efferd.com/logo/nvidia-wordmark.svg",
-					alt: "Nvidia Logo",
-				}}
-			>
-				<DecorIcon className="z-10" position="bottom-right" />
-			</LogoCard>
+			{CATEGORIES.map((cat, i) => {
+				const Icon = cat.icon;
+				const isShaded = shadedIndices.has(i);
+				const isLastRow = i >= 4;
+				const isRightEdge = (i + 1) % 4 === 0;
+				const isMobileRightEdge = (i + 1) % 2 === 0;
 
-			<LogoCard
-				className="border-b md:border-r"
-				logo={{
-					src: "https://storage.efferd.com/logo/supabase-wordmark.svg",
-					alt: "Supabase Logo",
-				}}
-			/>
-
-			<LogoCard
-				className="relative border-r border-b md:bg-secondary dark:md:bg-secondary/30"
-				logo={{
-					src: "https://storage.efferd.com/logo/github-wordmark.svg",
-					alt: "GitHub Logo",
-				}}
-			>
-				<DecorIcon className="z-10" position="bottom-right" />
-				<DecorIcon className="z-10 hidden md:block" position="bottom-left" />
-			</LogoCard>
-
-			<LogoCard
-				className="relative border-b bg-secondary md:bg-background dark:bg-secondary/30 md:dark:bg-background"
-				logo={{
-					src: "https://storage.efferd.com/logo/openai-wordmark.svg",
-					alt: "OpenAI Logo",
-				}}
-			/>
-
-			<LogoCard
-				className="relative border-r border-b bg-secondary md:border-b-0 md:bg-background dark:bg-secondary/30 md:dark:bg-background"
-				logo={{
-					src: "https://storage.efferd.com/logo/turso-wordmark.svg",
-					alt: "Turso Logo",
-				}}
-			>
-				<DecorIcon className="z-10 md:hidden" position="bottom-right" />
-			</LogoCard>
-
-			<LogoCard
-				className="border-b bg-background md:border-r md:border-b-0 md:bg-secondary dark:md:bg-secondary/30"
-				logo={{
-					src: "https://storage.efferd.com/logo/clerk-wordmark.svg",
-					alt: "Clerk Logo",
-				}}
-			/>
-
-			<LogoCard
-				className="border-r"
-				logo={{
-					src: "https://storage.efferd.com/logo/claude-wordmark.svg",
-					alt: "Claude AI Logo",
-				}}
-			/>
-
-			<LogoCard
-				className="bg-secondary dark:bg-secondary/30"
-				logo={{
-					src: "https://storage.efferd.com/logo/vercel-wordmark.svg",
-					alt: "Vercel Logo",
-				}}
-			/>
+				return (
+					<CategoryCard
+						key={cat.label}
+						label={cat.label}
+						icon={Icon}
+						className={cn(
+							!isLastRow && "border-b",
+							!isRightEdge && "md:border-r",
+							!isMobileRightEdge && "border-r md:border-r-0",
+							isShaded && "bg-secondary dark:bg-secondary/30",
+							!isShaded && "bg-background",
+						)}
+					>
+						{i === 0 && <DecorIcon className="z-10" position="bottom-right" />}
+						{i === 3 && <DecorIcon className="z-10 hidden md:block" position="bottom-left" />}
+						{i === 4 && <DecorIcon className="z-10 hidden md:block" position="bottom-right" />}
+					</CategoryCard>
+				);
+			})}
 		</div>
 	);
 }
 
-type LogoCardProps = React.ComponentProps<"div"> & {
-	logo: Logo;
+type CategoryCardProps = React.ComponentProps<"div"> & {
+	label: string;
+	icon: React.ElementType;
 };
 
-function LogoCard({ logo, className, children, ...props }: LogoCardProps) {
+function CategoryCard({ label, icon: Icon, className, children, ...props }: CategoryCardProps) {
 	return (
 		<div
 			className={cn(
-				"flex items-center justify-center bg-background px-4 py-8 md:p-8",
+				"relative flex flex-col items-center justify-center gap-2 px-4 py-8 md:p-8 group transition-colors hover:bg-orange-500/5",
 				className
 			)}
 			{...props}
 		>
-			<img
-				alt={logo.alt}
-				className="pointer-events-none h-4 select-none md:h-5 dark:brightness-0 dark:invert"
-				height="auto"
-				src={logo.src}
-				width="auto"
+			<Icon
+				size={22}
+				strokeWidth={1.5}
+				className="text-muted-foreground group-hover:text-orange-500 transition-colors duration-200"
 			/>
+			<span className="text-xs font-medium tracking-wide text-muted-foreground group-hover:text-foreground transition-colors duration-200">
+				{label}
+			</span>
 			{children}
 		</div>
 	);
