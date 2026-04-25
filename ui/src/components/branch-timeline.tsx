@@ -105,7 +105,7 @@ export function BranchTimeline({
                     <div className="relative flex items-center justify-center gap-2 sm:gap-4 w-full">
                         {/* Left overflow indicator */}
                         {showLeftEllipsis && (
-                            <span className="text-[10px] text-muted-foreground/40 flex-shrink-0 relative z-10 leading-none pb-4">
+                            <span className="text-[10px] text-muted-foreground/40 flex-shrink-0 relative z-10 leading-none">
                                 •••
                             </span>
                         )}
@@ -114,24 +114,22 @@ export function BranchTimeline({
                             const i = start + relIdx;
                             const isActive = i === currentIndex;
                             const isPast = i < currentIndex;
-                            // isPast = older question, !isPast && !isActive = newer (user navigated back)
 
                             return (
                                 <TooltipProvider key={branch.id}>
                                     <Tooltip delayDuration={300}>
                                         <TooltipTrigger asChild>
-                                            {/* Tall button = dot + number, large enough touch target */}
                                             <button
                                                 onClick={() => onSelectIndex(i)}
-                                                className="group relative flex-shrink-0 flex flex-col items-center justify-center gap-0.5 h-10 w-8 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary rounded-md cursor-pointer"
+                                                className="group relative flex-shrink-0 h-10 w-8 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary rounded-md cursor-pointer"
                                                 aria-label={`Question ${i + 1}: ${branch.prompt}`}
                                             >
-                                                {/* Dot */}
+                                                {/* Dot — absolutely centered = perfectly on the line */}
                                                 <motion.div
                                                     layout
                                                     transition={{ type: "spring", stiffness: 500, damping: 35 }}
                                                     className={cn(
-                                                        "rounded-full relative z-10 transition-colors duration-200",
+                                                        "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full z-10 transition-colors duration-200",
                                                         isActive
                                                             ? "w-5 h-5 bg-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.2)]"
                                                             : isPast
@@ -144,9 +142,9 @@ export function BranchTimeline({
                                                     )}
                                                 </motion.div>
 
-                                                {/* Sequence number */}
+                                                {/* Number — below the dot */}
                                                 <span className={cn(
-                                                    "text-[9px] tabular-nums leading-none transition-colors",
+                                                    "absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[9px] tabular-nums leading-none transition-colors",
                                                     isActive
                                                         ? "text-primary font-bold"
                                                         : "text-muted-foreground/40 group-hover:text-muted-foreground/70"
@@ -165,7 +163,7 @@ export function BranchTimeline({
 
                         {/* Right overflow indicator */}
                         {showRightEllipsis && (
-                            <span className="text-[10px] text-muted-foreground/40 flex-shrink-0 relative z-10 leading-none pb-4">
+                            <span className="text-[10px] text-muted-foreground/40 flex-shrink-0 relative z-10 leading-none">
                                 •••
                             </span>
                         )}

@@ -456,7 +456,7 @@ export function AiCompletion({
     return (
         <div className="w-full h-full flex flex-col bg-card">
 
-            <header className="relative w-full flex-shrink-0 px-4 pt-4 sm:px-6 sm:pt-6">
+            <header className="relative w-full flex-shrink-0 px-4 pt-4 sm:px-6 sm:pt-5">
                 <div className="absolute right-0 top-0 z-20">
                     <SessionSelector
                         sessions={sessions}
@@ -470,23 +470,27 @@ export function AiCompletion({
                     />
                 </div>
 
-                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100 text-center pt-2">
+                {/* Label separator */}
+                <div className="flex items-center gap-2.5 mb-3">
+                    <div className="h-px flex-1 bg-border/40" />
+                    <span className="font-mono text-[9px] tracking-[0.3em] text-muted-foreground/30 uppercase select-none">AI Assistant</span>
+                    <div className="h-px flex-1 bg-border/40" />
+                </div>
+
+                <h1 className="text-base sm:text-lg font-semibold text-foreground text-center leading-snug">
                     {query ? (
-                        <>Learning about <span className="text-primary">"{query}"</span></>
+                        <>Learning about{" "}<span className="text-primary italic font-bold">"{query}"</span></>
                     ) : "What do you want to learn?"}
                 </h1>
-                <p className="text-slate-500 dark:text-slate-400 mt-2 sm:mt-4 max-w-lg mx-auto text-center text-xs sm:text-base">
+                <p className="text-muted-foreground/50 mt-1.5 sm:mt-2 max-w-lg mx-auto text-center text-[11px] sm:text-xs leading-relaxed">
                     {query
-                        ? `Get pronunciations, examples, and detailed explanations for "${query}"`
-                        : "Explore topics, get explanations, and improve your understanding—all in one place."
+                        ? `Pronunciations, examples, and explanations for "${query}"`
+                        : "Explore topics, get explanations, and improve your understanding."
                     }
                 </p>
 
-                <div className="relative mt-3 sm:mt-6">
-                    <div className="absolute bottom-0 left-0 right-0 flex h-px">
-                        <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                        <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-                    </div>
+                <div className="flex items-center gap-2.5 mt-3 sm:mt-4">
+                    <div className="h-px flex-1 bg-border/40" />
                 </div>
             </header>
 
@@ -531,19 +535,10 @@ export function AiCompletion({
                         transition={{ delay: 0.2 }}
                         className="w-full"
                     >
-                        <div className="relative bg-card rounded-xl p-4 sm:p-6 text-left border-x">
-                            <div className="absolute top-0 left-0 right-0 flex h-px">
-                                <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                                <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-                            </div>
-                            <div className="text-sm sm:text-base text-card-foreground/90 leading-relaxed">
-                                Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
-                                <br /><br />
-                                Try tapping a suggestion above or type your own question below!
-                            </div>
-                            <div className="absolute bottom-0 left-0 right-0 flex h-px">
-                                <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                                <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                        <div className="relative border-l-2 border-primary/20 pl-4 py-1">
+                            <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground/30 uppercase mb-2">Ready</p>
+                            <div className="text-sm text-foreground/70 leading-relaxed">
+                                Ask me anything about <span className="font-semibold text-primary italic">"{query}"</span> — pronunciation, usage, nuances, or examples.
                             </div>
                         </div>
                     </motion.div>
@@ -571,7 +566,7 @@ export function AiCompletion({
                             transition={{ duration: 0.5 }}
                             className="w-full"
                         >
-                            <div ref={responseContainerRef} className="relative bg-card rounded-xl p-6 text-left">
+                            <div ref={responseContainerRef} className="relative border-l-2 border-primary/20 pl-4 py-1 text-left">
                                 <div className="relative">
                                     {/* Top blur gradient — ref-based, safe with multiple instances */}
                                     {canScroll && (
