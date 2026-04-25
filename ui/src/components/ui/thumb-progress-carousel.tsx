@@ -98,7 +98,7 @@ export function ThumbProgressCarousel({
       <Carousel setApi={setApi} className='w-full h-full' opts={{ loop: true }}>
         <CarouselContent className='h-full m-0'>
           {items.map((item) => (
-            <CarouselItem key={item.id} className='relative w-full h-full p-0 min-h-[450px]'>
+            <CarouselItem key={item.id} className='relative w-full h-full p-0'>
               <div className='absolute inset-0 overflow-hidden'>
                 <Image
                   src={item.image}

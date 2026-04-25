@@ -7,7 +7,8 @@ import { DecorIcon } from "@/components/ui/decor-icon";
 import { ThumbProgressCarousel } from "@/components/ui/thumb-progress-carousel";
 import { CarouselCard } from "@/components/carousel-card";
 import { BlueprintGrid, BlueprintBox } from "@/components/ui/blueprint-grid";
-import { Globe, AudioLines, Sparkles, Mic } from "lucide-react";
+import { AudioLines, Sparkles, Mic } from "lucide-react";
+import { ContextEngineCard } from "@/components/context-engine-card";
 import { GooeyText } from "@/components/ui/gooey-text-morphing";
 import { Card_9 } from "@/components/card-9";
 import { HighlightText } from "@/components/ui/highlight-text";
@@ -389,18 +390,8 @@ export function DashboardSkeleton() {
 				</div>
 				{/* Overlaying the feature columns on top of the continuous grid */}
 				<div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 flex-1">
-					{/* Feature 1: Context Engine Text */}
-					<div className="relative p-8 min-h-80 flex flex-col justify-between text-left text-foreground border-b lg:border-b-0 lg:border-r border-border/40 hover:bg-muted/5 transition-colors group">
-						<div className="flex flex-col h-full w-full">
-							<div className="mb-4 text-orange-500">
-								<Globe className="size-8 group-hover:scale-110 transition-transform duration-500" strokeWidth={1.5} />
-							</div>
-							<h3 className="text-xl font-bold mb-3 tracking-tight text-foreground group-hover:text-orange-500 transition-colors">Context Engine</h3>
-							<p className="text-sm text-foreground/70 leading-relaxed font-medium">
-								Don't just find definitions. Find moments. Our engine scans millions of videos to find the exact millisecond a word is spoken, giving you 360° understanding of tone and situation.
-							</p>
-						</div>
-					</div>
+					{/* Feature 1: Context Engine */}
+					<ContextEngineCard />
 
 					{/* Feature 2: Article Preview Feature */}
 					<div className="relative min-h-80 border-b lg:border-b-0 lg:border-r border-border/40 overflow-hidden">

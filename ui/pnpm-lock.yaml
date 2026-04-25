@@ -41,6 +41,9 @@ importers:
       '@icons-pack/react-simple-icons':
         specifier: ^13.7.0
         version: 13.7.0(react@19.1.0)
+      '@lordicon/element':
+        specifier: ^2.2.0
+        version: 2.2.0
       '@mantine/hooks':
         specifier: ^8.3.3
         version: 8.3.3(react@19.1.0)
@@ -766,6 +769,12 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.29':
     resolution: {integrity: sha512-uw6guiW/gcAGPDhLmd77/6lW8QLeiV5RUTsAX46Db6oLhGaVj4lhnPwb184s1bkc8kdVg/+h988dro8GRDpmYQ==}
+
+  '@lordicon/element@2.2.0':
+    resolution: {integrity: sha512-HBD8hw2G9E4cZnvrgIrm1USOvprr0pvEB3N0CO6W7j2jMw3EJ+2Z429lo6GGF5RcTLTAUB6B+dr2xXcdkGOplA==}
+
+  '@lordicon/web@1.0.1':
+    resolution: {integrity: sha512-FXC7IkLAjPpCSAZmFLhoKUBLwv6KZq+ifTtp/+GHMEJpEdECUWGEZwWX2pnrpPgD9XJ/k9XKLe4wsW0YRzL2Mg==}
 
   '@mantine/hooks@8.3.3':
     resolution: {integrity: sha512-nmspxbFSjFkimRXYhgAujnyBwGeAWDSP1WKHFR+Yl5x3Q0IkmsiOTE9yJPjMjmjffZfunFXQFwQDl1OF3m42Pw==}
@@ -5356,6 +5365,12 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.4
+
+  '@lordicon/element@2.2.0':
+    dependencies:
+      '@lordicon/web': 1.0.1
+
+  '@lordicon/web@1.0.1': {}
 
   '@mantine/hooks@8.3.3(react@19.1.0)':
     dependencies:
