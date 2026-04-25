@@ -239,7 +239,7 @@ export default function RoutedSearchPage() {
                   </div>
 
                   {/* Scrollable Content Layer */}
-                  <div className="px-4 pb-12 sm:px-6 space-y-4">
+                  <div className="px-4 pb-4 sm:px-6 space-y-4">
                     {playlist.length > 0 ? (
                       <AudioCard
                         currentClip={playlist[currentVideoIndex]}

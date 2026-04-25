@@ -27,6 +27,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { TranscriptBox } from "./transcript-box"
+import { DecorIcon } from "@/components/ui/decor-icon"
 
 function useSpamGuard(clickWindowMs = 2000, clickLimit = 5, cooldownSeconds = 5) {
   const [isThrottled, setIsThrottled] = useState(false)
@@ -425,7 +426,12 @@ export default function AudioCard({
   }, [targetSentence, player, seekTo, play])
 
   return (
-    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-6 shadow-2xl", className)}>
+    <div className="relative border border-border/40 p-2.5">
+      <DecorIcon position="top-left" />
+      <DecorIcon position="top-right" />
+      <DecorIcon position="bottom-left" />
+      <DecorIcon position="bottom-right" />
+    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-4 shadow-inner", className)}>
 
       {/* ── MOBILE COMPACT CONTROLS (< md) ── */}
       <div className="md:hidden flex flex-col gap-3">
@@ -558,8 +564,8 @@ export default function AudioCard({
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button size="icon" className="h-16 w-16 rounded-full bg-primary cursor-pointer" onClick={() => guardedAction(togglePlayPause)}>
-              {isPlaying ? <Pause size={28} /> : <Play size={28} className="ml-1" />}
+            <Button size="icon" className="h-12 w-12 rounded-full bg-primary cursor-pointer" onClick={() => guardedAction(togglePlayPause)}>
+              {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
             </Button>
             <span className="text-xs text-muted-foreground">{isPlaying ? "Pause" : "Play"}</span>
           </div>
@@ -668,6 +674,7 @@ export default function AudioCard({
         }}
         onTranscriptDetermined={onTranscriptDetermined}
       />
+    </div>
     </div>
   )
 }

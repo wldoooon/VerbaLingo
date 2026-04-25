@@ -391,7 +391,7 @@ export default function VideoPlayerCard({
           className="mb-3 -mt-2"
         />
       )}
-      <div className="relative w-full h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] overflow-hidden rounded-2xl bg-black shadow-inner">
+      <div className="relative w-full h-[260px] sm:h-[320px] md:h-[380px] lg:h-[400px] xl:h-[480px] overflow-hidden rounded-2xl bg-black shadow-inner">
 
         {/* Layer A */}
         <div className={cn("absolute inset-0 w-full h-full transition-opacity duration-300",

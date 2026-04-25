@@ -88,7 +88,7 @@ export function DashboardSkeleton() {
 				{/* Content Wrappers (So you can put stuff in left/right independently) */}
 				<div className="relative z-10 w-full min-h-[512px] overflow-hidden flex flex-col items-center justify-center p-6 border-transparent border-r border-border/40 border-b-0">
 					{/* Top-left glow overlay — sits above the opaque BlueprintGrid */}
-					<div className="absolute inset-0 z-[5] pointer-events-none bg-[radial-gradient(45%_50%_at_0%_0%,rgba(255,255,255,0.09),transparent)] dark:bg-[radial-gradient(45%_50%_at_0%_0%,rgba(255,255,255,0.05),transparent)]" />
+					<div className="absolute inset-0 z-[5] pointer-events-none dark:bg-[radial-gradient(45%_50%_at_0%_0%,rgba(255,255,255,0.05),transparent)]" />
 
 					{/* Background Blueprint Grid completely filling the left side */}
 					<div className="absolute w-full h-full inset-0 z-0 pointer-events-none">
@@ -194,12 +194,7 @@ export function DashboardSkeleton() {
 													{/* Floating Language Tags */}
 													<div className="z-10 bg-background/90 text-foreground text-[10px] sm:text-xs font-mono px-4 py-3 rounded-none shadow-sm opacity-95 backdrop-blur-md flex items-center gap-4 transition-all">
 														<img src={lang.icon} alt={lang.name} className="w-12 h-auto max-h-8 object-contain" />
-														<span className={`font-bold tracking-wider bg-clip-text text-transparent bg-gradient-to-r opacity-90 ${lang.name === "FRANÇAIS" ? "from-blue-800 via-slate-500 to-red-700" :
-															lang.name === "ENGLISH" ? "from-blue-800 via-slate-500 to-red-700" :
-															lang.name === "ESPAÑOL" ? "from-red-700 via-amber-600 to-red-700" :
-															lang.name === "DEUTSCH" ? "from-zinc-950 via-red-800 to-amber-600" :
-															""
-															}`}>
+														<span className="font-bold tracking-widest text-foreground/80 text-[11px]">
 															{lang.name}
 														</span>
 													</div>

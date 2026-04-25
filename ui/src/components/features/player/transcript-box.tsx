@@ -117,7 +117,7 @@ export const TranscriptBox = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: "circOut" }}
-              className="flex flex-col items-center gap-4 py-4"
+              className="flex flex-col items-center gap-2 py-2"
             >
               {/* Previous Context */}
               <div className="opacity-100 scale-100 transition-all duration-300 pointer-events-none hidden sm:block">

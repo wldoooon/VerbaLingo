@@ -25,8 +25,8 @@ export const SentenceGroup = memo(({
   onExplainWordInContext,
 }: SentenceGroupProps) => {
   return (
-    <div className="flex items-center justify-center text-center px-4 py-2">
-      <div className="relative text-lg sm:text-2xl font-medium leading-relaxed inline-block text-foreground tracking-tight">
+    <div className="flex items-center justify-center text-center px-4 py-1">
+      <div className="relative text-lg sm:text-2xl font-medium leading-snug inline-block text-foreground tracking-tight">
         {group.map((sentence, sIdx) => {
           const query = searchQuery.toLowerCase().trim()
           const rawWords: Word[] = (sentence.words as Word[] | undefined) || []
