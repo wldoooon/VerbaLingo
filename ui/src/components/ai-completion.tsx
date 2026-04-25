@@ -584,7 +584,7 @@ export function AiCompletion({
                                     <div
                                         ref={scrollContentRef}
                                         style={{ maxHeight: `${maxResponseHeight}px` }}
-                                        className="overflow-y-auto text-card-foreground pl-1 pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
+                                        className="overflow-y-auto overflow-x-hidden text-card-foreground pl-1 pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
                                         onScroll={(e) => {
                                             const el = e.currentTarget;
                                             if (topBlurRef.current) {
