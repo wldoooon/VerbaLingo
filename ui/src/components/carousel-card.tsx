@@ -20,7 +20,7 @@ const Container = ({ children }: { children: React.ReactNode }) => (
         <div className="relative w-full border-x flex-1 flex flex-col">
             <Ellipses />
             {/* Reduced internal padding to push Carousel closer to the inner frame lines */}
-            <div className="relative z-20 flex-1 w-full h-full flex flex-col p-2 sm:p-2 md:p-3">{children}</div>
+            <div className="relative z-20 flex-1 w-full h-full flex flex-col p-3 sm:p-3 md:p-9">{children}</div>
         </div>
     </div>
 );
@@ -28,7 +28,7 @@ const Container = ({ children }: { children: React.ReactNode }) => (
 export const CarouselCard = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<Container>
-			<div className="flex-1 w-full relative rounded-2xl overflow-hidden shadow-sm shadow-foreground/5 border border-border/70 dark:border-border/40 min-h-[400px]">
+			<div className="flex-1 w-full relative rounded-xl overflow-hidden shadow-sm shadow-foreground/5 border border-border/70 dark:border-border/40 min-h-[400px]">
                 <div className="absolute inset-0">
 				    {children}
                 </div>
