@@ -344,7 +344,7 @@ export function SearchBar() {
                         : "hover:-translate-y-0.5"
                 )}>
                     {/* Inner Content */}
-                    <div className="relative z-10 bg-muted/20 backdrop-blur-md flex flex-row items-center p-1 sm:p-1 w-full h-full">
+                    <div className="relative z-10 bg-muted flex flex-row items-center p-1 sm:p-1 w-full h-full">
 
                         {/* Category Dropdown */}
                         <DropdownMenu>
@@ -440,7 +440,7 @@ export function SearchBar() {
                                 }}
                                 onKeyDown={handleKeyDown}
                                 className={cn(
-                                    "border-0 bg-transparent shadow-none focus-visible:ring-0 pl-2 sm:pl-3 pr-20 h-8 sm:h-9 text-sm sm:text-base font-medium placeholder:text-transparent min-w-0",
+                                    "border-0 bg-transparent dark:bg-transparent shadow-none focus-visible:ring-0 pl-2 sm:pl-3 pr-20 h-8 sm:h-9 text-sm sm:text-base font-medium placeholder:text-transparent min-w-0",
                                     !hasAccess && "placeholder:text-muted-foreground/60 cursor-not-allowed opacity-60"
                                 )}
                             />

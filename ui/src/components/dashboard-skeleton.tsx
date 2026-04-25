@@ -16,6 +16,7 @@ import MagnifiedBento from "./magnified-bento";
 import { LogoCloud } from "@/components/logo-cloud";
 import { FaqBoxComponent } from "@/components/faq-box-component";
 import { ContactUs } from "@/components/contact-us";
+import { AsciiBackground } from "@/components/ui/ascii-background";
 
 const carouselItems = [
 	{
@@ -222,8 +223,6 @@ export function DashboardSkeleton() {
 			<div className="hidden lg:block col-span-1 relative min-h-[350px] lg:min-h-[400px] bg-background border-r border-border/40">
 				{/* Mask out the parent container's left border for just this section */}
 				<div className="absolute top-1/2 bottom-0 -left-[1px] w-[2px] bg-background z-20" />
-				{/* Dot pattern base */}
-				<div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
 				{/* ── Architectural box composition ── */}
 				<div className="absolute inset-0 p-7 flex flex-col gap-3 pointer-events-none select-none z-10">
@@ -264,23 +263,15 @@ export function DashboardSkeleton() {
 
 			{/* Center Content Box */}
 			<div className="col-span-2 lg:col-span-2 relative min-h-[350px] lg:min-h-[400px] flex flex-col items-center justify-center text-center px-4 py-12 bg-background">
-				{/* Architectural Grid Background (fading bottom-out from center) */}
+				{/* ASCII animation background — radial bloom, fades at edges */}
 				<div
 					className="absolute inset-0 z-0 pointer-events-none"
 					style={{
-						WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)",
-						maskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)"
+						WebkitMaskImage: "radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 100%)",
+						maskImage: "radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 100%)"
 					}}
 				>
-					<BlueprintGrid columns={10} cellSize="64px" className="border-none bg-transparent h-full !overflow-visible">
-						{Array.from({ length: 100 }).map((_, i) => (
-							<BlueprintBox 
-								key={i} 
-								className="border-none border-r border-border/40" 
-								shaded={[5, 12, 17, 24, 33].includes(i)} 
-							/>
-						))}
-					</BlueprintGrid>
+					<AsciiBackground isDark={resolvedTheme === "dark"} />
 				</div>
 				<div className="relative z-10 flex flex-col items-center max-w-4xl mx-auto">
 
@@ -294,9 +285,76 @@ export function DashboardSkeleton() {
 				</div>
 			</div>
 
-			{/* Right Flank (Hidden on Mobile) */}
+			{/* Right Flank — search page skeleton */}
 			<div className="hidden lg:block col-span-1 relative min-h-[350px] lg:min-h-[400px] bg-background" style={{ borderRightColor: "transparent" }}>
-				<div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+				<div className="absolute inset-0 p-4 flex gap-2 pointer-events-none select-none z-10">
+
+					{/* ── Left: video player + audio card ── */}
+					<div className="flex-[3] flex flex-col gap-2">
+
+						{/* Video player — rounded */}
+						<div className="w-full rounded-xl border border-border/50 bg-muted/10 relative shrink-0 overflow-hidden" style={{ aspectRatio: '16/9' }}>
+							<div className="absolute top-2 left-2 w-2.5 h-2.5 border-t border-l border-border/50" />
+							<div className="absolute bottom-2 right-2 w-2.5 h-2.5 border-b border-r border-border/50" />
+						</div>
+
+						{/* Audio card */}
+						<div className="shrink-0 h-[108px] border border-border/50 flex flex-col overflow-hidden">
+
+							{/* Header */}
+							<div className="flex items-center justify-between px-2 py-1.5 border-b border-border/30 shrink-0">
+								<div className="w-1/2 h-1 bg-muted/25" />
+								<div className="w-6 h-1 bg-muted/15" />
+							</div>
+
+							{/* Controls: 5 circles */}
+							<div className="flex items-center justify-center gap-1.5 py-1.5 border-b border-border/30 shrink-0">
+								<div className="w-3 h-3 rounded-full border border-border/40" />
+								<div className="w-3 h-3 rounded-full border border-border/40" />
+								<div className="w-4 h-4 rounded-full border border-border/50 bg-muted/15" />
+								<div className="w-3 h-3 rounded-full border border-border/40" />
+								<div className="w-3 h-3 rounded-full border border-border/40" />
+							</div>
+
+							{/* Transcript */}
+							<div className="flex-1 flex flex-col items-center justify-center gap-1 px-2">
+								<div className="w-3/4 h-1 bg-muted/12" />
+								<div className="w-full border-y border-border/30 py-1 flex flex-col gap-0.5 items-center">
+									<div className="w-full h-1 bg-muted/30" />
+									<div className="w-5/6 h-1 bg-muted/30" />
+								</div>
+								<div className="w-2/3 h-1 bg-muted/12" />
+							</div>
+
+						</div>
+					</div>
+
+					{/* ── Right: AI panel ── */}
+					<div className="flex-[2] border border-border/50 flex flex-col overflow-hidden">
+
+						{/* AI panel header */}
+						<div className="px-2 py-2 border-b border-border/30 shrink-0 flex justify-center">
+							<div className="w-2/3 h-1 bg-muted/20" />
+						</div>
+
+						{/* Response lines */}
+						<div className="flex-1 flex flex-col gap-1.5 p-2 pt-3">
+							<div className="w-4/5 h-1 bg-muted/15" />
+							<div className="w-full h-1 bg-muted/15" />
+							<div className="w-3/4 h-1 bg-muted/15" />
+							<div className="w-full h-1 bg-muted/10" />
+							<div className="w-5/6 h-1 bg-muted/10" />
+							<div className="w-2/3 h-1 bg-muted/10" />
+						</div>
+
+						{/* Input bar */}
+						<div className="px-2 py-2 border-t border-border/30 shrink-0">
+							<div className="w-full h-4 rounded-full border border-border/40 bg-muted/5" />
+						</div>
+
+					</div>
+
+				</div>
 			</div>
 
 			{/* --- Bottom Row: Unified Feature Section --- */}
