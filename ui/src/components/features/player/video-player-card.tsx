@@ -156,7 +156,9 @@ export default function VideoPlayerCard({
         const willSeek = lastSeekedClipId.current !== clip.video_id
         console.log(`[VPC] syncSinglePlayer(${key}) ACTIVE — video=${clip.video_id} willSeek=${willSeek} isMuted=${isMuted} rate=${playbackRate}`)
         if (willSeek) {
-          safeCall(player, 'seekTo', getClipStart(clip), true)
+          const exactStart = getClipStart(clip);
+          console.log(`[DEBUG_SYNC_VPC] syncSinglePlayer willSeek to exactStart: ${exactStart} for video ${clip.video_id}`);
+          safeCall(player, 'seekTo', exactStart, true)
           lastSeekedClipId.current = clip.video_id
         }
         safeCall(player, 'playVideo')
@@ -323,7 +325,7 @@ export default function VideoPlayerCard({
     // becomes active — which was causing the "sound cuts off" on navigation.
     if (clip) {
       lastSeekedClipId.current = clip.video_id
-      console.log(`[VPC] onReady player${key} — marking lastSeekedClipId=${clip.video_id} (no extra seekTo, start handled by playerVars)`)
+      console.log(`[VPC] onReady player${key} — marking lastSeekedClipId=${clip.video_id} (no extra seekTo, start handled by playerVars). Exact start was: ${getClipStart(clip)}`)
     }
 
     if (isActive) {

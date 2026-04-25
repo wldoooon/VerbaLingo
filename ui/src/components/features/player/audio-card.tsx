@@ -397,14 +397,37 @@ export default function AudioCard({
   }, [currentVideoIndex]) // was currentClip?.video_id — now index-based to handle duplicates
 
   // Memoized so it doesn't re-scan on every render (currentTime updates cause many renders)
-  const targetSentence = useMemo(() => sentencesInClip.find((sentence: any) => {
-    if (currentClip?.start_time !== undefined) {
-      return Math.abs(sentence.start_time - currentClip.start_time) < 0.1
+  const targetSentence = useMemo(() => {
+    const clipStartTime = currentClip?.start_time !== undefined ? currentClip.start_time : (currentClip as any)?.start;
+    console.log(`[DEBUG_SYNC] Calculating targetSentence. clipStartTime:`, clipStartTime, `searchQuery:`, searchQuery, `sentences count:`, sentencesInClip.length);
+    
+    if (clipStartTime !== undefined) {
+      // Find the closest sentence by start_time
+      let closest = null;
+      let minDiff = Infinity;
+      for (const sentence of sentencesInClip) {
+        const diff = Math.abs(sentence.start_time - clipStartTime);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = sentence;
+        }
+      }
+      console.log(`[DEBUG_SYNC] Closest sentence difference:`, minDiff, `Closest start_time:`, closest?.start_time, `Text:`, closest?.sentence_text);
+      // Only accept if it's reasonably close (e.g., within 2 seconds)
+      if (closest && minDiff < 2.0) {
+        return closest;
+      }
     }
-    const text = sentence.sentence_text || ""
-    const query = searchQuery.toLowerCase().trim()
-    return query && text.toLowerCase().includes(query)
-  }), [sentencesInClip, currentClip?.start_time, searchQuery])
+    
+    // Fallback to text search
+    const fallback = sentencesInClip.find((sentence: any) => {
+      const text = sentence.sentence_text || ""
+      const query = searchQuery.toLowerCase().trim()
+      return query && text.toLowerCase().includes(query)
+    })
+    console.log(`[DEBUG_SYNC] Fallback text search triggered. Found:`, fallback?.start_time, fallback?.sentence_text);
+    return fallback;
+  }, [sentencesInClip, currentClip?.start_time, (currentClip as any)?.start, searchQuery])
 
   useEffect(() => {
     if (targetSentence && currentClip?.video_id) {
@@ -416,6 +439,7 @@ export default function AudioCard({
   // Also re-runs when `player` becomes non-null so it retries if the transcript
   // resolved before the YouTube iframe was ready (race condition fix).
   useEffect(() => {
+    console.log(`[DEBUG_SYNC] Autoplay check. targetSentence:`, !!targetSentence, `targetStart:`, targetSentence?.start_time, `hasStarted:`, hasStartedPlayback.current, `playerReady:`, !!player);
     if (targetSentence && !hasStartedPlayback.current && player) {
       const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
       console.log(`[PERF] AUTOPLAY triggered  video=${currentClip?.video_id}  seekTo=${startTime.toFixed(2)}`)
