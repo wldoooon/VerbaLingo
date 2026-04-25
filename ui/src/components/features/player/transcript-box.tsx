@@ -120,7 +120,7 @@ export const TranscriptBox = ({
               className="flex flex-col items-center gap-2 py-2"
             >
               {/* Previous Context */}
-              <div className="opacity-100 scale-100 transition-all duration-300 pointer-events-none hidden sm:block">
+              <div className="opacity-30 scale-95 transition-all duration-300 pointer-events-none hidden sm:block">
                 {trio.prev && (
                   <SentenceGroup
                     group={[trio.prev]}
@@ -132,8 +132,8 @@ export const TranscriptBox = ({
               </div>
 
               {/* ACTIVE FOCUS + translation directly below */}
-              <div className="flex flex-col items-center gap-2">
-                <div className="opacity-100 scale-100 shadow-sm transition-all duration-300">
+              <div className="flex flex-col items-center gap-1 w-full border-y border-border/20 py-2">
+                <div className="transition-all duration-300">
                   <SentenceGroup
                     group={[trio.active]}
                     searchQuery={searchQuery}
@@ -151,7 +151,7 @@ export const TranscriptBox = ({
               </div>
 
               {/* Next Context */}
-              <div className="opacity-100 scale-100 transition-all duration-300 pointer-events-none hidden sm:block">
+              <div className="opacity-30 scale-95 transition-all duration-300 pointer-events-none hidden sm:block">
                 {trio.next && (
                   <SentenceGroup
                     group={[trio.next]}
