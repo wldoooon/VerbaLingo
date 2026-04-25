@@ -167,13 +167,13 @@ export default function RoutedSearchPage() {
 
   return (
     <>
-      <div className="flex-1 bg-transparent text-card-foreground">
+      <div className="flex-1 flex flex-col min-h-0 bg-transparent text-card-foreground">
         {showWall ? (
           /* ── Signup Wall ── */
           <SearchLimitWall />
         ) : (
           <div className={cn(
-            "mt-0 max-w-full xl:grid xl:items-start transition-[grid-template-columns] duration-300 ease-in-out",
+            "mt-0 max-w-full flex-1 min-h-0 xl:grid xl:items-stretch transition-[grid-template-columns] duration-300 ease-in-out border-t border-border/70",
             (playlist.length === 0 && !isLoading && !isFetching)
               ? "xl:grid-cols-1"
               : (isAiCollapsed ? "xl:grid-cols-[1fr_48px]" : "xl:grid-cols-[1fr_560px]")
@@ -206,7 +206,7 @@ export default function RoutedSearchPage() {
             )}
 
             {/* ── Player content or Empty State ── */}
-            <div className={`flex flex-col xl:pb-6 ${mobileTab !== "player" ? "hidden xl:block" : ""}`}>
+            <div className={`flex flex-col overflow-y-auto ${mobileTab !== "player" ? "hidden xl:flex" : ""}`}>
               {playlist.length === 0 && !isLoading && !isFetching ? (
                 <div className="p-4 sm:p-6">
                   <NoResults query={q} />
@@ -312,7 +312,7 @@ export default function RoutedSearchPage() {
 
                 {/* Desktop: sidebar panel */}
                 {isDesktop && (
-                  <div className="relative sticky top-0 h-screen border-l bg-card z-30">
+                  <div className="relative border-l bg-card z-30 h-full overflow-hidden">
                     {playlist.length === 0 ? (
                       <div className="w-full h-full flex flex-col p-6 pointer-events-none">
                         <div className="h-8 w-2/3 bg-muted/60 rounded-full mt-4 mb-2 mx-auto animate-pulse" />

@@ -470,7 +470,7 @@ export function AiCompletion({
                     />
                 </div>
 
-                <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center pt-2">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100 text-center pt-2">
                     {query ? (
                         <>Learning about <span className="text-primary">"{query}"</span></>
                     ) : "What do you want to learn?"}
@@ -615,7 +615,7 @@ export function AiCompletion({
                                                 )}
                                             </div>
                                         ) : (
-                                            <div className="text-base md:text-lg leading-relaxed">
+                                            <div className="text-sm md:text-base leading-relaxed">
                                                 <Response>
                                                     {currentBranch && !isLoading
                                                         ? currentBranch.response

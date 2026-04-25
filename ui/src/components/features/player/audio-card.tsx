@@ -433,14 +433,32 @@ export default function AudioCard({
       <DecorIcon position="bottom-right" />
     <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-4 shadow-inner", className)}>
 
+      {/* ── CARD HEADER ── */}
+      <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-border/20">
+        <div className="flex items-center gap-2 min-w-0">
+          {currentClip?.video_title && (
+            <span className="text-[11px] text-muted-foreground/60 truncate hidden sm:block">
+              — {currentClip.video_title}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {currentClip?.category && (
+            <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground/30 border border-border/20 px-1.5 py-0.5 rounded-sm">
+              {typeof currentClip.category === "string"
+                ? currentClip.category
+                : (currentClip.category as any)?.title ?? (currentClip.category as any)?.type ?? ""}
+            </span>
+          )}
+          <span className="text-[10px] font-medium text-muted-foreground/50 tabular-nums">
+            {currentVideoIndex + 1}<span className="opacity-40 mx-0.5">/</span>{totalItems || playlist.length}
+          </span>
+        </div>
+      </div>
+
       {/* ── MOBILE COMPACT CONTROLS (< md) ── */}
       <div className="md:hidden flex flex-col gap-3">
-        {/* Counter — z-20 to sit above controls */}
-        <div className="absolute top-3 right-3 text-[10px] font-bold text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20 z-20">
-          {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
-        </div>
-
-        <div className="flex items-center justify-between gap-2 mt-4">
+        <div className="flex items-center justify-between gap-2">
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
@@ -524,11 +542,6 @@ export default function AudioCard({
 
       {/* ── DESKTOP FULL CONTROLS (>= md) ── */}
       <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-4 mb-2">
-        {/* Counter — explicit z-10, sits above speed button area */}
-        <div className="absolute top-4 right-4 text-[10px] sm:text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20 z-10">
-          Clip {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
-        </div>
-
         {/* Volume control */}
         <div className="flex items-center gap-3 flex-1 max-w-[180px]">
           <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
@@ -649,6 +662,7 @@ export default function AudioCard({
         </div>
       </div>
 
+      <div className="border-t border-border/20 mb-1" />
       <TranscriptBox
         sentences={sentencesInClip}
         searchQuery={searchQuery}
