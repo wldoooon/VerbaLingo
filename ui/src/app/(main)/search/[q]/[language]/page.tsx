@@ -172,8 +172,9 @@ export default function RoutedSearchPage() {
           /* ── Signup Wall ── */
           <SearchLimitWall />
         ) : (
+          <div className="flex-1 min-h-0 border border-border/40 rounded-xl overflow-hidden">
           <div className={cn(
-            "mt-0 max-w-full flex-1 min-h-0 xl:grid xl:items-stretch transition-[grid-template-columns] duration-300 ease-in-out border-t border-border/70",
+            "mt-0 max-w-full h-full xl:grid xl:items-stretch transition-[grid-template-columns] duration-300 ease-in-out",
             (playlist.length === 0 && !isLoading && !isFetching)
               ? "xl:grid-cols-1"
               : (isAiCollapsed ? "xl:grid-cols-[1fr_48px]" : "xl:grid-cols-[1fr_560px]")
@@ -206,7 +207,7 @@ export default function RoutedSearchPage() {
             )}
 
             {/* ── Player content or Empty State ── */}
-            <div className={`flex flex-col overflow-y-auto ${mobileTab !== "player" ? "hidden xl:flex" : ""}`}>
+            <div className={`flex flex-col overflow-y-auto xl:border-r xl:border-border/40 ${mobileTab !== "player" ? "hidden xl:flex" : ""}`}>
               {playlist.length === 0 && !isLoading && !isFetching ? (
                 <div className="p-4 sm:p-6">
                   <NoResults query={q} />
@@ -312,7 +313,7 @@ export default function RoutedSearchPage() {
 
                 {/* Desktop: sidebar panel */}
                 {isDesktop && (
-                  <div className="relative border-l bg-card z-30 h-full overflow-hidden">
+                  <div className="relative bg-card z-30 h-full overflow-hidden">
                     {playlist.length === 0 ? (
                       <div className="w-full h-full flex flex-col p-6 pointer-events-none">
                         <div className="h-8 w-2/3 bg-muted/60 rounded-full mt-4 mb-2 mx-auto animate-pulse" />
@@ -356,6 +357,7 @@ export default function RoutedSearchPage() {
                 )}
               </>
             )}
+          </div>
           </div>
         )}
       </div>
