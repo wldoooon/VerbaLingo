@@ -7,12 +7,12 @@ import {
   ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Carousel, {
-  Slider,
-  SliderContainer,
-  SliderDotButton,
-  SliderNextButton,
-  SliderPrevButton,
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from '@/components/ui/carousel';
 
 interface DiscoverySectionProps {
@@ -33,9 +33,9 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
 
       {/* Carousel */}
       <div className="relative">
-        <Carousel options={OPTIONS} className="w-full" isAutoPlay={true}>
-          <SliderContainer>
-            <Slider className='w-full'>
+        <Carousel opts={OPTIONS} className="w-full">
+          <CarouselContent>
+            <CarouselItem className='w-full'>
               <div className='relative md:h-[600px] sm:h-full h-[400px] w-full rounded-lg overflow-hidden'>
                 {/* Background Image */}
                 <div
@@ -101,8 +101,8 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
                   </div>
                 </div>
               </div>
-            </Slider>
-            <Slider className='w-full'>
+            </CarouselItem>
+            <CarouselItem className='w-full'>
               <div className='relative md:h-[600px] sm:h-full h-[400px] w-full rounded-lg overflow-hidden'>
                 {/* Background Image */}
                 <div
@@ -168,34 +168,29 @@ export function DiscoverySection({ onVideoSelect, className }: DiscoverySectionP
                   </div>
                 </div>
               </div>
-            </Slider>
-            <Slider className='w-full'>
+            </CarouselItem>
+            <CarouselItem className='w-full'>
               <div className='bg-yellow-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
-            </Slider>
-            <Slider className='w-full'>
+            </CarouselItem>
+            <CarouselItem className='w-full'>
               <div className='bg-red-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
-            </Slider>
-            <Slider className='w-full'>
+            </CarouselItem>
+            <CarouselItem className='w-full'>
               <div className='bg-purple-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
-            </Slider>
-            <Slider className='w-full'>
+            </CarouselItem>
+            <CarouselItem className='w-full'>
               <div className='bg-indigo-500 md:h-[600px] sm:h-full h-[400px] w-full rounded-lg'></div>
-            </Slider>
-          </SliderContainer>
+            </CarouselItem>
+          </CarouselContent>
 
           {/* Navigation Buttons */}
-          <SliderPrevButton className='absolute top-[50%] p-2 border-2 rounded-full left-4 bg-white/25 dark:bg-black/25 dark:border-white backdrop-blur-sm text-primary disabled:opacity-20'>
+          <CarouselPrevious className='absolute top-[50%] p-2 border-2 rounded-full left-4 bg-white/25 dark:bg-black/25 dark:border-white backdrop-blur-sm text-primary disabled:opacity-20'>
             <ChevronLeft className='w-8 h-8' />
-          </SliderPrevButton>
+          </CarouselPrevious>
 
-          <SliderNextButton className='absolute right-4 p-2 border-2 rounded-full top-[50%] bg-white/25 dark:bg-black/25 dark:border-white backdrop-blur-sm text-primary disabled:opacity-20'>
+          <CarouselNext className='absolute right-4 p-2 border-2 rounded-full top-[50%] bg-white/25 dark:bg-black/25 dark:border-white backdrop-blur-sm text-primary disabled:opacity-20'>
             <ChevronRight className='w-8 h-8' />
-          </SliderNextButton>
-
-          {/* Dot Navigation */}
-          <div className='flex justify-center py-2'>
-            <SliderDotButton />
-          </div>
+          </CarouselNext>
         </Carousel>
       </div>
     </div>

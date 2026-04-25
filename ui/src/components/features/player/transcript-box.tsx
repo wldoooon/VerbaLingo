@@ -20,6 +20,7 @@ type TranscriptBoxProps = {
   isTranscriptLoading: boolean
   isTranslationLoading?: boolean
   translatedMap?: Record<number, string>
+  targetSentence?: Sentence | null
   onSearchWord?: (word: string) => void
   onExplainWordInContext?: (payload: { word: string; sentence: string }) => void
   onTranscriptDetermined?: (snippet: string) => void
@@ -31,16 +32,29 @@ export const TranscriptBox = ({
   isTranscriptLoading,
   isTranslationLoading,
   translatedMap,
+  targetSentence,
   onSearchWord,
   onExplainWordInContext,
   onTranscriptDetermined,
 }: TranscriptBoxProps) => {
+  const targetIdx = useMemo(() => {
+    if (!targetSentence) return -1
+    return sentences.findIndex(s => s === targetSentence || s.start_time === targetSentence.start_time)
+  }, [sentences, targetSentence])
+
   // Zustand selector: only triggers re-render when the sentence INDEX changes.
   // Handles gaps between sentences by returning the most recently passed sentence
   // (sentences are sorted by start_time from audio-card's sanitizedSentences).
   // No refs needed — the selector itself is the sticky engine.
   const activeIdx = usePlayerStore(state => {
     if (sentences.length === 0) return -1
+
+    // If the player hasn't updated the time yet (currentTime is exactly 0), 
+    // and we have a target index, default to it so we show the keyword sentence initially.
+    if (state.currentTime === 0 && targetIdx !== -1) {
+      return targetIdx
+    }
+
     const TIMING_LEAD = 0.05 * state.playbackRate
     const t = state.currentTime + TIMING_LEAD
 
