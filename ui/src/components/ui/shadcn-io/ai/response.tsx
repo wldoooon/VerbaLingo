@@ -254,9 +254,9 @@ const components: Options['components'] = {
   ),
 
   table: ({ node, children, className, ...props }) => (
-    <div className="my-4 overflow-x-auto">
+    <div className="my-4 overflow-x-auto max-w-full">
       <table
-        className={cn('w-full border-collapse border border-border', className)}
+        className={cn('w-full border-collapse border border-border text-xs', className)}
         {...props}
       >
         {children}
@@ -280,14 +280,14 @@ const components: Options['components'] = {
   ),
   th: ({ node, children, className, ...props }) => (
     <th
-      className={cn('px-4 py-2 text-left font-semibold text-sm', className)}
+      className={cn('px-2 py-1.5 text-left font-semibold text-xs', className)}
       {...props}
     >
       {children}
     </th>
   ),
   td: ({ node, children, className, ...props }) => (
-    <td className={cn('px-4 py-2 text-sm', className)} {...props}>
+    <td className={cn('px-2 py-1.5 text-xs', className)} {...props}>
       {children}
     </td>
   ),

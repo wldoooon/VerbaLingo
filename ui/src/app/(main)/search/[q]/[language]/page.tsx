@@ -172,7 +172,7 @@ export default function RoutedSearchPage() {
           /* ── Signup Wall ── */
           <SearchLimitWall />
         ) : (
-          <div className="flex-1 min-h-0 border border-border/40 rounded-xl overflow-hidden">
+          <div className="flex-1 min-h-0 border border-border/40 rounded-xl">
           <div className={cn(
             "mt-0 max-w-full h-full xl:grid xl:items-stretch transition-[grid-template-columns] duration-300 ease-in-out",
             (playlist.length === 0 && !isLoading && !isFetching)
@@ -313,7 +313,7 @@ export default function RoutedSearchPage() {
 
                 {/* Desktop: sidebar panel */}
                 {isDesktop && (
-                  <div className="relative bg-card z-30 h-full overflow-hidden">
+                  <div className="relative bg-card z-30 h-full">
                     {playlist.length === 0 ? (
                       <div className="w-full h-full flex flex-col p-6 pointer-events-none">
                         <div className="h-8 w-2/3 bg-muted/60 rounded-full mt-4 mb-2 mx-auto animate-pulse" />
