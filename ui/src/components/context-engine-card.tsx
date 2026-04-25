@@ -41,16 +41,8 @@ export function ContextEngineCard() {
             Context Engine
           </span>
         </div>
-        <span className="text-[9px] font-mono text-muted-foreground/25 uppercase tracking-widest">
-          EN · Movies
-        </span>
       </div>
 
-      {/* Count row */}
-      <div className="flex items-baseline justify-between mt-5 mb-5">
-        <span className="text-2xl font-bold tracking-tight text-foreground">2,847</span>
-        <span className="text-xs text-muted-foreground/40 font-medium">moments found</span>
-      </div>
 
       {/* Footer */}
       <div className="pt-4 border-t border-border/20">
