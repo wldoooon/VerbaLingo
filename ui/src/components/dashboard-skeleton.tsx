@@ -74,11 +74,8 @@ export function DashboardSkeleton() {
 		>
 			{/* --- Card 1: Top Hero Section (Split horizontally with NO gap) --- */}
 			<div className="relative col-span-2 min-h-114! lg:col-span-4 grid grid-cols-1 lg:grid-cols-2 gap-0" >
-				{/* The Outer Corners */}
-				<DecorIcon className="size-5 text-muted-foreground" position="top-left" />
-				<DecorIcon className="size-5 text-muted-foreground" position="top-right" />
-				<DecorIcon className="size-5 text-muted-foreground" position="bottom-left" />
-				<DecorIcon className="size-5 text-muted-foreground" position="bottom-right" />
+				{/* The Outer Corners removed */}
+
 
 				{/* --- Bleeding Grid Lines (Outer Edges) --- */}
 				<div className="pointer-events-none absolute -top-[1px] -inset-x-[100px] h-[1px] bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
