@@ -470,12 +470,7 @@ export function AiCompletion({
                     />
                 </div>
 
-                {/* Label separator */}
-                <div className="flex items-center gap-2.5 mb-3">
-                    <div className="h-px flex-1 bg-border/40" />
-                    <span className="font-mono text-[9px] tracking-[0.3em] text-muted-foreground/30 uppercase select-none">AI Assistant</span>
-                    <div className="h-px flex-1 bg-border/40" />
-                </div>
+             
 
                 <h1 className="text-base sm:text-lg font-semibold text-foreground text-center leading-snug">
                     {query ? (
@@ -494,7 +489,7 @@ export function AiCompletion({
                 </div>
             </header>
 
-            <main className="w-full flex-1 flex flex-col mt-3 sm:mt-6 space-y-4 sm:space-y-6 min-h-0 overflow-y-auto px-4 sm:px-6">
+            <main className="w-full flex-1 flex flex-col mt-3 sm:mt-6 space-y-4 sm:space-y-6 min-h-0 overflow-y-auto px-4 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {/* Suggestions */}
                 <AnimatePresence>
                     {!shouldHideSuggestions && (
@@ -535,8 +530,11 @@ export function AiCompletion({
                         transition={{ delay: 0.2 }}
                         className="w-full"
                     >
-                        <div className="relative border-l-2 border-primary/20 pl-4 py-1">
-                            <p className="font-mono text-[9px] tracking-[0.2em] text-muted-foreground/30 uppercase mb-2">Ready</p>
+                        <div className="relative text-left">
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="font-mono text-[9px] tracking-[0.25em] text-muted-foreground/30 uppercase shrink-0">Ready</span>
+                                <div className="h-px flex-1 bg-border/30" />
+                            </div>
                             <div className="text-sm text-foreground/70 leading-relaxed">
                                 Ask me anything about <span className="font-semibold text-primary italic">"{query}"</span> — pronunciation, usage, nuances, or examples.
                             </div>
@@ -566,7 +564,11 @@ export function AiCompletion({
                             transition={{ duration: 0.5 }}
                             className="w-full"
                         >
-                            <div ref={responseContainerRef} className="relative border-l-2 border-primary/20 pl-4 py-1 text-left">
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="font-mono text-[9px] tracking-[0.25em] text-muted-foreground/30 uppercase shrink-0">Response</span>
+                                <div className="h-px flex-1 bg-border/30" />
+                            </div>
+                            <div ref={responseContainerRef} className="relative text-left">
                                 <div className="relative">
                                     {/* Top blur gradient — ref-based, safe with multiple instances */}
                                     {canScroll && (
