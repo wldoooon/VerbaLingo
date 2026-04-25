@@ -217,61 +217,6 @@ export function DashboardSkeleton() {
 
 
 
-			{/* --- Spacer Row 2 (50% split, restoring the vertical line) --- */}
-			<div className="col-span-1 lg:col-span-2 relative border-r border-border/40 overflow-hidden" style={{ minHeight: "128px" }}>
-				{/* Background Blueprint Grid */}
-				<div className="absolute inset-0 z-0 pointer-events-none">
-					<BlueprintGrid columns={10} cellSize="1fr" className="border-none h-full bg-transparent">
-						{Array.from({ length: 20 }).map((_, i) => (
-							<BlueprintBox key={i} className="border-border/40" shaded={i === 2 || i === 7} />
-						))}
-					</BlueprintGrid>
-				</div>
-
-				{/* ── Horizontal architectural box composition ── */}
-				<div className="absolute inset-0 p-6 flex gap-3 pointer-events-none select-none z-10">
-
-					{/* Column A — narrow, 2 stacked cells */}
-					<div className="w-[16%] flex flex-col gap-3">
-						<div className="flex-[3] border border-border/50 bg-muted/15" />
-						<div className="flex-[2] border border-border/40" />
-					</div>
-
-					{/* Column B — wide, main cell with inset room + corner ticks */}
-					<div className="flex-[3] border border-border/50 relative">
-						<div className="absolute inset-5 border border-border/30 bg-muted/5" />
-						<div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-border/50" />
-						<div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r border-border/50" />
-					</div>
-
-					{/* Column C — medium, flipped stack (empty over filled) */}
-					<div className="flex-[2] flex flex-col gap-3">
-						<div className="flex-[2] border border-border/40" />
-						<div className="flex-[3] border border-border/50 bg-muted/20" />
-					</div>
-
-					{/* Column D — narrow, 3 stacked cells */}
-					<div className="w-[14%] flex flex-col gap-3">
-						<div className="flex-[1] border border-border/40" />
-						<div className="flex-[2] border border-border/50 bg-muted/10" />
-						<div className="flex-[1] border border-border/40" />
-					</div>
-
-				</div>
-			</div>
-			<div className="col-span-1 lg:col-span-2 flex items-stretch justify-stretch w-full h-full relative overflow-hidden" style={{ minHeight: "128px" }}>
-				{/* Background Blueprint Grid (Continuity) */}
-				<div className="absolute inset-0 z-0 pointer-events-none">
-					<BlueprintGrid columns={10} cellSize="1fr" className="border-none h-full bg-transparent border-l-0">
-						{Array.from({ length: 20 }).map((_, i) => (
-							<BlueprintBox key={i} className="border-border/40" />
-						))}
-					</BlueprintGrid>
-				</div>
-				<div className="w-full h-full relative z-10">
-					<LogoCloud />
-				</div>
-			</div>
 
 			{/* Left Flank (Hidden on Mobile) */}
 			<div className="hidden lg:block col-span-1 relative min-h-[350px] lg:min-h-[400px] bg-background border-r border-border/40">
@@ -319,21 +264,6 @@ export function DashboardSkeleton() {
 
 			{/* Center Content Box */}
 			<div className="col-span-2 lg:col-span-2 relative min-h-[350px] lg:min-h-[400px] flex flex-col items-center justify-center text-center px-4 py-12 bg-background">
-				{/* Ultra-Long Faded Horizontal Lines (Elevated to overflow past the box boundaries) */}
-				<div className="absolute inset-0 z-0 pointer-events-none overflow-visible">
-					{Array.from({ length: 15 }).map((_, i) => (
-						<div 
-							key={i}
-							className="absolute left-1/2 -translate-x-1/2 w-[150%] h-px bg-border/30"
-							style={{ 
-								top: `${i * 64}px`,
-								maskImage: "linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)",
-								WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)"
-							}}
-						/>
-					))}
-				</div>
-
 				{/* Architectural Grid Background (fading bottom-out from center) */}
 				<div
 					className="absolute inset-0 z-0 pointer-events-none"
