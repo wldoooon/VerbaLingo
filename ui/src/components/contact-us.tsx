@@ -30,9 +30,55 @@ import {
 
 import { HighlightText } from "@/components/ui/highlight-text";
 import { EclipseButton } from "@/components/satisui/eclipse-button";
+import { toastManager } from "@/components/ui/toast";
 
 export function ContactUs() {
 	const [isLoading, setIsLoading] = React.useState(false);
+	const [firstName, setFirstName] = React.useState("");
+	const [lastName, setLastName] = React.useState("");
+	const [email, setEmail] = React.useState("");
+	const [message, setMessage] = React.useState("");
+	const [termsAccepted, setTermsAccepted] = React.useState(false);
+
+	const handleSubmit = (e: React.MouseEvent) => {
+		e.preventDefault();
+		
+		if (!firstName.trim() || !lastName.trim() || !email.trim() || !message.trim()) {
+			toastManager.add({
+				title: "Missing Information",
+				description: "Please fill out all fields before sending.",
+				type: "error"
+			});
+			return;
+		}
+
+		if (!termsAccepted) {
+			toastManager.add({
+				title: "Privacy Policy",
+				description: "You must agree to the Privacy Policy.",
+				type: "warning"
+			});
+			return;
+		}
+
+		setIsLoading(true);
+		// Simulate network request
+		setTimeout(() => {
+			setIsLoading(false);
+			toastManager.add({
+				title: "Message Sent!",
+				description: "We'll get back to you shortly.",
+				type: "success"
+			});
+			// Reset form
+			setFirstName("");
+			setLastName("");
+			setEmail("");
+			setMessage("");
+			setTermsAccepted(false);
+		}, 1500);
+	};
+
 	return (
 		<div className="mx-auto min-h-screen w-full max-w-6xl md:border-x bg-background relative">
 			{/* --- Vertical Dotted Decoration --- */}
@@ -113,30 +159,60 @@ export function ContactUs() {
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 								<div className="space-y-2">
 									<Label htmlFor="first-name">First name</Label>
-									<Input id="first-name" placeholder="John" className="rounded-xl bg-background" />
+									<Input 
+										id="first-name" 
+										placeholder="John" 
+										className="rounded-xl bg-background" 
+										value={firstName}
+										onChange={(e) => setFirstName(e.target.value)}
+									/>
 								</div>
 								<div className="space-y-2">
 									<Label htmlFor="last-name">Last name</Label>
-									<Input id="last-name" placeholder="Doe" className="rounded-xl bg-background" />
+									<Input 
+										id="last-name" 
+										placeholder="Doe" 
+										className="rounded-xl bg-background" 
+										value={lastName}
+										onChange={(e) => setLastName(e.target.value)}
+									/>
 								</div>
 							</div>
 
 							{/* Work Email */}
 							<div className="space-y-2">
 								<Label htmlFor="email">Email</Label>
-								<Input id="email" type="email" placeholder="johndoe@example.com" className="rounded-xl bg-background" />
+								<Input 
+									id="email" 
+									type="email" 
+									placeholder="johndoe@example.com" 
+									className="rounded-xl bg-background" 
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+								/>
 							</div>
 
 
 							{/* Message */}
 							<div className="space-y-2">
 								<Label htmlFor="message">How can we help?</Label>
-								<Textarea id="message" placeholder="Your message" className="min-h-[120px] rounded-2xl bg-background" />
+								<Textarea 
+									id="message" 
+									placeholder="Your message" 
+									className="min-h-[120px] rounded-2xl bg-background" 
+									value={message}
+									onChange={(e) => setMessage(e.target.value)}
+								/>
 							</div>
 
 							{/* Privacy Policy */}
 							<div className="flex items-center space-x-2">
-								<Checkbox id="terms" className="rounded-md border-border" />
+								<Checkbox 
+									id="terms" 
+									className="rounded-md border-border" 
+									checked={termsAccepted}
+									onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+								/>
 								<Label htmlFor="terms" className="text-sm text-muted-foreground font-normal">
 									I agree to the <span className="text-foreground underline cursor-pointer">Privacy Policy</span>.
 								</Label>
@@ -145,11 +221,7 @@ export function ContactUs() {
 							{/* Submit Button */}
 							<div className="pt-4">
 								<EclipseButton
-									onClick={(e) => {
-										e.preventDefault();
-										setIsLoading(true);
-										setTimeout(() => setIsLoading(false), 2500);
-									}}
+									onClick={handleSubmit}
 									isLoading={isLoading}
 									variant="orange"
 									text={isLoading ? "Sending Message..." : "Send Message"}

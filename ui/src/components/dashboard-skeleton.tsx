@@ -406,12 +406,8 @@ export function DashboardSkeleton() {
 					</div>
 
 					{/* Feature 2: Article Preview Feature */}
-					<div className="relative flex flex-col items-center justify-center min-h-80 border-b lg:border-b-0 lg:border-r border-border/40 hover:bg-muted/5 transition-colors group overflow-hidden bg-background/50 backdrop-blur-sm">
-						<div
-							className="w-full h-full flex items-center justify-center transform scale-[0.85] xl:scale-[0.95]"
-						>
-							<ArticlePreviewCard />
-						</div>
+					<div className="relative min-h-80 border-b lg:border-b-0 lg:border-r border-border/40 overflow-hidden">
+						<ArticlePreviewCard />
 					</div>
 
 					{/* Feature 3 & 4: Magnified Bento Feature */}

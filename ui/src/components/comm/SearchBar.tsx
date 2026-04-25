@@ -344,7 +344,7 @@ export function SearchBar() {
                         : "hover:-translate-y-0.5"
                 )}>
                     {/* Inner Content */}
-                    <div className="relative z-10 bg-muted flex flex-row items-center p-1 sm:p-1 w-full h-full">
+                    <div className="relative z-10 bg-background flex flex-row items-center p-1 sm:p-1 w-full h-full">
 
                         {/* Category Dropdown */}
                         <DropdownMenu>
