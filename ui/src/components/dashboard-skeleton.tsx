@@ -163,7 +163,7 @@ export function DashboardSkeleton() {
 							<BlueprintBox colSpan={2} rowSpan={2} dotted={false} className="relative">
 								<div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center">
 									<p className="text-xs sm:text-sm font-medium text-foreground tracking-tight leading-relaxed">
-										Supporting <span className="text-primary">50+ languages</span> in real contexts
+										<span className="text-primary">+4 languages</span> in real contexts
 									</p>
 								</div>
 							</BlueprintBox>

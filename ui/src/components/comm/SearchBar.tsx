@@ -15,22 +15,25 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-    DropdownMenuCheckboxItem,
     DropdownMenuSeparator,
     DropdownMenuLabel,
-    DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 import { Card, CardContent } from '@/components/ui/card';
 import TextType from '@/components/TextType';
 import { useDatamuse } from '@/hooks/useDatamuse';
 
 // Fix #12: DEFAULT_CATEGORIES label/value consistency ('Talks' was mislabeled 'Music')
 const DEFAULT_CATEGORIES = [
-    { value: 'All', label: 'All', icon: <LayoutGrid className="w-4 h-4 mr-2 opacity-70" /> },
-    { value: 'Movies', label: 'Movies', icon: <Video className="w-4 h-4 mr-2 opacity-70" /> },
-    { value: 'Cartoons', label: 'TV Shows', icon: <Tv className="w-4 h-4 mr-2 opacity-70" /> },
-    { value: 'Podcasts', label: 'Podcasts', icon: <Mic className="w-4 h-4 mr-2 opacity-70" /> },
-    { value: 'Talks', label: 'Talks', icon: <Music className="w-4 h-4 mr-2 opacity-70" /> },
+    { value: 'All', label: 'All', renderIcon: (cls: string) => <LayoutGrid className={cls} /> },
+    { value: 'Movies', label: 'Movies', renderIcon: (cls: string) => <Video className={cls} /> },
+    { value: 'Cartoons', label: 'TV Shows', renderIcon: (cls: string) => <Tv className={cls} /> },
+    { value: 'Podcasts', label: 'Podcasts', renderIcon: (cls: string) => <Mic className={cls} /> },
+    { value: 'Talks', label: 'Talks', renderIcon: (cls: string) => <Music className={cls} /> },
 ];
 
 const PodcastIcon = ({ className }: { className?: string }) => (
@@ -48,10 +51,10 @@ const MoviesIcon = ({ className }: { className?: string }) => (
 );
 
 const ENGLISH_CATEGORIES = [
-    { value: 'All', label: 'All', icon: <LayoutGrid className="w-4 h-4 mr-2 opacity-70" /> },
-    { value: 'Movies', label: 'Movies & TV Shows', icon: <MoviesIcon className="w-4 h-4 mr-2 opacity-70" /> },
-    { value: 'Shows', label: 'Shows', icon: <Tv className="w-4 h-4 mr-2 opacity-70" /> },
-    { value: 'Podcasts & Talks', label: 'Podcast & Talks', icon: <PodcastIcon className="w-4 h-4 mr-2 opacity-70" /> },
+    { value: 'All', label: 'All', renderIcon: (cls: string) => <LayoutGrid className={cls} /> },
+    { value: 'Movies', label: 'Movies & TV Shows', renderIcon: (cls: string) => <MoviesIcon className={cls} /> },
+    { value: 'Shows', label: 'Shows', renderIcon: (cls: string) => <Tv className={cls} /> },
+    { value: 'Podcasts & Talks', label: 'Podcasts & Talks', renderIcon: (cls: string) => <PodcastIcon className={cls} /> },
 ];
 
 // Languages with flags
@@ -346,56 +349,67 @@ export function SearchBar() {
                     {/* Inner Content */}
                     <div className="relative z-10 bg-background flex flex-row items-center p-1 sm:p-1 w-full h-full">
 
-                        {/* Category Dropdown */}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                        {/* Category Popover */}
+                        <Popover>
+                            <PopoverTrigger asChild>
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     className={cn(
-                                        "h-8 sm:h-9 px-2 sm:px-3 rounded-lg gap-1 sm:gap-2 font-semibold text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted data-[state=open]:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0 cursor-pointer",
+                                        "h-8 sm:h-9 px-2 sm:px-3 rounded-lg gap-1 sm:gap-1.5 text-muted-foreground hover:bg-muted/50 data-[state=open]:bg-muted/70 data-[state=open]:text-foreground focus-visible:ring-0 focus-visible:ring-offset-0 cursor-pointer transition-all duration-200"
                                     )}
                                 >
-                                    <div className="flex items-center gap-1 sm:gap-2">
-                                        <svg
-                                            className="w-4 h-4 transition-colors"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        >
-                                            <line x1="4" y1="6" x2="20" y2="6" />
-                                            <line x1="4" y1="18" x2="12" y2="18" />
-                                        </svg>
-                                        <span className="hidden md:inline">{getCategoryLabel()}</span>
-                                        <ChevronDown className="w-4 h-4 opacity-50" />
-                                    </div>
+                                    <svg
+                                        className="w-3.5 h-3.5 shrink-0"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <line x1="4" y1="6" x2="20" y2="6" />
+                                        <line x1="4" y1="18" x2="12" y2="18" />
+                                    </svg>
+                                    <span className="hidden md:inline text-xs font-semibold">{getCategoryLabel()}</span>
+                                    <ChevronDown className="w-3 h-3 opacity-40" />
                                 </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="w-[200px] p-2 rounded-xl" sideOffset={8}>
-                                <DropdownMenuLabel className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
-                                    Search Context
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuGroup>
-                                    {(selectedLanguage === 'English' ? ENGLISH_CATEGORIES : DEFAULT_CATEGORIES).map((cat) => (
-                                        <DropdownMenuCheckboxItem
-                                            key={cat.value}
-                                            checked={isCategorySelected(cat.value)}
-                                            onCheckedChange={() => toggleCategory(cat.value)}
-                                            className="rounded-lg py-2.5 cursor-pointer flex items-center pr-8"
-                                        >
-                                            <div className="flex items-center">
-                                                {cat.icon}
-                                                <span>{cat.label}</span>
-                                            </div>
-                                        </DropdownMenuCheckboxItem>
-                                    ))}
-                                </DropdownMenuGroup>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                            </PopoverTrigger>
+                            <PopoverContent align="start" className="w-[210px] p-2 rounded-xl shadow-lg" sideOffset={8}>
+                                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest px-2 pt-1 pb-2">
+                                    Search in
+                                </p>
+                                <div className="flex flex-col gap-0.5">
+                                    {(selectedLanguage === 'English' ? ENGLISH_CATEGORIES : DEFAULT_CATEGORIES).map((cat) => {
+                                        const selected = isCategorySelected(cat.value);
+                                        return (
+                                            <button
+                                                key={cat.value}
+                                                onClick={() => toggleCategory(cat.value)}
+                                                className={cn(
+                                                    "group flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg text-sm transition-all duration-150 cursor-pointer border",
+                                                    selected
+                                                        ? "bg-primary/10 text-foreground border-primary/25"
+                                                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground border-transparent"
+                                                )}
+                                            >
+                                                <span className={cn(
+                                                    "transition-colors duration-150",
+                                                    selected ? "text-primary" : "text-muted-foreground/50 group-hover:text-muted-foreground"
+                                                )}>
+                                                    {cat.renderIcon("w-3.5 h-3.5")}
+                                                </span>
+                                                <span className="flex-1 text-left font-medium">{cat.label}</span>
+                                                <Check className={cn(
+                                                    "w-3.5 h-3.5 text-primary transition-all duration-150",
+                                                    selected ? "opacity-100 scale-100" : "opacity-0 scale-75"
+                                                )} />
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </PopoverContent>
+                        </Popover>
 
                         {/* Divider */}
                         <div className="w-px h-6 bg-border mx-2 hidden sm:block" />

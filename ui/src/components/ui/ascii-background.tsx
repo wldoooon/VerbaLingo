@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react"
 // Char sets per angular sector — different "arms" of the bloom get different chars
 const SECTOR_CHARS = ["·", ".", ",", ";", ":", "'", "-", "~", "`", "\"", "_", "+"]
 const CELL = 16
-const FPS = 22
+const FPS = 30
 
 interface AsciiBackgroundProps {
   isDark?: boolean
@@ -66,18 +66,18 @@ export function AsciiBackground({ isDark = false, className }: AsciiBackgroundPr
           const nd = dist / maxDist           //  0 … 1
 
           // ── 1. Expanding concentric rings ──────────────────────────
-          // Rings travel outward at 80 px/s; period = 40% of max radius
+          // Rings travel outward at 140 px/s; period = 40% of max radius
           const period = maxDist * 0.40
-          const phase = ((dist - t * 80) % period + period) % period / period
+          const phase = ((dist - t * 140) % period + period) % period / period
           const ring = Math.sin(phase * Math.PI * 2)  // –1 … 1
 
           // ── 2. 5-petal bloom (angle modulation) ───────────────────
           // Creates 5 brighter "arms"; slowly rotates
-          const bloom = Math.cos(angle * 5 - t * 0.5) * 0.38 + 0.62  // 0.24 … 1
+          const bloom = Math.cos(angle * 5 - t * 0.8) * 0.38 + 0.62  // 0.24 … 1
 
           // ── 3. Vortex twist ───────────────────────────────────────
           // Spiral distortion proportional to distance
-          const twist = Math.sin(angle * 3 + dist * 0.022 - t * 1.1) * 0.28
+          const twist = Math.sin(angle * 3 + dist * 0.022 - t * 1.6) * 0.28
 
           // ── 4. Combine ─────────────────────────────────────────────
           const raw = ((ring + 1) / 2) * bloom + twist
