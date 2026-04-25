@@ -219,10 +219,8 @@ export function DashboardSkeleton() {
 
 			{/* --- Spacer Row 2 (50% split, restoring the vertical line) --- */}
 			<div className="col-span-1 lg:col-span-2 relative border-r border-border/40 overflow-hidden" style={{ minHeight: "128px" }}>
-				{/* Background Blueprint Grid (Solid, No Fade) */}
-				<div
-					className="absolute inset-0 z-0 pointer-events-none"
-				>
+				{/* Background Blueprint Grid */}
+				<div className="absolute inset-0 z-0 pointer-events-none">
 					<BlueprintGrid columns={10} cellSize="1fr" className="border-none h-full bg-transparent">
 						{Array.from({ length: 20 }).map((_, i) => (
 							<BlueprintBox key={i} className="border-border/40" shaded={i === 2 || i === 7} />
@@ -230,6 +228,36 @@ export function DashboardSkeleton() {
 					</BlueprintGrid>
 				</div>
 
+				{/* ── Horizontal architectural box composition ── */}
+				<div className="absolute inset-0 p-6 flex gap-3 pointer-events-none select-none z-10">
+
+					{/* Column A — narrow, 2 stacked cells */}
+					<div className="w-[16%] flex flex-col gap-3">
+						<div className="flex-[3] border border-border/50 bg-muted/15" />
+						<div className="flex-[2] border border-border/40" />
+					</div>
+
+					{/* Column B — wide, main cell with inset room + corner ticks */}
+					<div className="flex-[3] border border-border/50 relative">
+						<div className="absolute inset-5 border border-border/30 bg-muted/5" />
+						<div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-border/50" />
+						<div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r border-border/50" />
+					</div>
+
+					{/* Column C — medium, flipped stack (empty over filled) */}
+					<div className="flex-[2] flex flex-col gap-3">
+						<div className="flex-[2] border border-border/40" />
+						<div className="flex-[3] border border-border/50 bg-muted/20" />
+					</div>
+
+					{/* Column D — narrow, 3 stacked cells */}
+					<div className="w-[14%] flex flex-col gap-3">
+						<div className="flex-[1] border border-border/40" />
+						<div className="flex-[2] border border-border/50 bg-muted/10" />
+						<div className="flex-[1] border border-border/40" />
+					</div>
+
+				</div>
 			</div>
 			<div className="col-span-1 lg:col-span-2 flex items-stretch justify-stretch w-full h-full relative overflow-hidden" style={{ minHeight: "128px" }}>
 				{/* Background Blueprint Grid (Continuity) */}
@@ -247,9 +275,46 @@ export function DashboardSkeleton() {
 
 			{/* Left Flank (Hidden on Mobile) */}
 			<div className="hidden lg:block col-span-1 relative min-h-[350px] lg:min-h-[400px] bg-background border-r border-border/40">
-				{/* Mask out the parent container's left border for just this section (Exposing the top half) */}
+				{/* Mask out the parent container's left border for just this section */}
 				<div className="absolute top-1/2 bottom-0 -left-[1px] w-[2px] bg-background z-20" />
-				<div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+				{/* Dot pattern base */}
+				<div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, var(--border) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+
+				{/* ── Architectural box composition ── */}
+				<div className="absolute inset-0 p-7 flex flex-col gap-3 pointer-events-none select-none z-10">
+
+					{/* Row A — tall, main mass */}
+					<div className="flex gap-3 flex-[5]">
+						{/* Left sub-column: two stacked cells */}
+						<div className="w-[42%] flex flex-col gap-3">
+							<div className="flex-[3] border border-border/50 bg-muted/15" />
+							<div className="flex-[2] border border-border/40" />
+						</div>
+						{/* Right: tall cell with inset room + corner ticks */}
+						<div className="flex-1 border border-border/50 relative">
+							<div className="absolute inset-5 border border-border/30 bg-muted/5" />
+							<div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-border/50" />
+							<div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r border-border/50" />
+						</div>
+					</div>
+
+					{/* Row B — medium, cross-hair accent */}
+					<div className="flex gap-3 flex-[3]">
+						<div className="flex-[4] border border-border/40 relative">
+							<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-px bg-border/35" />
+							<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-px bg-border/35" />
+						</div>
+						<div className="flex-[3] border border-border/50 bg-muted/20" />
+					</div>
+
+					{/* Row C — short, three-cell footer */}
+					<div className="flex gap-3 flex-[2]">
+						<div className="flex-[2] border border-border/40" />
+						<div className="flex-[3] border border-border/50 bg-muted/10" />
+						<div className="flex-[2] border border-border/40" />
+					</div>
+
+				</div>
 			</div>
 
 			{/* Center Content Box */}
