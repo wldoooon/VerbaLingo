@@ -313,9 +313,9 @@ export default function RoutedSearchPage() {
 
                 {/* Desktop: sidebar panel */}
                 {isDesktop && (
-                  <div className="relative bg-card z-30 h-full rounded-tr-xl">
+                  <div className="relative z-30 h-full p-2">
                     {playlist.length === 0 ? (
-                      <div className="w-full h-full flex flex-col p-6 pointer-events-none">
+                      <div className="w-full h-full flex flex-col p-6 bg-card rounded-xl pointer-events-none">
                         <div className="h-8 w-2/3 bg-muted/60 rounded-full mt-4 mb-2 mx-auto animate-pulse" />
                         <div className="h-4 w-1/2 bg-muted/40 rounded-full mb-10 mx-auto animate-pulse" />
                         <div className="flex gap-2 flex-wrap mb-10 justify-center">
@@ -346,7 +346,7 @@ export default function RoutedSearchPage() {
                             : <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />}
                         </button>
 
-                        <div className="relative h-full overflow-hidden rounded-tr-xl">
+                        <div className="relative h-full overflow-hidden rounded-xl border border-border/70">
                           <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
                             <AiCompletion externalPrompt={externalPrompt} contextSnippet={contextSnippet} />
                           </div>
