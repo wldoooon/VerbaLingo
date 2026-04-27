@@ -313,7 +313,7 @@ export default function RoutedSearchPage() {
 
                 {/* Desktop: sidebar panel */}
                 {isDesktop && (
-                  <div className="relative bg-card z-30 h-full">
+                  <div className="relative bg-card z-30 h-full rounded-tr-xl">
                     {playlist.length === 0 ? (
                       <div className="w-full h-full flex flex-col p-6 pointer-events-none">
                         <div className="h-8 w-2/3 bg-muted/60 rounded-full mt-4 mb-2 mx-auto animate-pulse" />
@@ -346,7 +346,7 @@ export default function RoutedSearchPage() {
                             : <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />}
                         </button>
 
-                        <div className="h-full overflow-hidden">
+                        <div className="relative h-full overflow-hidden rounded-tr-xl">
                           <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
                             <AiCompletion externalPrompt={externalPrompt} contextSnippet={contextSnippet} />
                           </div>

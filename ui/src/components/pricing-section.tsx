@@ -137,6 +137,9 @@ export function PricingCard({
 			key={plan.name}
 			{...props}
 		>
+			{plan.highlighted && (
+					<div className="pointer-events-none absolute inset-0 dark:bg-[radial-gradient(35%_50%_at_15%_0%,--theme(--color-foreground/.1),transparent)]" />
+				)}
 			<div
 				className={cn(
 					"border-b p-4",

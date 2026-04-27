@@ -454,7 +454,8 @@ export function AiCompletion({
     }
 
     return (
-        <div className="w-full h-full flex flex-col bg-card">
+        <div className="relative w-full h-full flex flex-col bg-card overflow-hidden">
+            <div className="pointer-events-none absolute inset-0 dark:bg-[radial-gradient(20%_30%_at_85%_0%,--theme(--color-foreground/.1),transparent)]" />
 
             <header className="relative w-full flex-shrink-0 px-4 pt-4 sm:px-6 sm:pt-5">
                 <div className="absolute right-0 top-0 z-20">

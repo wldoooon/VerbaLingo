@@ -63,9 +63,12 @@ export function UsageMeter() {
 
     return (
         <div className={cn(
-            "w-full rounded-xl border border-border/50 bg-card p-3 flex flex-col gap-3",
+            "relative w-full rounded-xl border border-border/50 bg-card p-3 flex flex-col gap-3 overflow-hidden",
             "transition-opacity group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0"
         )}>
+            {/* Top-right white glow — same as footer */}
+            <div className="pointer-events-none absolute inset-0 dark:bg-[radial-gradient(35%_80%_at_85%_0%,--theme(--color-foreground/.1),transparent)]" />
+
             <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-foreground">Usage</span>
                 <span className="text-[10px] text-muted-foreground">{tier} plan</span>
