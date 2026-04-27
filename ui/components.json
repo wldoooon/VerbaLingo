@@ -20,6 +20,10 @@
   },
   "registries": {
     "@animate-ui": "https://animate-ui.com/r/{name}.json",
-    "@coss": "https://coss.com/ui/r/{name}.json"
+    "@coss": "https://coss.com/ui/r/{name}.json",
+    "@shadcn-space": "https://shadcnspace.com/r/{name}.json",
+    "@uitripled": "https://ui.tripled.work/r/{name}.json",
+    "@efferd": "https://efferd.com/r/{style}/{name}.json",
+    "@cardcn": "https://cardcn.dev/r/{name}.json"
   }
 }

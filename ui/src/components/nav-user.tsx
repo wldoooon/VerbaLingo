@@ -1,114 +1,103 @@
-"use client"
+"use client";
 
+import Link from "next/link";
 import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from "lucide-react"
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@/components/ui/avatar";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { UserIcon, CreditCardIcon, LogOutIcon, LifeBuoyIcon } from "lucide-react";
+import { useAuthStore } from "@/stores/auth-store";
+import { useLogoutMutation } from "@/lib/authHooks";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar"
+export function NavUser() {
+	const user = useAuthStore((s) => s.user);
+const { mutate: logout, isPending } = useLogoutMutation();
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
-  const { isMobile } = useSidebar()
+const displayName = user?.full_name || user?.email?.split("@")[0] || "User";
+	const email = user?.email ?? "";
+	const avatar = user?.oauth_avatar_url || "/user_logo.png";
+	const tier = user?.tier
+		? user.tier.charAt(0).toUpperCase() + user.tier.slice(1)
+		: "Free";
+	const initials = displayName.charAt(0).toUpperCase();
 
-  return (
-    <SidebarMenu>
-      <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-4" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
-                </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
-  )
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Avatar className="size-8 cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all">
+					<AvatarImage src={avatar} />
+					<AvatarFallback>{initials}</AvatarFallback>
+				</Avatar>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end" className="w-60">
+				<DropdownMenuItem className="flex items-center justify-start gap-2">
+					<DropdownMenuLabel className="flex items-center gap-3">
+						<Avatar className="size-10">
+							<AvatarImage src={avatar} />
+							<AvatarFallback>{initials}</AvatarFallback>
+						</Avatar>
+						<div>
+							<span className="font-medium text-foreground">{displayName}</span>
+							<br />
+							<div className="max-w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-muted-foreground text-xs">
+								{email}
+							</div>
+							<div className="mt-0.5 text-[10px] text-muted-foreground">
+								{tier} plan
+							</div>
+						</div>
+					</DropdownMenuLabel>
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuGroup>
+					<DropdownMenuItem asChild>
+						<Link href="#">
+							<UserIcon />
+							Profile
+						</Link>
+					</DropdownMenuItem>
+				</DropdownMenuGroup>
+				<DropdownMenuSeparator />
+				<DropdownMenuGroup>
+					<DropdownMenuItem asChild>
+						<Link href="/pricing">
+							<CreditCardIcon />
+							Plan &amp; Billing
+						</Link>
+					</DropdownMenuItem>
+				</DropdownMenuGroup>
+				<DropdownMenuSeparator />
+				<DropdownMenuGroup>
+					<DropdownMenuItem asChild>
+						<Link href="#">
+							<LifeBuoyIcon />
+							Support
+						</Link>
+					</DropdownMenuItem>
+				</DropdownMenuGroup>
+				<DropdownMenuSeparator />
+				<DropdownMenuGroup>
+					<DropdownMenuItem
+						className="w-full cursor-pointer"
+						variant="destructive"
+						disabled={isPending}
+						onClick={() => logout()}
+					>
+						<LogOutIcon />
+						{isPending ? "Signing out…" : "Log out"}
+					</DropdownMenuItem>
+				</DropdownMenuGroup>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
 }

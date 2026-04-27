@@ -8,6 +8,7 @@ import { Response } from "@/components/ui/shadcn-io/ai/response";
 import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, Lock, MessageSquare, Zap, Square, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
+import TextType from "@/components/TextType";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
 import { useResponseHistory } from "@/hooks/useResponseHistory";
 import { SessionSelector } from "@/components/session-selector";
@@ -40,22 +41,22 @@ function generateSmartSuggestions(searchWord: string, language: string): SmartSu
             {
                 title: "Learn pronunciation tips",
                 prompt: `What are some general tips for improving ${lang} pronunciation?`,
-                icon: <Mic className="h-4 w-4" />,
+                icon: <Mic className="h-3 w-3" />,
             },
             {
                 title: "Common grammar mistakes",
                 prompt: `What are the most common grammar mistakes ${lang} learners make?`,
-                icon: <BookText className="h-4 w-4" />,
+                icon: <BookText className="h-3 w-3" />,
             },
             {
                 title: "Expand vocabulary",
                 prompt: `How can I effectively expand my ${lang} vocabulary?`,
-                icon: <Repeat className="h-4 w-4" />,
+                icon: <Repeat className="h-3 w-3" />,
             },
             {
                 title: "Common mistakes to avoid",
                 prompt: `What are common mistakes ${lang} learners make and how to avoid them?`,
-                icon: <XCircle className="h-4 w-4" />,
+                icon: <XCircle className="h-3 w-3" />,
             },
         ];
     }
@@ -64,25 +65,34 @@ function generateSmartSuggestions(searchWord: string, language: string): SmartSu
         {
             title: `Pronounce "${searchWord}" correctly`,
             prompt: `Break down how to pronounce "${searchWord}" in ${lang} syllable by syllable with phonetic examples. Include common mistakes learners make.`,
-            icon: <Mic className="h-4 w-4" />,
+            icon: <Mic className="h-3 w-3" />,
         },
         {
             title: `"${searchWord}" in different contexts`,
             prompt: `Show me 5 example sentences using "${searchWord}" in ${lang} in different contexts (formal, informal, academic, conversational). Explain the nuances.`,
-            icon: <BookText className="h-4 w-4" />,
+            icon: <BookText className="h-3 w-3" />,
         },
         {
             title: `Similar words to "${searchWord}"`,
             prompt: `What are 5 words similar in meaning or usage to "${searchWord}" in ${lang}? Explain the subtle differences with examples.`,
-            icon: <Repeat className="h-4 w-4" />,
+            icon: <Repeat className="h-3 w-3" />,
         },
         {
             title: `Common mistakes with "${searchWord}"`,
             prompt: `What are the most common mistakes ${lang} learners make when using "${searchWord}"? How can I avoid them?`,
-            icon: <XCircle className="h-4 w-4" />,
+            icon: <XCircle className="h-3 w-3" />,
         },
     ];
 }
+
+const AI_PLACEHOLDERS = [
+    "How do you pronounce this word?",
+    "Give me 5 examples in different contexts...",
+    "What's the difference between affect and effect?",
+    "Use it in a formal sentence...",
+    "What are some synonyms with subtle differences?",
+    "How would a native speaker say this?",
+];
 
 // Maps raw API errors to user-friendly messages
 function getFriendlyError(err: Error): string {
@@ -454,328 +464,333 @@ export function AiCompletion({
     }
 
     return (
-        <div className="w-full h-full flex flex-col bg-card">
+        <div className="relative w-full h-full flex flex-col bg-card overflow-hidden">
+            <div className="pointer-events-none absolute inset-0 dark:bg-[radial-gradient(20%_30%_at_85%_0%,--theme(--color-foreground/.1),transparent)]" />
 
-                <header className="relative w-full flex-shrink-0 px-4 pt-4 sm:px-6 sm:pt-6">
-                    <div className="absolute right-0 top-0 z-20">
-                        <SessionSelector
-                            sessions={sessions}
-                            activeSessionId={activeSessionId}
-                            onSelectSession={handleSessionSelect}
-                            onDeleteSession={deleteSession}
-                            onClearAll={clearHistory}
-                            currentQuery={query}
-                            isLoading={isLoading}
-                            isHistoryLoading={isHistoryLoading}
-                        />
-                    </div>
+            <header className="relative w-full flex-shrink-0 px-4 pt-4 sm:px-6 sm:pt-5">
+                <div className="absolute right-0 top-0 z-20">
+                    <SessionSelector
+                        sessions={sessions}
+                        activeSessionId={activeSessionId}
+                        onSelectSession={handleSessionSelect}
+                        onDeleteSession={deleteSession}
+                        onClearAll={clearHistory}
+                        currentQuery={query}
+                        isLoading={isLoading}
+                        isHistoryLoading={isHistoryLoading}
+                    />
+                </div>
 
-                    <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100 text-center pt-2">
-                        {query ? (
-                            <>Learning about <span className="text-primary">"{query}"</span></>
-                        ) : "What do you want to learn?"}
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-2 sm:mt-4 max-w-lg mx-auto text-center text-xs sm:text-base">
-                        {query
-                            ? `Get pronunciations, examples, and detailed explanations for "${query}"`
-                            : "Explore topics, get explanations, and improve your understanding—all in one place."
-                        }
-                    </p>
+             
 
-                    <div className="relative mt-3 sm:mt-6">
-                        <div className="absolute bottom-0 left-0 right-0 flex h-px">
-                            <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                            <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-                        </div>
-                    </div>
-                </header>
+                <h1 className="text-base sm:text-lg font-semibold text-foreground text-center leading-snug">
+                    {query ? (
+                        <>Learning about{" "}<span className="text-primary italic font-bold">"{query}"</span></>
+                    ) : "What do you want to learn?"}
+                </h1>
+                <p className="text-muted-foreground/50 mt-1.5 sm:mt-2 max-w-lg mx-auto text-center text-[11px] sm:text-xs leading-relaxed">
+                    {query
+                        ? `Pronunciations, examples, and explanations for "${query}"`
+                        : "Explore topics, get explanations, and improve your understanding."
+                    }
+                </p>
 
-                <main className="w-full flex-1 flex flex-col mt-3 sm:mt-6 space-y-4 sm:space-y-6 min-h-0 overflow-y-auto px-4 sm:px-6">
-                    {/* Suggestions */}
-                    <AnimatePresence>
-                        {!shouldHideSuggestions && (
-                            <motion.div
-                                initial={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="overflow-hidden suggestions-container"
-                            >
-                                <div className="flex flex-wrap justify-center gap-3">
-                                    {smartSuggestions.map((suggestion, i) => (
-                                        <motion.div
-                                            key={i}
-                                            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                                            transition={{ duration: 0.4, delay: i * 0.1, ease: [0.4, 0, 0.2, 1] }}
-                                        >
-                                            <SuggestionChip
-                                                icon={suggestion.icon}
-                                                text={suggestion.title}
-                                                onClick={() => handleSuggestionClick(suggestion)}
-                                            />
-                                        </motion.div>
-                                    ))}
-                                </div>
-                                <div className="w-full px-8">
-                                    <div className="h-px bg-border/40 my-2" />
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                <div className="flex items-center gap-2.5 mt-3 sm:mt-4">
+                    <div className="h-px flex-1 bg-border/40" />
+                </div>
+            </header>
 
-                    {/* Welcome message — isHistoryLoading guard prevents flash on session restore */}
-                    {!isLoading && !completion && !error && !currentBranch && !isHistoryLoading && query && (
+            <main className="w-full flex-1 flex flex-col mt-3 sm:mt-6 space-y-4 sm:space-y-6 min-h-0 overflow-y-auto px-4 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {/* Suggestions */}
+                <AnimatePresence>
+                    {!shouldHideSuggestions && (
                         <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="w-full"
+                            initial={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden suggestions-container"
                         >
-                            <div className="relative bg-card rounded-xl p-4 sm:p-6 text-left border-x">
-                                <div className="absolute top-0 left-0 right-0 flex h-px">
-                                    <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                                    <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-                                </div>
-                                <div className="text-sm sm:text-base text-card-foreground/90 leading-relaxed">
-                                    Hello! I'm your AI assistant. I can help you understand nuances, practice pronunciation, or generate examples for <span className="font-semibold text-primary">"{query}"</span>.
-                                    <br /><br />
-                                    Try tapping a suggestion above or type your own question below!
-                                </div>
-                                <div className="absolute bottom-0 left-0 right-0 flex h-px">
-                                    <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                                    <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-                                </div>
+                            <div className="flex flex-wrap justify-center gap-2">
+                                {smartSuggestions.map((suggestion, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        transition={{ duration: 0.4, delay: i * 0.1, ease: [0.4, 0, 0.2, 1] }}
+                                    >
+                                        <SuggestionChip
+                                            icon={suggestion.icon}
+                                            text={suggestion.title}
+                                            onClick={() => handleSuggestionClick(suggestion)}
+                                        />
+                                    </motion.div>
+                                ))}
+                            </div>
+                            <div className="w-full px-8">
+                                <div className="h-px bg-border/40 my-2" />
                             </div>
                         </motion.div>
                     )}
+                </AnimatePresence>
 
-                    {/* Response Section */}
-                    <AnimatePresence>
-                        {isLoading && !completion && !error ? (
-                            <motion.div
-                                key="skeleton"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                transition={{ duration: 0.3 }}
-                                className="w-full"
-                            >
-                                <AiAssistantSkeleton />
-                            </motion.div>
-                        ) : (completion || error || currentBranch) && (
-                            <motion.div
-                                key="completion"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                transition={{ duration: 0.5 }}
-                                className="w-full"
-                            >
-                                <div ref={responseContainerRef} className="relative bg-card rounded-xl p-6 text-left">
-                                    <div className="relative">
-                                        {/* Top blur gradient — ref-based, safe with multiple instances */}
-                                        {canScroll && (
-                                            <div
-                                                ref={topBlurRef}
-                                                className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300"
-                                            />
-                                        )}
-
-                                        <div
-                                            ref={scrollContentRef}
-                                            style={{ maxHeight: `${maxResponseHeight}px` }}
-                                            className="overflow-y-auto text-card-foreground pl-1 pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
-                                            onScroll={(e) => {
-                                                const el = e.currentTarget;
-                                                if (topBlurRef.current) {
-                                                    topBlurRef.current.style.opacity = el.scrollTop > 10 ? '1' : '0';
-                                                }
-                                                if (bottomBlurRef.current) {
-                                                    const isBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 10;
-                                                    bottomBlurRef.current.style.opacity = isBottom ? '0' : '1';
-                                                }
-                                            }}
-                                        >
-                                            {error ? (
-                                                /* User-friendly error with retry */
-                                                <div className="flex flex-col items-center gap-3 py-2">
-                                                    <p className="text-sm text-muted-foreground text-center leading-relaxed">
-                                                        {getFriendlyError(error)}
-                                                    </p>
-                                                    {currentPromptRef.current && (
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                            className="gap-2 rounded-full cursor-pointer"
-                                                            onClick={() => complete(currentPromptRef.current)}
-                                                        >
-                                                            <RefreshCw className="h-3.5 w-3.5" />
-                                                            Try again
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className="text-base md:text-lg leading-relaxed">
-                                                    <Response>
-                                                        {currentBranch && !isLoading
-                                                            ? currentBranch.response
-                                                            : completion
-                                                        }
-                                                    </Response>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Bottom blur gradient — ref-based */}
-                                        {canScroll && (
-                                            <div
-                                                ref={bottomBlurRef}
-                                                className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300"
-                                            />
-                                        )}
-                                    </div>
-
-                                    {!isLoading && !error && (
-                                        <div className="flex flex-col items-center gap-4 mt-4 pt-4 border-t">
-                                            {totalBranches > 1 && (
-                                                <div className="w-full">
-                                                    <BranchTimeline
-                                                        currentIndex={currentIndex}
-                                                        branches={branches}
-                                                        onSelectIndex={navigateToIndex}
-                                                        onPrevious={goToPrevious}
-                                                        onNext={goToNext}
-                                                        isLoading={isLoading}
-                                                    />
-                                                </div>
-                                            )}
-
-                                            <div className="flex items-center gap-2">
-                                                <TooltipProvider>
-                                                    <Tooltip delayDuration={0}>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                ref={copyButtonRef}
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-8 w-8 hover:text-primary transition-colors cursor-pointer"
-                                                                onClick={handleCopy}
-                                                                disabled={isCopied}
-                                                            >
-                                                                {isCopied ? <Check size={16} /> : <Copy size={16} />}
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent side="bottom">
-                                                            <p>Copy to clipboard</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 hover:text-green-500 transition-colors cursor-pointer"
-                                                    onClick={handleLike}
-                                                >
-                                                    <ThumbsUp size={16} />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 hover:text-red-500 transition-colors cursor-pointer"
-                                                    onClick={handleDislike}
-                                                >
-                                                    <ThumbsDown size={16} />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </main>
-
-                <footer className="relative w-full flex-shrink-0 mt-auto px-4 pb-4 sm:px-6 sm:pb-6 pt-4">
-                    <div className="absolute top-0 left-0 right-0 flex h-px">
-                        <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
-                        <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
-                    </div>
-
-                    {outOfSparks ? (
-                        <div
-                            className="relative w-full cursor-pointer"
-                            onClick={() => {
-                                toastManager.add({
-                                    title: "You're out of credits",
-                                    description: "Upgrade your plan for more.",
-                                    type: "warning",
-                                    actionProps: {
-                                        children: "Upgrade",
-                                        onClick: () => router.push("/pricing"),
-                                    },
-                                });
-                            }}
-                        >
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/40" />
-                            <div className="w-full rounded-full pl-10 pr-24 py-6 bg-muted/50 border border-border text-sm text-muted-foreground/40 select-none">
-                                Ask about pronunciation, definitions, examples...
+                {/* Welcome message — isHistoryLoading guard prevents flash on session restore */}
+                {!isLoading && !completion && !error && !currentBranch && !isHistoryLoading && query && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="w-full"
+                    >
+                        <div className="relative text-left">
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="font-mono text-[9px] tracking-[0.25em] text-muted-foreground/30 uppercase shrink-0">Ready</span>
+                                <div className="h-px flex-1 bg-border/30" />
+                            </div>
+                            <div className="text-sm text-foreground/70 leading-relaxed">
+                                Ask me anything about <span className="font-semibold text-primary italic">"{query}"</span> — pronunciation, usage, nuances, or examples.
                             </div>
                         </div>
-                    ) : (
-                        <>
-                            <div className="relative w-full">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
-                                <Input
-                                    type="text"
-                                    maxLength={150}
-                                    placeholder="Ask about pronunciation, definitions, examples..."
-                                    className="w-full rounded-full pl-10 pr-24 py-6 bg-muted shadow-sm border border-primary/40 focus-visible:bg-background transition-colors"
-                                    value={inputValue}
-                                    onChange={(e) => {
-                                        const val = e.target.value.slice(0, 150);
-                                        setInputValue(val);
-                                    }}
-                                    onKeyDown={handleKeyDown}
-                                    disabled={isLoading}
-                                />
+                    </motion.div>
+                )}
 
-                                {/* Character counter — only shown when user is typing */}
-                                {inputValue.length > 0 && (
-                                    <div className={cn(
-                                        "absolute right-12 top-1/2 -translate-y-1/2 text-[10px] font-medium pointer-events-none transition-all duration-200",
-                                        inputValue.length >= 150 ? "text-red-500 font-bold" : "text-muted-foreground/40"
-                                    )}>
-                                        {inputValue.length}/150
+                {/* Response Section */}
+                <AnimatePresence>
+                    {isLoading && !completion && !error ? (
+                        <motion.div
+                            key="skeleton"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3 }}
+                            className="w-full"
+                        >
+                            <AiAssistantSkeleton />
+                        </motion.div>
+                    ) : (completion || error || currentBranch) && (
+                        <motion.div
+                            key="completion"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.5 }}
+                            className="w-full"
+                        >
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="font-mono text-[9px] tracking-[0.25em] text-muted-foreground/30 uppercase shrink-0">Response</span>
+                                <div className="h-px flex-1 bg-border/30" />
+                            </div>
+                            <div ref={responseContainerRef} className="relative text-left">
+                                <div className="relative">
+                                    {/* Top blur gradient — ref-based, safe with multiple instances */}
+                                    {canScroll && (
+                                        <div
+                                            ref={topBlurRef}
+                                            className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-card to-transparent pointer-events-none z-10 opacity-0 transition-opacity duration-300"
+                                        />
+                                    )}
+
+                                    <div
+                                        ref={scrollContentRef}
+                                        style={{ maxHeight: `${maxResponseHeight}px` }}
+                                        className="overflow-y-auto overflow-x-hidden text-card-foreground pl-1 pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
+                                        onScroll={(e) => {
+                                            const el = e.currentTarget;
+                                            if (topBlurRef.current) {
+                                                topBlurRef.current.style.opacity = el.scrollTop > 10 ? '1' : '0';
+                                            }
+                                            if (bottomBlurRef.current) {
+                                                const isBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 10;
+                                                bottomBlurRef.current.style.opacity = isBottom ? '0' : '1';
+                                            }
+                                        }}
+                                    >
+                                        {error ? (
+                                            /* User-friendly error with retry */
+                                            <div className="flex flex-col items-center gap-3 py-2">
+                                                <p className="text-sm text-muted-foreground text-center leading-relaxed">
+                                                    {getFriendlyError(error)}
+                                                </p>
+                                                {currentPromptRef.current && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="gap-2 rounded-full cursor-pointer"
+                                                        onClick={() => complete(currentPromptRef.current)}
+                                                    >
+                                                        <RefreshCw className="h-3.5 w-3.5" />
+                                                        Try again
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="text-sm md:text-base leading-relaxed">
+                                                <Response>
+                                                    {currentBranch && !isLoading
+                                                        ? currentBranch.response
+                                                        : completion
+                                                    }
+                                                </Response>
+                                                {!isLoading && (
+                                                    <div className="flex items-center gap-0.5 mt-3 pt-3 border-t border-border/30">
+                                                        <TooltipProvider>
+                                                            <Tooltip delayDuration={0}>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button
+                                                                        ref={copyButtonRef}
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="h-7 w-7 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                                                                        onClick={handleCopy}
+                                                                        disabled={isCopied}
+                                                                    >
+                                                                        {isCopied ? <Check size={13} /> : <Copy size={13} />}
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent side="bottom"><p>Copy</p></TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 text-muted-foreground hover:text-green-500 transition-colors cursor-pointer"
+                                                            onClick={handleLike}
+                                                        >
+                                                            <ThumbsUp size={13} />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
+                                                            onClick={handleDislike}
+                                                        >
+                                                            <ThumbsDown size={13} />
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Bottom blur gradient — ref-based */}
+                                    {canScroll && (
+                                        <div
+                                            ref={bottomBlurRef}
+                                            className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none z-10 opacity-100 transition-opacity duration-300"
+                                        />
+                                    )}
+                                </div>
+
+                                {!isLoading && !error && totalBranches > 1 && (
+                                    <div className="mt-4 pt-4 border-t">
+                                        <BranchTimeline
+                                            currentIndex={currentIndex}
+                                            branches={branches}
+                                            onSelectIndex={navigateToIndex}
+                                            onPrevious={goToPrevious}
+                                            onNext={goToNext}
+                                            isLoading={isLoading}
+                                        />
                                     </div>
                                 )}
-
-                                {/* Stop button during streaming, submit button otherwise */}
-                                {isLoading ? (
-                                    <button
-                                        onClick={handleStop}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-destructive hover:bg-destructive/80 transition-colors flex items-center justify-center cursor-pointer shadow-sm"
-                                        title="Stop generating"
-                                    >
-                                        <Square className="h-3 w-3 text-white fill-white" />
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={handleInputSubmit}
-                                        disabled={!inputValue.trim()}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
-                                    </button>
-                                )}
                             </div>
-                            <div className="text-center mt-3 px-4">
-                                <p className="text-[10px] text-muted-foreground/50 font-medium tracking-wide">
-                                    AI can make mistakes. Double-check important info.
-                                </p>
-                            </div>
-                        </>
+                        </motion.div>
                     )}
-                </footer>
+                </AnimatePresence>
+            </main>
+
+            <footer className="relative w-full flex-shrink-0 mt-auto px-4 pb-4 sm:px-6 sm:pb-6 pt-4">
+                <div className="absolute top-0 left-0 right-0 flex h-px">
+                    <div className="w-1/2 bg-gradient-to-r from-transparent to-border"></div>
+                    <div className="w-1/2 bg-gradient-to-l from-transparent to-border"></div>
+                </div>
+
+                {outOfSparks ? (
+                    <div
+                        className="relative w-full cursor-pointer"
+                        onClick={() => {
+                            toastManager.add({
+                                title: "You're out of credits",
+                                description: "Upgrade your plan for more.",
+                                type: "warning",
+                                actionProps: {
+                                    children: "Upgrade",
+                                    onClick: () => router.push("/pricing"),
+                                },
+                            });
+                        }}
+                    >
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/40" />
+                        <div className="w-full rounded-full pl-10 pr-24 py-6 bg-muted/50 border border-border text-sm text-muted-foreground/40 select-none">
+                            Ask about pronunciation, definitions, examples...
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <div className="relative w-full">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
+                            {!inputValue && !isLoading && (
+                                <div className="pointer-events-none absolute left-10 right-24 top-1/2 -translate-y-1/2 flex items-center overflow-hidden">
+                                    <TextType
+                                        text={AI_PLACEHOLDERS}
+                                        typingSpeed={60}
+                                        pauseDuration={1800}
+                                        showCursor={true}
+                                        cursorCharacter="|"
+                                        className="text-sm text-muted-foreground/50 font-normal whitespace-nowrap"
+                                    />
+                                </div>
+                            )}
+                            <Input
+                                type="text"
+                                maxLength={150}
+                                placeholder=""
+                                className="w-full rounded-full pl-10 pr-24 py-6 bg-transparent shadow-sm border border-primary/40 focus-visible:bg-background/60 transition-colors placeholder:text-transparent"
+                                value={inputValue}
+                                onChange={(e) => {
+                                    const val = e.target.value.slice(0, 150);
+                                    setInputValue(val);
+                                }}
+                                onKeyDown={handleKeyDown}
+                                disabled={isLoading}
+                            />
+
+                            {/* Character counter — only shown when user is typing */}
+                            {inputValue.length > 0 && (
+                                <div className={cn(
+                                    "absolute right-12 top-1/2 -translate-y-1/2 text-[10px] font-medium pointer-events-none transition-all duration-200",
+                                    inputValue.length >= 150 ? "text-red-500 font-bold" : "text-muted-foreground/40"
+                                )}>
+                                    {inputValue.length}/150
+                                </div>
+                            )}
+
+                            {/* Stop button during streaming, submit button otherwise */}
+                            {isLoading ? (
+                                <button
+                                    onClick={handleStop}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-destructive hover:bg-destructive/80 transition-colors flex items-center justify-center cursor-pointer shadow-sm"
+                                    title="Stop generating"
+                                >
+                                    <Square className="h-3 w-3 text-white fill-white" />
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleInputSubmit}
+                                    disabled={!inputValue.trim()}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <CornerDownLeft className="h-5 w-5 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" />
+                                </button>
+                            )}
+                        </div>
+                        <div className="text-center mt-3 px-4">
+                            <p className="text-[10px] text-muted-foreground/50 font-medium tracking-wide">
+                                AI can make mistakes. Double-check important info.
+                            </p>
+                        </div>
+                    </>
+                )}
+            </footer>
         </div>
     );
 }

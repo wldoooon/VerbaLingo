@@ -18,6 +18,9 @@ type TranscriptBoxProps = {
   sentences: Sentence[]
   searchQuery: string
   isTranscriptLoading: boolean
+  isTranslationLoading?: boolean
+  translatedMap?: Record<number, string>
+  targetSentence?: Sentence | null
   onSearchWord?: (word: string) => void
   onExplainWordInContext?: (payload: { word: string; sentence: string }) => void
   onTranscriptDetermined?: (snippet: string) => void
@@ -27,16 +30,31 @@ export const TranscriptBox = ({
   sentences,
   searchQuery,
   isTranscriptLoading,
+  isTranslationLoading,
+  translatedMap,
+  targetSentence,
   onSearchWord,
   onExplainWordInContext,
   onTranscriptDetermined,
 }: TranscriptBoxProps) => {
+  const targetIdx = useMemo(() => {
+    if (!targetSentence) return -1
+    return sentences.findIndex(s => s === targetSentence || s.start_time === targetSentence.start_time)
+  }, [sentences, targetSentence])
+
   // Zustand selector: only triggers re-render when the sentence INDEX changes.
   // Handles gaps between sentences by returning the most recently passed sentence
   // (sentences are sorted by start_time from audio-card's sanitizedSentences).
   // No refs needed — the selector itself is the sticky engine.
   const activeIdx = usePlayerStore(state => {
     if (sentences.length === 0) return -1
+
+    // If the player hasn't updated the time yet (currentTime is exactly 0), 
+    // and we have a target index, default to it so we show the keyword sentence initially.
+    if (state.currentTime === 0 && targetIdx !== -1) {
+      return targetIdx
+    }
+
     const TIMING_LEAD = 0.05 * state.playbackRate
     const t = state.currentTime + TIMING_LEAD
 
@@ -71,6 +89,7 @@ export const TranscriptBox = ({
       prev: sentences[idx - 1],
       active,
       next: sentences[idx + 1],
+      activeIdx: idx,
     }
   }, [activeIdx, sentences])
 
@@ -89,7 +108,7 @@ export const TranscriptBox = ({
   }, [trio, onTranscriptDetermined])
 
   return (
-    <div className="relative mt-1 h-[180px] flex items-center justify-center overflow-hidden">
+    <div className="relative mt-1 min-h-[180px] flex items-center justify-center overflow-hidden">
       {/* Simple, clean brand background */}
 
       <div className="relative w-full px-4">
@@ -112,10 +131,10 @@ export const TranscriptBox = ({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: "circOut" }}
-              className="flex flex-col items-center gap-4 py-4"
+              className="flex flex-col items-center gap-2 py-2"
             >
               {/* Previous Context */}
-              <div className="opacity-100 scale-100 transition-all duration-300 pointer-events-none hidden sm:block">
+              <div className="opacity-30 scale-95 transition-all duration-300 pointer-events-none hidden sm:block">
                 {trio.prev && (
                   <SentenceGroup
                     group={[trio.prev]}
@@ -126,18 +145,27 @@ export const TranscriptBox = ({
                 )}
               </div>
 
-              {/* ACTIVE FOCUS */}
-              <div className="opacity-100 scale-100 shadow-sm transition-all duration-300">
-                <SentenceGroup
-                  group={[trio.active]}
-                  searchQuery={searchQuery}
-                  onSearchWord={onSearchWord}
-                  onExplainWordInContext={onExplainWordInContext}
-                />
+              {/* ACTIVE FOCUS + translation directly below */}
+              <div className="flex flex-col items-center gap-1 w-full border-y border-border/20 py-2">
+                <div className="transition-all duration-300">
+                  <SentenceGroup
+                    group={[trio.active]}
+                    searchQuery={searchQuery}
+                    onSearchWord={onSearchWord}
+                    onExplainWordInContext={onExplainWordInContext}
+                  />
+                </div>
+                {isTranslationLoading ? (
+                  <Skeleton className="h-5 w-2/3 rounded-full opacity-40" />
+                ) : translatedMap?.[trio.activeIdx] ? (
+                  <p className="text-base sm:text-xl font-medium text-muted-foreground/70 text-center px-4 leading-snug">
+                    {translatedMap[trio.activeIdx]}
+                  </p>
+                ) : null}
               </div>
 
               {/* Next Context */}
-              <div className="opacity-100 scale-100 transition-all duration-300 pointer-events-none hidden sm:block">
+              <div className="opacity-30 scale-95 transition-all duration-300 pointer-events-none hidden sm:block">
                 {trio.next && (
                   <SentenceGroup
                     group={[trio.next]}

@@ -14,6 +14,7 @@ from .core.manticore_client import get_manticore_configuration
 from .core.limiter import limiter
 from .core.logging import logger, setup_logging
 from . import models # Force model registration for relationships
+from .db.init_db import init_database
 from .api.routes import router
 from .api.auth import router as auth_router
 
@@ -24,11 +25,17 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     # Initialize logging first
     setup_logging()
-    
+
     app.state.api_client = None
     app.state.search_api = None
 
-    # 1. Initialize Manticore Search Client
+    # 1. Create PostgreSQL tables if they don't exist
+    try:
+        await init_database()
+    except Exception as e:
+        logger.error(f"Failed to initialize database tables: {e}")
+
+    # 2. Initialize Manticore Search Client
     try:
         config = get_manticore_configuration()
         api_client = manticoresearch.ApiClient(config)

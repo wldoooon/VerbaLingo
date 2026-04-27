@@ -167,13 +167,14 @@ export default function RoutedSearchPage() {
 
   return (
     <>
-      <div className="flex-1 bg-transparent text-card-foreground">
+      <div className="flex-1 flex flex-col min-h-0 bg-transparent text-card-foreground">
         {showWall ? (
           /* ── Signup Wall ── */
           <SearchLimitWall />
         ) : (
+          <div className="flex-1 min-h-0 border border-border/40 rounded-xl">
           <div className={cn(
-            "mt-0 max-w-full xl:grid xl:items-start transition-[grid-template-columns] duration-300 ease-in-out",
+            "mt-0 max-w-full h-full xl:grid xl:items-stretch transition-[grid-template-columns] duration-300 ease-in-out",
             (playlist.length === 0 && !isLoading && !isFetching)
               ? "xl:grid-cols-1"
               : (isAiCollapsed ? "xl:grid-cols-[1fr_48px]" : "xl:grid-cols-[1fr_560px]")
@@ -206,7 +207,7 @@ export default function RoutedSearchPage() {
             )}
 
             {/* ── Player content or Empty State ── */}
-            <div className={`flex flex-col xl:pb-6 ${mobileTab !== "player" ? "hidden xl:block" : ""}`}>
+            <div className={`flex flex-col overflow-y-auto xl:border-r xl:border-border/40 ${mobileTab !== "player" ? "hidden xl:flex" : ""}`}>
               {playlist.length === 0 && !isLoading && !isFetching ? (
                 <div className="p-4 sm:p-6">
                   <NoResults query={q} />
@@ -239,7 +240,7 @@ export default function RoutedSearchPage() {
                   </div>
 
                   {/* Scrollable Content Layer */}
-                  <div className="px-4 pb-12 sm:px-6 space-y-4">
+                  <div className="px-4 pb-4 sm:px-6 space-y-4">
                     {playlist.length > 0 ? (
                       <AudioCard
                         currentClip={playlist[currentVideoIndex]}
@@ -312,27 +313,27 @@ export default function RoutedSearchPage() {
 
                 {/* Desktop: sidebar panel */}
                 {isDesktop && (
-                  <div className="relative sticky top-0 h-screen border-l bg-card z-30">
+                  <div className="relative z-30 h-full p-2">
                     {playlist.length === 0 ? (
-                        <div className="w-full h-full flex flex-col p-6 pointer-events-none">
-                          <div className="h-8 w-2/3 bg-muted/60 rounded-full mt-4 mb-2 mx-auto animate-pulse" />
-                          <div className="h-4 w-1/2 bg-muted/40 rounded-full mb-10 mx-auto animate-pulse" />
-                          <div className="flex gap-2 flex-wrap mb-10 justify-center">
-                            {[1, 2, 3, 4].map((i) => (
-                              <div key={i} className="h-8 w-32 bg-muted/60 rounded-full animate-pulse" />
-                            ))}
-                          </div>
-                          <div className="w-full bg-muted/20 rounded-xl p-6 border animate-pulse">
-                            <div className="space-y-4">
-                              <div className="h-4 w-full bg-muted/60 rounded-full" />
-                              <div className="h-4 w-[90%] bg-muted/60 rounded-full" />
-                              <div className="h-4 w-[75%] bg-muted/60 rounded-full" />
-                            </div>
-                          </div>
-                          <div className="mt-auto pt-6 border-t border-border/40">
-                            <div className="h-14 w-full bg-muted/60 rounded-full animate-pulse" />
+                      <div className="w-full h-full flex flex-col p-6 bg-card rounded-xl pointer-events-none">
+                        <div className="h-8 w-2/3 bg-muted/60 rounded-full mt-4 mb-2 mx-auto animate-pulse" />
+                        <div className="h-4 w-1/2 bg-muted/40 rounded-full mb-10 mx-auto animate-pulse" />
+                        <div className="flex gap-2 flex-wrap mb-10 justify-center">
+                          {[1, 2, 3, 4].map((i) => (
+                            <div key={i} className="h-8 w-32 bg-muted/60 rounded-full animate-pulse" />
+                          ))}
+                        </div>
+                        <div className="w-full bg-muted/20 rounded-xl p-6 border animate-pulse">
+                          <div className="space-y-4">
+                            <div className="h-4 w-full bg-muted/60 rounded-full" />
+                            <div className="h-4 w-[90%] bg-muted/60 rounded-full" />
+                            <div className="h-4 w-[75%] bg-muted/60 rounded-full" />
                           </div>
                         </div>
+                        <div className="mt-auto pt-6 border-t border-border/40">
+                          <div className="h-14 w-full bg-muted/60 rounded-full animate-pulse" />
+                        </div>
+                      </div>
                     ) : (
                       <>
                         <button
@@ -345,7 +346,7 @@ export default function RoutedSearchPage() {
                             : <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />}
                         </button>
 
-                        <div className="h-full overflow-hidden">
+                        <div className="relative h-full overflow-hidden rounded-xl border border-border/70">
                           <div className={`absolute inset-0 transition-all duration-300 ${isAiCollapsed ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100 translate-x-0'}`}>
                             <AiCompletion externalPrompt={externalPrompt} contextSnippet={contextSnippet} />
                           </div>
@@ -356,6 +357,7 @@ export default function RoutedSearchPage() {
                 )}
               </>
             )}
+          </div>
           </div>
         )}
       </div>

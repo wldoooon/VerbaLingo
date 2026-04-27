@@ -11,5 +11,5 @@ export default function FooterWrapper() {
         return null;
     }
 
-    return <Footer />;
+    return <div className="mt-16"><Footer /></div>;
 }

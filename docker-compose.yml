@@ -1,25 +1,3 @@
-# ═══════════════════════════════════════════════════════════
-# VerbaLingo — Production Docker Compose
-# ═══════════════════════════════════════════════════════════
-#
-# ARCHITECTURE:
-#   Frontend (Next.js) → Deployed to Vercel (free tier, auto-deploys)
-#   Backend  (FastAPI) → Deployed to VPS via this Docker Compose
-#
-# This file defines the BACKEND services:
-#   1. backend   — FastAPI API server
-#   2. db        — PostgreSQL database
-#   3. redis     — Cache + rate limiting + sessions
-#   4. manticore — Full-text search engine
-#
-# HOW TO USE:
-#   Development:  docker compose up -d
-#   Production:   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-#   Rebuild:      docker compose up -d --build
-#   Logs:         docker compose logs -f backend
-#   Stop:         docker compose down
-#   Clean:        docker compose down -v  (WARNING: deletes all data!)
-
 services:
   # ─── Backend API Server ───────────────────────────────
   backend:
@@ -206,17 +184,17 @@ services:
       - "127.0.0.1:3000:3000" # We bind to localhost to keep it totally shielded from the public internet
     volumes:
       - dbgate_data:/root/.dbgate
+    environment:
+      - LOGIN=${DBGATE_LOGIN}
+      - PASSWORD=${DBGATE_PASSWORD}
+      - TOKEN_LIFETIME=${DBGATE_TOKEN_LIFETIME}
     deploy:
       resources:
         limits:
-          memory: 256M # DbGate is much lighter than CloudBeaver
+          memory: 256M
     networks:
       - verbalingo-net
 
-# ─── Named Volumes ─────────────────────────────────────
-# Named volumes persist data between container restarts.
-# Even if you `docker compose down`, volumes survive.
-# Only `docker compose down -v` deletes them.
 volumes:
   manticore_data:
     driver: local
@@ -231,9 +209,6 @@ volumes:
   dbgate_data:
     driver: local
 
-# ─── Network ───────────────────────────────────────────
-# A custom bridge network so containers can find each other
-# by service name (e.g., the backend calls "db:5432" to reach Postgres)
 networks:
   verbalingo-net:
     driver: bridge

@@ -1,134 +1,112 @@
-"""
-Translation service using LibreTranslate
-Based on: https://github.com/wagtail/wagtail-localize/blob/main/wagtail_localize/machine_translators/libretranslate.py
-"""
-import requests
-from typing import List, Optional
+import html
+import httpx
+from typing import List
 import logging
 
 logger = logging.getLogger(__name__)
 
+GOOGLE_API_KEY = "AIzaSyATBXajvzQLTDHEQbcpq0Ihe0vWDHmO520"
+SEPARATOR = " ||| "
+
 
 class TranslationService:
-    def __init__(self, api_url: str = "http://127.0.0.1:5000"):
-        """
-        Initialize LibreTranslate client
-        
-        Args:
-            api_url: LibreTranslate API URL (use container name for docker network)
-        """
-        self.api_url = api_url.rstrip("/")
-        self.timeout = 30  # Timeout for translation requests
-        
-    def get_supported_languages(self) -> List[dict]:
-        """Get list of supported languages from LibreTranslate"""
-        try:
-            response = requests.get(
-                f"{self.api_url}/languages",
-                timeout=10
-            )
-            response.raise_for_status()
-            return response.json()
-        except Exception as e:
-            logger.error(f"Failed to get supported languages: {e}")
-            return []
-    
-    def translate_text(
-        self, 
-        text: str, 
-        source_lang: str = "en", 
-        target_lang: str = "ar"
-    ) -> Optional[str]:
-        """
-        Translate text using LibreTranslate
-        
-        Args:
-            text: Text to translate
-            source_lang: Source language code (e.g., 'en', 'fr')
-            target_lang: Target language code (e.g., 'ar', 'es')
-            
-        Returns:
-            Translated text or None if translation fails
-        """
-        if not text or not text.strip():
-            return text
-            
-        try:
-            response = requests.post(
-                f"{self.api_url}/translate",
-                json={
-                    "q": text,
-                    "source": source_lang,
-                    "target": target_lang,
-                    "format": "text"
-                },
-                headers={"Content-Type": "application/json"},
-                timeout=self.timeout
-            )
-            response.raise_for_status()
-            result = response.json()
-            return result.get("translatedText", "")
-        except requests.exceptions.Timeout:
-            logger.error(f"Translation timeout for text: {text[:50]}...")
-            return None
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Translation failed: {e}")
-            return None
-        except Exception as e:
-            logger.error(f"Unexpected error during translation: {e}")
-            return None
-    
-    def translate_batch(
+
+    async def translate_batch(
         self,
-        texts: List[str],
-        source_lang: str = "en",
-        target_lang: str = "ar"
-    ) -> List[Optional[str]]:
+        sentences: List[str],
+        target_lang: str,
+        source_lang: str = "auto",
+    ) -> List[str]:
         """
-        Translate multiple texts (one by one to avoid API limits)
-        
-        Args:
-            texts: List of texts to translate
-            source_lang: Source language code
-            target_lang: Target language code
-            
-        Returns:
-            List of translated texts (None for failed translations)
+        Translate a list of sentences in one API call using the separator trick.
+        Waterfall: Endpoint A → Endpoint B → per-sentence fallback.
+        If the separator gets mangled by either endpoint, falls back to individual translation.
         """
-        translations = []
-        for text in texts:
-            translated = self.translate_text(text, source_lang, target_lang)
-            translations.append(translated)
-        return translations
-    
-    def health_check(self) -> bool:
-        """Check if LibreTranslate service is available"""
+        if not sentences:
+            return []
+
+        joined = SEPARATOR.join(sentences)
+
+        # --- Endpoint A (translate-pa) — fastest, best quality, no observed rate limits ---
         try:
-            response = requests.get(
-                f"{self.api_url}/languages",
-                timeout=5
+            translated_joined = await self._endpoint_a(joined, target_lang, source_lang)
+            parts = translated_joined.split(SEPARATOR)
+            if len(parts) == len(sentences):
+                return [p.strip() for p in parts]
+            logger.warning(
+                f"Endpoint A separator mismatch: expected {len(sentences)}, got {len(parts)}. Falling back to B."
             )
-            return response.status_code == 200
-        except Exception:
-            return False
+        except Exception as e:
+            logger.warning(f"Endpoint A failed ({e}). Falling back to B.")
+
+        # --- Endpoint B (translate_a/single) — reliable fallback, no auth required ---
+        try:
+            translated_joined = await self._endpoint_b(joined, target_lang, source_lang)
+            parts = translated_joined.split(SEPARATOR)
+            if len(parts) == len(sentences):
+                return [p.strip() for p in parts]
+            logger.warning(
+                f"Endpoint B separator mismatch: expected {len(sentences)}, got {len(parts)}. Translating individually."
+            )
+        except Exception as e:
+            logger.warning(f"Endpoint B failed ({e}). Translating individually.")
+
+        # --- Last resort: translate one sentence at a time ---
+        results = []
+        for sentence in sentences:
+            try:
+                results.append(await self._endpoint_a(sentence, target_lang, source_lang))
+            except Exception:
+                try:
+                    results.append(await self._endpoint_b(sentence, target_lang, source_lang))
+                except Exception:
+                    results.append(sentence)  # return original if everything fails
+        return results
+
+    async def _endpoint_a(self, text: str, target_lang: str, source_lang: str = "auto") -> str:
+        """translate-pa.googleapis.com — ~40ms, no rate limits, requires HTML unescape."""
+        async with httpx.AsyncClient() as client:
+            res = await client.post(
+                "https://translate-pa.googleapis.com/v1/translateHtml",
+                headers={
+                    "Content-Type": "application/json+protobuf",
+                    "X-Goog-API-Key": GOOGLE_API_KEY,
+                },
+                json=[[[text], source_lang, target_lang], "wt_lib"],
+                timeout=10.0,
+            )
+            res.raise_for_status()
+            data = res.json()
+            return html.unescape(data[0][0])
+
+    async def _endpoint_b(self, text: str, target_lang: str, source_lang: str = "auto") -> str:
+        """translate.googleapis.com — no auth, join all chunks, ~400 req before IP block."""
+        async with httpx.AsyncClient() as client:
+            res = await client.get(
+                "https://translate.googleapis.com/translate_a/single",
+                params={
+                    "client": "gtx",
+                    "dt": "t",
+                    "sl": source_lang,
+                    "tl": target_lang,
+                    "q": text,
+                },
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                },
+                timeout=10.0,
+            )
+            res.raise_for_status()
+            data = res.json()
+            # Always join all chunks — Google splits long text at punctuation
+            return "".join(chunk[0] for chunk in data[0] if chunk[0])
 
 
-# Singleton instance
-_translation_service: Optional[TranslationService] = None
+_translation_service: TranslationService | None = None
 
 
 def get_translation_service() -> TranslationService:
-    """Get or create translation service singleton"""
     global _translation_service
     if _translation_service is None:
-        # Lazy import to avoid potential circular imports at module level
-        try:
-            from app.core.config import get_settings
-            settings = get_settings()
-            base_url = getattr(settings, "LIBRETRANSLATE_URL", "http://127.0.0.1:5000")
-        except Exception:
-            # Fall back to localhost if settings import fails
-            base_url = "http://127.0.0.1:5000"
-
-        _translation_service = TranslationService(api_url=base_url)
+        _translation_service = TranslationService()
     return _translation_service

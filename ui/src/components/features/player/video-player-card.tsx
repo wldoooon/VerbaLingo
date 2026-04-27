@@ -21,14 +21,14 @@ function getClipStart(clip: any): number {
 // autoplay+mute+playsinline: required for iOS inline muted autoplay.
 // origin: must match window.location.origin to avoid Safari cross-origin errors.
 const PLAYER_VARS = {
-  autoplay:       1,
-  playsinline:    1,
-  mute:           1,
+  autoplay: 1,
+  playsinline: 1,
+  mute: 1,
   modestbranding: 1,
-  rel:            0,
-  controls:       0,
-  disablekb:      1,
-  fs:             0,
+  rel: 0,
+  controls: 0,
+  disablekb: 1,
+  fs: 0,
   iv_load_policy: 3,
   cc_load_policy: 0,
   origin: typeof window !== "undefined" ? window.location.origin : "",
@@ -116,7 +116,7 @@ export default function VideoPlayerCard({
   const safeCall = (player: YTPlayer | null, fn: string, ...args: any[]) => {
     try {
       if (player && typeof (player as any)[fn] === 'function') {
-        ;(player as any)[fn](...args)
+        ; (player as any)[fn](...args)
       } else if (player) {
         console.warn(`[VPC] safeCall: method "${fn}" not available on player`)
       }
@@ -154,9 +154,9 @@ export default function VideoPlayerCard({
 
       if (isActuallyActive) {
         const willSeek = lastSeekedClipId.current !== clip.video_id
-        console.log(`[VPC] syncSinglePlayer(${key}) ACTIVE — video=${clip.video_id} willSeek=${willSeek} isMuted=${isMuted} rate=${playbackRate}`)
         if (willSeek) {
-          safeCall(player, 'seekTo', getClipStart(clip), true)
+          const exactStart = getClipStart(clip);
+          safeCall(player, 'seekTo', exactStart, true)
           lastSeekedClipId.current = clip.video_id
         }
         safeCall(player, 'playVideo')
@@ -243,7 +243,7 @@ export default function VideoPlayerCard({
         if (typeof event.target.setPlaybackQuality === 'function') {
           event.target.setPlaybackQuality('hd720')
         }
-      } catch {}
+      } catch { }
     }
 
     // Stall detection — only before first play (avoids triggering on user-pause)
@@ -323,7 +323,6 @@ export default function VideoPlayerCard({
     // becomes active — which was causing the "sound cuts off" on navigation.
     if (clip) {
       lastSeekedClipId.current = clip.video_id
-      console.log(`[VPC] onReady player${key} — marking lastSeekedClipId=${clip.video_id} (no extra seekTo, start handled by playerVars)`)
     }
 
     if (isActive) {
@@ -391,7 +390,7 @@ export default function VideoPlayerCard({
           className="mb-3 -mt-2"
         />
       )}
-      <div className="relative w-full h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] overflow-hidden rounded-2xl bg-black shadow-inner">
+      <div className="relative w-full h-[260px] sm:h-[320px] md:h-[380px] lg:h-[400px] xl:h-[480px] overflow-hidden rounded-2xl bg-black shadow-inner">
 
         {/* Layer A */}
         <div className={cn("absolute inset-0 w-full h-full transition-opacity duration-300",

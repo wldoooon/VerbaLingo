@@ -10,6 +10,10 @@ import { useTheme } from "next-themes";
 import { Features } from "./Features";
 import AnimatedContent from "./AnimatedContent";
 import { useSearchStore } from "@/stores/use-search-store";
+import { Carter_One } from 'next/font/google';
+import { cn } from '@/lib/utils';
+
+const carterOne = Carter_One({ weight: '400', subsets: ['latin'] });
 
 const categories = [
   {
@@ -164,7 +168,7 @@ export function Hero() {
       const opacity = isActive ? 1 : Math.max(0.15, 1 - absOffset * 0.28);
       const zIndex = 10 - absOffset;
       const scale = isActive ? 1 : Math.max(0.75, 0.92 - absOffset * 0.06);
-      const hidden = absOffset >= 2;
+      const hidden = absOffset >= 3;
       return { offset, absOffset, isActive, translateX, opacity, zIndex, scale, hidden };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -184,7 +188,7 @@ export function Hero() {
 
 
             <AnimatedContent distance={40} direction="vertical" duration={1} delay={0.1}>
-              <h1 className="text-[clamp(3.5rem,8vw,4.5rem)] lg:text-7xl font-black text-foreground tracking-tighter leading-[0.85] mb-6 relative inline-block w-fit">
+              <h1 className={cn("text-[clamp(3.5rem,8vw,4.5rem)] lg:text-7xl font-black text-foreground tracking-tighter leading-[0.85] mb-6 relative inline-block w-fit", carterOne.className)}>
                 {/* Mascot Behind Text - Anchored together using 'em' scaling */}
                 <span
                   className="absolute -z-10 opacity-80 pointer-events-none transition-transform duration-1000 group-hover:scale-105 inline-block"
@@ -208,8 +212,8 @@ export function Hero() {
             </AnimatedContent>
 
             <AnimatedContent distance={30} direction="vertical" duration={0.8} delay={0.25}>
-              <p className="text-lg text-muted-foreground mb-10 max-w-lg leading-relaxed font-medium border-l-2 border-primary/30 pl-6">
-                Bridge the gap between dictionary definitions and native fluency. Our engine indexes <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">14.2M video frames</span>, paired with an <span className="text-foreground font-bold">AI Assistant</span> you can ask anything about usage, tone, and cultural nuance.
+              <p className="text-lg text-muted-foreground mb-10 max-w-lg leading-relaxed font-medium">
+                Learning from a dictionary is hard because it doesn't show you how people actually talk in the real world. We make it easy by showing you more than <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">14.2 million real video clips</span> from movies, TV shows, and interviews.
               </p>
             </AnimatedContent>
 
@@ -299,18 +303,12 @@ export function Hero() {
 
           {/* Right Column: Optimized 2D Carousel */}
           <AnimatedContent distance={0} duration={1.5} delay={0.6} className="w-full">
-            <div
-              className="flex flex-col items-center gap-5 mt-8 xl:mt-0"
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-            >
+            <div className="flex flex-col items-center gap-5 mt-8 xl:mt-0">
               {/* Cards */}
               <div
                 className="relative h-[380px] sm:h-[460px] xl:h-[540px] w-full flex items-center justify-center"
                 style={{ contain: 'layout style paint' }}
               >
-                {/* Bottom fog */}
-                <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent pointer-events-none z-20" />
                 {/* Left fog */}
                 <div className="absolute top-0 left-0 bottom-0 w-24 bg-gradient-to-r from-background to-transparent pointer-events-none z-20" />
                 {/* Right fog */}

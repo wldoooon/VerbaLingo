@@ -64,12 +64,12 @@ export function BranchTimeline({
 
     return (
         <div className={cn(
-            "w-full flex flex-col items-center gap-2 py-1 select-none transition-opacity duration-200",
+            "w-full flex flex-col gap-1.5 select-none transition-opacity duration-200",
             isLoading && "opacity-40 pointer-events-none"
         )}>
 
-            {/* Counter row + Latest jump */}
-            <div className="w-full flex items-center justify-between px-1 min-h-[16px]">
+            {/* Counter + Latest jump */}
+            <div className="flex items-center justify-between">
                 <span className="text-[10px] text-muted-foreground/50 tabular-nums font-medium">
                     {currentIndex + 1} / {branches.length}
                 </span>
@@ -84,75 +84,56 @@ export function BranchTimeline({
             </div>
 
             {/* Timeline row */}
-            <div className="w-full flex items-center gap-1 sm:gap-2">
-
-                {/* Prev button */}
+            <div className="flex items-center gap-1">
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={onPrevious}
                     disabled={currentIndex === 0}
-                    className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex-shrink-0 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20 cursor-pointer"
+                    className="h-6 w-6 rounded-full flex-shrink-0 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20 cursor-pointer"
                 >
-                    <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <ChevronLeft className="h-3 w-3" />
                 </Button>
 
-                {/* Nodes container */}
-                <div className="relative flex-1 flex items-center justify-center">
-                    {/* Background line */}
-                    <div className="absolute left-0 right-0 h-[2px] bg-slate-200 dark:bg-slate-700 rounded-full" />
+                {/* Track + dots */}
+                <div className="relative flex-1 flex items-center justify-center h-6">
+                    <div className="absolute left-0 right-0 h-px bg-border/60" />
 
-                    <div className="relative flex items-center justify-center gap-2 sm:gap-4 w-full">
-                        {/* Left overflow indicator */}
+                    <div className="relative flex items-center justify-center gap-3 w-full">
                         {showLeftEllipsis && (
-                            <span className="text-[10px] text-muted-foreground/40 flex-shrink-0 relative z-10 leading-none pb-4">
-                                •••
-                            </span>
+                            <span className="text-[9px] text-muted-foreground/30 relative z-10">···</span>
                         )}
 
                         {branches.slice(start, end + 1).map((branch, relIdx) => {
                             const i = start + relIdx;
                             const isActive = i === currentIndex;
                             const isPast = i < currentIndex;
-                            // isPast = older question, !isPast && !isActive = newer (user navigated back)
 
                             return (
                                 <TooltipProvider key={branch.id}>
-                                    <Tooltip delayDuration={300}>
+                                    <Tooltip delayDuration={200}>
                                         <TooltipTrigger asChild>
-                                            {/* Tall button = dot + number, large enough touch target */}
                                             <button
                                                 onClick={() => onSelectIndex(i)}
-                                                className="group relative flex-shrink-0 flex flex-col items-center justify-center gap-0.5 h-10 w-8 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary rounded-md cursor-pointer"
+                                                className="group relative flex-shrink-0 h-6 w-6 flex items-center justify-center outline-none cursor-pointer"
                                                 aria-label={`Question ${i + 1}: ${branch.prompt}`}
                                             >
-                                                {/* Dot */}
                                                 <motion.div
                                                     layout
                                                     transition={{ type: "spring", stiffness: 500, damping: 35 }}
                                                     className={cn(
-                                                        "rounded-full relative z-10 transition-colors duration-200",
+                                                        "rounded-full z-10 transition-all duration-200",
                                                         isActive
-                                                            ? "w-5 h-5 bg-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.2)]"
+                                                            ? "w-4 h-4 bg-primary shadow-[0_0_0_3px_hsl(var(--primary)/0.2)]"
                                                             : isPast
-                                                                ? "w-3 h-3 bg-slate-300 dark:bg-slate-600 group-hover:bg-slate-400 dark:group-hover:bg-slate-500"
-                                                                : "w-3 h-3 bg-primary/35 group-hover:bg-primary/55"
+                                                                ? "w-2.5 h-2.5 bg-border group-hover:bg-muted-foreground/50"
+                                                                : "w-2.5 h-2.5 bg-primary/30 group-hover:bg-primary/60"
                                                     )}
                                                 >
                                                     {isActive && (
-                                                        <div className="absolute inset-0 m-auto w-2 h-2 rounded-full bg-white dark:bg-black" />
+                                                        <div className="absolute inset-0 m-auto w-1.5 h-1.5 rounded-full bg-white dark:bg-black" />
                                                     )}
                                                 </motion.div>
-
-                                                {/* Sequence number */}
-                                                <span className={cn(
-                                                    "text-[9px] tabular-nums leading-none transition-colors",
-                                                    isActive
-                                                        ? "text-primary font-bold"
-                                                        : "text-muted-foreground/40 group-hover:text-muted-foreground/70"
-                                                )}>
-                                                    {i + 1}
-                                                </span>
                                             </button>
                                         </TooltipTrigger>
                                         <TooltipContent side="top" className="max-w-[200px] text-xs p-2">
@@ -163,30 +144,26 @@ export function BranchTimeline({
                             );
                         })}
 
-                        {/* Right overflow indicator */}
                         {showRightEllipsis && (
-                            <span className="text-[10px] text-muted-foreground/40 flex-shrink-0 relative z-10 leading-none pb-4">
-                                •••
-                            </span>
+                            <span className="text-[9px] text-muted-foreground/30 relative z-10">···</span>
                         )}
                     </div>
                 </div>
 
-                {/* Next button */}
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={onNext}
                     disabled={currentIndex === branches.length - 1}
-                    className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex-shrink-0 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20 cursor-pointer"
+                    className="h-6 w-6 rounded-full flex-shrink-0 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20 cursor-pointer"
                 >
-                    <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <ChevronRight className="h-3 w-3" />
                 </Button>
             </div>
 
-            {/* Active node prompt label */}
+            {/* Active prompt label */}
             {activePrompt && (
-                <p className="text-[10px] text-muted-foreground/50 text-center max-w-[260px] truncate leading-none">
+                <p className="text-[10px] text-muted-foreground/40 truncate text-center leading-none">
                     {activePrompt}
                 </p>
             )}

@@ -46,6 +46,7 @@ export function YoutubePlayer({
   const cancelledRef = useRef(false)
   const readyRef     = useRef(false)
   const pendingRef   = useRef<{ videoId: string; startSeconds: number } | null>(null)
+  const activeVideoIdRef = useRef(videoId)
 
   // ── Always-current callback refs ─────────────────────────────────────────
   // Critical: new YT.Player() captures closures at mount. By routing all events
@@ -61,6 +62,7 @@ export function YoutubePlayer({
   useEffect(() => {
     cancelledRef.current = false
     const mountVideo = videoId
+    activeVideoIdRef.current = videoId
 
     const init = () => {
       if (cancelledRef.current || !containerRef.current) return
@@ -124,10 +126,9 @@ export function YoutubePlayer({
   }, []) // intentionally empty — player created once, callbacks routed via refs
 
   // ── Handle video changes without destroying the player ───────────────────
-  const isFirstRender = useRef(true)
   useEffect(() => {
-    if (isFirstRender.current) { isFirstRender.current = false; return }
-    if (!videoId) return
+    if (!videoId || videoId === activeVideoIdRef.current) return
+    activeVideoIdRef.current = videoId
 
     const payload = { videoId, startSeconds }
 

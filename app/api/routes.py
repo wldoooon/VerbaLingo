@@ -8,7 +8,8 @@ from .deps import get_search_service, get_current_user_optional, get_groq_servic
 from ..services.search_service import SearchService
 from ..services.groq_service import GroqService
 from ..services.usage_service import check_ai_credits, deduct_ai_credits
-from ..schemas.search import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word, Category
+from ..services.translation_service import TranslationService, get_translation_service
+from ..schemas.search import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word, Category, TranslateRequest, TranslateResponse
 from ..core.limiter import feature_rate_limit
 from ..models.user import User
 
@@ -131,6 +132,27 @@ async def search(
 
     aggregations = raw_results.get("aggregations", {})
     return SearchResponse(total=total, hits=hits, aggregations=aggregations)
+
+
+@router.post("/translate", response_model=TranslateResponse)
+async def translate(
+    request: Request,
+    body: TranslateRequest,
+    current_user: Optional[User] = Depends(get_current_user_optional),
+    translation: TranslationService = Depends(get_translation_service),
+):
+    if not body.sentences:
+        raise HTTPException(status_code=400, detail="No sentences provided.")
+    if len(body.sentences) > 100:
+        raise HTTPException(status_code=400, detail="Max 100 sentences per request.")
+
+    translations = await translation.translate_batch(
+        sentences=body.sentences,
+        target_lang=body.target_lang,
+        source_lang=body.source_lang,
+    )
+
+    return TranslateResponse(translations=translations, source_lang=body.source_lang)
 
 
 @router.get("/videos/{video_id}/transcript", response_model=TranscriptResponse)

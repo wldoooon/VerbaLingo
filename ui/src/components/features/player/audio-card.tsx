@@ -12,11 +12,12 @@ import {
   RotateCcw,
   Volume2,
   Repeat,
-  Gauge
+  Gauge,
+  Globe,
 } from "lucide-react"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
-import { useTranscript } from "@/lib/useApi"
+import { useTranscript, useTranslateBatch, useTranslationPrefetch } from "@/lib/useApi"
 import { useRouter } from "next/navigation"
 import type { TranscriptSentence, Clips } from "@/lib/types"
 import { formatTime } from "@/lib/player-utils"
@@ -26,6 +27,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { TranscriptBox } from "./transcript-box"
+import { DecorIcon } from "@/components/ui/decor-icon"
 
 function useSpamGuard(clickWindowMs = 2000, clickLimit = 5, cooldownSeconds = 5) {
   const [isThrottled, setIsThrottled] = useState(false)
@@ -121,6 +123,63 @@ function SpeedPicker({ currentRate, onSelect }: { currentRate: number; onSelect:
 }
 // ────────────────────────────────────────────────────────────────────────────
 
+const TRANSLATION_LANGUAGES = [
+  { code: "ar", label: "Arabic" },
+  { code: "fr", label: "French" },
+  { code: "es", label: "Spanish" },
+  { code: "de", label: "German" },
+  { code: "tr", label: "Turkish" },
+  { code: "pt", label: "Portuguese" },
+  { code: "ru", label: "Russian" },
+  { code: "zh-CN", label: "Chinese" },
+  { code: "ja", label: "Japanese" },
+  { code: "hi", label: "Hindi" },
+  { code: "ko", label: "Korean" },
+  { code: "vi", label: "Vietnamese" },
+]
+
+function TranslationPicker({
+  current,
+  onSelect,
+}: {
+  current: string | null
+  onSelect: (code: string | null) => void
+}) {
+  return (
+    <div className="flex flex-col gap-3 p-1">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Translate to</span>
+        {current && (
+          <button
+            onClick={() => onSelect(null)}
+            className="text-[10px] font-bold text-destructive hover:underline"
+          >
+            Off
+          </button>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-1">
+        {TRANSLATION_LANGUAGES.map((lang) => (
+          <button
+            key={lang.code}
+            onClick={() => onSelect(current === lang.code ? null : lang.code)}
+            className={cn(
+              "text-left px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors",
+              current === lang.code
+                ? "bg-primary text-primary-foreground"
+                : "hover:bg-muted text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {lang.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+
 type AudioCardProps = {
   currentClip: Clips | undefined
   playlist: Clips[]
@@ -152,6 +211,8 @@ export default function AudioCard({
   // Separate popovers for mobile and desktop to avoid state conflicts on resize
   const [mobileSpeedOpen, setMobileSpeedOpen] = useState(false)
   const [desktopSpeedOpen, setDesktopSpeedOpen] = useState(false)
+  const [mobileTranslationOpen, setMobileTranslationOpen] = useState(false)
+  const [desktopTranslationOpen, setDesktopTranslationOpen] = useState(false)
 
   // Countdown for Next Button (5s Strategy)
   const [nextCooldown, setNextCooldown] = useState(0)
@@ -186,7 +247,7 @@ export default function AudioCard({
 
   const router = useRouter()
 
-  const { setQuery, setCategory, language: storeLanguage } = useSearchStore()
+  const { setQuery, setCategory, language: storeLanguage, translationLang, setTranslationLang } = useSearchStore()
   const activeLanguage = propLanguage || storeLanguage || "english"
 
   // True end of playlist — all clips loaded AND at last one
@@ -291,6 +352,26 @@ export default function AudioCard({
   }, [transcriptData])
 
   const sentencesInClip = sanitizedSentences
+
+  // Translate all sentences in one batch call — result cached forever by React Query
+  const { data: translationData, isPending: isTranslationLoading } = useTranslateBatch(
+    sentencesInClip,
+    currentClip?.video_id || "",
+    currentClip?.position,
+    translationLang,
+  )
+
+  // Prefetch translations for next 2 clips whenever index or language changes
+  useTranslationPrefetch(playlist, currentVideoIndex, translationLang, activeLanguage)
+
+  // Map index → translated text — index is stable and avoids float key issues
+  const translatedMap = useMemo(() => {
+    if (!translationData?.translations || !sentencesInClip.length) return {}
+    return Object.fromEntries(
+      translationData.translations.map((t, i) => [i, t])
+    )
+  }, [translationData, sentencesInClip])
+
   const hasStartedPlayback = useRef(false)
 
   // Reset playback flags when the clip changes — use currentVideoIndex so duplicate
@@ -316,20 +397,34 @@ export default function AudioCard({
   }, [currentVideoIndex]) // was currentClip?.video_id — now index-based to handle duplicates
 
   // Memoized so it doesn't re-scan on every render (currentTime updates cause many renders)
-  const targetSentence = useMemo(() => sentencesInClip.find((sentence: any) => {
-    if (currentClip?.start_time !== undefined) {
-      return Math.abs(sentence.start_time - currentClip.start_time) < 0.1
+  const targetSentence = useMemo(() => {
+    const clipStartTime = currentClip?.start_time !== undefined ? currentClip.start_time : (currentClip as any)?.start;
+    
+    if (clipStartTime !== undefined) {
+      // Find the closest sentence by start_time
+      let closest = null;
+      let minDiff = Infinity;
+      for (const sentence of sentencesInClip) {
+        const diff = Math.abs(sentence.start_time - clipStartTime);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = sentence;
+        }
+      }
+      // Only accept if it's reasonably close (e.g., within 2 seconds)
+      if (closest && minDiff < 2.0) {
+        return closest;
+      }
     }
-    const text = sentence.sentence_text || ""
-    const query = searchQuery.toLowerCase().trim()
-    return query && text.toLowerCase().includes(query)
-  }), [sentencesInClip, currentClip?.start_time, searchQuery])
-
-  useEffect(() => {
-    if (targetSentence && currentClip?.video_id) {
-      console.log(`[PERF] targetSentence FOUND  video=${currentClip.video_id}  start=${targetSentence.start_time}  playerReady=${!!player}  +${Math.round(performance.now() - transcriptFetchStart.current)}ms since transcript req`)
-    }
-  }, [targetSentence, currentClip?.video_id])
+    
+    // Fallback to text search
+    const fallback = sentencesInClip.find((sentence: any) => {
+      const text = sentence.sentence_text || ""
+      const query = searchQuery.toLowerCase().trim()
+      return query && text.toLowerCase().includes(query)
+    })
+    return fallback;
+  }, [sentencesInClip, currentClip?.start_time, (currentClip as any)?.start, searchQuery])
 
   // Auto-play when target sentence is found.
   // Also re-runs when `player` becomes non-null so it retries if the transcript
@@ -337,7 +432,6 @@ export default function AudioCard({
   useEffect(() => {
     if (targetSentence && !hasStartedPlayback.current && player) {
       const startTime = Math.max(0, targetSentence.start_time - PLAYBACK_START_OFFSET)
-      console.log(`[PERF] AUTOPLAY triggered  video=${currentClip?.video_id}  seekTo=${startTime.toFixed(2)}`)
       seekTo(startTime)
       play()
       hasStartedPlayback.current = true
@@ -345,16 +439,39 @@ export default function AudioCard({
   }, [targetSentence, player, seekTo, play])
 
   return (
-    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-6 shadow-2xl", className)}>
+    <div className="relative border border-border/70 p-2.5">
+      <DecorIcon position="top-left" />
+      <DecorIcon position="top-right" />
+      <DecorIcon position="bottom-left" />
+      <DecorIcon position="bottom-right" />
+    <div className={cn("relative w-full rounded-3xl bg-card text-foreground p-3 sm:p-4 shadow-inner", className)}>
+
+      {/* ── CARD HEADER ── */}
+      <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-border/20">
+        <div className="flex items-center gap-2 min-w-0">
+          {currentClip?.video_title && (
+            <span className="text-[11px] text-muted-foreground/60 truncate hidden sm:block">
+              — {currentClip.video_title}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {currentClip?.category && (
+            <span className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground/30 border border-border/20 px-1.5 py-0.5 rounded-sm">
+              {typeof currentClip.category === "string"
+                ? currentClip.category
+                : (currentClip.category as any)?.title ?? (currentClip.category as any)?.type ?? ""}
+            </span>
+          )}
+          <span className="text-[10px] font-medium text-muted-foreground/50 tabular-nums">
+            {currentVideoIndex + 1}<span className="opacity-40 mx-0.5">/</span>{totalItems || playlist.length}
+          </span>
+        </div>
+      </div>
 
       {/* ── MOBILE COMPACT CONTROLS (< md) ── */}
       <div className="md:hidden flex flex-col gap-3">
-        {/* Counter — z-20 to sit above controls */}
-        <div className="absolute top-3 right-3 text-[10px] font-bold text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20 z-20">
-          {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
-        </div>
-
-        <div className="flex items-center justify-between gap-2 mt-4">
+        <div className="flex items-center justify-between gap-2">
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
@@ -409,6 +526,20 @@ export default function AudioCard({
                 <SpeedPicker currentRate={rate} onSelect={(r) => { setRate(r); setPlaybackRate(r) }} />
               </PopoverContent>
             </Popover>
+            <Popover open={mobileTranslationOpen} onOpenChange={setMobileTranslationOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("h-9 w-9", translationLang ? "text-primary" : "")}
+                >
+                  <Globe size={16} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[220px] p-4 rounded-2xl" side="top" align="end">
+                <TranslationPicker current={translationLang} onSelect={setTranslationLang} />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
@@ -424,11 +555,6 @@ export default function AudioCard({
 
       {/* ── DESKTOP FULL CONTROLS (>= md) ── */}
       <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-4 mb-2">
-        {/* Counter — explicit z-10, sits above speed button area */}
-        <div className="absolute top-4 right-4 text-[10px] sm:text-xs font-medium text-muted-foreground bg-muted/40 px-2 py-1 rounded-md border border-border/20 z-10">
-          Clip {currentVideoIndex + 1} <span className="opacity-50">/</span> {totalItems || playlist.length}
-        </div>
-
         {/* Volume control */}
         <div className="flex items-center gap-3 flex-1 max-w-[180px]">
           <Volume2 size={20} className="text-muted-foreground flex-shrink-0" />
@@ -464,8 +590,8 @@ export default function AudioCard({
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button size="icon" className="h-16 w-16 rounded-full bg-primary cursor-pointer" onClick={() => guardedAction(togglePlayPause)}>
-              {isPlaying ? <Pause size={28} /> : <Play size={28} className="ml-1" />}
+            <Button size="icon" className="h-12 w-12 rounded-full bg-primary cursor-pointer" onClick={() => guardedAction(togglePlayPause)}>
+              {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
             </Button>
             <span className="text-xs text-muted-foreground">{isPlaying ? "Pause" : "Play"}</span>
           </div>
@@ -514,8 +640,27 @@ export default function AudioCard({
           </div>
         </div>
 
-        {/* Speed control — separate state from mobile popover */}
-        <div className="flex items-center gap-4 flex-1 max-w-[180px] justify-end">
+        {/* Speed + Translation controls */}
+        <div className="flex items-center gap-2 flex-1 max-w-[220px] justify-end">
+          <Popover open={desktopTranslationOpen} onOpenChange={setDesktopTranslationOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("gap-2 cursor-pointer", translationLang ? "text-primary" : "")}
+              >
+                <Globe size={18} />
+                <span className="font-semibold text-xs">
+                  {translationLang
+                    ? TRANSLATION_LANGUAGES.find(l => l.code === translationLang)?.label ?? translationLang
+                    : "Translate"}
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[220px] p-4 rounded-2xl shadow-xl" align="end">
+              <TranslationPicker current={translationLang} onSelect={setTranslationLang} />
+            </PopoverContent>
+          </Popover>
           <Popover open={desktopSpeedOpen} onOpenChange={setDesktopSpeedOpen}>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2 cursor-pointer">
@@ -530,10 +675,14 @@ export default function AudioCard({
         </div>
       </div>
 
+      <div className="border-t border-border/20 mb-1" />
       <TranscriptBox
         sentences={sentencesInClip}
         searchQuery={searchQuery}
         isTranscriptLoading={isTranscriptLoading}
+        isTranslationLoading={!!translationLang && isTranslationLoading}
+        translatedMap={translatedMap}
+        targetSentence={targetSentence}
         onSearchWord={(word) => {
           const clean = word.trim()
           if (!clean) return
@@ -553,6 +702,7 @@ export default function AudioCard({
         }}
         onTranscriptDetermined={onTranscriptDetermined}
       />
+    </div>
     </div>
   )
 }

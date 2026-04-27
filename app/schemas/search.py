@@ -44,3 +44,14 @@ class TranscriptResponse(BaseModel):
     start_time: float
     end_time: float
     sentences: List[TranscriptSentence]
+
+
+class TranslateRequest(BaseModel):
+    sentences: List[str]
+    target_lang: str
+    source_lang: str = "auto"
+
+
+class TranslateResponse(BaseModel):
+    translations: List[str]
+    source_lang: str
