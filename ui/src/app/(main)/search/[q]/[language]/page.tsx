@@ -52,7 +52,7 @@ export default function RoutedSearchPage() {
   const categoryForContext = categoryParam || null
 
   const { setQuery, setCategory, setLanguage, subCategory } = useSearchStore()
-  const { currentVideoIndex, resetIndex } = usePlayerStore()
+  const { currentVideoIndex, resetIndex, nextVideo } = usePlayerStore()
 
   // Entitlements: check if the user still has search access
   const { hasAccess, isLoaded } = useEntitlements("search")
@@ -223,6 +223,10 @@ export default function RoutedSearchPage() {
                           playlist={playlist}
                           isFetching={isFetching || isFetchingNextPage}
                           aggregations={aggregations}
+                          onClipEnded={() => {
+                            const idx = usePlayerStore.getState().currentVideoIndex
+                            if (idx < playlist.length - 1) nextVideo()
+                          }}
                         />
                       </PlayerErrorBoundary>
                     ) : (
@@ -249,6 +253,7 @@ export default function RoutedSearchPage() {
                         searchQuery={searchQuery}
                         language={languageParam}
                         isLoading={isLoading || (isFetching && playlist.length === 0)}
+                        isFetchingNextPage={isFetchingNextPage}
                         onExplainWordPrompt={(prompt) => setExternalPrompt(prompt)}
                         onTranscriptDetermined={(snippet) => setContextSnippet(snippet)}
                       />

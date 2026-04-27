@@ -14,6 +14,7 @@ import {
   Repeat,
   Gauge,
   Globe,
+  Loader2,
 } from "lucide-react"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
@@ -189,6 +190,7 @@ type AudioCardProps = {
   searchQuery?: string
   language?: string
   isLoading?: boolean
+  isFetchingNextPage?: boolean
 }
 
 export default function AudioCard({
@@ -200,6 +202,7 @@ export default function AudioCard({
   searchQuery = "",
   language: propLanguage,
   isLoading: isParentLoading,
+  isFetchingNextPage,
   onExplainWordPrompt,
   onTranscriptDetermined
 }: AudioCardProps & {
@@ -250,10 +253,15 @@ export default function AudioCard({
   const { setQuery, setCategory, language: storeLanguage, translationLang, setTranslationLang } = useSearchStore()
   const activeLanguage = propLanguage || storeLanguage || "english"
 
-  // True end of playlist — all clips loaded AND at last one
+  // True end — all clips loaded AND at last one
   const isAtEnd = currentVideoIndex >= playlist.length - 1 &&
     playlist.length >= (totalItems ?? playlist.length) &&
     playlist.length > 0
+
+  // At the last loaded clip but more pages exist — fetching them right now
+  const isWaitingForNextPage = !isAtEnd &&
+    currentVideoIndex >= playlist.length - 1 &&
+    !!isFetchingNextPage
 
   // Fetch transcript — guard against undefined clip to avoid empty-ID requests
   const transcriptFetchStart = useRef<number>(performance.now())
@@ -264,7 +272,7 @@ export default function AudioCard({
     }
   }, [currentClip?.video_id, currentVideoIndex])
 
-  const { data: transcriptData, isPending: isTranscriptLoading } = useTranscript(
+  const { data: transcriptData, isPending: isTranscriptLoading, isError: isTranscriptError, refetch: refetchTranscript } = useTranscript(
     !isParentLoading && !!currentClip ? (currentClip.video_id || "") : "",
     activeLanguage,
     currentClip?.position
@@ -310,10 +318,10 @@ export default function AudioCard({
     const handleKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName
       if (tag === "INPUT" || tag === "TEXTAREA") return
-      const { guardedAction, togglePlayPause, skipBackward, skipForward } = controlsRef.current
-      if (e.code === "Space") { e.preventDefault(); guardedAction(togglePlayPause) }
-      else if (e.key === "ArrowLeft") { e.preventDefault(); guardedAction(skipBackward) }
-      else if (e.key === "ArrowRight") { e.preventDefault(); guardedAction(skipForward) }
+      const { togglePlayPause, skipBackward, skipForward } = controlsRef.current
+      if (e.code === "Space") { e.preventDefault(); togglePlayPause() }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); skipBackward() }
+      else if (e.key === "ArrowRight") { e.preventDefault(); skipForward() }
     }
     window.addEventListener("keydown", handleKey)
     return () => window.removeEventListener("keydown", handleKey)
@@ -378,6 +386,9 @@ export default function AudioCard({
   // video_ids (same YouTube video at different timestamps) still re-trigger correctly
   useEffect(() => {
     hasStartedPlayback.current = false
+
+    // No cooldown on the first clip — only apply when the user has navigated past it
+    if (currentVideoIndex === 0) return
 
     setNextCooldown(5)
     if (nextTimerRef.current) clearInterval(nextTimerRef.current)
@@ -484,10 +495,10 @@ export default function AudioCard({
           </Popover>
 
           <div className="flex items-center justify-center gap-1 flex-1">
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => guardedAction(prevVideo)}>
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => guardedAction(prevVideo)} disabled={currentVideoIndex === 0}>
               <SkipBack size={16} />
             </Button>
-            <Button size="icon" className="h-10 w-10 rounded-full" onClick={() => guardedAction(togglePlayPause)}>
+            <Button size="icon" className="h-10 w-10 rounded-full" onClick={togglePlayPause}>
               {isPlaying ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
             </Button>
             <Button
@@ -495,10 +506,12 @@ export default function AudioCard({
               size="icon"
               className="h-9 w-9 relative"
               onClick={() => guardedAction(nextVideo)}
-              disabled={nextCooldown > 0 || isAtEnd}
+              disabled={nextCooldown > 0 || isAtEnd || isWaitingForNextPage}
             >
               {nextCooldown > 0 ? (
                 <span className="text-[10px] font-black text-primary animate-pulse">{nextCooldown}s</span>
+              ) : isWaitingForNextPage ? (
+                <Loader2 size={14} className="animate-spin text-muted-foreground" />
               ) : isAtEnd ? (
                 <span className="text-[10px] font-bold text-muted-foreground">End</span>
               ) : (
@@ -508,12 +521,11 @@ export default function AudioCard({
           </div>
 
           <div className="flex items-center gap-1">
-            {/* Repeat — now correctly disabled on mobile when no target sentence */}
             <Button
               variant="ghost"
               size="icon"
               className={cn("h-9 w-9", targetSentence ? "text-primary" : "")}
-              onClick={() => guardedAction(repeatTargetSentence)}
+              onClick={repeatTargetSentence}
               disabled={!targetSentence}
             >
               <Repeat size={16} />
@@ -576,28 +588,28 @@ export default function AudioCard({
           )}
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(prevVideo)}>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(prevVideo)} disabled={currentVideoIndex === 0}>
               <SkipBack size={20} />
             </Button>
             <span className="text-xs text-muted-foreground">Previous</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(skipBackward)}>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={skipBackward}>
               <RotateCcw size={20} />
             </Button>
             <span className="text-xs text-muted-foreground">-10s</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button size="icon" className="h-12 w-12 rounded-full bg-primary cursor-pointer" onClick={() => guardedAction(togglePlayPause)}>
+            <Button size="icon" className="h-12 w-12 rounded-full bg-primary cursor-pointer" onClick={togglePlayPause}>
               {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
             </Button>
             <span className="text-xs text-muted-foreground">{isPlaying ? "Pause" : "Play"}</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(skipForward)}>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={skipForward}>
               <RotateCcw size={20} className="scale-x-[-1]" />
             </Button>
             <span className="text-xs text-muted-foreground">+10s</span>
@@ -608,7 +620,7 @@ export default function AudioCard({
               variant="ghost"
               size="icon"
               className="h-11 w-11 rounded-full cursor-pointer"
-              onClick={() => guardedAction(repeatTargetSentence)}
+              onClick={repeatTargetSentence}
               disabled={!targetSentence}
             >
               <Repeat size={20} />
@@ -622,12 +634,14 @@ export default function AudioCard({
               size="icon"
               className="h-11 w-11 rounded-full cursor-pointer relative"
               onClick={() => guardedAction(nextVideo)}
-              disabled={nextCooldown > 0 || isAtEnd}
+              disabled={nextCooldown > 0 || isAtEnd || isWaitingForNextPage}
             >
               {nextCooldown > 0 ? (
                 <div className="flex items-center justify-center h-full w-full">
                   <span className="text-sm font-black text-primary animate-in zoom-in duration-300">{nextCooldown}s</span>
                 </div>
+              ) : isWaitingForNextPage ? (
+                <Loader2 size={18} className="animate-spin text-muted-foreground" />
               ) : isAtEnd ? (
                 <span className="text-xs font-bold text-muted-foreground">End</span>
               ) : (
@@ -635,7 +649,7 @@ export default function AudioCard({
               )}
             </Button>
             <span className="text-xs text-muted-foreground">
-              {nextCooldown > 0 ? "Wait..." : isAtEnd ? "End" : "Next"}
+              {nextCooldown > 0 ? "Wait..." : isWaitingForNextPage ? "Loading" : isAtEnd ? "End" : "Next"}
             </span>
           </div>
         </div>
@@ -680,6 +694,8 @@ export default function AudioCard({
         sentences={sentencesInClip}
         searchQuery={searchQuery}
         isTranscriptLoading={isTranscriptLoading}
+        isTranscriptError={isTranscriptError}
+        onRetry={refetchTranscript}
         isTranslationLoading={!!translationLang && isTranslationLoading}
         translatedMap={translatedMap}
         targetSentence={targetSentence}

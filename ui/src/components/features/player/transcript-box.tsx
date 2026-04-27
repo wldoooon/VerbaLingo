@@ -18,6 +18,8 @@ type TranscriptBoxProps = {
   sentences: Sentence[]
   searchQuery: string
   isTranscriptLoading: boolean
+  isTranscriptError?: boolean
+  onRetry?: () => void
   isTranslationLoading?: boolean
   translatedMap?: Record<number, string>
   targetSentence?: Sentence | null
@@ -30,6 +32,8 @@ export const TranscriptBox = ({
   sentences,
   searchQuery,
   isTranscriptLoading,
+  isTranscriptError,
+  onRetry,
   isTranslationLoading,
   translatedMap,
   targetSentence,
@@ -123,6 +127,24 @@ export const TranscriptBox = ({
             >
               <Skeleton className="h-6 w-3/4 rounded-full opacity-30" />
               <Skeleton className="h-6 w-1/2 rounded-full opacity-10" />
+            </motion.div>
+          ) : isTranscriptError ? (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center gap-2 text-center"
+            >
+              <p className="text-sm text-muted-foreground/60">Transcript unavailable for this clip.</p>
+              {onRetry && (
+                <button
+                  onClick={() => onRetry()}
+                  className="text-xs text-orange-500 hover:underline font-medium"
+                >
+                  Try again
+                </button>
+              )}
             </motion.div>
           ) : trio ? (
             <motion.div
