@@ -439,7 +439,7 @@ export default function AudioCard({
   }, [targetSentence, player, seekTo, play])
 
   return (
-    <div className="relative border border-border/40 p-2.5">
+    <div className="relative border border-border/70 p-2.5">
       <DecorIcon position="top-left" />
       <DecorIcon position="top-right" />
       <DecorIcon position="bottom-left" />

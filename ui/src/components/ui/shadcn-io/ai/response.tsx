@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import type { ComponentProps, HTMLAttributes } from 'react';
-import { isValidElement, memo } from 'react';
+import { memo } from 'react';
 import ReactMarkdown, { type Options } from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
@@ -11,196 +11,151 @@ import remarkMath from 'remark-math';
 import 'katex/dist/katex.min.css';
 import hardenReactMarkdown from 'harden-react-markdown';
 
-
-/**
- * Parses markdown text and removes incomplete tokens to prevent partial rendering
- * of links, images, bold, and italic formatting during streaming.
- */
 function parseIncompleteMarkdown(text: string): string {
-  if (!text || typeof text !== 'string') {
-    return text;
-  }
+  if (!text || typeof text !== 'string') return text;
 
   let result = text;
 
-  // Handle incomplete links and images
-  // Pattern: [...] or ![...] where the closing ] is missing
   const linkImagePattern = /(!?\[)([^\]]*?)$/;
   const linkMatch = result.match(linkImagePattern);
   if (linkMatch) {
-    // If we have an unterminated [ or ![, remove it and everything after
     const startIndex = result.lastIndexOf(linkMatch[1]);
     result = result.substring(0, startIndex);
   }
 
-  // Handle incomplete bold formatting (**)
   const boldPattern = /(\*\*)([^*]*?)$/;
   const boldMatch = result.match(boldPattern);
   if (boldMatch) {
-    // Count the number of ** in the entire string
     const asteriskPairs = (result.match(/\*\*/g) || []).length;
-    // If odd number of **, we have an incomplete bold - complete it
-    if (asteriskPairs % 2 === 1) {
-      result = `${result}**`;
-    }
+    if (asteriskPairs % 2 === 1) result = `${result}**`;
   }
 
-  // Handle incomplete italic formatting (__)
-  const italicPattern = /(__)([^_]*?)$/;
-  const italicMatch = result.match(italicPattern);
-  if (italicMatch) {
-    // Count the number of __ in the entire string
-    const underscorePairs = (result.match(/__/g) || []).length;
-    // If odd number of __, we have an incomplete italic - complete it
-    if (underscorePairs % 2 === 1) {
-      result = `${result}__`;
-    }
-  }
-
-  // Handle incomplete single asterisk italic (*)
-  const singleAsteriskPattern = /(\*)([^*]*?)$/;
-  const singleAsteriskMatch = result.match(singleAsteriskPattern);
-  if (singleAsteriskMatch) {
-    // Count single asterisks that aren't part of **
-    const singleAsterisks = result.split('').reduce((acc, char, index) => {
-      if (char === '*') {
-        // Check if it's part of a ** pair
-        const prevChar = result[index - 1];
-        const nextChar = result[index + 1];
-        if (prevChar !== '*' && nextChar !== '*') {
-          return acc + 1;
-        }
-      }
-      return acc;
-    }, 0);
-
-    // If odd number of single *, we have an incomplete italic - complete it
-    if (singleAsterisks % 2 === 1) {
-      result = `${result}*`;
-    }
-  }
-
-  // Handle incomplete single underscore italic (_)
-  const singleUnderscorePattern = /(_)([^_]*?)$/;
-  const singleUnderscoreMatch = result.match(singleUnderscorePattern);
-  if (singleUnderscoreMatch) {
-    // Count single underscores that aren't part of __
-    const singleUnderscores = result.split('').reduce((acc, char, index) => {
-      if (char === '_') {
-        // Check if it's part of a __ pair
-        const prevChar = result[index - 1];
-        const nextChar = result[index + 1];
-        if (prevChar !== '_' && nextChar !== '_') {
-          return acc + 1;
-        }
-      }
-      return acc;
-    }, 0);
-
-    // If odd number of single _, we have an incomplete italic - complete it
-    if (singleUnderscores % 2 === 1) {
-      result = `${result}_`;
-    }
-  }
-
-  // Handle incomplete inline code blocks (`) - but avoid code blocks (```)
-  const inlineCodePattern = /(`)([^`]*?)$/;
-  const inlineCodeMatch = result.match(inlineCodePattern);
-  if (inlineCodeMatch) {
-    // Check if we're dealing with a code block (triple backticks)
-    const hasCodeBlockStart = result.includes('```');
-    const codeBlockPattern = /```[\s\S]*?```/g;
-    const completeCodeBlocks = (result.match(codeBlockPattern) || []).length;
-    const allTripleBackticks = (result.match(/```/g) || []).length;
-
-    // If we have an odd number of ``` sequences, we're inside an incomplete code block
-    // In this case, don't complete inline code
-    const insideIncompleteCodeBlock = allTripleBackticks % 2 === 1;
-
-    if (!insideIncompleteCodeBlock) {
-      // Count the number of single backticks that are NOT part of triple backticks
-      let singleBacktickCount = 0;
-      for (let i = 0; i < result.length; i++) {
-        if (result[i] === '`') {
-          // Check if this backtick is part of a triple backtick sequence
-          const isTripleStart = result.substring(i, i + 3) === '```';
-          const isTripleMiddle =
-            i > 0 && result.substring(i - 1, i + 2) === '```';
-          const isTripleEnd = i > 1 && result.substring(i - 2, i + 1) === '```';
-
-          if (!(isTripleStart || isTripleMiddle || isTripleEnd)) {
-            singleBacktickCount++;
-          }
-        }
-      }
-
-      // If odd number of single backticks, we have an incomplete inline code - complete it
-      if (singleBacktickCount % 2 === 1) {
-        result = `${result}\``;
-      }
-    }
-  }
-
-  // Handle incomplete strikethrough formatting (~~)
   const strikethroughPattern = /(~~)([^~]*?)$/;
   const strikethroughMatch = result.match(strikethroughPattern);
   if (strikethroughMatch) {
-    // Count the number of ~~ in the entire string
     const tildePairs = (result.match(/~~/g) || []).length;
-    // If odd number of ~~, we have an incomplete strikethrough - complete it
-    if (tildePairs % 2 === 1) {
-      result = `${result}~~`;
-    }
+    if (tildePairs % 2 === 1) result = `${result}~~`;
   }
 
   return result;
 }
 
-// Create a hardened version of ReactMarkdown
+/** Normalize AI output quirks — skips table rows to avoid breaking table structure */
+function preprocessMarkdown(text: string): string {
+  return text
+    .split('\n')
+    .map((line) => {
+      // Table rows: leave untouched — converting <br> or • inside cells breaks the table
+      if (line.trim().startsWith('|')) return line;
+      return line
+        .replace(/^[•·▪]\s*/, '- ')
+        .replace(/<br\s*\/?>/gi, '\n');
+    })
+    .join('\n');
+}
+
 const HardenedMarkdown = hardenReactMarkdown(ReactMarkdown);
 
 export type ResponseProps = HTMLAttributes<HTMLDivElement> & {
   options?: Options;
   children: Options['children'];
-  allowedImagePrefixes?: ComponentProps<
-    ReturnType<typeof hardenReactMarkdown>
-  >['allowedImagePrefixes'];
-  allowedLinkPrefixes?: ComponentProps<
-    ReturnType<typeof hardenReactMarkdown>
-  >['allowedLinkPrefixes'];
-  defaultOrigin?: ComponentProps<
-    ReturnType<typeof hardenReactMarkdown>
-  >['defaultOrigin'];
+  allowedImagePrefixes?: ComponentProps<ReturnType<typeof hardenReactMarkdown>>['allowedImagePrefixes'];
+  allowedLinkPrefixes?: ComponentProps<ReturnType<typeof hardenReactMarkdown>>['allowedLinkPrefixes'];
+  defaultOrigin?: ComponentProps<ReturnType<typeof hardenReactMarkdown>>['defaultOrigin'];
   parseIncompleteMarkdown?: boolean;
 };
 
 const components: Options['components'] = {
-  ol: ({ node, children, className, ...props }) => (
-    <ol className={cn('ml-4 list-outside list-decimal', className)} {...props}>
+  /* ── Block elements ── */
+  p: ({ node, children, className, ...props }) => (
+    <p className={cn('mt-2 first:mt-0 leading-relaxed text-foreground/90', className)} {...props}>
       {children}
-    </ol>
+    </p>
   ),
-  li: ({ node, children, className, ...props }) => (
-    <li className={cn('py-1', className)} {...props}>
-      {children}
-    </li>
-  ),
+
   ul: ({ node, children, className, ...props }) => (
-    <ul className={cn('ml-4 list-outside list-disc', className)} {...props}>
+    <ul className={cn('mt-2 ml-0 space-y-1 list-none', className)} {...props}>
       {children}
     </ul>
   ),
-  hr: ({ node, className, ...props }) => (
-    <hr className={cn('my-6 border-border', className)} {...props} />
+
+  ol: ({ node, children, className, ...props }) => (
+    <ol
+      className={cn('mt-2 ml-4 space-y-1 list-decimal [&>li::marker]:text-muted-foreground/50 [&>li::marker]:text-xs [&>li::marker]:font-medium', className)}
+      {...props}
+    >
+      {children}
+    </ol>
   ),
+
+  li: ({ node, children, className, ...props }) => (
+    <li className={cn('flex gap-2 items-start leading-relaxed text-foreground/85', className)} {...props}>
+      <span className="mt-[6px] shrink-0 size-[4px] rounded-full bg-muted-foreground/45" />
+      <span className="flex-1 min-w-0">{children}</span>
+    </li>
+  ),
+
+  hr: ({ node, className, ...props }) => (
+    <hr className={cn('my-3 border-border/40', className)} {...props} />
+  ),
+
+  blockquote: ({ node, children, className, ...props }) => (
+    <blockquote
+      className={cn('my-2 border-l-2 border-primary/50 pl-3 text-muted-foreground/80 italic text-sm leading-relaxed', className)}
+      {...props}
+    >
+      {children}
+    </blockquote>
+  ),
+
+  /* ── Headings — compact for narrow panel ── */
+  h1: ({ node, children, className, ...props }) => (
+    <h1 className={cn('mt-5 mb-1.5 font-bold text-base text-foreground tracking-tight first:mt-0', className)} {...props}>
+      {children}
+    </h1>
+  ),
+  h2: ({ node, children, className, ...props }) => (
+    <h2 className={cn('mt-4 mb-1.5 font-bold text-sm text-foreground tracking-tight first:mt-0', className)} {...props}>
+      {children}
+    </h2>
+  ),
+  h3: ({ node, children, className, ...props }) => (
+    <h3 className={cn('mt-3 mb-1 font-semibold text-sm text-foreground/90 first:mt-0', className)} {...props}>
+      {children}
+    </h3>
+  ),
+  h4: ({ node, children, className, ...props }) => (
+    <h4 className={cn('mt-3 mb-1 font-semibold text-xs uppercase tracking-wider text-muted-foreground first:mt-0', className)} {...props}>
+      {children}
+    </h4>
+  ),
+  h5: ({ node, children, className, ...props }) => (
+    <h5 className={cn('mt-2 mb-0.5 font-semibold text-xs text-muted-foreground first:mt-0', className)} {...props}>
+      {children}
+    </h5>
+  ),
+  h6: ({ node, children, className, ...props }) => (
+    <h6 className={cn('mt-2 mb-0.5 font-medium text-xs text-muted-foreground/70 first:mt-0', className)} {...props}>
+      {children}
+    </h6>
+  ),
+
+  /* ── Inline ── */
   strong: ({ node, children, className, ...props }) => (
-    <span className={cn('font-semibold', className)} {...props}>
+    <span className={cn('font-semibold text-foreground', className)} {...props}>
       {children}
     </span>
   ),
+
+  em: ({ node, children, className, ...props }) => (
+    <em className={cn('italic text-foreground/80', className)} {...props}>
+      {children}
+    </em>
+  ),
+
   a: ({ node, children, className, ...props }) => (
     <a
-      className={cn('font-medium text-primary underline', className)}
+      className={cn('font-medium text-primary underline underline-offset-2 hover:text-primary/80 transition-colors', className)}
       rel="noreferrer"
       target="_blank"
       {...props}
@@ -208,130 +163,50 @@ const components: Options['components'] = {
       {children}
     </a>
   ),
-  h1: ({ node, children, className, ...props }) => (
-    <h1
-      className={cn('mt-8 mb-4 font-semibold text-3xl', className)}
+
+  code: ({ node, className, ...props }) => {
+    const inline = node?.position?.start.line === node?.position?.end.line;
+    if (!inline) return <code className={className} {...props} />;
+    return (
+      <code
+        className={cn('rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 font-mono text-[0.78em]', className)}
+        {...props}
+      />
+    );
+  },
+
+  pre: ({ node, className, children, ...props }) => (
+    <pre
+      className={cn('my-3 overflow-x-auto rounded-lg border border-white/5 bg-zinc-950 px-4 py-3 text-xs text-zinc-200 dark:bg-zinc-900', className)}
       {...props}
     >
       {children}
-    </h1>
-  ),
-  h2: ({ node, children, className, ...props }) => (
-    <h2
-      className={cn('mt-8 mb-4 font-semibold text-2xl', className)}
-      {...props}
-    >
-      {children}
-    </h2>
-  ),
-  h3: ({ node, children, className, ...props }) => (
-    <h3 className={cn('mt-8 mb-4 font-semibold text-xl', className)} {...props}>
-      {children}
-    </h3>
-  ),
-  h4: ({ node, children, className, ...props }) => (
-    <h4 className={cn('mt-8 mb-4 font-semibold text-lg', className)} {...props}>
-      {children}
-    </h4>
-  ),
-  h5: ({ node, children, className, ...props }) => (
-    <h5
-      className={cn('mt-8 mb-4 font-semibold text-base', className)}
-      {...props}
-    >
-      {children}
-    </h5>
-  ),
-  h6: ({ node, children, className, ...props }) => (
-    <h6 className={cn('mt-8 mb-4 font-semibold text-sm', className)} {...props}>
-      {children}
-    </h6>
-  ),
-  p: ({ node, children, className, ...props }) => (
-    <p className={cn('mt-3', className)} {...props}>
-      {children}
-    </p>
+    </pre>
   ),
 
+  /* ── Table ── */
   table: ({ node, children, className, ...props }) => (
-    <div className="my-4 overflow-x-auto max-w-full">
-      <table
-        className={cn('w-full border-collapse border border-border text-xs', className)}
-        {...props}
-      >
+    <div className="my-3 overflow-x-auto max-w-full rounded-lg border border-border/50">
+      <table className={cn('w-full border-collapse text-xs', className)} {...props}>
         {children}
       </table>
     </div>
   ),
   thead: ({ node, children, className, ...props }) => (
-    <thead className={cn('bg-muted/50', className)} {...props}>
-      {children}
-    </thead>
+    <thead className={cn('bg-muted/60', className)} {...props}>{children}</thead>
   ),
   tbody: ({ node, children, className, ...props }) => (
-    <tbody className={cn('divide-y divide-border', className)} {...props}>
-      {children}
-    </tbody>
+    <tbody className={cn('divide-y divide-border/40', className)} {...props}>{children}</tbody>
   ),
   tr: ({ node, children, className, ...props }) => (
-    <tr className={cn('border-border border-b', className)} {...props}>
-      {children}
-    </tr>
+    <tr className={cn('border-b border-border/30 hover:bg-muted/20 transition-colors', className)} {...props}>{children}</tr>
   ),
   th: ({ node, children, className, ...props }) => (
-    <th
-      className={cn('px-2 py-1.5 text-left font-semibold text-xs', className)}
-      {...props}
-    >
-      {children}
-    </th>
+    <th className={cn('px-3 py-2 text-left font-semibold text-xs text-foreground/80 align-top whitespace-nowrap border-r border-border/50 last:border-r-0', className)} {...props}>{children}</th>
   ),
   td: ({ node, children, className, ...props }) => (
-    <td className={cn('px-2 py-1.5 text-xs', className)} {...props}>
-      {children}
-    </td>
+    <td className={cn('px-3 py-2 text-xs text-foreground/75 align-top break-words max-w-[240px] border-r border-border/50 last:border-r-0', className)} {...props}>{children}</td>
   ),
-  blockquote: ({ node, children, className, ...props }) => (
-    <blockquote
-      className={cn(
-        'my-4 border-muted-foreground/30 border-l-4 pl-4 text-muted-foreground italic',
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </blockquote>
-  ),
-  code: ({ node, className, ...props }) => {
-    const inline = node?.position?.start.line === node?.position?.end.line;
-
-    if (!inline) {
-      return <code className={className} {...props} />;
-    }
-
-    return (
-      <code
-        className={cn(
-          'rounded bg-muted px-1.5 py-0.5 font-mono text-sm',
-          className
-        )}
-        {...props}
-      />
-    );
-  },
-  pre: ({ node, className, children, ...props }) => {
-    return (
-      <pre
-        className={cn(
-          'mb-4 mt-6 overflow-x-auto rounded-lg border bg-black py-4 px-4 text-white',
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </pre>
-    );
-  },
 };
 
 export const Response = memo(
@@ -345,18 +220,14 @@ export const Response = memo(
     parseIncompleteMarkdown: shouldParseIncompleteMarkdown = true,
     ...props
   }: ResponseProps) => {
-    // Parse the children to remove incomplete markdown tokens if enabled
-    const parsedChildren =
-      typeof children === 'string' && shouldParseIncompleteMarkdown
-        ? parseIncompleteMarkdown(children)
-        : children;
+    let processed = typeof children === 'string' ? preprocessMarkdown(children) : children;
+    if (typeof processed === 'string' && shouldParseIncompleteMarkdown) {
+      processed = parseIncompleteMarkdown(processed);
+    }
 
     return (
       <div
-        className={cn(
-          'size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
-          className
-        )}
+        className={cn('size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0', className)}
         {...props}
       >
         <HardenedMarkdown
@@ -368,7 +239,7 @@ export const Response = memo(
           remarkPlugins={[remarkGfm, remarkMath]}
           {...options}
         >
-          {parsedChildren}
+          {processed}
         </HardenedMarkdown>
       </div>
     );
