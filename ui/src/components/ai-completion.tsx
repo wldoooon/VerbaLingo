@@ -40,22 +40,22 @@ function generateSmartSuggestions(searchWord: string, language: string): SmartSu
             {
                 title: "Learn pronunciation tips",
                 prompt: `What are some general tips for improving ${lang} pronunciation?`,
-                icon: <Mic className="h-4 w-4" />,
+                icon: <Mic className="h-3 w-3" />,
             },
             {
                 title: "Common grammar mistakes",
                 prompt: `What are the most common grammar mistakes ${lang} learners make?`,
-                icon: <BookText className="h-4 w-4" />,
+                icon: <BookText className="h-3 w-3" />,
             },
             {
                 title: "Expand vocabulary",
                 prompt: `How can I effectively expand my ${lang} vocabulary?`,
-                icon: <Repeat className="h-4 w-4" />,
+                icon: <Repeat className="h-3 w-3" />,
             },
             {
                 title: "Common mistakes to avoid",
                 prompt: `What are common mistakes ${lang} learners make and how to avoid them?`,
-                icon: <XCircle className="h-4 w-4" />,
+                icon: <XCircle className="h-3 w-3" />,
             },
         ];
     }
@@ -64,22 +64,22 @@ function generateSmartSuggestions(searchWord: string, language: string): SmartSu
         {
             title: `Pronounce "${searchWord}" correctly`,
             prompt: `Break down how to pronounce "${searchWord}" in ${lang} syllable by syllable with phonetic examples. Include common mistakes learners make.`,
-            icon: <Mic className="h-4 w-4" />,
+            icon: <Mic className="h-3 w-3" />,
         },
         {
             title: `"${searchWord}" in different contexts`,
             prompt: `Show me 5 example sentences using "${searchWord}" in ${lang} in different contexts (formal, informal, academic, conversational). Explain the nuances.`,
-            icon: <BookText className="h-4 w-4" />,
+            icon: <BookText className="h-3 w-3" />,
         },
         {
             title: `Similar words to "${searchWord}"`,
             prompt: `What are 5 words similar in meaning or usage to "${searchWord}" in ${lang}? Explain the subtle differences with examples.`,
-            icon: <Repeat className="h-4 w-4" />,
+            icon: <Repeat className="h-3 w-3" />,
         },
         {
             title: `Common mistakes with "${searchWord}"`,
             prompt: `What are the most common mistakes ${lang} learners make when using "${searchWord}"? How can I avoid them?`,
-            icon: <XCircle className="h-4 w-4" />,
+            icon: <XCircle className="h-3 w-3" />,
         },
     ];
 }
@@ -500,7 +500,7 @@ export function AiCompletion({
                             transition={{ duration: 0.3 }}
                             className="overflow-hidden suggestions-container"
                         >
-                            <div className="flex flex-wrap justify-center gap-3">
+                            <div className="flex flex-wrap justify-center gap-2">
                                 {smartSuggestions.map((suggestion, i) => (
                                     <motion.div
                                         key={i}
