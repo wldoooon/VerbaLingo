@@ -41,13 +41,15 @@ type VideoPlayerCardProps = {
   isFetching?: boolean
   aggregations?: Record<string, number>
   className?: string
+  onClipEnded?: () => void
 }
 
 export default function VideoPlayerCard({
   playlist,
   isFetching,
   aggregations,
-  className
+  className,
+  onClipEnded,
 }: VideoPlayerCardProps) {
   const {
     currentVideoIndex,
@@ -226,6 +228,11 @@ export default function VideoPlayerCard({
         safeCall(event.target, 'mute')
       }
       return
+    }
+
+    // Clip ended — auto-advance to next
+    if (event.data === 0) {
+      onClipEnded?.()
     }
 
     const isNowPlaying = event.data === 1
