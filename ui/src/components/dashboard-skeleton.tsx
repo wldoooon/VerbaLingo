@@ -37,36 +37,18 @@ const carouselItems = [
 	},
 ];
 
-import { AnimatePresence, motion } from "motion/react";
-import { Loader2 } from "lucide-react";
+import { motion } from "motion/react";
 
 export function DashboardSkeleton() {
 	const { resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
-	const [isPageLoading, setIsPageLoading] = useState(true);
 
 	useEffect(() => {
 		setMounted(true);
-		// Simulate page load
-		const timer = setTimeout(() => {
-			setIsPageLoading(false);
-		}, 1000);
-		return () => clearTimeout(timer);
 	}, []);
 
 	return (
 		<>
-			<AnimatePresence mode="wait">
-				{isPageLoading && (
-					<motion.div
-						key="preloader"
-						exit={{ opacity: 0, transition: { duration: 0.3 } }}
-						className="fixed inset-0 z-[100] flex items-center justify-center bg-background"
-					>
-						<Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
-					</motion.div>
-				)}
-			</AnimatePresence>
 			<div
 				className={cn(
 					"grid grid-cols-2 lg:grid-cols-4 gap-0",

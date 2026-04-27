@@ -15,18 +15,15 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserIcon, CreditCardIcon, LogOutIcon, LifeBuoyIcon, ZapIcon } from "lucide-react";
+import { UserIcon, CreditCardIcon, LogOutIcon, LifeBuoyIcon } from "lucide-react";
 import { useAuthStore } from "@/stores/auth-store";
-import { useUsageStore } from "@/stores/usage-store";
 import { useLogoutMutation } from "@/lib/authHooks";
 
 export function NavUser() {
 	const user = useAuthStore((s) => s.user);
-	const usageMap = useUsageStore((s) => s.usage);
-	const { mutate: logout, isPending } = useLogoutMutation();
+const { mutate: logout, isPending } = useLogoutMutation();
 
-	const sparksBalance = usageMap["ai_chat"]?.balance ?? 0;
-	const displayName = user?.full_name || user?.email?.split("@")[0] || "User";
+const displayName = user?.full_name || user?.email?.split("@")[0] || "User";
 	const email = user?.email ?? "";
 	const avatar = user?.oauth_avatar_url || "/user_logo.png";
 	const tier = user?.tier
@@ -72,15 +69,6 @@ export function NavUser() {
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuItem className="justify-between pointer-events-none select-none">
-						<div className="flex items-center gap-2">
-							<ZapIcon />
-							<span>AI Sparks</span>
-						</div>
-						<span className="text-xs font-mono text-foreground">
-							{sparksBalance.toLocaleString()}
-						</span>
-					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
 						<Link href="/pricing">
 							<CreditCardIcon />

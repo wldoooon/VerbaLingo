@@ -43,7 +43,7 @@ export function AppHeader() {
 	return (
 		<header
 			className={cn(
-				"pxx-4 mb-6 flex items-center justify-between gap-2 md:px-2"
+				"pxx-4 mb-6 flex items-center justify-between gap-2 md:px-2 relative z-50"
 			)}
 		>
 			<div className="flex items-center gap-3">

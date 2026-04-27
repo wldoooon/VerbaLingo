@@ -338,7 +338,7 @@ export function SearchBar() {
     const panelVisible = showRecent && !isSearching && (recentSearches.length > 0 || hasSuggestions);
 
     return (
-        <div className="w-full max-w-4xl flex items-center gap-4 relative z-30" ref={containerRef}>
+        <div className="w-full max-w-4xl flex items-center gap-4 relative z-50" ref={containerRef}>
             <div className="flex-1">
                 <div className={cn(
                     "group relative rounded-xl transition-all duration-300 ease-in-out border border-primary/40 overflow-hidden",
