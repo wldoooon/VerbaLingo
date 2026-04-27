@@ -15,15 +15,21 @@ import { useAuthStore } from "@/stores/auth-store";
 
 import { useState, useCallback, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { usePathname } from "next/navigation";
 import { ThemeToggleButton, useThemeTransition } from "@/components/ui/shadcn-io/theme-toggle-button";
-
-const activeItem = navLinks.find((item) => item.isActive);
 
 export function AppHeader() {
 	const { theme, setTheme } = useTheme();
 	const { startTransition } = useThemeTransition();
 	const [mounted, setMounted] = useState(false);
 	const authStatus = useAuthStore((s) => s.status);
+	const pathname = usePathname();
+
+	const activeItem = navLinks.find((item) => {
+		if (!item.path || item.path === "#") return false;
+		if (item.path === "/") return pathname === "/";
+		return pathname === item.path || pathname.startsWith(item.path + "/");
+	});
 
 	useEffect(() => setMounted(true), []);
 

@@ -22,7 +22,6 @@ export const navGroups: SidebarNavGroup[] = [
 				title: "Home",
 				path: "/",
 				icon: <LayoutGridIcon />,
-				isActive: true,
 			},
 		],
 	},

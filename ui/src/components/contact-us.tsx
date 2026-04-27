@@ -205,18 +205,6 @@ export function ContactUs() {
 								/>
 							</div>
 
-							{/* Privacy Policy */}
-							<div className="flex items-center space-x-2">
-								<Checkbox 
-									id="terms" 
-									className="rounded-md border-border" 
-									checked={termsAccepted}
-									onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-								/>
-								<Label htmlFor="terms" className="text-sm text-muted-foreground font-normal">
-									I agree to the <span className="text-foreground underline cursor-pointer">Privacy Policy</span>.
-								</Label>
-							</div>
 
 							{/* Submit Button */}
 							<div className="pt-4">
