@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavGroup } from "@/components/nav-group";
 import { footerNavLinks, navGroups } from "@/components/app-shared";
-import { LatestChange } from "@/components/latest-change";
+import { UsageMeter } from "@/components/usage-meter";
 import { PlusIcon, SearchIcon } from "lucide-react";
 
 import { DecorIcon } from "@/components/ui/decor-icon";
@@ -70,7 +70,7 @@ export function AppSidebar() {
 				))}
 			</SidebarContent>
 			<SidebarFooter className="border-t border-border/40">
-				<LatestChange />
+				<UsageMeter />
 				<SidebarMenu className="mt-2">
 					{footerNavLinks.map((item) => (
 						<SidebarMenuItem key={item.title}>

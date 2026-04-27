@@ -28,7 +28,7 @@ export function NavUser() {
 	const sparksBalance = usageMap["ai_chat"]?.balance ?? 0;
 	const displayName = user?.full_name || user?.email?.split("@")[0] || "User";
 	const email = user?.email ?? "";
-	const avatar = user?.oauth_avatar_url ?? "";
+	const avatar = user?.oauth_avatar_url || "/user_logo.png";
 	const tier = user?.tier
 		? user.tier.charAt(0).toUpperCase() + user.tier.slice(1)
 		: "Free";

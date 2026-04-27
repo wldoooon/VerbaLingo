@@ -115,7 +115,7 @@ export function DashboardSkeleton() {
 								<BlueprintBox colSpan={7} rowSpan={3} dotted={false} className="px-8 border-b-primary/10">
 									<div className="flex flex-col items-start justify-center h-full w-full relative">
 										{mounted && (
-											<div className="absolute -right-10 sm:-right-20 md:-right-42 top-1/2 -translate-y-1/2 w-52 sm:w-64 md:w-80 opacity-80 pointer-events-none z-2">
+											<div className="absolute -right-10 sm:-right-20 md:-right-42 top-1/2 -translate-y-1/2 w-52 sm:w-64 md:w-80 opacity-90 pointer-events-none z-2">
 												<img
 													src={resolvedTheme === 'dark' ? "/sleeping_cat.png" : "/cat_logo3.png"}
 													alt="Mascot"

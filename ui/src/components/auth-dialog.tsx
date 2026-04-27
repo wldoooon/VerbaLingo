@@ -86,13 +86,13 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
 
     /* ── Shared form body rendered in both Dialog and Drawer ── */
     const authBody = (
-        <div className="relative bg-white dark:bg-zinc-900 md:rounded-3xl md:shadow-2xl md:border md:border-slate-100 md:dark:border-zinc-800 p-6 sm:p-8 max-h-[85vh] md:max-h-[90vh] overflow-y-auto w-full custom-scrollbar">
+        <div className="relative bg-white dark:bg-zinc-900 md:rounded-2xl md:shadow-2xl md:border md:border-slate-100 md:dark:border-zinc-800 p-5 sm:p-6 max-h-[85vh] md:max-h-[90vh] overflow-y-auto w-full custom-scrollbar">
             {/* Google OAuth Loading Overlay */}
             {isGoogleLoading && (
-                <div className="absolute inset-0 z-40 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm flex flex-col items-center justify-center rounded-3xl">
-                    <div className="relative mb-4">
-                        <div className="w-12 h-12 border-4 border-slate-200 dark:border-zinc-700 rounded-full" />
-                        <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-orange-500 rounded-full animate-spin" />
+                <div className="absolute inset-0 z-40 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl">
+                    <div className="relative mb-3">
+                        <div className="w-10 h-10 border-4 border-slate-200 dark:border-zinc-700 rounded-full" />
+                        <div className="absolute inset-0 w-10 h-10 border-4 border-transparent border-t-orange-500 rounded-full animate-spin" />
                     </div>
                     <p className="text-slate-700 dark:text-slate-300 font-semibold text-sm">
                         Connecting to Google...
@@ -106,19 +106,19 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
             {/* Close Button */}
             <button
                 onClick={handleClose}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors cursor-pointer z-50"
+                className="absolute top-3.5 right-3.5 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors cursor-pointer z-50"
             >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
             </button>
 
             <div className="flex flex-col items-center">
                 {/* Header + Google button — hidden on verify/forgot steps */}
                 {showHeader && (
                     <>
-                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight mb-1 sm:mb-2">
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight mb-1">
                             {tab === "login" ? "Welcome Back" : "Create an account"}
                         </h2>
-                        <p className="text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base mb-6 sm:mb-8 text-center px-4">
+                        <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mb-5 text-center px-4">
                             {tab === "login"
                                 ? "Log in to continue your language mastery."
                                 : "Join and master fluency."}
@@ -127,12 +127,12 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                         <button
                             onClick={handleGoogleLogin}
                             disabled={isGoogleLoading}
-                            className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all group mb-6 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all group mb-4 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isGoogleLoading ? (
-                                <Loader2 className="w-5 h-5 animate-spin text-slate-500" />
+                                <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
                             ) : (
-                                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -144,7 +144,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                             </span>
                         </button>
 
-                        <div className="relative w-full mb-6">
+                        <div className="relative w-full mb-4">
                             <div className="absolute inset-0 flex items-center">
                                 <div className="w-full border-t border-slate-100 dark:border-zinc-800"></div>
                             </div>
@@ -188,7 +188,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
 
                 {/* Footer toggle */}
                 {showHeader && (
-                    <div className="mt-6 sm:mt-8 text-center border-t border-slate-100 dark:border-zinc-800 pt-5 sm:pt-6 w-full">
+                    <div className="mt-4 text-center border-t border-slate-100 dark:border-zinc-800 pt-4 w-full">
                         <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">
                             {tab === "login" ? "Don't have an account?" : "Already have an account?"}{' '}
                             <button
@@ -212,7 +212,7 @@ export function AuthDialog({ defaultTab = "login", children }: { defaultTab?: "l
                     {children || <Button>Log in</Button>}
                 </DialogTrigger>
                 <DialogContent
-                    className="w-[95vw] max-w-[440px] p-0 bg-transparent border-none shadow-none"
+                    className="w-[95vw] max-w-[440px] p-0 bg-transparent border-none shadow-none duration-300 data-[state=open]:slide-in-from-bottom-3 data-[state=closed]:slide-out-to-bottom-2"
                     onInteractOutside={(e) => e.preventDefault()}
                     onEscapeKeyDown={(e) => e.preventDefault()}
                     showCloseButton={false}
