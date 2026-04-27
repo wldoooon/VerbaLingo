@@ -144,7 +144,7 @@ export function BranchTimeline({
 
                                                 {/* Number — below the dot */}
                                                 <span className={cn(
-                                                    "absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[9px] tabular-nums leading-none transition-colors",
+                                                    "absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-3 text-[9px] tabular-nums leading-none transition-colors",
                                                     isActive
                                                         ? "text-primary font-bold"
                                                         : "text-muted-foreground/40 group-hover:text-muted-foreground/70"

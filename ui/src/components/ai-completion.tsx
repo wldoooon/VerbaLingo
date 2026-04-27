@@ -8,6 +8,7 @@ import { Response } from "@/components/ui/shadcn-io/ai/response";
 import { ThumbsDown, ThumbsUp, Copy, Mic, BookText, Repeat, XCircle, Search, CornerDownLeft, Lock, MessageSquare, Zap, Square, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SuggestionChip } from "@/components/suggestion-chip";
+import TextType from "@/components/TextType";
 import { AiAssistantSkeleton } from "@/components/ai-assistant-skeleton";
 import { useResponseHistory } from "@/hooks/useResponseHistory";
 import { SessionSelector } from "@/components/session-selector";
@@ -83,6 +84,15 @@ function generateSmartSuggestions(searchWord: string, language: string): SmartSu
         },
     ];
 }
+
+const AI_PLACEHOLDERS = [
+    "How do you pronounce this word?",
+    "Give me 5 examples in different contexts...",
+    "What's the difference between affect and effect?",
+    "Use it in a formal sentence...",
+    "What are some synonyms with subtle differences?",
+    "How would a native speaker say this?",
+];
 
 // Maps raw API errors to user-friendly messages
 function getFriendlyError(err: Error): string {
@@ -620,6 +630,43 @@ export function AiCompletion({
                                                         : completion
                                                     }
                                                 </Response>
+                                                {!isLoading && (
+                                                    <div className="flex items-center gap-0.5 mt-3 pt-3 border-t border-border/30">
+                                                        <TooltipProvider>
+                                                            <Tooltip delayDuration={0}>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button
+                                                                        ref={copyButtonRef}
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="h-7 w-7 text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                                                                        onClick={handleCopy}
+                                                                        disabled={isCopied}
+                                                                    >
+                                                                        {isCopied ? <Check size={13} /> : <Copy size={13} />}
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent side="bottom"><p>Copy</p></TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 text-muted-foreground hover:text-green-500 transition-colors cursor-pointer"
+                                                            onClick={handleLike}
+                                                        >
+                                                            <ThumbsUp size={13} />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
+                                                            onClick={handleDislike}
+                                                        >
+                                                            <ThumbsDown size={13} />
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -633,58 +680,16 @@ export function AiCompletion({
                                     )}
                                 </div>
 
-                                {!isLoading && !error && (
-                                    <div className="flex flex-col items-center gap-4 mt-4 pt-4 border-t">
-                                        {totalBranches > 1 && (
-                                            <div className="w-full">
-                                                <BranchTimeline
-                                                    currentIndex={currentIndex}
-                                                    branches={branches}
-                                                    onSelectIndex={navigateToIndex}
-                                                    onPrevious={goToPrevious}
-                                                    onNext={goToNext}
-                                                    isLoading={isLoading}
-                                                />
-                                            </div>
-                                        )}
-
-                                        <div className="flex items-center gap-2">
-                                            <TooltipProvider>
-                                                <Tooltip delayDuration={0}>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            ref={copyButtonRef}
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8 hover:text-primary transition-colors cursor-pointer"
-                                                            onClick={handleCopy}
-                                                            disabled={isCopied}
-                                                        >
-                                                            {isCopied ? <Check size={16} /> : <Copy size={16} />}
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent side="bottom">
-                                                        <p>Copy to clipboard</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 hover:text-green-500 transition-colors cursor-pointer"
-                                                onClick={handleLike}
-                                            >
-                                                <ThumbsUp size={16} />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 hover:text-red-500 transition-colors cursor-pointer"
-                                                onClick={handleDislike}
-                                            >
-                                                <ThumbsDown size={16} />
-                                            </Button>
-                                        </div>
+                                {!isLoading && !error && totalBranches > 1 && (
+                                    <div className="mt-4 pt-4 border-t">
+                                        <BranchTimeline
+                                            currentIndex={currentIndex}
+                                            branches={branches}
+                                            onSelectIndex={navigateToIndex}
+                                            onPrevious={goToPrevious}
+                                            onNext={goToNext}
+                                            isLoading={isLoading}
+                                        />
                                     </div>
                                 )}
                             </div>
@@ -723,11 +728,23 @@ export function AiCompletion({
                     <>
                         <div className="relative w-full">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500" />
+                            {!inputValue && !isLoading && (
+                                <div className="pointer-events-none absolute left-10 right-24 top-1/2 -translate-y-1/2 flex items-center overflow-hidden">
+                                    <TextType
+                                        text={AI_PLACEHOLDERS}
+                                        typingSpeed={60}
+                                        pauseDuration={1800}
+                                        showCursor={true}
+                                        cursorCharacter="|"
+                                        className="text-sm text-muted-foreground/50 font-normal whitespace-nowrap"
+                                    />
+                                </div>
+                            )}
                             <Input
                                 type="text"
                                 maxLength={150}
-                                placeholder="Ask about pronunciation, definitions, examples..."
-                                className="w-full rounded-full pl-10 pr-24 py-6 bg-muted shadow-sm border border-primary/40 focus-visible:bg-background transition-colors"
+                                placeholder=""
+                                className="w-full rounded-full pl-10 pr-24 py-6 bg-transparent shadow-sm border border-primary/40 focus-visible:bg-background/60 transition-colors placeholder:text-transparent"
                                 value={inputValue}
                                 onChange={(e) => {
                                     const val = e.target.value.slice(0, 150);

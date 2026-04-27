@@ -12,9 +12,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 				<div className="flex flex-1 flex-col min-h-0 p-1">
 					{children}
 				</div>
-				<div className="mt-16">
-					<FooterWrapper />
-				</div>
+				<FooterWrapper />
 			</SidebarInset>
 		</SidebarProvider>
 	);
