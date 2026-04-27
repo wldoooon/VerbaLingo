@@ -25,19 +25,35 @@ type Plan = {
 
 const plans: Plan[] = [
 	{
+		name: "Free",
+		info: "Try the core experience",
+		price: {
+			monthly: 0,
+			yearly: 0,
+		},
+		features: [
+			"50 Searches / month",
+			"60,000 AI Credits / month",
+			"Unlimited Translations",
+			"All languages included",
+		],
+		btn: {
+			text: "Get Started Free",
+			href: "#",
+		},
+	},
+	{
 		name: "Basic",
-		info: "For most individuals",
+		info: "For casual learners",
 		price: {
 			monthly: 7,
 			yearly: 5,
 		},
 		features: [
-			"Up to 3 Blog posts",
-			"Up to 3 Transcriptions",
-			"Up to 3 Posts stored",
-			"Markdown support",
-			"Community support",
-			"AI powered suggestions",
+			"300 Searches / month",
+			"800,000 AI Credits / month",
+			"Unlimited Translations",
+			"All languages included",
 		],
 		btn: {
 			text: "Start Your Free Trial",
@@ -47,19 +63,17 @@ const plans: Plan[] = [
 	{
 		highlighted: true,
 		name: "Pro",
-		info: "For small businesses",
+		info: "For committed learners",
 		price: {
-			monthly: 10,
-			yearly: 7,
+			monthly: 12,
+			yearly: 9,
 		},
 		features: [
-			"Up to 500 Blog Posts",
-			"Up to 500 Transcriptions",
-			"Up to 500 Posts stored",
-			"Unlimited Markdown support",
-			"SEO optimization tools",
+			"Unlimited Searches",
+			"5,000,000 AI Credits / month",
+			"Unlimited Translations",
 			"Priority support",
-			"AI powered suggestions",
+			"All languages included",
 		],
 		btn: {
 			text: "Get started",
@@ -68,22 +82,21 @@ const plans: Plan[] = [
 	},
 	{
 		name: "Max",
-		info: "For large organizations",
+		info: "For power users & daily practice",
 		price: {
-			monthly: 19,
-			yearly: 10,
+			monthly: 20,
+			yearly: 16,
 		},
 		features: [
-			"Unlimited Blog Posts",
-			"Unlimited Transcriptions",
-			"Unlimited Posts stored",
-			"Unlimited Markdown support",
-			"SEO optimization tools",
+			"Unlimited Searches",
+			"Unlimited AI Credits",
+			"Unlimited Translations",
 			"Priority support",
-			"AI powered suggestions",
+			"All languages included",
+			"Early access to new features",
 		],
 		btn: {
-			text: "Contact team",
+			text: "Get started",
 			href: "#",
 		},
 	},
@@ -107,7 +120,7 @@ export function PricingSection() {
 			</div>
 
 			<FrequencyToggle frequency={frequency} setFrequency={setFrequency} />
-			<div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-6 md:grid-cols-3">
+			<div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 				{plans.map((plan) => (
 					<PricingCard frequency={frequency} key={plan.name} plan={plan} />
 				))}

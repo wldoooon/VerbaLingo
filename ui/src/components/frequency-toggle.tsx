@@ -32,10 +32,10 @@ export function FrequencyToggle({
 					onClick={() => setFrequency(freq)}
 					type="button"
 				>
-					<span className="relative z-10">{freq}</span>
+					<span className={cn("relative z-10 transition-colors", frequency === freq ? "text-white" : "")}>{freq}</span>
 					{frequency === freq && (
 						<motion.span
-							className="absolute inset-0 z-10 rounded-xl bg-background mix-blend-difference dark:bg-foreground"
+							className="absolute inset-0 z-0 rounded-xl bg-orange-500"
 							layoutId="frequency"
 							transition={{ type: "spring", duration: 0.4 }}
 						/>

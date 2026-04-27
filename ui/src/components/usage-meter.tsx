@@ -51,9 +51,9 @@ export function UsageMeter() {
     const searches = usageMap["search"] ?? { current: 0, limit: 100, remaining: 100 }
     const sparks = usageMap["ai_chat"] ?? { current: 0, limit: 50_000, balance: 50_000 }
 
-    const sparkBalance = sparks.balance ?? sparks.remaining ?? 0
+    const sparkUsed = sparks.current ?? 0
     const sparkLimit = sparks.limit ?? 50_000
-    const sparkUsed = Math.max(0, sparkLimit - sparkBalance)
+    const sparkBalance = sparks.balance ?? sparks.remaining ?? Math.max(0, sparkLimit - sparkUsed)
 
     const searchRemaining = searches.remaining ?? Math.max(0, searches.limit - searches.current)
 
