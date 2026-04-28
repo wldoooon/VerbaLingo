@@ -159,11 +159,17 @@ export const fetchTranslateBatch = async (
   targetLang: string,
   sourceLang: string = "auto",
 ): Promise<TranslateBatchResponse> => {
+  console.log(`[TRANSLATE] → request  sentences=${sentences.length}  lang=${targetLang}  totalChars=${sentences.join("").length}`)
   const response = await apiClient.post<TranslateBatchResponse>(
     "/api/v1/translate",
     { sentences, target_lang: targetLang, source_lang: sourceLang },
   );
-  return response.data;
+  const data = response.data
+  console.log(`[TRANSLATE] ← response  translations=${data.translations?.length ?? 0}  expected=${sentences.length}  match=${data.translations?.length === sentences.length}`)
+  if (data.translations?.length !== sentences.length) {
+    console.warn(`[TRANSLATE] ⚠ count mismatch — sent ${sentences.length}, got ${data.translations?.length}`)
+  }
+  return data;
 };
 
 /**
@@ -180,8 +186,11 @@ export const useTranslateBatch = (
   const sentenceTexts = sentences.map((s) => s.sentence_text);
 
   return useQuery<TranslateBatchResponse, Error>({
-    queryKey: ["translation", videoId, position, targetLang],
-    queryFn: () => fetchTranslateBatch(sentenceTexts, targetLang!, "auto"),
+    queryKey: ["translation", videoId, position, targetLang, sentenceTexts.length],
+    queryFn: () => {
+      console.log(`[TRANSLATE] queryFn fired  video=${videoId}  position=${position}  sentences=${sentenceTexts.length}  lang=${targetLang}`)
+      return fetchTranslateBatch(sentenceTexts, targetLang!, "auto")
+    },
     enabled: !!videoId && !!targetLang && sentences.length > 0,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 30,
@@ -217,11 +226,6 @@ export const useTranslationPrefetch = (
 
       const clip = playlist[nextIndex];
       const transcriptKey = ["transcript", clip.video_id, language, clip.position] as const;
-      const translationKey = ["translation", clip.video_id, clip.position, targetLang] as const;
-
-      // Skip if translation already cached
-      if (queryClient.getQueryData(translationKey)) continue;
-
       // Wait for transcript (instant if cached, waits if in-flight, fetches if neither)
       queryClient
         .ensureQueryData<TranscriptResponse>({
@@ -232,6 +236,8 @@ export const useTranslationPrefetch = (
         .then((transcriptData) => {
           if (!transcriptData?.sentences?.length) return;
           const sentenceTexts = transcriptData.sentences.map((s: any) => s.sentence_text);
+          const translationKey = ["translation", clip.video_id, clip.position, targetLang, sentenceTexts.length];
+          if (queryClient.getQueryData(translationKey)) return;
           queryClient.prefetchQuery({
             queryKey: translationKey,
             queryFn: () => fetchTranslateBatch(sentenceTexts, targetLang, "auto"),

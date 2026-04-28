@@ -38,27 +38,35 @@ class TranslationService:
             return []
 
         joined = SEPARATOR.join(sentences)
+        joined_chars = len(joined)
+        logger.info(f"[TRANSLATE] START  sentences={len(sentences)}  chars={joined_chars}  lang={target_lang}")
 
         # Endpoint A — fastest, best quality, no rate limits
         try:
             translated_joined = await self._endpoint_a(joined, target_lang, source_lang)
             parts = translated_joined.split(SEPARATOR)
             if len(parts) == len(sentences):
+                logger.info(f"[TRANSLATE] endpoint_a OK  parts={len(parts)}")
                 return [p.strip() for p in parts]
             logger.warning(
-                f"Endpoint A separator mismatch: expected {len(sentences)}, got {len(parts)}. Falling back to B."
+                f"[TRANSLATE] endpoint_a separator mismatch: expected {len(sentences)}, got {len(parts)}. Falling back to B."
             )
         except Exception as e:
-            logger.warning(f"Endpoint A failed ({e}). Falling back to B.")
+            logger.warning(f"[TRANSLATE] endpoint_a FAILED ({type(e).__name__}: {e}). Falling back to B.")
 
         # Endpoint B — chunked to respect 5000 char limit, still one round-trip per chunk
         try:
-            return await self._endpoint_b_chunked(sentences, target_lang, source_lang)
+            result = await self._endpoint_b_chunked(sentences, target_lang, source_lang)
+            logger.info(f"[TRANSLATE] endpoint_b_chunked OK  result={len(result)}")
+            return result
         except Exception as e:
-            logger.warning(f"Endpoint B failed ({e}). Translating individually.")
+            logger.warning(f"[TRANSLATE] endpoint_b FAILED ({type(e).__name__}: {e}). Using parallel fallback.")
 
         # Last resort — all sentences in parallel, not sequential
-        return await self._parallel_fallback(sentences, target_lang, source_lang)
+        logger.warning(f"[TRANSLATE] parallel_fallback START  sentences={len(sentences)}")
+        result = await self._parallel_fallback(sentences, target_lang, source_lang)
+        logger.info(f"[TRANSLATE] parallel_fallback DONE  result={len(result)}")
+        return result
 
     async def _parallel_fallback(
         self, sentences: List[str], target_lang: str, source_lang: str

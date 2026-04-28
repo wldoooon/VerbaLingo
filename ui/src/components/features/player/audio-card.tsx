@@ -362,6 +362,7 @@ export default function AudioCard({
   const sentencesInClip = sanitizedSentences
 
   // Translate all sentences in one batch call — result cached forever by React Query
+  console.log(`[TRANSLATE HOOK] video=${currentClip?.video_id}  sentences=${sentencesInClip.length}  lang=${translationLang}  enabled=${!!currentClip?.video_id && !!translationLang && sentencesInClip.length > 0}`)
   const { data: translationData, isPending: isTranslationLoading } = useTranslateBatch(
     sentencesInClip,
     currentClip?.video_id || "",
