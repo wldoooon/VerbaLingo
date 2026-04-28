@@ -189,8 +189,16 @@ export const useTranslateBatch = (
 };
 
 /**
- * Prefetch translations for the next 2 clips, piggybacking on already-cached transcripts.
- * Mirrors useTranscriptPrefetch — call both together whenever currentIndex changes.
+ * Prefetch translations for the next 2 clips using a waterfall:
+ * wait for transcript to be ready (cached or in-flight), then immediately fire translation.
+ *
+ * Fixes two bugs from the old approach:
+ *  1. Off-by-one: started at i=0 (current clip), redundant with useTranslateBatch.
+ *  2. Race condition: getQueryData snapshot was always empty while transcript was in-flight,
+ *     so translation prefetch silently skipped every time.
+ *
+ * ensureQueryData deduplicates — if useTranscriptPrefetch already started the fetch,
+ * this just attaches to the same promise and waits for it to resolve.
  */
 export const useTranslationPrefetch = (
   playlist: any[],
@@ -203,24 +211,36 @@ export const useTranslationPrefetch = (
   useEffect(() => {
     if (!playlist || playlist.length === 0 || !targetLang) return;
 
-    const prefetchCount = 2;
-    for (let i = 0; i <= prefetchCount; i++) {
+    for (let i = 1; i <= 2; i++) {
       const nextIndex = currentIndex + i;
       if (nextIndex >= playlist.length) continue;
 
       const clip = playlist[nextIndex];
-      const transcriptData = queryClient.getQueryData<TranscriptResponse>([
-        "transcript", clip.video_id, language, clip.position,
-      ]);
+      const transcriptKey = ["transcript", clip.video_id, language, clip.position] as const;
+      const translationKey = ["translation", clip.video_id, clip.position, targetLang] as const;
 
-      if (!transcriptData?.sentences?.length) continue;
+      // Skip if translation already cached
+      if (queryClient.getQueryData(translationKey)) continue;
 
-      const sentenceTexts = transcriptData.sentences.map((s) => s.sentence_text);
-      queryClient.prefetchQuery({
-        queryKey: ["translation", clip.video_id, clip.position, targetLang],
-        queryFn: () => fetchTranslateBatch(sentenceTexts, targetLang, "auto"),
-        staleTime: Infinity,
-      });
+      // Wait for transcript (instant if cached, waits if in-flight, fetches if neither)
+      queryClient
+        .ensureQueryData<TranscriptResponse>({
+          queryKey: transcriptKey,
+          queryFn: () => fetchTranscript(clip.video_id, language, clip.position),
+          staleTime: 1000 * 60 * 5,
+        })
+        .then((transcriptData) => {
+          if (!transcriptData?.sentences?.length) return;
+          const sentenceTexts = transcriptData.sentences.map((s: any) => s.sentence_text);
+          queryClient.prefetchQuery({
+            queryKey: translationKey,
+            queryFn: () => fetchTranslateBatch(sentenceTexts, targetLang, "auto"),
+            staleTime: Infinity,
+          });
+        })
+        .catch(() => {
+          // Transcript fetch failed — translation will load on arrival, not a crash
+        });
     }
   }, [currentIndex, playlist, targetLang, language, queryClient]);
 };
