@@ -17,9 +17,11 @@ import {
   Loader2,
   Search,
   Check,
-  X,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
 import { useTranscript, useTranslateBatch, useTranslationPrefetch } from "@/lib/useApi"
@@ -183,6 +185,10 @@ function TranslationPicker({
   onSelect: (code: string | null) => void
 }) {
   const [search, setSearch] = useState("")
+  const lastLang = useRef<string>(current ?? TRANSLATION_LANGUAGES[0].code)
+
+  // Keep lastLang updated whenever a real language is selected
+  if (current) lastLang.current = current
 
   const filtered = TRANSLATION_LANGUAGES.filter(l =>
     l.label.toLowerCase().includes(search.toLowerCase())
@@ -198,23 +204,22 @@ function TranslationPicker({
           <Globe size={13} className="text-muted-foreground" />
           <span className="text-xs font-bold text-foreground">Translate to</span>
         </div>
-        {current && (
-          <button
-            onClick={() => onSelect(null)}
-            className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-destructive transition-colors"
-          >
-            <X size={11} />
-            Turn off
-          </button>
-        )}
+        <Switch
+          size="sm"
+          checked={!!current}
+          onCheckedChange={(checked) => {
+            if (checked) onSelect(lastLang.current)
+            else onSelect(null)
+          }}
+        />
       </div>
 
       {/* Active selection badge */}
       {selected && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border/40">
           <FlagImg url={selected.flagUrl} alt={selected.label} />
-          <span className="text-xs font-semibold text-primary flex-1">{selected.label}</span>
-          <Check size={13} className="text-primary" />
+          <span className="text-xs font-semibold text-foreground flex-1">{selected.label}</span>
+          <Check size={13} className="text-muted-foreground" />
         </div>
       )}
 
@@ -239,13 +244,13 @@ function TranslationPicker({
               className={cn(
                 "flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg text-xs font-medium transition-colors text-left",
                 current === lang.code
-                  ? "bg-primary/10 text-primary"
+                  ? "bg-muted text-foreground"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               <FlagImg url={lang.flagUrl} alt={lang.label} />
               <span className="flex-1">{lang.label}</span>
-              {current === lang.code && <Check size={12} className="text-primary" />}
+              {current === lang.code && <Check size={12} className="text-muted-foreground" />}
             </button>
           ))}
           {filtered.length === 0 && (
@@ -622,7 +627,7 @@ export default function AudioCard({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={cn("h-9 px-2 gap-1.5 cursor-pointer", translationLang ? "text-primary" : "")}
+                  className={cn("h-9 px-2 gap-1.5 cursor-pointer", translationLang ? "bg-muted text-foreground" : "")}
                 >
                   {translationLang
                     ? <FlagImg url={TRANSLATION_LANGUAGES.find(l => l.code === translationLang)?.flagUrl ?? ""} alt={translationLang} />
@@ -745,7 +750,7 @@ export default function AudioCard({
                 size="sm"
                 className={cn(
                   "gap-1.5 cursor-pointer transition-all",
-                  translationLang ? "text-primary bg-primary/5 hover:bg-primary/10" : ""
+                  translationLang ? "bg-muted text-foreground hover:bg-muted/80" : ""
                 )}
               >
                 {translationLang ? (
@@ -759,6 +764,7 @@ export default function AudioCard({
                     <span className="font-semibold text-xs">Translate</span>
                   </>
                 )}
+                {desktopTranslationOpen ? <ChevronUp size={12} className="text-muted-foreground" /> : <ChevronDown size={12} className="text-muted-foreground" />}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[260px] p-4 rounded-2xl shadow-xl" align="end">

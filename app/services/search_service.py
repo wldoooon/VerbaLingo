@@ -38,13 +38,29 @@ class SearchService:
         search_result["aggregations"] = aggregations
         return search_result
 
+    # ISO code → table name prefix (when the frontend sends a short code
+    # but the table was created with the full language name).
+    _ISO_TO_TABLE = {
+        "es": "spanish",
+        "fr": "french",
+        "de": "german",
+        "ja": "japanese",
+        "zh": "chinese",
+        "en": None,  # falls through to default table
+    }
+
     def _resolve_table(self, language: str) -> str:
         """Determines the correct Manticore table based on language."""
         if not language:
             return self.table_name
 
         lang = language.lower().strip()
-        if lang in ["english", "general"]:
+        if lang in ["english", "general", "en"]:
+            return self.table_name
+
+        # Normalise ISO codes to full names so both "es" and "spanish" work
+        lang = self._ISO_TO_TABLE.get(lang, lang)
+        if lang is None:
             return self.table_name
 
         return f"{lang}_dataset"
