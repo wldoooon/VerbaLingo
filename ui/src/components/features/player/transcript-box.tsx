@@ -18,6 +18,8 @@ type TranscriptBoxProps = {
   sentences: Sentence[]
   searchQuery: string
   isTranscriptLoading: boolean
+  isTranscriptError?: boolean
+  onRetry?: () => void
   isTranslationLoading?: boolean
   translatedMap?: Record<number, string>
   targetSentence?: Sentence | null
@@ -30,6 +32,8 @@ export const TranscriptBox = ({
   sentences,
   searchQuery,
   isTranscriptLoading,
+  isTranscriptError,
+  onRetry,
   isTranslationLoading,
   translatedMap,
   targetSentence,
@@ -124,6 +128,24 @@ export const TranscriptBox = ({
               <Skeleton className="h-6 w-3/4 rounded-full opacity-30" />
               <Skeleton className="h-6 w-1/2 rounded-full opacity-10" />
             </motion.div>
+          ) : isTranscriptError ? (
+            <motion.div
+              key="error"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center gap-2 text-center"
+            >
+              <p className="text-sm text-muted-foreground/60">Transcript unavailable for this clip.</p>
+              {onRetry && (
+                <button
+                  onClick={() => onRetry()}
+                  className="text-xs text-orange-500 hover:underline font-medium"
+                >
+                  Try again
+                </button>
+              )}
+            </motion.div>
           ) : trio ? (
             <motion.div
               key={trio.active.start_time}
@@ -133,28 +155,31 @@ export const TranscriptBox = ({
               transition={{ duration: 0.15, ease: "circOut" }}
               className="flex flex-col items-center gap-2 py-2"
             >
-              {/* Previous Context */}
-              <div className="opacity-30 scale-95 transition-all duration-300 pointer-events-none hidden sm:block">
-                {trio.prev && (
+              {/* Previous */}
+              {trio.prev && (
+                <div className="flex flex-col items-center gap-1 w-full hidden sm:flex">
                   <SentenceGroup
                     group={[trio.prev]}
                     searchQuery={searchQuery}
                     onSearchWord={onSearchWord}
                     onExplainWordInContext={onExplainWordInContext}
                   />
-                )}
-              </div>
-
-              {/* ACTIVE FOCUS + translation directly below */}
-              <div className="flex flex-col items-center gap-1 w-full border-y border-border/20 py-2">
-                <div className="transition-all duration-300">
-                  <SentenceGroup
-                    group={[trio.active]}
-                    searchQuery={searchQuery}
-                    onSearchWord={onSearchWord}
-                    onExplainWordInContext={onExplainWordInContext}
-                  />
+                  {translatedMap?.[trio.activeIdx - 1] && (
+                    <p className="text-sm sm:text-base font-medium text-muted-foreground/60 text-center px-4 leading-snug">
+                      {translatedMap[trio.activeIdx - 1]}
+                    </p>
+                  )}
                 </div>
+              )}
+
+              {/* Active + translation */}
+              <div className="flex flex-col items-center gap-1 w-full border-y border-border/20 py-2">
+                <SentenceGroup
+                  group={[trio.active]}
+                  searchQuery={searchQuery}
+                  onSearchWord={onSearchWord}
+                  onExplainWordInContext={onExplainWordInContext}
+                />
                 {isTranslationLoading ? (
                   <Skeleton className="h-5 w-2/3 rounded-full opacity-40" />
                 ) : translatedMap?.[trio.activeIdx] ? (
@@ -164,17 +189,22 @@ export const TranscriptBox = ({
                 ) : null}
               </div>
 
-              {/* Next Context */}
-              <div className="opacity-30 scale-95 transition-all duration-300 pointer-events-none hidden sm:block">
-                {trio.next && (
+              {/* Next */}
+              {trio.next && (
+                <div className="flex flex-col items-center gap-1 w-full hidden sm:flex">
                   <SentenceGroup
                     group={[trio.next]}
                     searchQuery={searchQuery}
                     onSearchWord={onSearchWord}
                     onExplainWordInContext={onExplainWordInContext}
                   />
-                )}
-              </div>
+                  {translatedMap?.[trio.activeIdx + 1] && (
+                    <p className="text-sm sm:text-base font-medium text-muted-foreground/60 text-center px-4 leading-snug">
+                      {translatedMap[trio.activeIdx + 1]}
+                    </p>
+                  )}
+                </div>
+              )}
             </motion.div>
           ) : (
             <motion.div

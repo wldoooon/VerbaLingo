@@ -1,186 +1,164 @@
-import React from 'react';
 import { Metadata } from 'next';
-import { DecorIcon } from '@/components/ui/decor-icon';
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "PokiSpokey privacy policy — how we collect, use, and protect your data.",
+  title: "Privacy Policy — PokiSpokey",
+  description: "How PokiSpokey collects, uses, and protects your data.",
 };
+
+const sections = [
+  { id: "introduction",  title: "Introduction" },
+  { id: "data-collected", title: "Data We Collect" },
+  { id: "how-we-use",   title: "How We Use It" },
+  { id: "sharing",      title: "Data Sharing" },
+  { id: "retention",    title: "Retention" },
+  { id: "security",     title: "Security" },
+  { id: "rights",       title: "Your Rights" },
+  { id: "cookies",      title: "Cookies" },
+  { id: "changes",      title: "Policy Changes" },
+  { id: "contact",      title: "Contact" },
+];
 
 export default function PrivacyPage() {
   return (
-    <div className="py-10 px-4">
-      <div className="max-w-4xl mx-auto border-t border-l border-border/40">
+    <div className="max-w-5xl mx-auto px-6 py-16">
+      <div className="lg:flex lg:gap-20">
 
-        {/* Header */}
-        <div className="relative border-r border-b border-border/40 px-10 py-14">
-          <DecorIcon position="top-left" />
-          <DecorIcon position="top-right" />
-          <DecorIcon position="bottom-left" />
-          <DecorIcon position="bottom-right" />
-          <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-foreground mb-4">
-            Privacy Policy
-          </h1>
-          <p className="text-sm text-muted-foreground">Last updated: March 13, 2026</p>
-        </div>
-
-        {/* Section 1 */}
-        <div className="relative border-r border-b border-border/40 px-10 py-8">
-          <DecorIcon position="top-left" />
-          <h2 className="text-xl font-bold text-foreground mb-3">1. Introduction</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            PokiSpokey ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains what personal data we collect when you use our language learning platform, how we use and store it, who we share it with, and what rights you have over your data. By using the Service, you consent to the practices described in this policy.
-          </p>
-        </div>
-
-        {/* Section 2 */}
-        <div className="relative border-r border-b border-border/40 px-10 py-8 bg-muted/20 dark:bg-muted/5">
-          <DecorIcon position="top-left" />
-          <h2 className="text-xl font-bold text-foreground mb-3">2. Information We Collect</h2>
-          <div className="text-muted-foreground leading-relaxed space-y-4">
-            <p>We collect the following categories of information:</p>
-
-            <h3 className="text-base font-semibold text-foreground mt-4">2.1 Account and Identity Data</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong className="text-foreground">Email address</strong> — collected at registration, used for authentication and service communications.</li>
-              <li><strong className="text-foreground">Display name</strong> — provided by you or derived from your Google account if you sign in via Google OAuth.</li>
-              <li><strong className="text-foreground">Profile picture URL</strong> — optionally provided via Google OAuth; stored as a reference URL only.</li>
-              <li><strong className="text-foreground">Password hash</strong> — if you register with email/password, we store a bcrypt-hashed version. We never store your plain-text password.</li>
-              <li><strong className="text-foreground">Subscription tier</strong> — your current plan (Free, Basic, Pro, Scholar Max, or VIP Unlimited).</li>
-            </ul>
-
-            <h3 className="text-base font-semibold text-foreground mt-4">2.2 Usage and Activity Data</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong className="text-foreground">Search queries</strong> — words and phrases you search, along with language and category filters.</li>
-              <li><strong className="text-foreground">AI Tutor conversations</strong> — messages you send and responses generated, logged for abuse monitoring.</li>
-              <li><strong className="text-foreground">Usage counters</strong> — monthly counts of searches, AI sessions, and AI Sparks consumed. Reset monthly.</li>
-              <li><strong className="text-foreground">Language and category preferences</strong> — persisted to improve your experience across sessions.</li>
-            </ul>
-
-            <h3 className="text-base font-semibold text-foreground mt-4">2.3 Technical and Device Data</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong className="text-foreground">IP address</strong> — logged on authentication events for security and rate-limiting.</li>
-              <li><strong className="text-foreground">Browser type and version</strong> — for compatibility and diagnostics.</li>
-              <li><strong className="text-foreground">Device type and operating system</strong> — for analytics and debugging.</li>
-              <li><strong className="text-foreground">Referrer URL and navigation patterns</strong> — to understand how users discover the Service.</li>
-            </ul>
-
-            <h3 className="text-base font-semibold text-foreground mt-4">2.4 Payment and Billing Data</h3>
-            <p>Payment processing is handled exclusively by <strong className="text-foreground">Polar.sh</strong>. We do not store your credit card details. We only store your Polar Customer ID and subscription history.</p>
+        {/* Sticky TOC */}
+        <aside className="hidden lg:block w-44 shrink-0">
+          <div className="sticky top-20">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-4">
+              On this page
+            </p>
+            <nav className="flex flex-col gap-0.5">
+              {sections.map((s) => (
+                <a
+                  key={s.id}
+                  href={`#${s.id}`}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors py-1 border-l-2 border-transparent hover:border-orange-500 pl-3"
+                >
+                  {s.title}
+                </a>
+              ))}
+            </nav>
           </div>
-        </div>
+        </aside>
 
-        {/* Section 3 */}
-        <div className="relative border-r border-b border-border/40 px-10 py-8">
-          <DecorIcon position="top-left" />
-          <h2 className="text-xl font-bold text-foreground mb-3">3. How We Use Your Data</h2>
-          <p className="text-muted-foreground leading-relaxed mb-3">We use the data we collect strictly for the following purposes. We do not sell your personal data.</p>
-          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-            <li><strong className="text-foreground">Service delivery</strong> — authentication, search, video playback, and AI Tutor.</li>
-            <li><strong className="text-foreground">Usage limit enforcement</strong> — tracking monthly search count and Sparks balance.</li>
-            <li><strong className="text-foreground">Billing and subscription management</strong> — via Polar.</li>
-            <li><strong className="text-foreground">Security and fraud prevention</strong> — detecting unauthorized access and abuse.</li>
-            <li><strong className="text-foreground">Service improvement</strong> — using anonymized, aggregated data.</li>
-            <li><strong className="text-foreground">Communications</strong> — transactional emails only (OTP, password reset, billing receipts).</li>
-            <li><strong className="text-foreground">Legal compliance</strong> — responding to lawful requests and enforcing our Terms.</li>
-          </ul>
-        </div>
-
-        {/* Section 4 */}
-        <div className="relative border-r border-b border-border/40 px-10 py-8 bg-muted/20 dark:bg-muted/5">
-          <DecorIcon position="top-left" />
-          <h2 className="text-xl font-bold text-foreground mb-3">4. Authentication and Session Management</h2>
-          <div className="text-muted-foreground leading-relaxed space-y-3">
-            <p>PokiSpokey uses stateless JWT authentication. When you log in, we issue a short-lived access token (30 minutes) and a longer-lived refresh token (7 days), stored in Redis with rotation on each use.</p>
-            <p>Access tokens are stored in your browser's memory or secure cookie storage. We do not use persistent tracking cookies for advertising. The only cookies we set are strictly necessary for authentication.</p>
+        {/* Content */}
+        <main className="flex-1 min-w-0">
+          <div className="mb-12 pb-8 border-b border-border/40">
+            <h1 className="text-4xl font-bold tracking-tight text-foreground mb-2">
+              Privacy Policy
+            </h1>
+            <p className="text-sm text-muted-foreground">Last updated: April 27, 2026</p>
           </div>
-        </div>
 
-        {/* Section 5 */}
-        <div className="relative border-r border-b border-border/40 px-10 py-8">
-          <DecorIcon position="top-left" />
-          <h2 className="text-xl font-bold text-foreground mb-3">5. Third-Party Services We Use</h2>
-          <ul className="list-disc pl-5 space-y-3 text-muted-foreground">
-            <li><strong className="text-foreground">Polar.sh</strong> — payment processing, PCI-DSS compliant.</li>
-            <li><strong className="text-foreground">Groq</strong> — AI inference for the AI Tutor. Conversation context is sent to Groq's API.</li>
-            <li><strong className="text-foreground">YouTube / Google</strong> — video delivery via the YouTube IFrame API. YouTube may set its own cookies.</li>
-            <li><strong className="text-foreground">Vercel</strong> — frontend hosting. May collect standard server logs including IP addresses.</li>
-            <li><strong className="text-foreground">Our VPS</strong> — FastAPI, PostgreSQL, Redis, and Manticore run on a self-hosted private VPS.</li>
-          </ul>
-        </div>
+          <div className="space-y-14 text-[15px] leading-relaxed text-muted-foreground">
 
-        {/* Section 6 */}
-        <div className="relative border-r border-b border-border/40 px-10 py-8 bg-muted/20 dark:bg-muted/5">
-          <DecorIcon position="top-left" />
-          <h2 className="text-xl font-bold text-foreground mb-3">6. Data Retention</h2>
-          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-            <li><strong className="text-foreground">Account data</strong> — retained until you request deletion.</li>
-            <li><strong className="text-foreground">Usage counters</strong> — reset monthly; historical totals retained for analytics.</li>
-            <li><strong className="text-foreground">AI Tutor logs</strong> — retained up to 90 days for abuse monitoring, then deleted.</li>
-            <li><strong className="text-foreground">Refresh tokens</strong> — expire after 7 days and are purged from Redis automatically.</li>
-            <li><strong className="text-foreground">Subscription history</strong> — retained for a minimum of 5 years for financial compliance.</li>
-          </ul>
-        </div>
+            <section id="introduction" className="scroll-mt-20">
+              <h2 className="text-base font-semibold text-foreground mb-3">Introduction</h2>
+              <p>
+                PokiSpokey ("we", "us") is committed to protecting your privacy. This policy explains what personal data we collect when you use our language learning platform, how we use it, who we share it with, and what rights you have. By using the Service you agree to the practices described here.
+              </p>
+            </section>
 
-        {/* Section 7 */}
-        <div className="relative border-r border-b border-border/40 px-10 py-8">
-          <DecorIcon position="top-left" />
-          <h2 className="text-xl font-bold text-foreground mb-3">7. Data Security</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            We implement industry-standard security: TLS/HTTPS for all data in transit, bcrypt password hashing, JWT signing with secure keys, Redis-based refresh token rotation, rate limiting, and IP-based abuse detection. No system is completely secure — we will notify affected users promptly in the event of a data breach.
-          </p>
-        </div>
+            <section id="data-collected" className="scroll-mt-20">
+              <h2 className="text-base font-semibold text-foreground mb-3">Data We Collect</h2>
+              <div className="space-y-5">
+                <div>
+                  <p className="font-medium text-foreground mb-1">Account data</p>
+                  <p>Email address, display name, and profile picture if you sign in with Google. Passwords are stored as one-way hashes — we never see your plain-text password.</p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground mb-1">Usage data</p>
+                  <p>Search queries, language preferences, and monthly search and AI credit counts. This data powers your usage meter and enforces plan limits.</p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground mb-1">Technical data</p>
+                  <p>IP address (for security and rate limiting), browser type, and device type. Used for diagnostics and abuse prevention only.</p>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground mb-1">Billing data</p>
+                  <p>Payments are handled entirely by Polar.sh. We store only your subscription status and customer reference — no card details ever touch our servers.</p>
+                </div>
+              </div>
+            </section>
 
-        {/* Section 8 */}
-        <div className="relative border-r border-b border-border/40 px-10 py-8 bg-muted/20 dark:bg-muted/5">
-          <DecorIcon position="top-left" />
-          <h2 className="text-xl font-bold text-foreground mb-3">8. Your Data Rights</h2>
-          <p className="text-muted-foreground leading-relaxed mb-3">Depending on your location, you may have rights under applicable law (GDPR, CCPA):</p>
-          <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-            <li><strong className="text-foreground">Access</strong> — request a copy of your personal data.</li>
-            <li><strong className="text-foreground">Rectification</strong> — request correction of inaccurate data.</li>
-            <li><strong className="text-foreground">Erasure</strong> — request deletion of your account and data.</li>
-            <li><strong className="text-foreground">Restriction</strong> — request limits on how we process your data.</li>
-            <li><strong className="text-foreground">Portability</strong> — request an export of your data.</li>
-            <li><strong className="text-foreground">Object</strong> — object to processing for certain purposes.</li>
-            <li><strong className="text-foreground">Withdraw Consent</strong> — withdraw consent at any time where processing is consent-based.</li>
-          </ul>
-          <p className="text-muted-foreground mt-3">
-            Contact us at{' '}
-            <a href="mailto:support@pokispokey.com" className="text-orange-500 hover:underline">support@pokispokey.com</a>. We respond within 30 days.
-          </p>
-        </div>
+            <section id="how-we-use" className="scroll-mt-20">
+              <h2 className="text-base font-semibold text-foreground mb-3">How We Use It</h2>
+              <p className="mb-3">We use your data strictly to operate and improve the Service. We do not sell your personal data.</p>
+              <ul className="list-disc pl-5 space-y-1.5">
+                <li>Authenticate you and manage your account</li>
+                <li>Deliver search, video playback, and AI features</li>
+                <li>Enforce plan limits and track usage</li>
+                <li>Send transactional emails (verification codes, billing receipts)</li>
+                <li>Detect and prevent abuse and unauthorized access</li>
+                <li>Improve the Service using anonymized, aggregated data</li>
+              </ul>
+            </section>
 
-        {/* Section 9 */}
-        <div className="relative border-r border-b border-border/40 px-10 py-8">
-          <DecorIcon position="top-left" />
-          <h2 className="text-xl font-bold text-foreground mb-3">9. Children's Privacy</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            The Service is not directed to children under 13. If we become aware that a child under 13 has provided personal data, we will delete it promptly. Contact us at{' '}
-            <a href="mailto:support@pokispokey.com" className="text-orange-500 hover:underline">support@pokispokey.com</a>.
-          </p>
-        </div>
+            <section id="sharing" className="scroll-mt-20">
+              <h2 className="text-base font-semibold text-foreground mb-3">Data Sharing</h2>
+              <p className="mb-3">We share data only with the services required to operate PokiSpokey:</p>
+              <ul className="list-disc pl-5 space-y-1.5">
+                <li><span className="text-foreground font-medium">Polar.sh</span> — payment processing (PCI-DSS compliant)</li>
+                <li><span className="text-foreground font-medium">Groq</span> — AI inference; your message is sent to generate a response</li>
+                <li><span className="text-foreground font-medium">YouTube</span> — video playback via the official IFrame API</li>
+                <li><span className="text-foreground font-medium">Vercel</span> — frontend hosting</li>
+              </ul>
+              <p className="mt-3">We do not share your data with advertisers or data brokers.</p>
+            </section>
 
-        {/* Section 10 */}
-        <div className="relative border-r border-b border-border/40 px-10 py-8 bg-muted/20 dark:bg-muted/5">
-          <DecorIcon position="top-left" />
-          <h2 className="text-xl font-bold text-foreground mb-3">10. Changes to This Policy</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            We may update this policy from time to time. We will update the "Last updated" date and notify registered users of material changes via email or an in-app notice.
-          </p>
-        </div>
+            <section id="retention" className="scroll-mt-20">
+              <h2 className="text-base font-semibold text-foreground mb-3">Retention</h2>
+              <ul className="list-disc pl-5 space-y-1.5">
+                <li>Account data is kept until you request deletion</li>
+                <li>Usage counters reset monthly; aggregate totals are retained for analytics</li>
+                <li>AI conversation logs are kept for up to 90 days for abuse monitoring, then permanently deleted</li>
+                <li>Billing history is retained for a minimum of 5 years for financial and legal compliance</li>
+              </ul>
+            </section>
 
-        {/* Section 11 — Contact footer box */}
-        <div className="relative border-r border-b border-border/40 px-10 py-8">
-          <DecorIcon position="top-left" />
-          <DecorIcon position="bottom-right" />
-          <h2 className="text-xl font-bold text-foreground mb-3">11. Contact</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Questions or requests? Reach us at{' '}
-            <a href="mailto:support@pokispokey.com" className="text-orange-500 hover:underline">support@pokispokey.com</a>.
-          </p>
-        </div>
+            <section id="security" className="scroll-mt-20">
+              <h2 className="text-base font-semibold text-foreground mb-3">Security</h2>
+              <p>All data is transmitted over TLS/HTTPS. Passwords are hashed before storage. We use short-lived authentication tokens with automatic rotation, rate limiting, and IP-based abuse detection. In the event of a confirmed data breach, we will notify affected users promptly.</p>
+            </section>
 
+            <section id="rights" className="scroll-mt-20">
+              <h2 className="text-base font-semibold text-foreground mb-3">Your Rights</h2>
+              <p className="mb-3">Depending on your location (GDPR, CCPA, and similar laws), you may have the right to:</p>
+              <ul className="list-disc pl-5 space-y-1.5">
+                <li>Access a copy of your personal data</li>
+                <li>Correct inaccurate information</li>
+                <li>Request deletion of your account and all associated data</li>
+                <li>Export your data in a portable format</li>
+                <li>Object to or restrict certain types of processing</li>
+              </ul>
+              <p className="mt-3">
+                To exercise any of these rights, email{' '}
+                <a href="mailto:support@pokispokey.com" className="text-orange-500 hover:underline">support@pokispokey.com</a>. We respond within 30 days.
+              </p>
+            </section>
+
+            <section id="cookies" className="scroll-mt-20">
+              <h2 className="text-base font-semibold text-foreground mb-3">Cookies</h2>
+              <p>We use only strictly necessary cookies for authentication. We do not use tracking, advertising, or analytics cookies. Disabling cookies in your browser will prevent login from functioning.</p>
+            </section>
+
+            <section id="changes" className="scroll-mt-20">
+              <h2 className="text-base font-semibold text-foreground mb-3">Policy Changes</h2>
+              <p>We may update this policy. The "Last updated" date at the top reflects the most recent revision. We will notify registered users of material changes via email or an in-app notice before they take effect.</p>
+            </section>
+
+            <section id="contact" className="scroll-mt-20 pb-16">
+              <h2 className="text-base font-semibold text-foreground mb-3">Contact</h2>
+              <p>
+                Questions or requests? Email us at{' '}
+                <a href="mailto:support@pokispokey.com" className="text-orange-500 hover:underline">support@pokispokey.com</a>.
+              </p>
+            </section>
+
+          </div>
+        </main>
       </div>
     </div>
   );

@@ -52,7 +52,7 @@ const LANGUAGES_ORDER = [
   { lang: SearchLanguage.ENGLISH, enabled: true },
   { lang: SearchLanguage.GERMAN, enabled: true },
   { lang: SearchLanguage.FRENCH, enabled: true },
-  { lang: SearchLanguage.SPANISH, enabled: false },
+  { lang: SearchLanguage.SPANISH, enabled: true },
   { lang: SearchLanguage.JAPANESE, enabled: false },
   { lang: SearchLanguage.CHINESE, enabled: false },
 ];

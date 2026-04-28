@@ -8,6 +8,7 @@ import manticoresearch
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from .core.redis import redis_client
 from .services.usage_service import sync_all_dirty_users
+from .services.translation_service import TranslationService
 
 from .core.config import get_settings
 from .core.manticore_client import get_manticore_configuration
@@ -81,6 +82,10 @@ async def lifespan(app: FastAPI):
     if app.state.api_client:
         await app.state.api_client.close()
         logger.info("Manticore client closed")
+
+    # Close shared translation HTTP client
+    await TranslationService.close()
+    logger.info("Translation HTTP client closed")
 
     # Close Redis connection pool
     await redis_client.close()

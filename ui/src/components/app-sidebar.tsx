@@ -34,13 +34,11 @@ export function AppSidebar() {
 				<div className="absolute -top-[1px] -inset-x-12 h-px bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
 				<div className="absolute -bottom-[1px] -inset-x-12 h-px bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
 			</div>
-			<SidebarHeader className="h-14 justify-center border-b border-border/40">
-				<SidebarMenuButton asChild>
-					<a href="/">
-						<Image src="/main_logo.png" alt="PokiSpokey" width={34} height={34} className="size-11" />
-						<span className="font-medium">PokiSpokey</span>
-					</a>
-				</SidebarMenuButton>
+			<SidebarHeader className="h-14 border-b border-border/40">
+				<a href="/" className="flex h-full w-full items-center gap-2 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+					<Image src="/main_logo.png" alt="PokiSpokey" width={34} height={34} className="size-9 shrink-0" />
+					<span className="font-medium group-data-[collapsible=icon]:hidden">PokiSpokey</span>
+				</a>
 			</SidebarHeader>
 			<SidebarContent>
 				<SidebarGroup>

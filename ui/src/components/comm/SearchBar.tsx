@@ -62,7 +62,7 @@ const LANGUAGES = [
     { value: 'English', label: 'English', flag: 'https://flagcdn.com/us.svg', available: true },
     { value: 'Germany', label: 'Deutsch', flag: 'https://flagcdn.com/de.svg', available: true },
     { value: 'French', label: 'Français', flag: 'https://flagcdn.com/fr.svg', available: true },
-    { value: 'Spanish', label: 'Español', flag: 'https://flagcdn.com/es.svg', available: false },
+    { value: 'Spanish', label: 'Español', flag: 'https://flagcdn.com/es.svg', available: true },
     { value: 'Japanese', label: '日本語', flag: 'https://flagcdn.com/jp.svg', available: false },
     { value: 'Chinese', label: '中文', flag: 'https://flagcdn.com/cn.svg', available: false },
 ];

@@ -159,11 +159,17 @@ export const fetchTranslateBatch = async (
   targetLang: string,
   sourceLang: string = "auto",
 ): Promise<TranslateBatchResponse> => {
+  console.log(`[TRANSLATE] → request  sentences=${sentences.length}  lang=${targetLang}  totalChars=${sentences.join("").length}`)
   const response = await apiClient.post<TranslateBatchResponse>(
     "/api/v1/translate",
     { sentences, target_lang: targetLang, source_lang: sourceLang },
   );
-  return response.data;
+  const data = response.data
+  console.log(`[TRANSLATE] ← response  translations=${data.translations?.length ?? 0}  expected=${sentences.length}  match=${data.translations?.length === sentences.length}`)
+  if (data.translations?.length !== sentences.length) {
+    console.warn(`[TRANSLATE] ⚠ count mismatch — sent ${sentences.length}, got ${data.translations?.length}`)
+  }
+  return data;
 };
 
 /**
@@ -180,8 +186,11 @@ export const useTranslateBatch = (
   const sentenceTexts = sentences.map((s) => s.sentence_text);
 
   return useQuery<TranslateBatchResponse, Error>({
-    queryKey: ["translation", videoId, position, targetLang],
-    queryFn: () => fetchTranslateBatch(sentenceTexts, targetLang!, "auto"),
+    queryKey: ["translation", videoId, position, targetLang, sentenceTexts.length],
+    queryFn: () => {
+      console.log(`[TRANSLATE] queryFn fired  video=${videoId}  position=${position}  sentences=${sentenceTexts.length}  lang=${targetLang}`)
+      return fetchTranslateBatch(sentenceTexts, targetLang!, "auto")
+    },
     enabled: !!videoId && !!targetLang && sentences.length > 0,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 30,
@@ -189,8 +198,16 @@ export const useTranslateBatch = (
 };
 
 /**
- * Prefetch translations for the next 2 clips, piggybacking on already-cached transcripts.
- * Mirrors useTranscriptPrefetch — call both together whenever currentIndex changes.
+ * Prefetch translations for the next 2 clips using a waterfall:
+ * wait for transcript to be ready (cached or in-flight), then immediately fire translation.
+ *
+ * Fixes two bugs from the old approach:
+ *  1. Off-by-one: started at i=0 (current clip), redundant with useTranslateBatch.
+ *  2. Race condition: getQueryData snapshot was always empty while transcript was in-flight,
+ *     so translation prefetch silently skipped every time.
+ *
+ * ensureQueryData deduplicates — if useTranscriptPrefetch already started the fetch,
+ * this just attaches to the same promise and waits for it to resolve.
  */
 export const useTranslationPrefetch = (
   playlist: any[],
@@ -203,24 +220,33 @@ export const useTranslationPrefetch = (
   useEffect(() => {
     if (!playlist || playlist.length === 0 || !targetLang) return;
 
-    const prefetchCount = 2;
-    for (let i = 0; i <= prefetchCount; i++) {
+    for (let i = 1; i <= 2; i++) {
       const nextIndex = currentIndex + i;
       if (nextIndex >= playlist.length) continue;
 
       const clip = playlist[nextIndex];
-      const transcriptData = queryClient.getQueryData<TranscriptResponse>([
-        "transcript", clip.video_id, language, clip.position,
-      ]);
-
-      if (!transcriptData?.sentences?.length) continue;
-
-      const sentenceTexts = transcriptData.sentences.map((s) => s.sentence_text);
-      queryClient.prefetchQuery({
-        queryKey: ["translation", clip.video_id, clip.position, targetLang],
-        queryFn: () => fetchTranslateBatch(sentenceTexts, targetLang, "auto"),
-        staleTime: Infinity,
-      });
+      const transcriptKey = ["transcript", clip.video_id, language, clip.position] as const;
+      // Wait for transcript (instant if cached, waits if in-flight, fetches if neither)
+      queryClient
+        .ensureQueryData<TranscriptResponse>({
+          queryKey: transcriptKey,
+          queryFn: () => fetchTranscript(clip.video_id, language, clip.position),
+          staleTime: 1000 * 60 * 5,
+        })
+        .then((transcriptData) => {
+          if (!transcriptData?.sentences?.length) return;
+          const sentenceTexts = transcriptData.sentences.map((s: any) => s.sentence_text);
+          const translationKey = ["translation", clip.video_id, clip.position, targetLang, sentenceTexts.length];
+          if (queryClient.getQueryData(translationKey)) return;
+          queryClient.prefetchQuery({
+            queryKey: translationKey,
+            queryFn: () => fetchTranslateBatch(sentenceTexts, targetLang, "auto"),
+            staleTime: Infinity,
+          });
+        })
+        .catch(() => {
+          // Transcript fetch failed — translation will load on arrival, not a crash
+        });
     }
   }, [currentIndex, playlist, targetLang, language, queryClient]);
 };

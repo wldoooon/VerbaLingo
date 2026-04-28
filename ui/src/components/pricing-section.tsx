@@ -6,7 +6,8 @@ import Link from "next/link";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { type FREQUENCY, FrequencyToggle } from "@/components/frequency-toggle";
-import { StarIcon, CheckCircleIcon } from "lucide-react";
+import { StarIcon, CheckCircleIcon, ShieldCheckIcon, BadgeCheckIcon, LockIcon, RefreshCcwIcon } from "lucide-react";
+import { useAuthStore } from "@/stores/auth-store";
 
 type Plan = {
 	name: string;
@@ -25,19 +26,35 @@ type Plan = {
 
 const plans: Plan[] = [
 	{
+		name: "Free",
+		info: "Try the core experience",
+		price: {
+			monthly: 0,
+			yearly: 0,
+		},
+		features: [
+			"50 Searches / month",
+			"60,000 AI Credits / month",
+			"Unlimited Translations",
+			"All languages included",
+		],
+		btn: {
+			text: "Get Started Free",
+			href: "#",
+		},
+	},
+	{
 		name: "Basic",
-		info: "For most individuals",
+		info: "For casual learners",
 		price: {
 			monthly: 7,
 			yearly: 5,
 		},
 		features: [
-			"Up to 3 Blog posts",
-			"Up to 3 Transcriptions",
-			"Up to 3 Posts stored",
-			"Markdown support",
-			"Community support",
-			"AI powered suggestions",
+			"300 Searches / month",
+			"800,000 AI Credits / month",
+			"Unlimited Translations",
+			"All languages included",
 		],
 		btn: {
 			text: "Start Your Free Trial",
@@ -47,19 +64,17 @@ const plans: Plan[] = [
 	{
 		highlighted: true,
 		name: "Pro",
-		info: "For small businesses",
+		info: "For committed learners",
 		price: {
-			monthly: 10,
-			yearly: 7,
+			monthly: 12,
+			yearly: 9,
 		},
 		features: [
-			"Up to 500 Blog Posts",
-			"Up to 500 Transcriptions",
-			"Up to 500 Posts stored",
-			"Unlimited Markdown support",
-			"SEO optimization tools",
+			"Unlimited Searches",
+			"5,000,000 AI Credits / month",
+			"Unlimited Translations",
 			"Priority support",
-			"AI powered suggestions",
+			"All languages included",
 		],
 		btn: {
 			text: "Get started",
@@ -68,22 +83,21 @@ const plans: Plan[] = [
 	},
 	{
 		name: "Max",
-		info: "For large organizations",
+		info: "For power users & daily practice",
 		price: {
-			monthly: 19,
-			yearly: 10,
+			monthly: 20,
+			yearly: 16,
 		},
 		features: [
-			"Unlimited Blog Posts",
-			"Unlimited Transcriptions",
-			"Unlimited Posts stored",
-			"Unlimited Markdown support",
-			"SEO optimization tools",
+			"Unlimited Searches",
+			"Unlimited AI Credits",
+			"Unlimited Translations",
 			"Priority support",
-			"AI powered suggestions",
+			"All languages included",
+			"Early access to new features",
 		],
 		btn: {
-			text: "Contact team",
+			text: "Get started",
 			href: "#",
 		},
 	},
@@ -93,6 +107,8 @@ export function PricingSection() {
 	const [frequency, setFrequency] = React.useState<"monthly" | "yearly">(
 		"monthly"
 	);
+	const user = useAuthStore((s) => s.user);
+	const userTier = user?.tier?.toLowerCase() ?? null;
 
 	return (
 		<div className="flex w-full flex-col items-center justify-center space-y-7 p-4">
@@ -107,10 +123,29 @@ export function PricingSection() {
 			</div>
 
 			<FrequencyToggle frequency={frequency} setFrequency={setFrequency} />
-			<div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-6 md:grid-cols-3">
+			<div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
 				{plans.map((plan) => (
-					<PricingCard frequency={frequency} key={plan.name} plan={plan} />
+					<PricingCard frequency={frequency} key={plan.name} plan={plan} userTier={userTier} />
 				))}
+			</div>
+
+			<div className="flex flex-wrap items-center justify-center gap-6 text-muted-foreground text-xs">
+				<div className="flex items-center gap-1.5">
+					<LockIcon className="size-3.5" />
+					<span>Secure payment</span>
+				</div>
+				<div className="flex items-center gap-1.5">
+					<BadgeCheckIcon className="size-3.5" />
+					<span>No hidden fees</span>
+				</div>
+				<div className="flex items-center gap-1.5">
+					<RefreshCcwIcon className="size-3.5" />
+					<span>Cancel anytime</span>
+				</div>
+				<div className="flex items-center gap-1.5">
+					<ShieldCheckIcon className="size-3.5" />
+					<span>Privacy protected</span>
+				</div>
 			</div>
 		</div>
 	);
@@ -119,14 +154,17 @@ export function PricingSection() {
 type PricingCardProps = React.ComponentProps<"div"> & {
 	plan: Plan;
 	frequency?: FREQUENCY;
+	userTier?: string | null;
 };
 
 export function PricingCard({
 	plan,
 	className,
 	frequency = "monthly",
+	userTier,
 	...props
 }: PricingCardProps) {
+	const isCurrentPlan = userTier === plan.name.toLowerCase();
 	return (
 		<div
 			className={cn(
@@ -150,12 +188,12 @@ export function PricingCard({
 					<div className="absolute top-2 right-2 z-10 flex items-center gap-2">
 						{plan.highlighted && (
 							<motion.div
-								className="flex items-center gap-1 rounded-md border bg-background px-2 py-0.5 text-xs"
+								className="flex items-center gap-1 rounded-md border border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-xs text-orange-500"
 								key="popular-badge"
 								layout
 								transition={{ duration: 0.1 }}
 							>
-								<StarIcon className="size-3 fill-current" />
+								<StarIcon className="size-3 fill-orange-500 text-orange-500" />
 								Popular
 							</motion.div>
 						)}
@@ -220,13 +258,19 @@ export function PricingCard({
 					plan.highlighted && "bg-card dark:bg-card/80"
 				)}
 			>
-				<Button
-					asChild
-					className="w-full"
-					variant={plan.highlighted ? "default" : "outline"}
-				>
-					<Link href={plan.btn.href}>{plan.btn.text}</Link>
-				</Button>
+				{isCurrentPlan ? (
+					<Button className="w-full" variant="secondary" disabled>
+						Current Plan
+					</Button>
+				) : (
+					<Button
+						asChild
+						className="w-full"
+						variant={plan.highlighted ? "default" : "outline"}
+					>
+						<Link href={plan.btn.href}>{plan.btn.text}</Link>
+					</Button>
+				)}
 			</div>
 		</div>
 	);

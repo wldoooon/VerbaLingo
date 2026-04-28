@@ -14,7 +14,14 @@ import {
   Repeat,
   Gauge,
   Globe,
+  Loader2,
+  Search,
+  Check,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { useSearchStore } from "@/stores/use-search-store"
 import { useTranscript, useTranslateBatch, useTranslationPrefetch } from "@/lib/useApi"
@@ -123,20 +130,52 @@ function SpeedPicker({ currentRate, onSelect }: { currentRate: number; onSelect:
 }
 // ────────────────────────────────────────────────────────────────────────────
 
+const flag = (cc: string) => `https://flagcdn.com/${cc}.svg`
+
 const TRANSLATION_LANGUAGES = [
-  { code: "ar", label: "Arabic" },
-  { code: "fr", label: "French" },
-  { code: "es", label: "Spanish" },
-  { code: "de", label: "German" },
-  { code: "tr", label: "Turkish" },
-  { code: "pt", label: "Portuguese" },
-  { code: "ru", label: "Russian" },
-  { code: "zh-CN", label: "Chinese" },
-  { code: "ja", label: "Japanese" },
-  { code: "hi", label: "Hindi" },
-  { code: "ko", label: "Korean" },
-  { code: "vi", label: "Vietnamese" },
+  { code: "ar", label: "Arabic",     flagUrl: flag("sa") },
+  { code: "fr", label: "French",     flagUrl: flag("fr") },
+  { code: "es", label: "Spanish",    flagUrl: flag("es") },
+  { code: "de", label: "German",     flagUrl: flag("de") },
+  { code: "tr", label: "Turkish",    flagUrl: flag("tr") },
+  { code: "pt", label: "Portuguese", flagUrl: flag("br") },
+  { code: "ru", label: "Russian",    flagUrl: flag("ru") },
+  { code: "zh-CN", label: "Chinese", flagUrl: flag("cn") },
+  { code: "ja", label: "Japanese",   flagUrl: flag("jp") },
+  { code: "hi", label: "Hindi",      flagUrl: flag("in") },
+  { code: "ko", label: "Korean",     flagUrl: flag("kr") },
+  { code: "vi", label: "Vietnamese", flagUrl: flag("vn") },
+  { code: "it", label: "Italian",    flagUrl: flag("it") },
+  { code: "nl", label: "Dutch",      flagUrl: flag("nl") },
+  { code: "pl", label: "Polish",     flagUrl: flag("pl") },
+  { code: "sv", label: "Swedish",    flagUrl: flag("se") },
+  { code: "el", label: "Greek",      flagUrl: flag("gr") },
+  { code: "cs", label: "Czech",      flagUrl: flag("cz") },
+  { code: "ro", label: "Romanian",   flagUrl: flag("ro") },
+  { code: "hu", label: "Hungarian",  flagUrl: flag("hu") },
+  { code: "th", label: "Thai",       flagUrl: flag("th") },
+  { code: "id", label: "Indonesian", flagUrl: flag("id") },
+  { code: "ms", label: "Malay",      flagUrl: flag("my") },
+  { code: "he", label: "Hebrew",     flagUrl: flag("il") },
+  { code: "bn", label: "Bengali",    flagUrl: flag("bd") },
+  { code: "ur", label: "Urdu",       flagUrl: flag("pk") },
+  { code: "fa", label: "Persian",    flagUrl: flag("ir") },
+  { code: "uk", label: "Ukrainian",  flagUrl: flag("ua") },
+  { code: "bg", label: "Bulgarian",  flagUrl: flag("bg") },
+  { code: "hr", label: "Croatian",   flagUrl: flag("hr") },
+  { code: "sk", label: "Slovak",     flagUrl: flag("sk") },
+  { code: "da", label: "Danish",     flagUrl: flag("dk") },
+  { code: "fi", label: "Finnish",    flagUrl: flag("fi") },
+  { code: "no", label: "Norwegian",  flagUrl: flag("no") },
 ]
+
+function FlagImg({ url, alt }: { url: string; alt: string }) {
+  return (
+    <div className="w-5 h-5 rounded-full overflow-hidden border border-border/30 shadow-sm flex-shrink-0">
+      <img src={url} alt={alt} className="w-full h-full object-cover" />
+    </div>
+  )
+}
 
 function TranslationPicker({
   current,
@@ -145,34 +184,79 @@ function TranslationPicker({
   current: string | null
   onSelect: (code: string | null) => void
 }) {
+  const [search, setSearch] = useState("")
+  const lastLang = useRef<string>(current ?? TRANSLATION_LANGUAGES[0].code)
+
+  // Keep lastLang updated whenever a real language is selected
+  if (current) lastLang.current = current
+
+  const filtered = TRANSLATION_LANGUAGES.filter(l =>
+    l.label.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const selected = TRANSLATION_LANGUAGES.find(l => l.code === current)
+
   return (
-    <div className="flex flex-col gap-3 p-1">
+    <div className="flex flex-col gap-3">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Translate to</span>
-        {current && (
-          <button
-            onClick={() => onSelect(null)}
-            className="text-[10px] font-bold text-destructive hover:underline"
-          >
-            Off
-          </button>
-        )}
+        <div className="flex items-center gap-1.5">
+          <Globe size={13} className="text-muted-foreground" />
+          <span className="text-xs font-bold text-foreground">Translate to</span>
+        </div>
+        <Switch
+          size="sm"
+          checked={!!current}
+          onCheckedChange={(checked) => {
+            if (checked) onSelect(lastLang.current)
+            else onSelect(null)
+          }}
+        />
       </div>
-      <div className="grid grid-cols-2 gap-1">
-        {TRANSLATION_LANGUAGES.map((lang) => (
-          <button
-            key={lang.code}
-            onClick={() => onSelect(current === lang.code ? null : lang.code)}
-            className={cn(
-              "text-left px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors",
-              current === lang.code
-                ? "bg-primary text-primary-foreground"
-                : "hover:bg-muted text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {lang.label}
-          </button>
-        ))}
+
+      {/* Active selection badge */}
+      {selected && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border/40">
+          <FlagImg url={selected.flagUrl} alt={selected.label} />
+          <span className="text-xs font-semibold text-foreground flex-1">{selected.label}</span>
+          <Check size={13} className="text-muted-foreground" />
+        </div>
+      )}
+
+      {/* Search */}
+      <div className="relative">
+        <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+        <Input
+          placeholder="Search language..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="pl-7 h-8 text-xs rounded-lg bg-muted/50 border-border/40 focus-visible:ring-1"
+        />
+      </div>
+
+      {/* Language list */}
+      <div className="max-h-[220px] overflow-y-auto -mx-1 px-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+        <div className="flex flex-col gap-0.5">
+          {filtered.map(lang => (
+            <button
+              key={lang.code}
+              onClick={() => onSelect(current === lang.code ? null : lang.code)}
+              className={cn(
+                "flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg text-xs font-medium transition-colors text-left",
+                current === lang.code
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              <FlagImg url={lang.flagUrl} alt={lang.label} />
+              <span className="flex-1">{lang.label}</span>
+              {current === lang.code && <Check size={12} className="text-muted-foreground" />}
+            </button>
+          ))}
+          {filtered.length === 0 && (
+            <p className="text-center text-xs text-muted-foreground py-6">No languages found</p>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -189,6 +273,7 @@ type AudioCardProps = {
   searchQuery?: string
   language?: string
   isLoading?: boolean
+  isFetchingNextPage?: boolean
 }
 
 export default function AudioCard({
@@ -200,6 +285,7 @@ export default function AudioCard({
   searchQuery = "",
   language: propLanguage,
   isLoading: isParentLoading,
+  isFetchingNextPage,
   onExplainWordPrompt,
   onTranscriptDetermined
 }: AudioCardProps & {
@@ -250,10 +336,15 @@ export default function AudioCard({
   const { setQuery, setCategory, language: storeLanguage, translationLang, setTranslationLang } = useSearchStore()
   const activeLanguage = propLanguage || storeLanguage || "english"
 
-  // True end of playlist — all clips loaded AND at last one
+  // True end — all clips loaded AND at last one
   const isAtEnd = currentVideoIndex >= playlist.length - 1 &&
     playlist.length >= (totalItems ?? playlist.length) &&
     playlist.length > 0
+
+  // At the last loaded clip but more pages exist — fetching them right now
+  const isWaitingForNextPage = !isAtEnd &&
+    currentVideoIndex >= playlist.length - 1 &&
+    !!isFetchingNextPage
 
   // Fetch transcript — guard against undefined clip to avoid empty-ID requests
   const transcriptFetchStart = useRef<number>(performance.now())
@@ -264,7 +355,7 @@ export default function AudioCard({
     }
   }, [currentClip?.video_id, currentVideoIndex])
 
-  const { data: transcriptData, isPending: isTranscriptLoading } = useTranscript(
+  const { data: transcriptData, isPending: isTranscriptLoading, isError: isTranscriptError, refetch: refetchTranscript } = useTranscript(
     !isParentLoading && !!currentClip ? (currentClip.video_id || "") : "",
     activeLanguage,
     currentClip?.position
@@ -310,10 +401,10 @@ export default function AudioCard({
     const handleKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName
       if (tag === "INPUT" || tag === "TEXTAREA") return
-      const { guardedAction, togglePlayPause, skipBackward, skipForward } = controlsRef.current
-      if (e.code === "Space") { e.preventDefault(); guardedAction(togglePlayPause) }
-      else if (e.key === "ArrowLeft") { e.preventDefault(); guardedAction(skipBackward) }
-      else if (e.key === "ArrowRight") { e.preventDefault(); guardedAction(skipForward) }
+      const { togglePlayPause, skipBackward, skipForward } = controlsRef.current
+      if (e.code === "Space") { e.preventDefault(); togglePlayPause() }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); skipBackward() }
+      else if (e.key === "ArrowRight") { e.preventDefault(); skipForward() }
     }
     window.addEventListener("keydown", handleKey)
     return () => window.removeEventListener("keydown", handleKey)
@@ -354,6 +445,7 @@ export default function AudioCard({
   const sentencesInClip = sanitizedSentences
 
   // Translate all sentences in one batch call — result cached forever by React Query
+  console.log(`[TRANSLATE HOOK] video=${currentClip?.video_id}  sentences=${sentencesInClip.length}  lang=${translationLang}  enabled=${!!currentClip?.video_id && !!translationLang && sentencesInClip.length > 0}`)
   const { data: translationData, isPending: isTranslationLoading } = useTranslateBatch(
     sentencesInClip,
     currentClip?.video_id || "",
@@ -378,6 +470,9 @@ export default function AudioCard({
   // video_ids (same YouTube video at different timestamps) still re-trigger correctly
   useEffect(() => {
     hasStartedPlayback.current = false
+
+    // No cooldown on the first clip — only apply when the user has navigated past it
+    if (currentVideoIndex === 0) return
 
     setNextCooldown(5)
     if (nextTimerRef.current) clearInterval(nextTimerRef.current)
@@ -484,10 +579,10 @@ export default function AudioCard({
           </Popover>
 
           <div className="flex items-center justify-center gap-1 flex-1">
-            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => guardedAction(prevVideo)}>
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => guardedAction(prevVideo)} disabled={currentVideoIndex === 0}>
               <SkipBack size={16} />
             </Button>
-            <Button size="icon" className="h-10 w-10 rounded-full" onClick={() => guardedAction(togglePlayPause)}>
+            <Button size="icon" className="h-10 w-10 rounded-full" onClick={togglePlayPause}>
               {isPlaying ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
             </Button>
             <Button
@@ -495,10 +590,12 @@ export default function AudioCard({
               size="icon"
               className="h-9 w-9 relative"
               onClick={() => guardedAction(nextVideo)}
-              disabled={nextCooldown > 0 || isAtEnd}
+              disabled={nextCooldown > 0 || isAtEnd || isWaitingForNextPage}
             >
               {nextCooldown > 0 ? (
                 <span className="text-[10px] font-black text-primary animate-pulse">{nextCooldown}s</span>
+              ) : isWaitingForNextPage ? (
+                <Loader2 size={14} className="animate-spin text-muted-foreground" />
               ) : isAtEnd ? (
                 <span className="text-[10px] font-bold text-muted-foreground">End</span>
               ) : (
@@ -508,12 +605,11 @@ export default function AudioCard({
           </div>
 
           <div className="flex items-center gap-1">
-            {/* Repeat — now correctly disabled on mobile when no target sentence */}
             <Button
               variant="ghost"
               size="icon"
               className={cn("h-9 w-9", targetSentence ? "text-primary" : "")}
-              onClick={() => guardedAction(repeatTargetSentence)}
+              onClick={repeatTargetSentence}
               disabled={!targetSentence}
             >
               <Repeat size={16} />
@@ -530,13 +626,16 @@ export default function AudioCard({
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className={cn("h-9 w-9", translationLang ? "text-primary" : "")}
+                  size="sm"
+                  className={cn("h-9 px-2 gap-1.5 cursor-pointer", translationLang ? "bg-muted text-foreground" : "")}
                 >
-                  <Globe size={16} />
+                  {translationLang
+                    ? <FlagImg url={TRANSLATION_LANGUAGES.find(l => l.code === translationLang)?.flagUrl ?? ""} alt={translationLang} />
+                    : <Globe size={15} />
+                  }
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[220px] p-4 rounded-2xl" side="top" align="end">
+              <PopoverContent className="w-[260px] p-4 rounded-2xl" side="top" align="end">
                 <TranslationPicker current={translationLang} onSelect={setTranslationLang} />
               </PopoverContent>
             </Popover>
@@ -576,28 +675,28 @@ export default function AudioCard({
           )}
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(prevVideo)}>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(prevVideo)} disabled={currentVideoIndex === 0}>
               <SkipBack size={20} />
             </Button>
             <span className="text-xs text-muted-foreground">Previous</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(skipBackward)}>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={skipBackward}>
               <RotateCcw size={20} />
             </Button>
             <span className="text-xs text-muted-foreground">-10s</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button size="icon" className="h-12 w-12 rounded-full bg-primary cursor-pointer" onClick={() => guardedAction(togglePlayPause)}>
+            <Button size="icon" className="h-12 w-12 rounded-full bg-primary cursor-pointer" onClick={togglePlayPause}>
               {isPlaying ? <Pause size={22} /> : <Play size={22} className="ml-0.5" />}
             </Button>
             <span className="text-xs text-muted-foreground">{isPlaying ? "Pause" : "Play"}</span>
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={() => guardedAction(skipForward)}>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full cursor-pointer" onClick={skipForward}>
               <RotateCcw size={20} className="scale-x-[-1]" />
             </Button>
             <span className="text-xs text-muted-foreground">+10s</span>
@@ -608,7 +707,7 @@ export default function AudioCard({
               variant="ghost"
               size="icon"
               className="h-11 w-11 rounded-full cursor-pointer"
-              onClick={() => guardedAction(repeatTargetSentence)}
+              onClick={repeatTargetSentence}
               disabled={!targetSentence}
             >
               <Repeat size={20} />
@@ -622,12 +721,14 @@ export default function AudioCard({
               size="icon"
               className="h-11 w-11 rounded-full cursor-pointer relative"
               onClick={() => guardedAction(nextVideo)}
-              disabled={nextCooldown > 0 || isAtEnd}
+              disabled={nextCooldown > 0 || isAtEnd || isWaitingForNextPage}
             >
               {nextCooldown > 0 ? (
                 <div className="flex items-center justify-center h-full w-full">
                   <span className="text-sm font-black text-primary animate-in zoom-in duration-300">{nextCooldown}s</span>
                 </div>
+              ) : isWaitingForNextPage ? (
+                <Loader2 size={18} className="animate-spin text-muted-foreground" />
               ) : isAtEnd ? (
                 <span className="text-xs font-bold text-muted-foreground">End</span>
               ) : (
@@ -635,7 +736,7 @@ export default function AudioCard({
               )}
             </Button>
             <span className="text-xs text-muted-foreground">
-              {nextCooldown > 0 ? "Wait..." : isAtEnd ? "End" : "Next"}
+              {nextCooldown > 0 ? "Wait..." : isWaitingForNextPage ? "Loading" : isAtEnd ? "End" : "Next"}
             </span>
           </div>
         </div>
@@ -647,17 +748,26 @@ export default function AudioCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("gap-2 cursor-pointer", translationLang ? "text-primary" : "")}
+                className={cn(
+                  "gap-1.5 cursor-pointer transition-all",
+                  translationLang ? "bg-muted text-foreground hover:bg-muted/80" : ""
+                )}
               >
-                <Globe size={18} />
-                <span className="font-semibold text-xs">
-                  {translationLang
-                    ? TRANSLATION_LANGUAGES.find(l => l.code === translationLang)?.label ?? translationLang
-                    : "Translate"}
-                </span>
+                {translationLang ? (
+                  <>
+                    <FlagImg url={TRANSLATION_LANGUAGES.find(l => l.code === translationLang)?.flagUrl ?? ""} alt={translationLang} />
+                    <span className="font-semibold text-xs">{TRANSLATION_LANGUAGES.find(l => l.code === translationLang)?.label}</span>
+                  </>
+                ) : (
+                  <>
+                    <Globe size={15} />
+                    <span className="font-semibold text-xs">Translate</span>
+                  </>
+                )}
+                {desktopTranslationOpen ? <ChevronUp size={12} className="text-muted-foreground" /> : <ChevronDown size={12} className="text-muted-foreground" />}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[220px] p-4 rounded-2xl shadow-xl" align="end">
+            <PopoverContent className="w-[260px] p-4 rounded-2xl shadow-xl" align="end">
               <TranslationPicker current={translationLang} onSelect={setTranslationLang} />
             </PopoverContent>
           </Popover>
@@ -680,6 +790,8 @@ export default function AudioCard({
         sentences={sentencesInClip}
         searchQuery={searchQuery}
         isTranscriptLoading={isTranscriptLoading}
+        isTranscriptError={isTranscriptError}
+        onRetry={refetchTranscript}
         isTranslationLoading={!!translationLang && isTranslationLoading}
         translatedMap={translatedMap}
         targetSentence={targetSentence}
