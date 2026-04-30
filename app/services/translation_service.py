@@ -62,10 +62,17 @@ class TranslationService:
         except Exception as e:
             logger.warning(f"[TRANSLATE] endpoint_b FAILED ({type(e).__name__}: {e}). Using parallel fallback.")
 
-        # Last resort — all sentences in parallel, not sequential
+        # Last resort — all sentences in parallel (includes MyMemory as endpoint C)
         logger.warning(f"[TRANSLATE] parallel_fallback START  sentences={len(sentences)}")
         result = await self._parallel_fallback(sentences, target_lang, source_lang)
         logger.info(f"[TRANSLATE] parallel_fallback DONE  result={len(result)}")
+
+        # If every sentence came back identical to the original, all endpoints are blocked.
+        # Raise so the route returns 503 — the frontend will show an error instead of
+        # silently caching the original text as a "translation".
+        if all(t.strip() == s.strip() for t, s in zip(result, sentences)):
+            raise RuntimeError(f"All translation endpoints failed for lang={target_lang}")
+
         return result
 
     async def _parallel_fallback(
@@ -76,10 +83,15 @@ class TranslationService:
             try:
                 return await self._endpoint_a(sentence, target_lang, source_lang)
             except Exception:
-                try:
-                    return await self._endpoint_b_single(sentence, target_lang, source_lang)
-                except Exception:
-                    return sentence  # return original if everything fails
+                pass
+            try:
+                return await self._endpoint_b_single(sentence, target_lang, source_lang)
+            except Exception:
+                pass
+            try:
+                return await self._endpoint_c_mymemory(sentence, target_lang, source_lang)
+            except Exception:
+                return sentence  # return original only as absolute last resort
 
         return list(await asyncio.gather(*[translate_one(s) for s in sentences]))
 
@@ -143,6 +155,23 @@ class TranslationService:
             return await self._endpoint_b_single(sentence, target_lang, source_lang)
         except Exception:
             return sentence
+
+    async def _endpoint_c_mymemory(self, text: str, target_lang: str, source_lang: str = "auto") -> str:
+        """api.mymemory.translated.net — free, no key needed, works from VPS IPs, 500 char limit."""
+        client = self.get_client()
+        src = "en" if source_lang == "auto" else source_lang
+        res = await client.get(
+            "https://api.mymemory.translated.net/get",
+            params={"q": text[:500], "langpair": f"{src}|{target_lang}"},
+        )
+        res.raise_for_status()
+        data = res.json()
+        if data.get("responseStatus") not in (200, "200"):
+            raise RuntimeError(f"MyMemory error: {data.get('responseMessage', 'unknown')}")
+        translated = data["responseData"]["translatedText"]
+        if not translated or translated.strip() == text.strip():
+            raise RuntimeError("MyMemory returned unchanged text")
+        return translated
 
     async def _endpoint_a(self, text: str, target_lang: str, source_lang: str = "auto") -> str:
         """translate-pa.googleapis.com — ~40ms, no rate limits, requires HTML unescape."""

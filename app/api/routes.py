@@ -11,6 +11,7 @@ from ..services.usage_service import check_ai_credits, deduct_ai_credits
 from ..services.translation_service import TranslationService, get_translation_service
 from ..schemas.search import SearchHit, SearchResponse, TranscriptSentence, TranscriptResponse, Word, Category, TranslateRequest, TranslateResponse
 from ..core.limiter import feature_rate_limit
+from ..core.logging import logger
 from ..models.user import User
 
 router = APIRouter(
@@ -101,17 +102,11 @@ async def search(
         start_time = source.get("start", 0.0)
         end_time = source.get("end_time", 0.0)
         
-        words_data = source.get("words", [])
-        words = [
-            Word(text=w.get("text"), start=w.get("start"), end=w.get("end"))
-            for w in words_data if isinstance(w, dict)
-        ] if words_data else []
-
         transcript_sentence = TranscriptSentence(
             sentence_text=sentence_text,
             start_time=start_time,
             end_time=end_time,
-            words=words,
+            words=[],
             position=source.get("position")
         )
         
@@ -143,8 +138,10 @@ async def translate(
 ):
     if not body.sentences:
         raise HTTPException(status_code=400, detail="No sentences provided.")
-    if len(body.sentences) > 100:
-        raise HTTPException(status_code=400, detail="Max 100 sentences per request.")
+    if len(body.sentences) > 200:
+        raise HTTPException(status_code=400, detail="Max 200 sentences per request.")
+
+    logger.info(f"[TRANSLATE ROUTE] received sentences={len(body.sentences)}  lang={body.target_lang}  totalChars={sum(len(s) for s in body.sentences)}")
 
     translations = await translation.translate_batch(
         sentences=body.sentences,
@@ -152,6 +149,7 @@ async def translate(
         source_lang=body.source_lang,
     )
 
+    logger.info(f"[TRANSLATE ROUTE] returning translations={len(translations)}  match={len(translations)==len(body.sentences)}")
     return TranslateResponse(translations=translations, source_lang=body.source_lang)
 
 
