@@ -299,7 +299,7 @@
 }
 
 .search-animated-border {
-  border: 1px solid transparent;
+  border: 0.5px solid transparent;
   background:
     linear-gradient(var(--background), var(--background)) padding-box,
     linear-gradient(var(--border-angle), #f97316, #000000) border-box;
@@ -310,4 +310,12 @@
   background:
     linear-gradient(var(--background), var(--background)) padding-box,
     linear-gradient(var(--border-angle), #f97316, #ffffff) border-box;
+}
+
+.card-animated-border {
+  border: 0.5px solid transparent;
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(var(--border-angle), #f97316, #ffffff) border-box;
+  animation: search-border-rotate 8s linear infinite;
 }

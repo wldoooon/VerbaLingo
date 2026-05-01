@@ -63,7 +63,7 @@ export function UsageMeter() {
 
     return (
         <div className={cn(
-            "relative w-full rounded-xl border border-border/50 bg-card p-3 flex flex-col gap-3 overflow-hidden",
+            "card-animated-border relative w-full rounded-xl p-3 flex flex-col gap-3 overflow-hidden",
             "transition-opacity group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:opacity-0"
         )}>
             {/* Top-right white glow — same as footer */}
