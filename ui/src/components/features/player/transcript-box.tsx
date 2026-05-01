@@ -18,7 +18,6 @@ const SyncedTranslation = memo(({ text, startTime, endTime, className }: SyncedT
   const words = text.split(" ")
 
   const activeWordIdx = usePlayerStore(state => {
-    if (!state.isPlaying) return -1
     const t = state.currentTime + 0.05 * state.playbackRate
     if (t < startTime || t >= endTime) return -1
     const progress = (t - startTime) / (endTime - startTime)
@@ -32,9 +31,7 @@ const SyncedTranslation = memo(({ text, startTime, endTime, className }: SyncedT
           key={i}
           className={cn(
             "transition-all duration-150 ease-out",
-            i === activeWordIdx
-              ? "text-primary font-semibold"
-              : ""
+            i === activeWordIdx ? "text-primary font-semibold" : ""
           )}
         >
           {word}{i < words.length - 1 ? " " : ""}

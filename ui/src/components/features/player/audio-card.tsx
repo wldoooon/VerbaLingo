@@ -156,7 +156,6 @@ const TRANSLATION_LANGUAGES = [
   { code: "th", label: "Thai",       flagUrl: flag("th") },
   { code: "id", label: "Indonesian", flagUrl: flag("id") },
   { code: "ms", label: "Malay",      flagUrl: flag("my") },
-  { code: "he", label: "Hebrew",     flagUrl: flag("il") },
   { code: "bn", label: "Bengali",    flagUrl: flag("bd") },
   { code: "ur", label: "Urdu",       flagUrl: flag("pk") },
   { code: "fa", label: "Persian",    flagUrl: flag("ir") },
