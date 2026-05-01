@@ -319,3 +319,13 @@
     linear-gradient(var(--border-angle), #f97316, #ffffff) border-box;
   animation: search-border-rotate 8s linear infinite;
 }
+
+@keyframes usage-shimmer {
+  0%   { transform: skewX(-12deg) translateX(-150%); }
+  30%  { transform: skewX(-12deg) translateX(150%); }
+  100% { transform: skewX(-12deg) translateX(150%); }
+}
+
+.usage-shimmer {
+  animation: usage-shimmer 6s ease-in-out infinite;
+}
