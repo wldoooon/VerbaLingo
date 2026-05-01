@@ -24,13 +24,32 @@ class SearchService:
         "en": None,
     }
 
+    _LANGUAGE_CONFIG = {
+        "germany_dataset": {
+            "map": {"Podcasts": 1, "News": 2, "Cartoons": 3},
+            "default_id": 1,
+        },
+        "english_dataset": {
+            "map": {"Podcasts": 1, "Movies": 2, "Shows": 3},
+            "default_id": 1,
+        },
+        "spanish_dataset": {
+            "map": {"Podcasts": 1, "Shows": 3, "Movies": 4},
+            "default_id": 1,
+        },
+        "french_dataset": {
+            "map": {"Podcasts": 1, "Movies": 4},
+            "default_id": 1,
+        },
+    }
 
     async def search(self, q: str, language: str, category: Optional[str] = None, sub_category: Optional[str] = None, page: int = 1, limit: int = 30) -> dict:
         table_name = self._resolve_table(language)
         effective_category = category or "Podcasts"
         offset = (page - 1) * limit
         logger.debug(f"Search: q={q!r} lang={language} cat={effective_category} page={page}")
-        category_id = 1 if table_name == "germany_dataset" else None
+        config = self._LANGUAGE_CONFIG.get(table_name)
+        category_id = config["map"].get(effective_category, config["default_id"]) if config else None
         return await self._search_single_category(q, effective_category, table_name, limit=limit, offset=offset, sub_category=sub_category, category_id=category_id)
 
     def _resolve_table(self, language: str) -> str:
@@ -58,7 +77,7 @@ class SearchService:
             "query": {"bool": {"must": must_conditions}},
             "limit": limit,
             "offset": offset,
-            "options": {"cutoff": self.CUTOFF, "ranker": "none"},
+            "options": {"cutoff": self.CUTOFF},
             "profile": True,
         }
 
