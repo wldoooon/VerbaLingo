@@ -86,45 +86,26 @@ function useSpamGuard(clickWindowMs = 2000, clickLimit = 5, cooldownSeconds = 5)
 const SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2]
 
 function SpeedPicker({ currentRate, onSelect }: { currentRate: number; onSelect: (s: number) => void }) {
-  const MIN_H = 14
-  const MAX_H = 56
   return (
-    <div className="flex flex-col gap-4 p-1">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Playback Speed</span>
-        <span className="text-base font-black text-primary font-mono tabular-nums">{currentRate}x</span>
+    <div className="flex flex-col">
+      <div className="px-3 pt-2 pb-1.5">
+        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Speed</span>
+        <div className="mt-1.5 h-px bg-border/60" />
       </div>
-
-      {/* Bars + labels */}
-      <div className="flex items-end gap-1">
-        {SPEEDS.map((s) => {
-          const isActive = currentRate === s
-          const h = Math.round(MIN_H + (s / 2) * (MAX_H - MIN_H))
-          return (
-            <button
-              key={s}
-              onClick={() => onSelect(s)}
-              className="flex flex-col items-center gap-2 flex-1 group cursor-pointer"
-            >
-              <div
-                className={cn(
-                  "w-full rounded-sm transition-all duration-150",
-                  isActive
-                    ? "bg-primary"
-                    : "bg-muted-foreground/20 group-hover:bg-muted-foreground/50"
-                )}
-                style={{ height: h }}
-              />
-              <span className={cn(
-                "text-[9px] font-bold leading-none transition-colors whitespace-nowrap",
-                isActive ? "text-primary" : "text-muted-foreground/60 group-hover:text-foreground"
-              )}>
-                {s}x
-              </span>
-            </button>
-          )
-        })}
-      </div>
+      {SPEEDS.map((s) => (
+        <button
+          key={s}
+          onClick={() => onSelect(s)}
+          className={cn(
+            "w-full text-left px-3 py-1.5 rounded-md text-sm font-mono transition-colors",
+            s === currentRate
+              ? "bg-primary/10 text-primary font-semibold"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}
+        >
+          {s}x
+        </button>
+      ))}
     </div>
   )
 }
@@ -615,9 +596,12 @@ export default function AudioCard({
             </Button>
             <Popover open={mobileSpeedOpen} onOpenChange={setMobileSpeedOpen}>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-9 px-2 font-bold text-xs">{rate}x</Button>
+                <Button variant="ghost" size="sm" className="h-9 px-2 gap-1 font-bold text-xs">
+                  {rate}x
+                  {mobileSpeedOpen ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+                </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[260px] p-4 rounded-2xl" side="top" align="end">
+              <PopoverContent className="w-32 p-1 rounded-xl" side="top" align="end">
                 <SpeedPicker currentRate={rate} onSelect={(r) => { setRate(r); setPlaybackRate(r) }} />
               </PopoverContent>
             </Popover>
@@ -626,8 +610,9 @@ export default function AudioCard({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={cn("h-9 px-2 gap-1.5 cursor-pointer", translationLang ? "bg-muted text-foreground" : "")}
+                  className={cn("relative overflow-hidden h-9 px-2 gap-1.5 cursor-pointer", translationLang ? "bg-muted text-foreground" : "")}
                 >
+                  <div className="usage-shimmer pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-black/8 to-transparent dark:via-white/10" />
                   {translationLang
                     ? <FlagImg url={TRANSLATION_LANGUAGES.find(l => l.code === translationLang)?.flagUrl ?? ""} alt={translationLang} />
                     : <Globe size={15} />
@@ -748,10 +733,11 @@ export default function AudioCard({
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "gap-1.5 cursor-pointer transition-all",
+                  "relative overflow-hidden gap-1.5 cursor-pointer transition-all",
                   translationLang ? "bg-muted text-foreground hover:bg-muted/80" : ""
                 )}
               >
+                <div className="usage-shimmer pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-black/8 to-transparent dark:via-white/10" />
                 {translationLang ? (
                   <>
                     <FlagImg url={TRANSLATION_LANGUAGES.find(l => l.code === translationLang)?.flagUrl ?? ""} alt={translationLang} />
@@ -775,9 +761,10 @@ export default function AudioCard({
               <Button variant="ghost" size="sm" className="gap-2 cursor-pointer">
                 <Gauge size={18} />
                 <span className="font-semibold">{rate}x</span>
+                {desktopSpeedOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[280px] p-4 rounded-2xl shadow-xl" align="end">
+            <PopoverContent className="w-32 p-1 rounded-xl shadow-xl" align="end">
               <SpeedPicker currentRate={rate} onSelect={(r) => { setRate(r); setPlaybackRate(r) }} />
             </PopoverContent>
           </Popover>
