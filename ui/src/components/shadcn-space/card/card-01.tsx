@@ -1,31 +1,44 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'motion/react'
+import { motion, AnimatePresence } from 'motion/react'
 import { cn } from '@/lib/utils'
 
 const SENTENCES = [
   {
-    words: ["It", "was", "an", "ephemeral", "moment", "of", "beauty."],
-    keywordIdx: 3,
+    words: ["The", "quieter", "you", "become,", "the", "more", "you", "hear."],
+    keywordIdx: 1,
     source: "Movies",
     lang: "EN",
+    translations: [
+      { text: "Plus tu te tais, plus tu entends.", lang: "FR" },
+      { text: "Cuanto más callado estás, más escuchas.", lang: "ES" },
+      { text: "Je stiller du wirst, desto mehr hörst du.", lang: "DE" },
+    ],
   },
   {
-    words: ["Elle", "est", "nostalgique", "de", "son", "enfance."],
+    words: ["Paris", "est", "toujours", "une", "bonne", "idée."],
     keywordIdx: 2,
     source: "News",
     lang: "FR",
+    translations: [
+      { text: "Paris is always a good idea.", lang: "EN" },
+      { text: "París siempre es una buena idea.", lang: "ES" },
+      { text: "Paris ist immer eine gute Idee.", lang: "DE" },
+    ],
   },
   {
-    words: ["Es", "una", "serendipia", "encontrarte", "aquí."],
+    words: ["No", "llores,", "sonríe", "porque", "sucedió."],
     keywordIdx: 2,
     source: "Podcasts",
     lang: "ES",
+    translations: [
+      { text: "Don't cry, smile because it happened.", lang: "EN" },
+      { text: "Ne pleure pas, souris parce que c'est arrivé.", lang: "FR" },
+      { text: "Wein nicht, lächle, weil es passiert ist.", lang: "DE" },
+    ],
   },
 ]
-
-const BARS = [4, 8, 13, 18, 22, 18, 13, 8, 16, 12, 5, 9, 14, 20, 16, 12, 8, 5]
 
 const languageFlags = [
   { flag: 'https://flagcdn.com/us.svg', label: 'English' },
@@ -36,35 +49,48 @@ const languageFlags = [
 const ArticlePreviewCard = () => {
   const [sentenceIdx, setSentenceIdx] = useState(0)
   const [wordIdx, setWordIdx] = useState(0)
+  const [phase, setPhase] = useState<'words' | 'translating'>('words')
+  const [translationIdx, setTranslationIdx] = useState(0)
 
   useEffect(() => {
     const sentence = SENTENCES[sentenceIdx]
-    const isKeyword = wordIdx === sentence.keywordIdx
-    const isLast = wordIdx >= sentence.words.length - 1
-    const delay = isLast ? 1600 : isKeyword ? 820 : 430
 
-    const t = setTimeout(() => {
-      if (isLast) {
-        setSentenceIdx(s => (s + 1) % SENTENCES.length)
-        setWordIdx(0)
-      } else {
-        setWordIdx(w => w + 1)
-      }
-    }, delay)
+    if (phase === 'words') {
+      const isKeyword = wordIdx === sentence.keywordIdx
+      const isLast = wordIdx >= sentence.words.length - 1
+      const delay = isLast ? 700 : isKeyword ? 820 : 430
 
-    return () => clearTimeout(t)
-  }, [sentenceIdx, wordIdx])
+      const t = setTimeout(() => {
+        if (isLast) {
+          setPhase('translating')
+          setTranslationIdx(0)
+        } else {
+          setWordIdx(w => w + 1)
+        }
+      }, delay)
+      return () => clearTimeout(t)
+    }
+
+    if (phase === 'translating') {
+      const isLastTranslation = translationIdx >= sentence.translations.length - 1
+
+      const t = setTimeout(() => {
+        if (isLastTranslation) {
+          setSentenceIdx(s => (s + 1) % SENTENCES.length)
+          setWordIdx(0)
+          setPhase('words')
+        } else {
+          setTranslationIdx(i => i + 1)
+        }
+      }, 1600)
+      return () => clearTimeout(t)
+    }
+  }, [sentenceIdx, wordIdx, phase, translationIdx])
 
   const sentence = SENTENCES[sentenceIdx]
 
   return (
     <div className="relative w-full h-full border border-border/50 bg-card/50 overflow-hidden flex flex-col">
-
-      {/* Corner ticks */}
-      <div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-border/50 z-10 pointer-events-none" />
-      <div className="absolute top-3 right-3 w-3 h-3 border-t border-r border-border/50 z-10 pointer-events-none" />
-      <div className="absolute bottom-3 left-3 w-3 h-3 border-b border-l border-border/50 z-10 pointer-events-none" />
-      <div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r border-border/50 z-10 pointer-events-none" />
 
       {/* ── Top: word-by-word transcript panel ── */}
       <div className="relative flex-1 flex flex-col items-center justify-center gap-3 px-6 bg-gradient-to-br from-muted/20 via-background to-muted/10 overflow-hidden">
@@ -87,7 +113,7 @@ const ArticlePreviewCard = () => {
               key={`${sentenceIdx}-${i}`}
               className={cn(
                 "mr-0.5 px-1 py-0.5 border-2 rounded-md transition-all duration-150 ease-out inline-flex items-center text-sm font-medium",
-                i === wordIdx
+                i === wordIdx && phase === 'words'
                   ? "bg-primary/20 border-primary text-foreground font-bold scale-105 shadow-[0_0_14px_-3px_hsl(var(--primary)/0.4)]"
                   : "border-transparent text-foreground/65"
               )}
@@ -95,6 +121,27 @@ const ArticlePreviewCard = () => {
               {word}
             </span>
           ))}
+        </div>
+
+        {/* Translation */}
+        <div className="h-8 flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${sentenceIdx}-${translationIdx}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.35, ease: "easeInOut" }}
+              className="flex items-center gap-2"
+            >
+              <span className="font-mono text-[9px] border border-border/50 bg-muted/40 px-1.5 py-0.5 rounded text-muted-foreground tracking-widest uppercase">
+                {sentence.translations[translationIdx].lang}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {sentence.translations[translationIdx].text}
+              </span>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Source badge */}
@@ -106,7 +153,6 @@ const ArticlePreviewCard = () => {
 
       {/* ── Content ── */}
       <div className="px-6 py-5 border-t border-border/40">
-        
 
         <h3 className="text-lg font-bold text-foreground mb-1.5">Master Real Expressions</h3>
 

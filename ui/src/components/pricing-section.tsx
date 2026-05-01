@@ -176,7 +176,10 @@ export function PricingCard({
 			{...props}
 		>
 			{plan.highlighted && (
-					<div className="pointer-events-none absolute inset-0 dark:bg-[radial-gradient(35%_50%_at_15%_0%,--theme(--color-foreground/.1),transparent)]" />
+					<>
+						<div className="pointer-events-none absolute inset-0 dark:bg-[radial-gradient(35%_50%_at_15%_0%,--theme(--color-foreground/.1),transparent)]" />
+						<div className="usage-shimmer pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-black/8 to-transparent dark:via-white/10" />
+					</>
 				)}
 			<div
 				className={cn(
