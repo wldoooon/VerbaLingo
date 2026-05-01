@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Rubik_Wet_Paint } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import QueryProvider from "@/components/QueryProvider";
@@ -14,6 +14,7 @@ import FooterWrapper from "@/components/FooterWrapper";
 import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
+export const rubikWetPaint = Rubik_Wet_Paint({ subsets: ["latin"], weight: "400", variable: "--font-rubik-wet-paint" });
 
 export const metadata: Metadata = {
   title: {
@@ -54,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://s.ytimg.com" />
       </head>
       <body
-        className={`${inter.className} w-full min-h-screen bg-background`}
+        className={`${inter.className} ${rubikWetPaint.variable} w-full min-h-screen bg-background`}
         suppressHydrationWarning
       >
         <Script src="https://www.youtube.com/iframe_api" strategy="afterInteractive" />
