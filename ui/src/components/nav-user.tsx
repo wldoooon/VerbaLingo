@@ -10,7 +10,7 @@ import { useLogoutMutation } from "@/lib/authHooks";
 const easeOutQuint: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
 const menuItems = [
-  { id: "profile",  label: "Profile",        icon: UserIcon,     href: "#",        logout: false },
+  { id: "profile",  label: "Profile",        icon: UserIcon,     href: "/profile", logout: false },
   { id: "billing",  label: "Plan & Billing",  icon: CreditCardIcon, href: "/pricing", logout: false },
   { id: "support",  label: "Support",         icon: LifeBuoyIcon, href: "#",        logout: false },
   { id: "divider" },

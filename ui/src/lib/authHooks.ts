@@ -130,6 +130,21 @@ export function useVerifyEmailMutation() {
   });
 }
 
+export function useUpdateProfileMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (vars: { full_name: string }) => {
+      const res = await apiClient.patch<UserRead>("/auth/me", vars);
+      return res.data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      toastManager.add({ title: "Profile updated", type: "success" });
+    },
+  });
+}
+
 export function useResetPasswordMutation() {
   return useMutation({
     mutationFn: async (vars: {

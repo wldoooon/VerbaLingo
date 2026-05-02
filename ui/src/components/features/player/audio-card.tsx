@@ -539,7 +539,7 @@ export default function AudioCard({
             </span>
           )}
           <span className="text-[10px] font-medium text-muted-foreground/50 tabular-nums">
-            {currentVideoIndex + 1}<span className="opacity-40 mx-0.5">/</span>{totalItems || playlist.length}
+            {currentVideoIndex + 1}<span className="opacity-40 mx-0.5">/</span>{(totalItems ?? playlist.length) > 100 ? "+100" : (totalItems || playlist.length)}
           </span>
         </div>
       </div>
