@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
+import { AnimatePresence, motion } from "motion/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -162,12 +163,23 @@ function AccountTab({ user }: { user: typeof MOCK_USER }) {
 
       {/* Actions */}
       <div className="flex items-center justify-between pt-1">
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-foreground gap-2"
+          onClick={() => logoutMutation.mutate()}
+          disabled={logoutMutation.isPending}
+        >
           <LogOut className="h-4 w-4" />
-          Sign out
+          {logoutMutation.isPending ? "Signing out…" : "Sign out"}
         </Button>
-        <Button size="sm" className="rounded-xl px-6 h-9" disabled={!isDirty}>
-          Save Changes
+        <Button
+          size="sm"
+          className="rounded-xl px-6 h-9"
+          disabled={!isDirty || updateMutation.isPending}
+          onClick={() => updateMutation.mutate({ full_name: displayName })}
+        >
+          {updateMutation.isPending ? "Saving…" : "Save Changes"}
         </Button>
       </div>
     </div>
@@ -394,9 +406,26 @@ function BillingTab({ user }: { user: typeof MOCK_USER }) {
   )
 }
 
+const TAB_ORDER = ["account", "security", "billing"]
+
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir > 0 ? 36 : -36, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit:  (dir: number) => ({ x: dir > 0 ? -36 : 36, opacity: 0 }),
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 export function AccountInfoCard() {
   const authUser = useAuthStore((s) => s.user)
+  const [activeTab, setActiveTab] = useState("account")
+  const directionRef = useRef(0)
+
+  const handleTabChange = (value: string) => {
+    const prev = TAB_ORDER.indexOf(activeTab)
+    const next = TAB_ORDER.indexOf(value)
+    directionRef.current = next > prev ? 1 : -1
+    setActiveTab(value)
+  }
 
   // Merge real auth data over mock defaults (billing/usage still mock until API ready)
   const user = {
@@ -412,7 +441,7 @@ export function AccountInfoCard() {
 
   return (
     <div className="rounded-3xl border border-border/60 bg-card shadow-sm overflow-hidden">
-      <Tabs defaultValue="account">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         {/* Tab bar */}
         <div className="px-6 pt-5 pb-0">
           <TabsList className="bg-muted/70 rounded-xl p-1 h-auto gap-0.5">
@@ -425,23 +454,42 @@ export function AccountInfoCard() {
                 key={tab.value}
                 value={tab.value}
                 className={cn(
-                  "rounded-lg px-4 py-1.5 text-sm font-medium transition-all",
+                  "relative rounded-lg px-4 py-1.5 text-sm font-medium transition-colors duration-200",
                   "text-muted-foreground hover:text-foreground",
-                  "data-[state=active]:bg-background data-[state=active]:text-foreground",
-                  "data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/40"
+                  "data-[state=active]:text-foreground",
+                  "data-[state=active]:bg-transparent data-[state=active]:shadow-none"
                 )}
               >
-                {tab.label}
+                {activeTab === tab.value && (
+                  <motion.div
+                    layoutId="activeTabPill"
+                    className="absolute inset-0 rounded-lg bg-background shadow-sm border border-border/40"
+                    transition={{ type: "spring", damping: 30, stiffness: 400, mass: 0.8 }}
+                  />
+                )}
+                <span className="relative z-10">{tab.label}</span>
               </TabsTrigger>
             ))}
           </TabsList>
         </div>
 
         {/* Tab content */}
-        <div className="px-6 pt-5 pb-6">
-          <TabsContent value="account"  className="mt-0"><AccountTab  user={user} /></TabsContent>
-          <TabsContent value="security" className="mt-0"><SecurityTab /></TabsContent>
-          <TabsContent value="billing"  className="mt-0"><BillingTab  user={user} /></TabsContent>
+        <div className="px-6 pt-5 pb-6 overflow-hidden">
+          <AnimatePresence mode="wait" custom={directionRef.current}>
+            <motion.div
+              key={activeTab}
+              custom={directionRef.current}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+            >
+              {activeTab === "account"  && <AccountTab  user={user} />}
+              {activeTab === "security" && <SecurityTab />}
+              {activeTab === "billing"  && <BillingTab  user={user} />}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </Tabs>
     </div>
