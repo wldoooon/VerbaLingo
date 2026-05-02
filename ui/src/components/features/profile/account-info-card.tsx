@@ -12,9 +12,14 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Lock, LogOut, Mail, ShieldCheck, CalendarDays,
-  Eye, EyeOff, KeyRound, Smartphone, CreditCard,
-  Zap, Search, Check, ArrowUpRight,
+  Eye, EyeOff, KeyRound, Smartphone, Camera,
+  Zap, Search, Check, ArrowUpRight, TriangleAlert,
 } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Dialog, DialogContent, DialogDescription,
+  DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/stores/auth-store"
 import { useLogoutMutation, useUpdateProfileMutation } from "@/lib/authHooks"
@@ -72,36 +77,255 @@ function formatNumber(n: number) {
   return String(n)
 }
 
+// ── Skeleton ─────────────────────────────────────────────────────────────────
+function AccountInfoCardSkeleton() {
+  return (
+    <div className="rounded-3xl border border-border/60 bg-card shadow-sm overflow-hidden relative">
+      {/* Shimmer sweep */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-foreground/[0.04] to-transparent"
+          style={{ transform: "translateX(-100%)", animation: "shimmer 1.8s ease-in-out infinite" }}
+        />
+      </div>
+
+      {/* Tab bar skeleton */}
+      <div className="px-6 pt-5 pb-0">
+        <div className="flex gap-1 bg-muted/70 rounded-xl p-1 w-fit">
+          {["w-20", "w-20", "w-16"].map((w, i) => (
+            <Skeleton key={i} className={`h-8 ${w} rounded-lg`} />
+          ))}
+        </div>
+      </div>
+
+      {/* Content skeleton */}
+      <div className="px-6 pt-5 pb-6 space-y-6">
+        {/* Avatar row */}
+        <div className="flex items-center gap-5">
+          <Skeleton className="h-24 w-24 rounded-full shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-40 rounded-lg" />
+            <Skeleton className="h-4 w-52 rounded-lg" />
+            <Skeleton className="h-5 w-14 rounded-full mt-1" />
+          </div>
+        </div>
+
+        <Skeleton className="h-px w-full rounded-full" />
+
+        {/* Input fields */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Skeleton className="h-3 w-24 rounded" />
+            <Skeleton className="h-11 w-full rounded-xl" />
+          </div>
+          <div className="space-y-1.5">
+            <Skeleton className="h-3 w-28 rounded" />
+            <Skeleton className="h-11 w-full rounded-xl" />
+          </div>
+        </div>
+
+        <Skeleton className="h-px w-full rounded-full" />
+
+        {/* Meta cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-2xl bg-muted/30 border border-border/40 px-4 py-3.5 space-y-2">
+              <Skeleton className="h-3 w-20 rounded" />
+              <Skeleton className="h-4 w-28 rounded" />
+            </div>
+          ))}
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-between pt-1">
+          <Skeleton className="h-9 w-24 rounded-xl" />
+          <Skeleton className="h-9 w-28 rounded-xl" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Delete account dialog ─────────────────────────────────────────────────────
+function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const [confirmText, setConfirmText] = useState("")
+  const canDelete = confirmText === "DELETE"
+
+  const stagger = (i: number) => ({
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    transition: { delay: i * 0.07, duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] as const },
+  })
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) setConfirmText(""); onOpenChange(v) }}>
+      <DialogContent className="rounded-2xl max-w-sm" showCloseButton={false}>
+        <div className="flex flex-col items-center gap-5 pt-2">
+          <motion.div
+            {...stagger(0)}
+            className="h-16 w-16 rounded-full bg-red-500/10 flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.05, type: "spring", damping: 16, stiffness: 300 }}
+            >
+              <TriangleAlert className="h-8 w-8 text-red-500" />
+            </motion.div>
+          </motion.div>
+
+          <motion.div {...stagger(1)} className="text-center space-y-1.5">
+            <DialogTitle className="text-lg">Delete your account</DialogTitle>
+            <DialogDescription className="text-sm leading-relaxed">
+              This is permanent and cannot be undone. All your data, history,
+              and subscription will be erased immediately.
+            </DialogDescription>
+          </motion.div>
+
+          <motion.div {...stagger(2)} className="w-full space-y-2">
+            <Label className="text-xs text-muted-foreground">
+              Type <span className="font-mono font-bold text-foreground">DELETE</span> to confirm
+            </Label>
+            <Input
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder="DELETE"
+              className="rounded-xl h-11 text-center font-mono tracking-widest bg-muted/40 border-border/50"
+            />
+          </motion.div>
+
+          <motion.div {...stagger(3)} className="flex gap-2 w-full pb-1">
+            <Button
+              variant="outline"
+              className="flex-1 rounded-xl h-10"
+              onClick={() => { setConfirmText(""); onOpenChange(false) }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              className="flex-1 rounded-xl h-10 transition-all duration-200"
+              disabled={!canDelete}
+            >
+              Delete Account
+            </Button>
+          </motion.div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 // ── Sub-components ───────────────────────────────────────────────────────────
 
 function AccountTab({ user }: { user: typeof MOCK_USER }) {
-  const [displayName, setDisplayName] = useState(user.full_name ?? "")
+  const [displayName, setDisplayName]     = useState(user.full_name ?? "")
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [sizeError, setSizeError]         = useState(false)
+  const [deleteOpen, setDeleteOpen]       = useState(false)
+  const fileInputRef                      = useRef<HTMLInputElement>(null)
   const isDirty = displayName !== (user.full_name ?? "")
   const tier = TIER_CONFIG[user.tier] ?? TIER_CONFIG.free
   const updateMutation = useUpdateProfileMutation()
   const logoutMutation = useLogoutMutation()
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setSizeError(false)
+    if (file.size > 5 * 1024 * 1024) { setSizeError(true); e.target.value = ""; return }
+    setAvatarPreview(URL.createObjectURL(file))
+    e.target.value = ""
+  }
+
   return (
     <div className="space-y-6">
       {/* Avatar row */}
       <div className="flex items-center gap-5">
-        <Avatar className="h-24 w-24 ring-2 ring-border/40 ring-offset-2 ring-offset-card">
-          <AvatarImage src={user.oauth_avatar_url || "/user_logo.png"} />
-          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary text-2xl font-bold">
-            {getInitials(user.full_name, user.email)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 min-w-0">
-          <p className="text-xl font-semibold text-foreground truncate">
-            {user.full_name || user.email.split("@")[0] || "User"}
-          </p>
-          <p className="text-sm text-muted-foreground truncate mt-0.5">{user.email}</p>
-          <Badge
-            variant="outline"
-            className={cn("mt-2 text-[11px] font-semibold px-2.5 py-0.5 rounded-full", tier.className)}
+        {/* Clickable avatar with hover overlay */}
+        <div className="relative group cursor-pointer shrink-0" onClick={() => fileInputRef.current?.click()}>
+          <Avatar className="h-24 w-24 ring-2 ring-border/40 ring-offset-2 ring-offset-card">
+            <AvatarImage src={avatarPreview || user.oauth_avatar_url || "/user_logo.png"} />
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary text-2xl font-bold">
+              {getInitials(user.full_name, user.email)}
+            </AvatarFallback>
+          </Avatar>
+          <motion.div
+            initial={false}
+            animate={{ opacity: 0 }}
+            whileHover={{ opacity: 1 }}
+            transition={{ duration: 0.18 }}
+            className="absolute inset-0 rounded-full bg-black/50 flex flex-col items-center justify-center gap-0.5"
           >
-            {tier.label}
-          </Badge>
+            <Camera className="h-5 w-5 text-white" />
+            <span className="text-[10px] font-semibold text-white">Change</span>
+          </motion.div>
+        </div>
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+
+        <div className="flex-1 min-w-0 space-y-2.5">
+          <div>
+            <p className="text-xl font-semibold text-foreground truncate">
+              {user.full_name || user.email.split("@")[0] || "User"}
+            </p>
+            <p className="text-sm text-muted-foreground truncate mt-0.5">{user.email}</p>
+            <Badge
+              variant="outline"
+              className={cn("mt-2 text-[11px] font-semibold px-2.5 py-0.5 rounded-full", tier.className)}
+            >
+              {tier.label}
+            </Badge>
+          </div>
+
+          <div className="flex items-center gap-3 flex-wrap">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-xl h-8 px-3 gap-1.5 text-xs"
+              onClick={() => { setSizeError(false); fileInputRef.current?.click() }}
+            >
+              <Camera className="h-3.5 w-3.5" />
+              Upload photo
+            </Button>
+            {avatarPreview && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="rounded-xl h-8 px-3 text-xs text-muted-foreground hover:text-red-500"
+                onClick={() => setAvatarPreview(null)}
+              >
+                Remove
+              </Button>
+            )}
+          </div>
+
+          <AnimatePresence mode="wait">
+            {sizeError ? (
+              <motion.p
+                key="error"
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className="text-[11px] text-red-500"
+              >
+                File exceeds 5 MB — please choose a smaller image.
+              </motion.p>
+            ) : (
+              <motion.p
+                key="hint"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="text-[11px] text-muted-foreground"
+              >
+                JPG, PNG or GIF · Max 5 MB
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
@@ -182,6 +406,30 @@ function AccountTab({ user }: { user: typeof MOCK_USER }) {
           {updateMutation.isPending ? "Saving…" : "Save Changes"}
         </Button>
       </div>
+
+      {/* Danger zone */}
+      <div className="rounded-2xl border border-red-500/20 bg-red-500/[0.03] px-5 py-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <TriangleAlert className="h-4 w-4 text-red-500/70" />
+          <h3 className="text-sm font-semibold text-red-500/80">Danger Zone</h3>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-foreground">Delete account</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Permanently remove your account and all associated data.</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0 rounded-xl h-9 px-4 border-red-500/30 text-red-500 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50 transition-colors"
+            onClick={() => setDeleteOpen(true)}
+          >
+            Delete
+          </Button>
+        </div>
+      </div>
+
+      <DeleteAccountDialog open={deleteOpen} onOpenChange={setDeleteOpen} />
     </div>
   )
 }
@@ -416,7 +664,8 @@ const slideVariants = {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export function AccountInfoCard() {
-  const authUser = useAuthStore((s) => s.user)
+  const authUser   = useAuthStore((s) => s.user)
+  const authStatus = useAuthStore((s) => s.status)
   const [activeTab, setActiveTab] = useState("account")
   const directionRef = useRef(0)
 
@@ -439,7 +688,14 @@ export function AccountInfoCard() {
     created_at:       authUser?.created_at ?? MOCK_USER.created_at,
   }
 
+  if (authStatus === "unknown") return <AccountInfoCardSkeleton />
+
   return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
     <div className="rounded-3xl border border-border/60 bg-card shadow-sm overflow-hidden">
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         {/* Tab bar */}
@@ -493,5 +749,6 @@ export function AccountInfoCard() {
         </div>
       </Tabs>
     </div>
+    </motion.div>
   )
 }
