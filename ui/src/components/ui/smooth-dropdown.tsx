@@ -8,6 +8,7 @@ const easeOutQuint: [number, number, number, number] = [0.23, 1, 0.32, 1];
 
 export type SmoothDropdownItem =
   | {
+      type?: "item";
       id: string;
       label: string;
       icon?: React.ReactNode;
