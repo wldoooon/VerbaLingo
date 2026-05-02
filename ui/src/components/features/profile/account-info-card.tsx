@@ -12,9 +12,14 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Lock, LogOut, Mail, ShieldCheck, CalendarDays,
-  Eye, EyeOff, KeyRound, Smartphone, Camera,
-  Zap, Search, Check, ArrowUpRight, TriangleAlert,
+  Eye, EyeOff, KeyRound, Smartphone, Camera, Languages, ChevronDown, Info,
+  Zap, Search, Check, ArrowUpRight, TriangleAlert, Link2, Unlink,
 } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Command, CommandEmpty, CommandGroup,
+  CommandInput, CommandItem, CommandList,
+} from "@/components/ui/command"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Dialog, DialogContent, DialogDescription,
@@ -53,6 +58,33 @@ const TIER_CONFIG: Record<string, { label: string; className: string }> = {
   pro:     { label: "Pro",     className: "bg-muted text-muted-foreground border-border" },
   premium: { label: "Premium", className: "bg-purple-500/10 text-purple-500 border-purple-500/20" },
   max:     { label: "Max",     className: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
+}
+
+const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "fr", label: "French" },
+  { code: "ar", label: "Arabic" },
+  { code: "es", label: "Spanish" },
+  { code: "de", label: "German" },
+  { code: "it", label: "Italian" },
+  { code: "pt", label: "Portuguese" },
+  { code: "zh", label: "Chinese" },
+  { code: "ja", label: "Japanese" },
+  { code: "ko", label: "Korean" },
+  { code: "ru", label: "Russian" },
+  { code: "tr", label: "Turkish" },
+  { code: "nl", label: "Dutch" },
+]
+
+function GoogleIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+  )
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -146,6 +178,69 @@ function AccountInfoCardSkeleton() {
   )
 }
 
+// ── Language combobox ─────────────────────────────────────────────────────────
+function LanguageCombobox({
+  value,
+  onChange,
+  languages,
+}: {
+  value: string
+  onChange: (v: string) => void
+  languages: typeof LANGUAGES
+}) {
+  const [open, setOpen] = useState(false)
+  const selected = languages.find((l) => l.code === value) ?? LANGUAGES.find((l) => l.code === value)
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "w-full flex items-center justify-between rounded-xl h-11 px-3 text-sm",
+            "bg-muted/40 border border-border/50 transition-colors",
+            "hover:bg-muted/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+            open && "ring-2 ring-primary/30 bg-muted/70"
+          )}
+        >
+          <span className={cn("font-medium", selected ? "text-foreground" : "text-muted-foreground")}>
+            {selected?.label ?? "Select…"}
+          </span>
+          <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.18 }}>
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          </motion.div>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="p-0 rounded-xl border-border/60 shadow-lg"
+        align="start"
+        sideOffset={6}
+        style={{ width: "var(--radix-popover-trigger-width)" }}
+      >
+        <Command>
+          <CommandInput placeholder="Search language…" className="h-9 text-sm" />
+          <CommandList className="max-h-44">
+            <CommandEmpty className="text-sm py-4">No language found.</CommandEmpty>
+            <CommandGroup>
+              {languages.map((lang) => (
+                <CommandItem
+                  key={lang.code}
+                  value={lang.label}
+                  onSelect={() => { onChange(lang.code); setOpen(false) }}
+                  className="rounded-lg gap-2 cursor-pointer"
+                >
+                  <Check className={cn("h-3.5 w-3.5 shrink-0", lang.code === value ? "opacity-100 text-primary" : "opacity-0")} />
+                  {lang.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 // ── Delete account dialog ─────────────────────────────────────────────────────
 function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const [confirmText, setConfirmText] = useState("")
@@ -219,9 +314,13 @@ function DeleteAccountDialog({ open, onOpenChange }: { open: boolean; onOpenChan
 // ── Sub-components ───────────────────────────────────────────────────────────
 
 function AccountTab({ user }: { user: typeof MOCK_USER }) {
+  const isOAuth = !!user.oauth_provider
+
   const [displayName, setDisplayName]     = useState(user.full_name ?? "")
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [sizeError, setSizeError]         = useState(false)
+  const [nativeLang, setNativeLang]       = useState("ar")
+  const [learningLang, setLearningLang]   = useState("en")
   const [deleteOpen, setDeleteOpen]       = useState(false)
   const fileInputRef                      = useRef<HTMLInputElement>(null)
   const isDirty = displayName !== (user.full_name ?? "")
@@ -343,7 +442,15 @@ function AccountTab({ user }: { user: typeof MOCK_USER }) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email Address</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email Address</Label>
+            {isOAuth && (
+              <span className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-muted border border-border/50 rounded-full px-2 py-0.5">
+                <GoogleIcon className="h-3 w-3" />
+                via Google
+              </span>
+            )}
+          </div>
           <div className="relative">
             <Input
               value={user.email}
@@ -384,6 +491,127 @@ function AccountTab({ user }: { user: typeof MOCK_USER }) {
           </div>
         ))}
       </div>
+
+      <Separator />
+
+      {/* Preferences */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Languages className="h-4 w-4 text-muted-foreground" />
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Language Preferences</h3>
+        </div>
+        <div className="rounded-2xl border border-border/40 bg-muted/10 p-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">I speak</Label>
+              <LanguageCombobox
+                value={nativeLang}
+                onChange={setNativeLang}
+                languages={LANGUAGES}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">I'm learning</Label>
+              <LanguageCombobox
+                value={learningLang}
+                onChange={setLearningLang}
+                languages={LANGUAGES.filter(l => l.code !== nativeLang)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Linked accounts */}
+      <div className="space-y-3">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Linked Accounts</h3>
+        <div className="space-y-2">
+          {[
+            {
+              id:          "google",
+              name:        "Google",
+              description: "Sign in with your Google account",
+              icon:        <GoogleIcon className="h-5 w-5" />,
+              linked:      user.oauth_provider === "google",
+              canUnlink:   user.oauth_provider === "google",
+            },
+          ].map((provider) => (
+            <motion.div
+              key={provider.id}
+              layout
+              className="flex items-center justify-between rounded-2xl border border-border/40 bg-muted/20 px-4 py-3"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-xl bg-background border border-border/50 flex items-center justify-center shrink-0">
+                  {provider.icon}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-foreground">{provider.name}</p>
+                    {provider.linked && (
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 rounded-full bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                        Connected
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">{provider.description}</p>
+                </div>
+              </div>
+
+              {provider.linked ? (
+                <div className="flex flex-col items-end gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled
+                    className="rounded-xl h-8 px-3 text-xs text-muted-foreground gap-1.5 opacity-40 cursor-not-allowed"
+                  >
+                    <Unlink className="h-3.5 w-3.5" />
+                    Unlink
+                  </Button>
+                  <span className="text-[10px] text-muted-foreground/60 pr-1">Only sign-in method</span>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl h-8 px-3 text-xs gap-1.5"
+                >
+                  <Link2 className="h-3.5 w-3.5" />
+                  Connect
+                </Button>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* No-password notice for OAuth users */}
+      {isOAuth && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="flex items-start gap-3 rounded-2xl border border-border/40 bg-muted/20 px-4 py-3.5"
+        >
+          <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-foreground">No password set</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              You sign in with Google. If you lose access to your Google account you won't be able to log in.{" "}
+              <button
+                type="button"
+                onClick={() => {/* TODO: navigate to security tab */}}
+                className="underline underline-offset-2 text-foreground hover:text-primary transition-colors"
+              >
+                Add a password
+              </button>
+            </p>
+          </div>
+        </motion.div>
+      )}
 
       {/* Actions */}
       <div className="flex items-center justify-between pt-1">
@@ -434,12 +662,16 @@ function AccountTab({ user }: { user: typeof MOCK_USER }) {
   )
 }
 
-function SecurityTab() {
+function SecurityTab({ user }: { user: typeof MOCK_USER }) {
+  const isOAuth = !!user.oauth_provider
+
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew]         = useState(false)
   const [current, setCurrent]         = useState("")
   const [next, setNext]               = useState("")
   const [confirm, setConfirm]         = useState("")
+
+  const [newEmail, setNewEmail]       = useState("")
 
   const sessions = [
     { device: "MacBook Pro", location: "Algiers, DZ", current: true,  last: "Now" },
@@ -510,6 +742,63 @@ function SecurityTab() {
             Update Password
           </Button>
         </div>
+      </div>
+
+      <Separator />
+
+      {/* Change email */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Mail className="h-4 w-4 text-muted-foreground" />
+          <h3 className="font-semibold text-sm">Change Email</h3>
+        </div>
+
+        {isOAuth ? (
+          <div className="flex items-start gap-3 rounded-2xl border border-border/40 bg-muted/20 px-4 py-3.5">
+            <Info className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Managed by Google</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Your email is tied to your Google account and can't be changed here. Update it directly in your Google account settings.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Current Email</Label>
+                <div className="relative">
+                  <Input
+                    value={user.email}
+                    readOnly
+                    className="rounded-xl h-11 bg-muted/30 border-border/30 text-muted-foreground pr-10 cursor-not-allowed"
+                  />
+                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">New Email</Label>
+                <Input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="new@example.com"
+                  className="rounded-xl h-11 bg-muted/40 border-border/50 focus-visible:ring-primary/30"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                className="rounded-xl px-6 h-9"
+                disabled={!newEmail || newEmail === user.email}
+              >
+                Send verification code
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <Separator />
@@ -742,7 +1031,7 @@ export function AccountInfoCard() {
               transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
               {activeTab === "account"  && <AccountTab  user={user} />}
-              {activeTab === "security" && <SecurityTab />}
+              {activeTab === "security" && <SecurityTab user={user} />}
               {activeTab === "billing"  && <BillingTab  user={user} />}
             </motion.div>
           </AnimatePresence>
