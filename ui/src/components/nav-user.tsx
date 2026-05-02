@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { UserIcon, CreditCardIcon, LogOutIcon, LifeBuoyIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -33,6 +34,7 @@ export function NavUser() {
     return () => observer.disconnect();
   }, []);
 
+  const router                        = useRouter();
   const user                          = useAuthStore((s) => s.user);
   const { mutate: logout, isPending } = useLogoutMutation();
 
@@ -157,7 +159,7 @@ export function NavUser() {
                     }}
                     onClick={() => {
                       if (isLogout) { setIsOpen(false); logout(); }
-                      else setIsOpen(false);
+                      else { setIsOpen(false); if (item.href) router.push(item.href); }
                     }}
                     onMouseEnter={() => setHovered(item.id!)}
                     className={`relative flex items-center gap-3 rounded-lg text-sm cursor-pointer m-0! pl-3! py-2! transition-colors duration-200 ease-out

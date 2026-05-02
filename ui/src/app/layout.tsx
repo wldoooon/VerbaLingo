@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Rubik_Wet_Paint } from "next/font/google";
+import { Inter, Rubik_Wet_Paint, Carter_One } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import QueryProvider from "@/components/QueryProvider";
@@ -8,13 +8,13 @@ import { ToastProvider } from "@/components/ui/toast";
 import TechnicalLattice from "@/components/TechnicalLattice";
 import AuthSync from "@/components/AuthSync"
 import { YouTubeErrorSuppressor } from "@/components/YouTubeErrorSuppressor";
-import { BetaBanner } from "@/components/BetaBanner";
 import { CookieBanner } from "@/components/CookieBanner";
 import FooterWrapper from "@/components/FooterWrapper";
 import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 export const rubikWetPaint = Rubik_Wet_Paint({ subsets: ["latin"], weight: "400", variable: "--font-rubik-wet-paint" });
+export const carterOne = Carter_One({ subsets: ["latin"], weight: "400", variable: "--font-carter-one" });
 
 export const metadata: Metadata = {
   title: {
@@ -55,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://s.ytimg.com" />
       </head>
       <body
-        className={`${inter.className} ${rubikWetPaint.variable} w-full min-h-screen bg-background`}
+        className={`${inter.className} ${rubikWetPaint.variable} ${carterOne.variable} w-full min-h-screen bg-background`}
         suppressHydrationWarning
       >
         <Script src="https://www.youtube.com/iframe_api" strategy="afterInteractive" />
@@ -70,7 +70,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <YouTubeErrorSuppressor />
             <CookieBanner />
             <ToastProvider position="bottom-right">
-              <BetaBanner />
               {children}
             </ToastProvider>
           </QueryProvider>

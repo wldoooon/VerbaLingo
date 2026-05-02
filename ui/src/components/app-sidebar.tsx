@@ -15,20 +15,26 @@ import {
 import { NavGroup } from "@/components/nav-group";
 import { footerNavLinks, navGroups } from "@/components/app-shared";
 import { UsageMeter } from "@/components/usage-meter";
-import { HighlightText } from "@/components/ui/highlight-text";
+import { useAuthStore } from "@/stores/auth-store";
+
 export function AppSidebar() {
+	const authStatus = useAuthStore((s) => s.status)
+	const visibleGroups = navGroups.filter(
+		(g) => g.label !== "Settings" || authStatus === "authenticated"
+	)
+
 	return (
 		<Sidebar collapsible="icon" variant="floating" className="[&_[data-sidebar=sidebar]]:rounded-2xl [&_[data-sidebar=sidebar]]:border-border/40 [&_[data-sidebar=sidebar]]:relative [&_[data-sidebar=sidebar]]:bg-background">
 			<SidebarHeader className="h-14 border-b border-border/40">
 				<a href="/" className="flex h-full w-full items-center gap-0 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
 					<Image src="/main_logo.png" alt="PokiSpokey" width={34} height={34} className="size-9 shrink-0" />
-					<HighlightText variant="underline" color="primary" style={{ fontFamily: 'var(--font-rubik-wet-paint)' }} className="group-data-[collapsible=icon]:hidden -ml-1">
-						<span className="text-orange-400/80">Poki</span>Spokey
-					</HighlightText>
+					<span style={{ fontFamily: 'var(--font-carter-one)' }} className="group-data-[collapsible=icon]:hidden -ml-1">
+						PokiSpokey
+					</span>
 				</a>
 			</SidebarHeader>
 			<SidebarContent>
-				{navGroups.map((group, index) => (
+				{visibleGroups.map((group, index) => (
 					<NavGroup key={`sidebar-group-${index}`} {...group} />
 				))}
 			</SidebarContent>

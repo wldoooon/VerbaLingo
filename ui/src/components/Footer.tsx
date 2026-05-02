@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { GithubIcon, InstagramIcon, LinkedinIcon, YoutubeIcon } from "lucide-react";
-import { HighlightText } from "@/components/ui/highlight-text";
 
 export function Footer() {
 	return (
@@ -17,9 +16,9 @@ export function Footer() {
 					<div className="col-span-6 flex flex-col gap-4 pt-5 md:col-span-4">
 						<a className="flex items-center w-max" href="/">
 							<img src="/main_logo.png" className="h-15" alt="PokiSpokey" />
-							<HighlightText variant="underline" color="primary" style={{ fontFamily: 'var(--font-rubik-wet-paint)' }} className="text-xl text-foreground -ml-1">
-								<span className="text-orange-400/70">Poki</span>Spokey
-						</HighlightText>
+							<span style={{ fontFamily: 'var(--font-carter-one)' }} className="text-xl text-foreground -ml-1">
+							PokiSpokey
+						</span>
 						</a>
 						<p className="max-w-sm text-balance text-muted-foreground text-sm">
 							Master any language by hearing it in real context from movies, podcasts, shows, and more.

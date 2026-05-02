@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Lock, LogOut, Mail, ShieldCheck, CalendarDays,
-  Eye, EyeOff, KeyRound, Smartphone, Camera, Languages, ChevronDown, Info,
+  Eye, EyeOff, KeyRound, Camera, Languages, ChevronDown, Info,
   Zap, Search, Check, ArrowUpRight, TriangleAlert, Link2, Unlink,
 } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -662,84 +662,175 @@ function AccountTab({ user }: { user: typeof MOCK_USER }) {
   )
 }
 
+function getPasswordStrength(pw: string): { score: number; label: string; barColor: string; textColor: string } {
+  if (!pw) return { score: 0, label: "", barColor: "", textColor: "" }
+  let score = 0
+  if (pw.length >= 8)  score++
+  if (pw.length >= 12) score++
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++
+  if (/\d/.test(pw))   score++
+  if (/[^A-Za-z0-9]/.test(pw)) score++
+  const s = Math.min(4, score) as 0 | 1 | 2 | 3 | 4
+  return [
+    { score: 0, label: "",       barColor: "",                textColor: "" },
+    { score: 1, label: "Weak",   barColor: "bg-red-500",      textColor: "text-red-500" },
+    { score: 2, label: "Fair",   barColor: "bg-amber-500",    textColor: "text-amber-500" },
+    { score: 3, label: "Good",   barColor: "bg-blue-500",     textColor: "text-blue-500" },
+    { score: 4, label: "Strong", barColor: "bg-emerald-500",  textColor: "text-emerald-500" },
+  ][s]
+}
+
+function PasswordStrengthBar({ password }: { password: string }) {
+  const { score, label, barColor, textColor } = getPasswordStrength(password)
+  if (!password) return null
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ duration: 0.15 }}
+      className="space-y-1.5"
+    >
+      <div className="flex gap-1">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-1 flex-1 rounded-full bg-border/50 overflow-hidden">
+            <motion.div
+              className={cn("h-full rounded-full", i <= score ? barColor : "")}
+              initial={{ width: 0 }}
+              animate={{ width: i <= score ? "100%" : "0%" }}
+              transition={{ duration: 0.25, delay: i * 0.04 }}
+            />
+          </div>
+        ))}
+      </div>
+      <p className={cn("text-[11px] font-medium", textColor)}>{label}</p>
+    </motion.div>
+  )
+}
+
 function SecurityTab({ user }: { user: typeof MOCK_USER }) {
   const isOAuth = !!user.oauth_provider
 
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew]         = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [current, setCurrent]         = useState("")
   const [next, setNext]               = useState("")
   const [confirm, setConfirm]         = useState("")
-
   const [newEmail, setNewEmail]       = useState("")
 
-  const sessions = [
-    { device: "MacBook Pro", location: "Algiers, DZ", current: true,  last: "Now" },
-    { device: "iPhone 15",   location: "Algiers, DZ", current: false, last: "2 hours ago" },
-    { device: "Chrome / Windows", location: "Paris, FR", current: false, last: "3 days ago" },
-  ]
+  const strength      = getPasswordStrength(next)
+  const passwordsMatch = confirm.length > 0 && next === confirm
+  const passwordsMismatch = confirm.length > 0 && next !== confirm
+  const canSubmitPassword = isOAuth
+    ? next && confirm && next === confirm && strength.score >= 2
+    : current && next && confirm && next === confirm && strength.score >= 2
+
+  function EyeToggle({ show, onToggle }: { show: boolean; onToggle: () => void }) {
+    return (
+      <button type="button" onClick={onToggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors">
+        {show ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+      </button>
+    )
+  }
 
   return (
     <div className="space-y-6">
-      {/* Change password */}
-      <div className="space-y-3">
+
+      {/* Password section */}
+      <div className="space-y-4">
         <div className="flex items-center gap-2">
           <KeyRound className="h-4 w-4 text-muted-foreground" />
-          <h3 className="font-semibold text-sm">Change Password</h3>
+          <h3 className="font-semibold text-sm">{isOAuth ? "Set Password" : "Change Password"}</h3>
+          {isOAuth && (
+            <Badge variant="outline" className="text-[9px] px-1.5 py-0 rounded-full bg-amber-500/10 text-amber-500 border-amber-500/20 ml-1">
+              Not set
+            </Badge>
+          )}
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Current</Label>
-            <div className="relative">
-              <Input
-                type={showCurrent ? "text" : "password"}
-                value={current}
-                onChange={(e) => setCurrent(e.target.value)}
-                placeholder="••••••••"
-                className="rounded-xl h-11 pr-10 bg-muted/40 border-border/50 focus-visible:ring-primary/30"
-              />
-              <button
-                type="button"
-                onClick={() => setShowCurrent(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground"
-              >
-                {showCurrent ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-              </button>
+
+        {isOAuth && (
+          <p className="text-xs text-muted-foreground -mt-1">
+            Add a password as a backup sign-in method in case you lose access to Google.
+          </p>
+        )}
+
+        <div className="space-y-3">
+          {/* Current password — only for non-OAuth */}
+          {!isOAuth && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Current Password</Label>
+              <div className="relative">
+                <Input
+                  type={showCurrent ? "text" : "password"}
+                  value={current}
+                  onChange={(e) => setCurrent(e.target.value)}
+                  placeholder="••••••••"
+                  className="rounded-xl h-11 pr-10 bg-muted/40 border-border/50 focus-visible:ring-primary/30"
+                />
+                <EyeToggle show={showCurrent} onToggle={() => setShowCurrent(v => !v)} />
+              </div>
+            </div>
+          )}
+
+          {/* New + Confirm side by side */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                {isOAuth ? "Password" : "New Password"}
+              </Label>
+              <div className="relative">
+                <Input
+                  type={showNew ? "text" : "password"}
+                  value={next}
+                  onChange={(e) => setNext(e.target.value)}
+                  placeholder="••••••••"
+                  className="rounded-xl h-11 pr-10 bg-muted/40 border-border/50 focus-visible:ring-primary/30"
+                />
+                <EyeToggle show={showNew} onToggle={() => setShowNew(v => !v)} />
+              </div>
+              <AnimatePresence>
+                {next && <PasswordStrengthBar password={next} />}
+              </AnimatePresence>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  placeholder="••••••••"
+                  className={cn(
+                    "rounded-xl h-11 pr-10 bg-muted/40 border-border/50 focus-visible:ring-primary/30",
+                    passwordsMatch    && "border-emerald-500/50 focus-visible:ring-emerald-500/30",
+                    passwordsMismatch && "border-red-500/50 focus-visible:ring-red-500/30",
+                  )}
+                />
+                <EyeToggle show={showConfirm} onToggle={() => setShowConfirm(v => !v)} />
+              </div>
+              <AnimatePresence>
+                {confirm && (
+                  <motion.p
+                    key={passwordsMatch ? "match" : "mismatch"}
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className={cn("text-[11px] font-medium", passwordsMatch ? "text-emerald-500" : "text-red-500")}
+                  >
+                    {passwordsMatch ? "Passwords match" : "Passwords don't match"}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">New</Label>
-            <div className="relative">
-              <Input
-                type={showNew ? "text" : "password"}
-                value={next}
-                onChange={(e) => setNext(e.target.value)}
-                placeholder="••••••••"
-                className="rounded-xl h-11 pr-10 bg-muted/40 border-border/50 focus-visible:ring-primary/30"
-              />
-              <button
-                type="button"
-                onClick={() => setShowNew(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground"
-              >
-                {showNew ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-              </button>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Confirm</Label>
-            <Input
-              type="password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              placeholder="••••••••"
-              className="rounded-xl h-11 bg-muted/40 border-border/50 focus-visible:ring-primary/30"
-            />
-          </div>
         </div>
+
         <div className="flex justify-end">
-          <Button size="sm" className="rounded-xl px-6 h-9" disabled={!current || !next || next !== confirm}>
-            Update Password
+          <Button size="sm" className="rounded-xl px-6 h-9" disabled={!canSubmitPassword}>
+            {isOAuth ? "Set Password" : "Update Password"}
           </Button>
         </div>
       </div>
@@ -747,7 +838,7 @@ function SecurityTab({ user }: { user: typeof MOCK_USER }) {
       <Separator />
 
       {/* Change email */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Mail className="h-4 w-4 text-muted-foreground" />
           <h3 className="font-semibold text-sm">Change Email</h3>
@@ -759,7 +850,7 @@ function SecurityTab({ user }: { user: typeof MOCK_USER }) {
             <div>
               <p className="text-sm font-medium text-foreground">Managed by Google</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Your email is tied to your Google account and can't be changed here. Update it directly in your Google account settings.
+                Your email is tied to your Google account. Update it directly in your Google account settings.
               </p>
             </div>
           </div>
@@ -788,50 +879,16 @@ function SecurityTab({ user }: { user: typeof MOCK_USER }) {
                 />
               </div>
             </div>
-            <div className="flex justify-end">
-              <Button
-                size="sm"
-                className="rounded-xl px-6 h-9"
-                disabled={!newEmail || newEmail === user.email}
-              >
-                Send verification code
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">We'll send a verification code to your new address.</p>
+              <Button size="sm" className="rounded-xl px-6 h-9" disabled={!newEmail || newEmail === user.email}>
+                Send code
               </Button>
             </div>
           </div>
         )}
       </div>
 
-      <Separator />
-
-      {/* Active sessions */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Smartphone className="h-4 w-4 text-muted-foreground" />
-          <h3 className="font-semibold text-sm">Active Sessions</h3>
-        </div>
-        <div className="space-y-2">
-          {sessions.map((s, i) => (
-            <div key={i} className="flex items-center justify-between rounded-2xl border border-border/40 bg-muted/20 px-4 py-3">
-              <div>
-                <p className="text-sm font-medium text-foreground flex items-center gap-2">
-                  {s.device}
-                  {s.current && (
-                    <Badge variant="outline" className="text-[9px] px-1.5 py-0 rounded-full bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-                      This device
-                    </Badge>
-                  )}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">{s.location} · {s.last}</p>
-              </div>
-              {!s.current && (
-                <Button variant="ghost" size="sm" className="text-xs text-red-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg h-7">
-                  Revoke
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   )
 }
@@ -991,18 +1048,21 @@ export function AccountInfoCard() {
         <div className="px-6 pt-5 pb-0">
           <TabsList className="bg-muted/70 rounded-xl p-1 h-auto gap-0.5">
             {[
-              { value: "account",  label: "Account" },
-              { value: "security", label: "Security" },
-              { value: "billing",  label: "Billing" },
+              { value: "account",  label: "Account",  soon: false },
+              { value: "security", label: "Security", soon: false },
+              { value: "billing",  label: "Billing",  soon: true  },
             ].map(tab => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
+                disabled={tab.soon}
                 className={cn(
                   "relative rounded-lg px-4 py-1.5 text-sm font-medium transition-colors duration-200",
-                  "text-muted-foreground hover:text-foreground",
+                  "text-muted-foreground",
+                  !tab.soon && "hover:text-foreground",
                   "data-[state=active]:text-foreground",
-                  "data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                  "data-[state=active]:bg-transparent data-[state=active]:shadow-none",
+                  tab.soon && "cursor-not-allowed opacity-60"
                 )}
               >
                 {activeTab === tab.value && (
@@ -1012,7 +1072,14 @@ export function AccountInfoCard() {
                     transition={{ type: "spring", damping: 30, stiffness: 400, mass: 0.8 }}
                   />
                 )}
-                <span className="relative z-10">{tab.label}</span>
+                <span className="relative z-10 flex items-center gap-1.5">
+                  {tab.label}
+                  {tab.soon && (
+                    <span className="text-[9px] font-semibold uppercase tracking-wide bg-muted border border-border/50 text-muted-foreground rounded-full px-1.5 py-0.5 leading-none">
+                      Soon
+                    </span>
+                  )}
+                </span>
               </TabsTrigger>
             ))}
           </TabsList>
