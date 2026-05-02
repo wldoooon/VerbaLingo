@@ -15,6 +15,8 @@ import {
   Zap, Search, Check, ArrowUpRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuthStore } from "@/stores/auth-store"
+import { useLogoutMutation, useUpdateProfileMutation } from "@/lib/authHooks"
 
 // ── Mock data ────────────────────────────────────────────────────────────────
 const MOCK_USER = {
@@ -42,7 +44,7 @@ const PLANS = [
 const TIER_CONFIG: Record<string, { label: string; className: string }> = {
   free:    { label: "Free",    className: "bg-muted text-muted-foreground border-border" },
   basic:   { label: "Basic",   className: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
-  pro:     { label: "Pro",     className: "bg-primary/10 text-primary border-primary/20" },
+  pro:     { label: "Pro",     className: "bg-muted text-muted-foreground border-border" },
   premium: { label: "Premium", className: "bg-purple-500/10 text-purple-500 border-purple-500/20" },
   max:     { label: "Max",     className: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
 }
@@ -72,22 +74,26 @@ function formatNumber(n: number) {
 // ── Sub-components ───────────────────────────────────────────────────────────
 
 function AccountTab({ user }: { user: typeof MOCK_USER }) {
-  const [displayName, setDisplayName] = useState(user.full_name)
-  const isDirty = displayName !== user.full_name
+  const [displayName, setDisplayName] = useState(user.full_name ?? "")
+  const isDirty = displayName !== (user.full_name ?? "")
   const tier = TIER_CONFIG[user.tier] ?? TIER_CONFIG.free
+  const updateMutation = useUpdateProfileMutation()
+  const logoutMutation = useLogoutMutation()
 
   return (
     <div className="space-y-6">
       {/* Avatar row */}
       <div className="flex items-center gap-5">
         <Avatar className="h-24 w-24 ring-2 ring-border/40 ring-offset-2 ring-offset-card">
-          <AvatarImage src={user.oauth_avatar_url ?? undefined} />
+          <AvatarImage src={user.oauth_avatar_url || "/user_logo.png"} />
           <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary text-2xl font-bold">
             {getInitials(user.full_name, user.email)}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0">
-          <p className="text-xl font-semibold text-foreground truncate">{user.full_name}</p>
+          <p className="text-xl font-semibold text-foreground truncate">
+            {user.full_name || user.email.split("@")[0] || "User"}
+          </p>
           <p className="text-sm text-muted-foreground truncate mt-0.5">{user.email}</p>
           <Badge
             variant="outline"
@@ -390,7 +396,19 @@ function BillingTab({ user }: { user: typeof MOCK_USER }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 export function AccountInfoCard() {
-  const user = MOCK_USER
+  const authUser = useAuthStore((s) => s.user)
+
+  // Merge real auth data over mock defaults (billing/usage still mock until API ready)
+  const user = {
+    ...MOCK_USER,
+    full_name:        authUser?.full_name ?? MOCK_USER.full_name,
+    email:            authUser?.email     ?? MOCK_USER.email,
+    oauth_avatar_url: authUser?.oauth_avatar_url ?? null,
+    oauth_provider:   authUser?.oauth_provider   ?? null,
+    tier:             (authUser?.tier ?? MOCK_USER.tier) as typeof MOCK_USER.tier,
+    is_email_verified: authUser?.is_email_verified ?? MOCK_USER.is_email_verified,
+    created_at:       authUser?.created_at ?? MOCK_USER.created_at,
+  }
 
   return (
     <div className="rounded-3xl border border-border/60 bg-card shadow-sm overflow-hidden">
