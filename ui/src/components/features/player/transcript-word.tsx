@@ -29,7 +29,6 @@ export const TranscriptWord = memo(({
   // Component will only re-render when isCurrentWord toggles.
   // Lead scaled with playbackRate so timing stays accurate at any speed.
   const isCurrentWord = usePlayerStore(state => {
-    if (!state.isPlaying) return false
     const TIMING_LEAD = 0.05 * state.playbackRate
     const adjustedTime = state.currentTime + TIMING_LEAD
     return adjustedTime >= start && adjustedTime < end
@@ -55,7 +54,7 @@ export const TranscriptWord = memo(({
               "bg-primary text-primary-foreground border-primary shadow-sm",
               // The active word being spoken right now
               isCurrentWord &&
-              "bg-primary/20 border-primary text-foreground font-bold scale-105 shadow-[0_0_15px_-3px_rgba(var(--primary),0.3)]",
+              "border-primary text-foreground font-bold scale-105",
               // Normal state
               !isCurrentWord && !isSearchMatch &&
               "border-transparent hover:bg-accent/40 hover:text-foreground hover:scale-105",

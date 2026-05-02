@@ -74,6 +74,7 @@
     "react-intersection-observer": "^9.16.0",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^15.6.6",
+    "react-use-measure": "^2.1.7",
     "react-youtube": "^10.1.0",
     "rehype-katex": "^7.0.1",
     "remark-breaks": "^4.0.0",

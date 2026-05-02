@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
 	Sidebar,
 	SidebarContent,
@@ -16,54 +15,26 @@ import {
 import { NavGroup } from "@/components/nav-group";
 import { footerNavLinks, navGroups } from "@/components/app-shared";
 import { UsageMeter } from "@/components/usage-meter";
-import { PlusIcon, SearchIcon } from "lucide-react";
-
-import { DecorIcon } from "@/components/ui/decor-icon";
+import { useAuthStore } from "@/stores/auth-store";
 
 export function AppSidebar() {
-	return (
-		<Sidebar collapsible="icon" variant="floating" className="[&_[data-sidebar=sidebar]]:rounded-none [&_[data-sidebar=sidebar]]:border-border/40 [&_[data-sidebar=sidebar]]:relative [&_[data-sidebar=sidebar]]:bg-background">
-			{/* --- Architectural Decorations --- */}
-			<div className="absolute inset-0 pointer-events-none z-50">
-				<DecorIcon className="size-4 text-muted-foreground/40" position="top-left" />
-				<DecorIcon className="size-4 text-muted-foreground/40" position="top-right" />
-				<DecorIcon className="size-4 text-muted-foreground/40" position="bottom-left" />
-				<DecorIcon className="size-4 text-muted-foreground/40" position="bottom-right" />
+	const authStatus = useAuthStore((s) => s.status)
+	const visibleGroups = navGroups.filter(
+		(g) => g.label !== "Settings" || authStatus === "authenticated"
+	)
 
-				{/* Bleeding grid lines */}
-				<div className="absolute -top-[1px] -inset-x-12 h-px bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-				<div className="absolute -bottom-[1px] -inset-x-12 h-px bg-border/40" style={{ WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)" }} />
-			</div>
+	return (
+		<Sidebar collapsible="icon" variant="floating" className="[&_[data-sidebar=sidebar]]:rounded-2xl [&_[data-sidebar=sidebar]]:border-border/40 [&_[data-sidebar=sidebar]]:relative [&_[data-sidebar=sidebar]]:bg-background">
 			<SidebarHeader className="h-14 border-b border-border/40">
-				<a href="/" className="flex h-full w-full items-center gap-2 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+				<a href="/" className="flex h-full w-full items-center gap-0 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
 					<Image src="/main_logo.png" alt="PokiSpokey" width={34} height={34} className="size-9 shrink-0" />
-					<span className="font-medium group-data-[collapsible=icon]:hidden">PokiSpokey</span>
+					<span style={{ fontFamily: 'var(--font-carter-one)' }} className="group-data-[collapsible=icon]:hidden -ml-1">
+						PokiSpokey
+					</span>
 				</a>
 			</SidebarHeader>
 			<SidebarContent>
-				<SidebarGroup>
-					<SidebarMenuItem className="flex items-center gap-2">
-						<SidebarMenuButton
-							className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
-							tooltip="Add product"
-						>
-							<PlusIcon
-							/>
-							<span>Add product</span>
-						</SidebarMenuButton>
-						<Button
-							aria-label="Search store"
-							className="size-8 group-data-[collapsible=icon]:opacity-0"
-							size="icon"
-							variant="outline"
-						>
-							<SearchIcon
-							/>
-							<span className="sr-only">Search store</span>
-						</Button>
-					</SidebarMenuItem>
-				</SidebarGroup>
-				{navGroups.map((group, index) => (
+				{visibleGroups.map((group, index) => (
 					<NavGroup key={`sidebar-group-${index}`} {...group} />
 				))}
 			</SidebarContent>

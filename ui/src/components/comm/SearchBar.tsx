@@ -341,13 +341,11 @@ export function SearchBar() {
         <div className="w-full max-w-4xl flex items-center gap-4 relative z-50" ref={containerRef}>
             <div className="flex-1">
                 <div className={cn(
-                    "group relative rounded-xl transition-all duration-300 ease-in-out border border-primary/40 overflow-hidden",
-                    panelVisible
-                        ? "rounded-b-none"
-                        : "hover:-translate-y-0.5"
+                    "search-animated-border group relative transition-all duration-300",
+                    panelVisible ? "rounded-t-xl" : "rounded-xl hover:-translate-y-0.5"
                 )}>
                     {/* Inner Content */}
-                    <div className="relative z-10 bg-background flex flex-row items-center p-1 sm:p-1 w-full h-full">
+                    <div className="relative z-10 flex flex-row items-center p-1 sm:p-1 w-full h-full">
 
                         {/* Category Popover */}
                         <Popover>
@@ -389,7 +387,7 @@ export function SearchBar() {
                                                 className={cn(
                                                     "group flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg text-sm transition-all duration-150 cursor-pointer border",
                                                     selected
-                                                        ? "bg-primary/10 text-foreground border-primary/25"
+                                                        ? "bg-muted text-foreground border-border hover:bg-muted/70"
                                                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground border-transparent"
                                                 )}
                                             >

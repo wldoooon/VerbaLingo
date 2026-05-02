@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useUsageStore } from "@/stores/usage-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { toastManager } from "@/components/ui/toast";
 
 export const apiClient = axios.create({
@@ -40,7 +41,12 @@ apiClient.interceptors.response.use(
 
     if (limit && remaining && policy) {
       const feature = policy.split(";")[0];
-      if (feature) {
+      // Guests: update in real-time from headers (limited quota, need immediate feedback).
+      // Authenticated users: correct usage comes from /auth/me → setAllUsage.
+      // Skipping header updates for authenticated users prevents guest-tier limits
+      // from overwriting correct values if a request slips through during a brief
+      // token-expiry window (edge case, but cheap to guard).
+      if (feature && useAuthStore.getState().status !== "authenticated") {
         useUsageStore.getState().updateUsage(feature, {
           limit: parseInt(limit, 10),
           remaining: parseInt(remaining, 10),

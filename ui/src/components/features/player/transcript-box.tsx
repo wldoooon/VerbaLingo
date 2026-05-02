@@ -1,10 +1,45 @@
 "use client"
 
-import { useMemo, useEffect } from "react"
+import { useMemo, useEffect, memo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Skeleton } from "@/components/ui/skeleton"
 import { usePlayerStore } from "@/stores/use-player-store"
 import { SentenceGroup } from "./sentence-group"
+import { cn } from "@/lib/utils"
+
+type SyncedTranslationProps = {
+  text: string
+  startTime: number
+  endTime: number
+  className?: string
+}
+
+const SyncedTranslation = memo(({ text, startTime, endTime, className }: SyncedTranslationProps) => {
+  const words = text.split(" ")
+
+  const activeWordIdx = usePlayerStore(state => {
+    const t = state.currentTime + 0.05 * state.playbackRate
+    if (t < startTime || t >= endTime) return -1
+    const progress = (t - startTime) / (endTime - startTime)
+    return Math.min(Math.floor(progress * words.length), words.length - 1)
+  })
+
+  return (
+    <p className={cn("text-center px-4 leading-snug", className)}>
+      {words.map((word, i) => (
+        <span
+          key={i}
+          className={cn(
+            "transition-all duration-150 ease-out",
+            i === activeWordIdx ? "text-primary font-semibold" : ""
+          )}
+        >
+          {word}{i < words.length - 1 ? " " : ""}
+        </span>
+      ))}
+    </p>
+  )
+})
 
 type Word = { text: string; start: number; end: number }
 type Sentence = {
@@ -165,9 +200,12 @@ export const TranscriptBox = ({
                     onExplainWordInContext={onExplainWordInContext}
                   />
                   {translatedMap?.[trio.activeIdx - 1] && (
-                    <p className="text-sm sm:text-base font-medium text-muted-foreground/60 text-center px-4 leading-snug">
-                      {translatedMap[trio.activeIdx - 1]}
-                    </p>
+                    <SyncedTranslation
+                      text={translatedMap[trio.activeIdx - 1]}
+                      startTime={trio.prev.start_time}
+                      endTime={trio.prev.end_time}
+                      className="text-sm sm:text-base font-medium text-muted-foreground"
+                    />
                   )}
                 </div>
               )}
@@ -183,9 +221,12 @@ export const TranscriptBox = ({
                 {isTranslationLoading ? (
                   <Skeleton className="h-5 w-2/3 rounded-full opacity-40" />
                 ) : translatedMap?.[trio.activeIdx] ? (
-                  <p className="text-base sm:text-xl font-medium text-muted-foreground/70 text-center px-4 leading-snug">
-                    {translatedMap[trio.activeIdx]}
-                  </p>
+                  <SyncedTranslation
+                    text={translatedMap[trio.activeIdx]}
+                    startTime={trio.active.start_time}
+                    endTime={trio.active.end_time}
+                    className="text-base sm:text-xl font-medium text-foreground"
+                  />
                 ) : null}
               </div>
 
@@ -199,9 +240,12 @@ export const TranscriptBox = ({
                     onExplainWordInContext={onExplainWordInContext}
                   />
                   {translatedMap?.[trio.activeIdx + 1] && (
-                    <p className="text-sm sm:text-base font-medium text-muted-foreground/60 text-center px-4 leading-snug">
-                      {translatedMap[trio.activeIdx + 1]}
-                    </p>
+                    <SyncedTranslation
+                      text={translatedMap[trio.activeIdx + 1]}
+                      startTime={trio.next.start_time}
+                      endTime={trio.next.end_time}
+                      className="text-sm sm:text-base font-medium text-muted-foreground"
+                    />
                   )}
                 </div>
               )}

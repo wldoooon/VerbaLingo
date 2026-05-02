@@ -1,9 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { GithubIcon, InstagramIcon, LinkedinIcon, YoutubeIcon } from "lucide-react";
-import { Ranchers } from "next/font/google";
-
-const pacifico = Ranchers({ weight: "400", subsets: ["latin"] });
 
 export function Footer() {
 	return (
@@ -19,9 +16,9 @@ export function Footer() {
 					<div className="col-span-6 flex flex-col gap-4 pt-5 md:col-span-4">
 						<a className="flex items-center w-max" href="/">
 							<img src="/main_logo.png" className="h-15" alt="PokiSpokey" />
-							<span style={pacifico.style} className="text-xl text-foreground tracking-widest">
-								<span className="text-orange-500">Poki</span>Spokey
-							</span>
+							<span style={{ fontFamily: 'var(--font-carter-one)' }} className="text-xl text-foreground -ml-1">
+							PokiSpokey
+						</span>
 						</a>
 						<p className="max-w-sm text-balance text-muted-foreground text-sm">
 							Master any language by hearing it in real context from movies, podcasts, shows, and more.

@@ -47,6 +47,14 @@ export function CookieBanner() {
                 >
                     <div className="bg-card/80 backdrop-blur-xl border border-border/50 shadow-2xl rounded-2xl p-4 sm:p-5 relative overflow-hidden">
 
+                        {/* Shimmer sweep */}
+                        <div className="absolute inset-0 pointer-events-none">
+                            <div
+                                className="absolute inset-0 bg-gradient-to-r from-transparent via-foreground/[0.04] to-transparent"
+                                style={{ transform: "translateX(-100%)", animation: "shimmer 2.4s ease-in-out infinite" }}
+                            />
+                        </div>
+
                         <div className="relative z-10">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-2">

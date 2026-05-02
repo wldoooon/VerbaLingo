@@ -54,8 +54,8 @@ export const navGroups: SidebarNavGroup[] = [
 		label: "Settings",
 		items: [
 			{
-				title: "Profile",
-				path: "#",
+				title: "Account Settings",
+				path: "/profile",
 				icon: <UsersIcon />,
 			},
 		],

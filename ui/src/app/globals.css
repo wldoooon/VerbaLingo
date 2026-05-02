@@ -285,3 +285,47 @@
     width: 100%
   }
 }
+
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes search-border-rotate {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+.search-animated-border {
+  border: 0.5px solid transparent;
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(var(--border-angle), #f97316, #000000) border-box;
+  animation: search-border-rotate 8s linear infinite;
+}
+
+.dark .search-animated-border {
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(var(--border-angle), #f97316, #ffffff) border-box;
+}
+
+.card-animated-border {
+  border: 0.5px solid transparent;
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(var(--border-angle), #f97316, #ffffff) border-box;
+  animation: search-border-rotate 8s linear infinite;
+}
+
+@keyframes usage-shimmer {
+  0%   { transform: skewX(-12deg) translateX(-150%); }
+  30%  { transform: skewX(-12deg) translateX(150%); }
+  100% { transform: skewX(-12deg) translateX(150%); }
+}
+
+.usage-shimmer {
+  animation: usage-shimmer 6s ease-in-out infinite;
+}

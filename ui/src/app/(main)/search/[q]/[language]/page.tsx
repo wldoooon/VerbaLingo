@@ -207,7 +207,7 @@ export default function RoutedSearchPage() {
             )}
 
             {/* ── Player content or Empty State ── */}
-            <div className={`flex flex-col overflow-y-auto xl:border-r xl:border-border/40 ${mobileTab !== "player" ? "hidden xl:flex" : ""}`}>
+            <div className={`flex flex-col overflow-y-auto ${mobileTab !== "player" ? "hidden xl:flex" : ""}`}>
               {playlist.length === 0 && !isLoading && !isFetching ? (
                 <div className="p-4 sm:p-6">
                   <NoResults query={q} />
@@ -343,7 +343,7 @@ export default function RoutedSearchPage() {
                       <>
                         <button
                           onClick={() => setIsAiCollapsed(!isAiCollapsed)}
-                          className="absolute -left-3 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
+                          className="absolute -left-1 top-8 w-6 h-6 bg-popover border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all z-50 shadow-lg cursor-pointer group"
                           title={isAiCollapsed ? "Open AI Assistant" : "Close AI Assistant"}
                         >
                           {isAiCollapsed
