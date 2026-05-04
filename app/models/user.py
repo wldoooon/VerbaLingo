@@ -9,13 +9,14 @@ from sqlalchemy import DateTime, String
 if TYPE_CHECKING:
     from .user_usage import UserUsage
     from .subscription import Subscription
+    from .invoice import Invoice
+    from .webhook_event import WebhookEvent
 
 
 class UserTier(str, Enum):
     FREE = "free"
     BASIC = "basic"
     PRO = "pro"
-    PREMIUM = "premium"
     MAX = "max"
 
 
@@ -60,18 +61,8 @@ class User(UserBase, table=True):
         sa_column=Column(DateTime(timezone=True))
     )
 
-    # Tier management
-    tier_updated_at: datetime | None = Field(
-        default=None,
-        sa_column=Column(DateTime(timezone=True))
-    )
-    tier_expires_at: datetime | None = Field(
-        default=None,
-        sa_column=Column(DateTime(timezone=True))
-    )
-
-    # Polar billing — customer identity only (permanent, survives cancellation/resubscription)
-    polar_customer_id: str | None = Field(default=None, index=True, unique=True)
+    # Dodo billing — customer identity only (permanent, survives cancellation/resubscription)
+    dodo_customer_id: str | None = Field(default=None, index=True, unique=True)
 
     # Timestamps (with timezone support)
     created_at: datetime = Field(
@@ -84,8 +75,9 @@ class User(UserBase, table=True):
     )
 
     usage: Optional["UserUsage"] = Relationship(back_populates="user")
-
     subscriptions: list["Subscription"] = Relationship(back_populates="user")
+    invoices: list["Invoice"] = Relationship(back_populates="user")
+    webhook_events: list["WebhookEvent"] = Relationship(back_populates="user")
 
 
 # API Schemas
@@ -103,7 +95,6 @@ class UserRead(UserBase):
     oauth_provider: str | None = None
     oauth_avatar_url: str | None = None
     last_login_at: datetime | None = None
-    tier_expires_at: datetime | None = None
     created_at: datetime
     # Real-time usage data (not persisted in User table)
     usage: Optional[Dict[str, Any]] = None

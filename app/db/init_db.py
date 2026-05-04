@@ -12,7 +12,7 @@ from sqlmodel import SQLModel
 from .session import engine
 from ..core.logging import logger
 # Import all models so they are registered with SQLModel.metadata
-from ..models import User, UserUsage, Subscription
+from ..models import User, UserUsage, Subscription, Invoice, WebhookEvent
 
 async def init_database():
     """

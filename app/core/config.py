@@ -30,8 +30,20 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
-    #Groq 
+    # Groq
     GROQ_API_KEY: str
+
+    # Dodo Payments
+    DODO_API_KEY: str = ""
+    DODO_WEBHOOK_SECRET: str = ""
+
+    # Product IDs — Test Mode (prefix: test_) / Live Mode (prefix: prod_)
+    DODO_PRODUCT_BASIC_MONTHLY: str = ""
+    DODO_PRODUCT_BASIC_YEARLY: str = ""
+    DODO_PRODUCT_PRO_MONTHLY: str = ""
+    DODO_PRODUCT_PRO_YEARLY: str = ""
+    DODO_PRODUCT_MAX_MONTHLY: str = ""
+    DODO_PRODUCT_MAX_YEARLY: str = ""
 
     # OTP Settings (Password Reset)
     OTP_LENGTH: int = 6
