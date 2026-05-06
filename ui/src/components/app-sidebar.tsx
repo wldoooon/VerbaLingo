@@ -28,8 +28,11 @@ export function AppSidebar() {
 			<SidebarHeader className="h-14 border-b border-border/40">
 				<a href="/" className="flex h-full w-full items-center gap-0 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
 					<Image src="/main_logo.png" alt="PokiSpokey" width={34} height={34} className="size-9 shrink-0" />
-					<span style={{ fontFamily: 'var(--font-carter-one)' }} className="group-data-[collapsible=icon]:hidden -ml-1">
+					<span style={{ fontFamily: 'var(--font-carter-one)' }} className="group-data-[collapsible=icon]:hidden -ml-1 relative">
 						PokiSpokey
+						<span className="absolute -top-2 -right-6 text-[9px] bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded px-1 py-0.5 leading-none">
+							beta
+						</span>
 					</span>
 				</a>
 			</SidebarHeader>

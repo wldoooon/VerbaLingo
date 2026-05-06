@@ -30,6 +30,9 @@ fastapi-mail>=1.4.1
 # ─── AI / LLM ───
 groq>=0.4.0
 
+# ─── Payments ───
+dodopayments[aiohttp]
+
 # ─── Rate Limiting ───
 slowapi>=0.1.9
 

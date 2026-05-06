@@ -446,6 +446,12 @@ export default function AudioCard({
 
   const hasStartedPlayback = useRef(false)
 
+  // Reset when the search query changes — handles re-search from the search page
+  // where currentVideoIndex stays at 0 (no index change = no effect trigger below)
+  useEffect(() => {
+    hasStartedPlayback.current = false
+  }, [searchQuery])
+
   // Reset playback flags when the clip changes — use currentVideoIndex so duplicate
   // video_ids (same YouTube video at different timestamps) still re-trigger correctly
   useEffect(() => {

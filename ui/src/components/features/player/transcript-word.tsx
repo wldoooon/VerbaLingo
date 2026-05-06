@@ -3,7 +3,7 @@
 import { memo, useState } from "react"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Search, Sparkles, Bookmark } from "lucide-react"
+import { Search, Sparkles, Copy, MousePointerClick } from "lucide-react"
 import { usePlayerStore } from "@/stores/use-player-store"
 
 type TranscriptWordProps = {
@@ -88,9 +88,24 @@ export const TranscriptWord = memo(({
               <span>Meaning in this context</span>
             </button>
             <div className="h-px w-full bg-border/60 my-1" />
-            <button className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80">
-              <Bookmark className="h-4 w-4 text-muted-foreground" />
-              <span>Save word</span>
+            <button
+              className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80"
+              onClick={() => {
+                usePlayerStore.getState().seekTo(start)
+                usePlayerStore.getState().play()
+                setIsOpen(false)
+              }}
+            >
+              <MousePointerClick className="h-4 w-4 text-muted-foreground" />
+              <span>Seek to word</span>
+            </button>
+            <div className="h-px w-full bg-border/60 my-1" />
+            <button
+              className="w-full flex items-center gap-2 text-left px-2 py-1 rounded-md hover:bg-muted/80"
+              onClick={() => { navigator.clipboard.writeText(wordText); setIsOpen(false) }}
+            >
+              <Copy className="h-4 w-4 text-muted-foreground" />
+              <span>Copy word</span>
             </button>
           </div>
         </PopoverContent>

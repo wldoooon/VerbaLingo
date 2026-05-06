@@ -2,25 +2,25 @@
 import { cn } from "@/lib/utils";
 import NumberFlow from "@number-flow/react";
 import { AnimatePresence, motion } from "motion/react";
-import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { type FREQUENCY, FrequencyToggle } from "@/components/frequency-toggle";
-import { StarIcon, CheckCircleIcon, ShieldCheckIcon, BadgeCheckIcon, LockIcon, RefreshCcwIcon } from "lucide-react";
+import { StarIcon, CheckCircleIcon, ShieldCheckIcon, BadgeCheckIcon, LockIcon, RefreshCcwIcon, Loader2 } from "lucide-react";
 import { useAuthStore } from "@/stores/auth-store";
+import { apiClient } from "@/lib/apiClient";
+import { toastManager } from "@/components/ui/toast";
+import { AuthDialog } from "@/components/auth-dialog";
 
 type Plan = {
 	name: string;
 	info: string;
 	price: {
 		monthly: number;
-		yearly: number; // yearly per month
+		yearly: number;
 	};
 	features: string[];
-	btn: {
-		text: string;
-		href: string;
-	};
+	btn: string;
+	plan?: "basic" | "pro" | "max"; // absent on Free
 	highlighted?: boolean;
 };
 
@@ -28,47 +28,33 @@ const plans: Plan[] = [
 	{
 		name: "Free",
 		info: "Try the core experience",
-		price: {
-			monthly: 0,
-			yearly: 0,
-		},
+		price: { monthly: 0, yearly: 0 },
 		features: [
 			"50 Searches / month",
 			"60,000 AI Credits / month",
 			"Unlimited Translations",
 			"All languages included",
 		],
-		btn: {
-			text: "Get Started Free",
-			href: "#",
-		},
+		btn: "Get Started Free",
 	},
 	{
 		name: "Basic",
 		info: "For casual learners",
-		price: {
-			monthly: 7,
-			yearly: 5,
-		},
+		price: { monthly: 7, yearly: 5 },
 		features: [
 			"300 Searches / month",
 			"800,000 AI Credits / month",
 			"Unlimited Translations",
 			"All languages included",
 		],
-		btn: {
-			text: "Start Your Free Trial",
-			href: "#",
-		},
+		btn: "Get Basic",
+		plan: "basic",
 	},
 	{
 		highlighted: true,
 		name: "Pro",
 		info: "For committed learners",
-		price: {
-			monthly: 12,
-			yearly: 9,
-		},
+		price: { monthly: 12, yearly: 9 },
 		features: [
 			"Unlimited Searches",
 			"5,000,000 AI Credits / month",
@@ -76,18 +62,13 @@ const plans: Plan[] = [
 			"Priority support",
 			"All languages included",
 		],
-		btn: {
-			text: "Get started",
-			href: "#",
-		},
+		btn: "Get Pro",
+		plan: "pro",
 	},
 	{
 		name: "Max",
 		info: "For power users & daily practice",
-		price: {
-			monthly: 20,
-			yearly: 16,
-		},
+		price: { monthly: 20, yearly: 16 },
 		features: [
 			"Unlimited Searches",
 			"Unlimited AI Credits",
@@ -96,17 +77,13 @@ const plans: Plan[] = [
 			"All languages included",
 			"Early access to new features",
 		],
-		btn: {
-			text: "Get started",
-			href: "#",
-		},
+		btn: "Get Max",
+		plan: "max",
 	},
 ];
 
 export function PricingSection() {
-	const [frequency, setFrequency] = React.useState<"monthly" | "yearly">(
-		"monthly"
-	);
+	const [frequency, setFrequency] = React.useState<"monthly" | "yearly">("monthly");
 	const user = useAuthStore((s) => s.user);
 	const userTier = user?.tier?.toLowerCase() ?? null;
 
@@ -164,7 +141,95 @@ export function PricingCard({
 	userTier,
 	...props
 }: PricingCardProps) {
+	const [loading, setLoading] = useState(false);
+	const status = useAuthStore((s) => s.status);
 	const isCurrentPlan = userTier === plan.name.toLowerCase();
+	const isPaidPlan = !!plan.plan;
+	const isLoggedIn = status === "authenticated";
+
+	const handleCheckout = async () => {
+		if (!plan.plan) return;
+
+		setLoading(true);
+		try {
+			const { data } = await apiClient.post<{ checkout_url: string }>(
+				"/billing/checkout",
+				{ plan: plan.plan, billing_period: frequency }
+			);
+			window.location.href = data.checkout_url;
+			// don't setLoading(false) — page is navigating away
+		} catch (err: any) {
+			const msg = err?.response?.data?.detail ?? err?.message ?? "Could not start checkout. Please try again.";
+			console.error("[checkout]", err?.response?.status, err?.response?.data);
+			toastManager.add({
+				title: "Checkout failed",
+				description: msg,
+				type: "error",
+			});
+			setLoading(false);
+		}
+	};
+
+	const renderButton = () => {
+		// Current plan — always takes priority
+		if (isCurrentPlan) {
+			return (
+				<Button className="w-full" variant="secondary" disabled>
+					Current Plan
+				</Button>
+			);
+		}
+
+		// Free plan — guest sees signup prompt, logged-in users can't click back to free
+		if (!isPaidPlan) {
+			if (!isLoggedIn) {
+				return (
+					<AuthDialog defaultTab="signup">
+						<Button className="w-full" variant="outline">
+							{plan.btn}
+						</Button>
+					</AuthDialog>
+				);
+			}
+			// Paid user looking at free card — they cancel via Manage Plan (portal)
+			return (
+				<Button className="w-full" variant="outline" disabled>
+					{plan.btn}
+				</Button>
+			);
+		}
+
+		// Paid plan — guest sees signup prompt
+		if (!isLoggedIn) {
+			return (
+				<AuthDialog defaultTab="signup">
+					<Button
+						className="w-full"
+						variant={plan.highlighted ? "default" : "outline"}
+					>
+						{plan.btn}
+					</Button>
+				</AuthDialog>
+			);
+		}
+
+		// Paid plan — logged-in user → checkout
+		return (
+			<Button
+				className="w-full"
+				variant={plan.highlighted ? "default" : "outline"}
+				onClick={handleCheckout}
+				disabled={loading}
+			>
+				{loading ? (
+					<Loader2 className="size-4 animate-spin" />
+				) : (
+					plan.btn
+				)}
+			</Button>
+		);
+	};
+
 	return (
 		<div
 			className={cn(
@@ -176,11 +241,11 @@ export function PricingCard({
 			{...props}
 		>
 			{plan.highlighted && (
-					<>
-						<div className="pointer-events-none absolute inset-0 dark:bg-[radial-gradient(35%_50%_at_15%_0%,--theme(--color-foreground/.1),transparent)]" />
-						<div className="usage-shimmer pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-black/8 to-transparent dark:via-white/10" />
-					</>
-				)}
+				<>
+					<div className="pointer-events-none absolute inset-0 dark:bg-[radial-gradient(35%_50%_at_15%_0%,--theme(--color-foreground/.1),transparent)]" />
+					<div className="usage-shimmer pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-black/8 to-transparent dark:via-white/10" />
+				</>
+			)}
 			<div
 				className={cn(
 					"border-b p-4",
@@ -212,7 +277,6 @@ export function PricingCard({
 									layout
 									transition={{ duration: 0.15 }}
 								>
-									{/* Calculate the actual discount percentage of the plan */}
 									{Math.round(
 										((plan.price.monthly - plan.price.yearly) /
 											plan.price.monthly) *
@@ -261,19 +325,7 @@ export function PricingCard({
 					plan.highlighted && "bg-card dark:bg-card/80"
 				)}
 			>
-				{isCurrentPlan ? (
-					<Button className="w-full" variant="secondary" disabled>
-						Current Plan
-					</Button>
-				) : (
-					<Button
-						asChild
-						className="w-full"
-						variant={plan.highlighted ? "default" : "outline"}
-					>
-						<Link href={plan.btn.href}>{plan.btn.text}</Link>
-					</Button>
-				)}
+				{renderButton()}
 			</div>
 		</div>
 	);

@@ -17,7 +17,6 @@ class RateLimitTier(str, Enum):
     FREE = "free"
     BASIC = "basic"
     PRO = "pro"
-    PREMIUM = "premium"
     MAX = "max"
 
 
@@ -46,26 +45,23 @@ SECURITY_LIMITS: Dict[str, Dict[str, int]] = {
 FEATURE_LIMITS: Dict[str, Dict[RateLimitTier, int]] = {
     "search": {
         RateLimitTier.ANONYMOUS: 5,
-        RateLimitTier.FREE: 4,
-        RateLimitTier.BASIC: 17,
-        RateLimitTier.PRO: 67,
-        RateLimitTier.PREMIUM: -1,  # unlimited
-        RateLimitTier.MAX: -1,      # unlimited
+        RateLimitTier.FREE:      4,
+        RateLimitTier.BASIC:     17,
+        RateLimitTier.PRO:       67,
+        RateLimitTier.MAX:       -1,
     },
     "ai_chat": {
-        RateLimitTier.ANONYMOUS: 0,   # blocked
-        RateLimitTier.FREE: 15,
-        RateLimitTier.BASIC: 50,
-        RateLimitTier.PRO: 100,
-        RateLimitTier.PREMIUM: -1,  # unlimited (gated by Sparks wallet instead)
-        RateLimitTier.MAX: -1,      # unlimited
+        RateLimitTier.ANONYMOUS: 0,
+        RateLimitTier.FREE:      15,
+        RateLimitTier.BASIC:     50,
+        RateLimitTier.PRO:       100,
+        RateLimitTier.MAX:       -1,
     },
     "export": {
-        RateLimitTier.ANONYMOUS: 0,   # blocked
-        RateLimitTier.FREE: 5,
-        RateLimitTier.BASIC: 10,
-        RateLimitTier.PRO: -1,      # unlimited
-        RateLimitTier.PREMIUM: -1,  # unlimited
-        RateLimitTier.MAX: -1,      # unlimited
+        RateLimitTier.ANONYMOUS: 0,
+        RateLimitTier.FREE:      5,
+        RateLimitTier.BASIC:     10,
+        RateLimitTier.PRO:       -1,
+        RateLimitTier.MAX:       -1,
     },
 }

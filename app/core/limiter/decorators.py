@@ -59,10 +59,9 @@ def get_identifier_and_tier(request: Request) -> Tuple[str, RateLimitTier]:
         user_id = str(user.id)
         user_tier = getattr(user, "tier", "free")
         tier_map = {
-            "basic":   RateLimitTier.BASIC,
-            "pro":     RateLimitTier.PRO,
-            "premium": RateLimitTier.PREMIUM,
-            "max":     RateLimitTier.MAX,
+            "basic": RateLimitTier.BASIC,
+            "pro":   RateLimitTier.PRO,
+            "max":   RateLimitTier.MAX,
         }
         tier = tier_map.get(user_tier, RateLimitTier.FREE)
         return f"user:{user_id}", tier
