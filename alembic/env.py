@@ -22,9 +22,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlmodel import SQLModel
 from app.core.config import get_settings
-from app.models.user import User
-from app.models.user_usage import UserUsage
+from app.models.user import User            # noqa: F401
+from app.models.user_usage import UserUsage  # noqa: F401
 from app.models.subscription import Subscription  # noqa: F401
+from app.models.invoice import Invoice            # noqa: F401
+from app.models.webhook_event import WebhookEvent # noqa: F401
 
 settings = get_settings()
 # Override sqlalchemy.url with our .env URL (escape % for configparser)

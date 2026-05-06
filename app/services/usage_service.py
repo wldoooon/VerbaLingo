@@ -12,18 +12,16 @@ settings = get_settings()
 
 FEATURE_LIMITS = {
     "search": {
-        UserTier.FREE:     250,    
-        UserTier.BASIC:    500,    
-        UserTier.PRO:      2000,   
-        UserTier.PREMIUM:  -1,
-        UserTier.MAX:      -1,
+        UserTier.FREE:  250,
+        UserTier.BASIC: 500,
+        UserTier.PRO:   2000,
+        UserTier.MAX:   -1,
     },
     "ai_chat": {
-        UserTier.FREE:     50,     
-        UserTier.BASIC:    500,
-        UserTier.PRO:      2000,
-        UserTier.PREMIUM:  -1,
-        UserTier.MAX:      -1,
+        UserTier.FREE:  50,
+        UserTier.BASIC: 500,
+        UserTier.PRO:   2000,
+        UserTier.MAX:   -1,
     }
 }
 

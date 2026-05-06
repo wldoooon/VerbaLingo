@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     # Dodo Payments
     DODO_API_KEY: str = ""
     DODO_WEBHOOK_SECRET: str = ""
+    DODO_ENVIRONMENT: str = "test_mode"  # "test_mode" | "live_mode"
 
     # Product IDs — Test Mode (prefix: test_) / Live Mode (prefix: prod_)
     DODO_PRODUCT_BASIC_MONTHLY: str = ""

@@ -18,6 +18,7 @@ from . import models # Force model registration for relationships
 from .db.init_db import init_database
 from .api.routes import router
 from .api.auth import router as auth_router
+from .api.billing import router as billing_router
 
 settings = get_settings()
 
@@ -130,3 +131,4 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(router)
+app.include_router(billing_router)
