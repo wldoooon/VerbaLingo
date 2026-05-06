@@ -1,16 +1,16 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function BillingSuccessPage() {
+function BillingSuccessContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const queryClient = useQueryClient();
 
-	const status = searchParams.get("status");          // "active" | other
+	const status = searchParams.get("status");
 	const subscriptionId = searchParams.get("subscription_id");
 
 	const isSuccess = status === "active";
@@ -19,8 +19,6 @@ export default function BillingSuccessPage() {
 	useEffect(() => {
 		if (!isSuccess) return;
 
-		// Webhook may take a few seconds. Poll /auth/me up to 6 times (2s apart)
-		// until the tier updates, then stop.
 		let attempts = 0;
 		const poll = async () => {
 			attempts++;
@@ -37,7 +35,6 @@ export default function BillingSuccessPage() {
 		return () => clearTimeout(timer);
 	}, [isSuccess, queryClient]);
 
-	// Payment was cancelled or failed
 	if (!isSuccess) {
 		return (
 			<div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
@@ -63,7 +60,6 @@ export default function BillingSuccessPage() {
 			<div className="flex size-16 items-center justify-center rounded-full bg-green-500/10">
 				<CheckCircle2 className="size-8 text-green-500" />
 			</div>
-
 			<div className="space-y-2">
 				<h1 className="font-bold text-2xl tracking-tight">Payment successful!</h1>
 				<p className="max-w-sm text-muted-foreground text-sm">
@@ -77,19 +73,22 @@ export default function BillingSuccessPage() {
 					</p>
 				)}
 			</div>
-
 			{syncing ? (
 				<Loader2 className="size-5 animate-spin text-muted-foreground" />
 			) : (
 				<div className="flex gap-3">
-					<Button onClick={() => router.push("/search")}>
-						Start searching
-					</Button>
-					<Button variant="outline" onClick={() => router.push("/profile")}>
-						View profile
-					</Button>
+					<Button onClick={() => router.push("/search")}>Start searching</Button>
+					<Button variant="outline" onClick={() => router.push("/profile")}>View profile</Button>
 				</div>
 			)}
 		</div>
+	);
+}
+
+export default function BillingSuccessPage() {
+	return (
+		<Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="size-6 animate-spin text-muted-foreground" /></div>}>
+			<BillingSuccessContent />
+		</Suspense>
 	);
 }
