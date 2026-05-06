@@ -23,7 +23,8 @@ router = APIRouter(prefix="/billing", tags=["Billing"])
 # ── Request schemas ──────────────────────────────────────────────────────────
 
 class CheckoutRequest(BaseModel):
-    product_id: str
+    plan: str            # "basic" | "pro" | "max"
+    billing_period: str  # "monthly" | "yearly"
 
 
 # ── Checkout ─────────────────────────────────────────────────────────────────
@@ -43,7 +44,8 @@ async def checkout(
     try:
         url = await create_checkout_url(
             user=current_user,
-            product_id=body.product_id,
+            plan=body.plan,
+            billing_period=body.billing_period,
         )
         return {"checkout_url": url}
     except Exception as e:

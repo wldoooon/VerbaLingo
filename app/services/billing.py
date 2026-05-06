@@ -58,7 +58,24 @@ PLAN_TO_TIER = {
 
 # ── Checkout ─────────────────────────────────────────────────────────────────
 
-async def create_checkout_url(user: User, product_id: str) -> str:
+def _resolve_product_id(plan: str, billing_period: str) -> str:
+    """Resolves the Dodo product ID from plan name + billing period using server-side config."""
+    key = (plan.lower(), billing_period.lower())
+    mapping = {
+        ("basic", "monthly"): settings.DODO_PRODUCT_BASIC_MONTHLY,
+        ("basic", "yearly"):  settings.DODO_PRODUCT_BASIC_YEARLY,
+        ("pro",   "monthly"): settings.DODO_PRODUCT_PRO_MONTHLY,
+        ("pro",   "yearly"):  settings.DODO_PRODUCT_PRO_YEARLY,
+        ("max",   "monthly"): settings.DODO_PRODUCT_MAX_MONTHLY,
+        ("max",   "yearly"):  settings.DODO_PRODUCT_MAX_YEARLY,
+    }
+    product_id = mapping.get(key)
+    if not product_id:
+        raise ValueError(f"Unknown plan/period combination: {plan}/{billing_period}")
+    return product_id
+
+
+async def create_checkout_url(user: User, plan: str, billing_period: str) -> str:
     """
     Creates a Dodo checkout session and returns the payment URL.
     The user is redirected here — they pay on Dodo's page, not yours.
@@ -66,14 +83,17 @@ async def create_checkout_url(user: User, product_id: str) -> str:
     The actual plan upgrade happens later via the subscription.active webhook,
     NOT here. Never trust the success redirect for access control.
     """
+    product_id = _resolve_product_id(plan, billing_period)
     async with _dodo_client() as client:
         response = await client.checkout_sessions.create(
             product_cart=[{"product_id": product_id, "quantity": 1}],
             return_url=f"{settings.FRONTEND_URL}/billing/success",
-            customer_email=user.email,
+            customer={"email": user.email, "name": user.full_name or user.email},
             metadata={"user_id": str(user.id)},
         )
-        return response.url
+        if not response.checkout_url:
+            raise ValueError("Dodo returned no checkout URL")
+        return response.checkout_url
 
 
 # ── Customer Portal ──────────────────────────────────────────────────────────

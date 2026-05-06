@@ -1,4 +1,4 @@
-export type UserTier = "free" | "pro";
+export type UserTier = "free" | "basic" | "pro" | "max";
 
 export type FeatureUsage = {
   current: number;
@@ -17,7 +17,6 @@ export type UserRead = {
   oauth_provider?: string | null;
   oauth_avatar_url?: string | null;
   last_login_at?: string | null;
-  tier_expires_at?: string | null;
   created_at: string;
   usage?: Record<string, FeatureUsage>;
 };
