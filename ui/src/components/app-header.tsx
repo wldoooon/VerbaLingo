@@ -8,7 +8,6 @@ import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
 import { CustomSidebarTrigger } from "@/components/custom-sidebar-trigger";
 import { navLinks } from "@/components/app-shared";
 import { NavUser } from "@/components/nav-user";
-import { BellIcon } from "lucide-react";
 import { SearchBar } from "@/components/comm/SearchBar";
 import { AuthDialog } from "@/components/auth-dialog";
 import { useAuthStore } from "@/stores/auth-store";
@@ -64,12 +63,9 @@ export function AppHeader() {
 					<ThemeToggleButton
 						theme={theme as 'light' | 'dark'}
 						onClick={handleThemeToggle}
-						className="h-9 w-9 mr-1"
+						className="h-9 w-9 rounded-full border border-border shadow-sm bg-card"
 					/>
 				)}
-				<Button aria-label="Notifications" size="icon" variant="ghost">
-					<BellIcon />
-				</Button>
 				<Separator
 					className="h-4 data-[orientation=vertical]:self-center"
 					orientation="vertical"

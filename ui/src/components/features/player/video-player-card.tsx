@@ -179,7 +179,7 @@ export default function VideoPlayerCard({
     syncSinglePlayer('A', playerARef.current)
     syncSinglePlayer('B', playerBRef.current)
 
-  }, [activeKey, activeClipId, isMuted, playbackRate, setPlayer, clipA?.video_id, clipB?.video_id])
+  }, [activeKey, activeClipId, isMuted, playbackRate, setPlayer, clipA?.video_id, clipB?.video_id, activePlayer])
 
   const startPolling = () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
@@ -345,6 +345,9 @@ export default function VideoPlayerCard({
       } else {
         console.log(`[VPC] onReady player${key} ACTIVE — keeping muted (isMuted=true)`)
       }
+      // Explicitly force play since browser autoplay policies sometimes block the automatic
+      // playerVars.autoplay on initial mount, resulting in a black/paused screen.
+      safeCall(player, 'playVideo')
     } else {
       console.log(`[VPC] onReady player${key} BACKGROUND — setting up turbo buffer`)
       safeCall(player, 'mute')
