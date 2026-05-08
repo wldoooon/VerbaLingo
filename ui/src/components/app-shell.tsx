@@ -5,14 +5,16 @@ import FooterWrapper from "@/components/FooterWrapper";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
 	return (
-		<SidebarProvider>
+		<SidebarProvider className="bg-muted/20">
 			<AppSidebar />
-			<SidebarInset className="overflow-x-hidden p-4 md:p-6">
-				<AppHeader />
-				<div className="flex flex-1 flex-col min-h-0 p-1">
-					{children}
+			<SidebarInset className="overflow-x-hidden p-2 bg-transparent">
+				<div className="flex flex-col min-h-full rounded-2xl bg-card border border-border/50 p-4 md:p-6">
+					<AppHeader />
+					<div className="flex flex-1 flex-col min-h-0 p-1">
+						{children}
+					</div>
+					<FooterWrapper />
 				</div>
-				<FooterWrapper />
 			</SidebarInset>
 		</SidebarProvider>
 	);

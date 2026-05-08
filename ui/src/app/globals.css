@@ -329,3 +329,35 @@
 .usage-shimmer {
   animation: usage-shimmer 6s ease-in-out infinite;
 }
+
+/* ── Exclude elements from root view transition ── */
+.vt-exclude {
+  view-transition-name: vt-exclude;
+}
+::view-transition-old(vt-exclude),
+::view-transition-new(vt-exclude) {
+  animation: none;
+}
+
+/* ── Theme View Transition — vertical wipe with mid-pause ── */
+::view-transition-old(root) {
+  animation: vt-fade-out 1.1s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+::view-transition-new(root) {
+  animation: vt-wipe-in 1.1s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+@keyframes vt-fade-out {
+  0%   { opacity: 1;   filter: blur(0px);  }
+  38%  { opacity: 0.4; filter: blur(5px);  }
+  60%  { opacity: 0.4; filter: blur(5px);  }
+  100% { opacity: 0;   filter: blur(8px);  }
+}
+
+@keyframes vt-wipe-in {
+  0%   { clip-path: inset(100% 0 0 0); filter: blur(8px);  }
+  38%  { clip-path: inset(48% 0 0 0);  filter: blur(3px);  }
+  60%  { clip-path: inset(48% 0 0 0);  filter: blur(3px);  }
+  100% { clip-path: inset(0% 0 0 0);   filter: blur(0px);  }
+}
