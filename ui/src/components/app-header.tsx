@@ -64,8 +64,6 @@ export function AppHeader() {
 					<ThemeToggleButton
 						theme={theme as 'light' | 'dark'}
 						onClick={handleThemeToggle}
-						variant="circle"
-						start="top-right"
 						className="h-9 w-9 mr-1"
 					/>
 				)}
