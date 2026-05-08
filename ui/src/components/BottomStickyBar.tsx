@@ -148,11 +148,9 @@ export function BottomStickyBar({ className }: BottomStickyBarProps) {
           <div className="flex items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
             {/* Theme Toggle with Circle Animation */}
             {mounted && (
-              <ThemeToggleButton 
+              <ThemeToggleButton
                 theme={theme as 'light' | 'dark'}
                 onClick={handleThemeToggle}
-                variant="circle"
-                start="bottom-right"
                 className="hidden sm:flex h-8 w-8"
               />
             )}
